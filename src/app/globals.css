@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary-color: #4CAF50;
+  --primary-hover: #45a049;
+  --text-color: #333;
+  --border-color: #e5e5e5;
+}
+
+html {
+  direction: rtl;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  color: var(--text-color);
+  background-color: white;
+}
+
+/* Custom button styles */
+.btn-primary {
+  @apply bg-green-500 text-white rounded-full py-3 px-6 hover:bg-green-600 transition-colors;
+}
+
+.btn-outline {
+  @apply border-2 border-green-500 text-green-500 rounded-full py-3 px-6 hover:bg-green-50 transition-colors;
+}
+
+/* Custom input styles */
+.input-underline {
+  @apply w-full p-3 border-b-2 border-gray-300 focus:border-green-500 outline-none text-right;
+}
+
+/* Custom card styles */
+.card {
+  @apply bg-white rounded-lg shadow-md p-6;
+}
+
+/* Status badges */
+.status-badge {
+  @apply px-4 py-1 rounded-full text-sm font-medium;
+}
+
+.status-pending {
+  @apply bg-orange-100 text-orange-800;
+}
+
+.status-completed {
+  @apply bg-green-100 text-green-800;
+}
+
+/* Icon styles */
+.icon-button {
+  @apply w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors;
+}
+
+/* Navigation menu */
+.nav-link {
+  @apply text-gray-600 hover:text-green-500 transition-colors;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .container {
+    @apply px-4;
+  }
+  
+  .card {
+    @apply rounded-none shadow-none;
+  }
+}
