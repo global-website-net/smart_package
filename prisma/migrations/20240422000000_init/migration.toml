@@ -1,2 +1,5 @@
 # This is an empty migration.toml file
 # It's needed for Prisma to track migrations 
+
+# This is the migration configuration file
+migration_name = "20240422000000_init" 
