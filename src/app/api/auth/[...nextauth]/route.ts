@@ -1,7 +1,7 @@
 import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
-import { db } from '@/lib/db'
+import { db, pool } from '@/lib/db'
 
 declare module "next-auth" {
   interface Session {
@@ -35,8 +35,8 @@ const handler = NextAuth({
         }
 
         try {
-          // Use our database utility to find the user
-          const client = await db.pool.connect()
+          // Use the pool directly to find the user
+          const client = await pool.connect()
           try {
             const result = await client.query(
               'SELECT * FROM "User" WHERE email = $1',
