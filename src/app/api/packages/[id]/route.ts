@@ -6,7 +6,7 @@ import prisma from '@/lib/prisma'
 // For Next.js 15.3.1, the correct type for route handlers
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -24,7 +24,7 @@ export async function GET(
     }
 
     const packageData = await prisma.package.findUnique({
-      where: { id: params.id },
+      where: { id: context.params.id },
       include: {
         user: {
           select: {
@@ -67,7 +67,7 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -102,7 +102,7 @@ export async function PATCH(
     }
 
     const updatedPackage = await prisma.package.update({
-      where: { id: params.id },
+      where: { id: context.params.id },
       data: { status },
       include: {
         user: {
