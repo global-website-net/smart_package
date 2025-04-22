@@ -47,14 +47,14 @@ export async function POST(request: Request) {
       )
     }
 
-    // Create the user using a raw query
+    // Create the user using a raw query with proper enum casting
     const newUser = await prisma.$queryRaw`
       INSERT INTO "User" (
         "email", "password", "fullName", "governorate", "town", 
         "phonePrefix", "phoneNumber", "role", "createdAt", "updatedAt"
       ) VALUES (
         ${email}, ${hashedPassword}, ${fullName}, ${governorate}, ${town},
-        ${phonePrefix}, ${phoneNumber}, ${UserRole.REGULAR}, NOW(), NOW()
+        ${phonePrefix}, ${phoneNumber}, ${UserRole.REGULAR}::"UserRole", NOW(), NOW()
       ) RETURNING *
     `
     
