@@ -43,7 +43,7 @@ export default function Header() {
             <Link href="/contact" className="hover:text-green-500 transition-colors mr-10">
               اتصل بنا
             </Link>
-            {isLoggedIn && (
+            {!isLoggedIn && (
               <Link href="/track" className="hover:text-green-500 transition-colors mr-10">
                 تتبع الطرود
               </Link>
@@ -167,7 +167,7 @@ export default function Header() {
               >
                 اتصل بنا
               </Link>
-              {isLoggedIn && (
+              {!isLoggedIn && (
                 <Link
                   href="/track"
                   className="hover:text-green-500 transition-colors"
