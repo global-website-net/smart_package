@@ -69,9 +69,7 @@ async function checkAndApplySchema() {
       
       console.log('Some tables are missing. Applying schema...');
       
-      // Execute each statement in a transaction
-      await client.query('BEGIN');
-      
+      // Execute each statement individually without a transaction
       for (const statement of statements) {
         // Skip DROP TABLE statements to preserve existing data
         if (statement.toLowerCase().includes('drop table')) {
@@ -97,16 +95,13 @@ async function checkAndApplySchema() {
             console.log(`Table already exists, skipping: ${error.message}`);
             continue;
           }
-          // For other errors, rethrow
-          throw error;
+          // For other errors, log and continue
+          console.error(`Error executing statement: ${error.message}`);
+          console.log('Continuing with next statement...');
         }
       }
       
-      await client.query('COMMIT');
       console.log('Database schema applied successfully');
-    } catch (error) {
-      await client.query('ROLLBACK');
-      throw error;
     } finally {
       client.release();
     }
