@@ -34,53 +34,57 @@ export async function POST(request: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // Create user in database - using a simpler approach without transactions
-    // First check if user exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email }
-    })
-
-    if (existingUser) {
+    // Create user in database - using a different approach
+    // First check if user exists using a raw query to avoid prepared statement issues
+    const existingUsers = await prisma.$queryRaw`
+      SELECT id FROM "User" WHERE email = ${email}
+    `
+    
+    if (Array.isArray(existingUsers) && existingUsers.length > 0) {
       return NextResponse.json(
         { error: 'البريد الإلكتروني مستخدم بالفعل' },
         { status: 400 }
       )
     }
 
-    // Create the user
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        fullName,
-        governorate,
-        town,
-        phonePrefix,
-        phoneNumber,
-        role: UserRole.REGULAR
-      }
-    })
+    // Create the user using a raw query
+    const newUser = await prisma.$queryRaw`
+      INSERT INTO "User" (
+        "email", "password", "fullName", "governorate", "town", 
+        "phonePrefix", "phoneNumber", "role", "createdAt", "updatedAt"
+      ) VALUES (
+        ${email}, ${hashedPassword}, ${fullName}, ${governorate}, ${town},
+        ${phonePrefix}, ${phoneNumber}, ${UserRole.REGULAR}, NOW(), NOW()
+      ) RETURNING *
+    `
+    
+    // Extract the user from the raw query result
+    const user = Array.isArray(newUser) && newUser.length > 0 ? newUser[0] : null
+    
+    if (!user) {
+      throw new Error('Failed to create user')
+    }
 
     // Create user in Supabase auth
     const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
-      email: user.email,
+      email: email,
       password: password,
       email_confirm: true,
       user_metadata: {
-        full_name: user.fullName,
-        role: user.role,
-        governorate: user.governorate,
-        town: user.town,
-        phone_prefix: user.phonePrefix,
-        phone_number: user.phoneNumber
+        full_name: fullName,
+        role: UserRole.REGULAR,
+        governorate: governorate,
+        town: town,
+        phone_prefix: phonePrefix,
+        phone_number: phoneNumber
       }
     })
 
     if (authError) {
       // Delete the user from our database if Supabase auth fails
-      await prisma.user.delete({
-        where: { id: user.id }
-      })
+      await prisma.$queryRaw`
+        DELETE FROM "User" WHERE id = ${user.id}
+      `
       throw new Error('Failed to create Supabase auth user')
     }
 
