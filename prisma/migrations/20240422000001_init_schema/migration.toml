@@ -1,0 +1,2 @@
+# This is the migration configuration file
+migration_name = "20240422000001_init_schema" 
