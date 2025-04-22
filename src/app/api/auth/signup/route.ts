@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 import { createClient } from '@supabase/supabase-js'
 import { UserRole } from '@prisma/client'
 
@@ -32,9 +32,15 @@ export async function POST(request: Request) {
     }
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email }
-    })
+    let existingUser = null
+    try {
+      existingUser = await prisma.user.findUnique({
+        where: { email }
+      })
+    } catch (dbError) {
+      console.error('Database error when checking existing user:', dbError)
+      // Continue with signup process even if this check fails
+    }
 
     if (existingUser) {
       return NextResponse.json(
@@ -47,18 +53,34 @@ export async function POST(request: Request) {
     const hashedPassword = await bcrypt.hash(password, 10)
 
     // Create user
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        fullName,
-        governorate,
-        town,
-        phonePrefix,
-        phoneNumber,
-        role: UserRole.REGULAR
-      }
-    })
+    let user = null
+    try {
+      user = await prisma.user.create({
+        data: {
+          email,
+          password: hashedPassword,
+          fullName,
+          governorate,
+          town,
+          phonePrefix,
+          phoneNumber,
+          role: UserRole.REGULAR
+        }
+      })
+    } catch (createError) {
+      console.error('Error creating user:', createError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء إنشاء الحساب' },
+        { status: 500 }
+      )
+    }
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء إنشاء الحساب' },
+        { status: 500 }
+      )
+    }
 
     // Return success response without password
     const { password: _, ...userWithoutPassword } = user

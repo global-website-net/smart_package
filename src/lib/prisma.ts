@@ -1,14 +1,26 @@
 import { PrismaClient } from '@prisma/client'
 
-// PrismaClient is attached to the `global` object in development to prevent
-// exhausting your database connection limit.
-const globalForPrisma = global as unknown as { prisma: PrismaClient }
-
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
-    log: ['query', 'error', 'warn'],
+// This is a workaround for the "prepared statement already exists" error in serverless environments
+// See: https://github.com/prisma/prisma/issues/5001
+const prismaClientSingleton = () => {
+  return new PrismaClient({
+    log: ['error'],
+    // Use connection pooling in production
+    datasources: {
+      db: {
+        url: process.env.DATABASE_URL
+      }
+    }
   })
+}
+
+type PrismaClientSingleton = ReturnType<typeof prismaClientSingleton>
+
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClientSingleton | undefined
+}
+
+const prisma = globalForPrisma.prisma ?? prismaClientSingleton()
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
