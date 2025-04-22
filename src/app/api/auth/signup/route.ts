@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 export async function POST(request: Request) {
   try {
@@ -64,6 +63,24 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     console.error('Error in signup:', error)
+    
+    // Handle specific database errors
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2002') {
+        return NextResponse.json(
+          { error: 'البريد الإلكتروني مستخدم بالفعل' },
+          { status: 400 }
+        )
+      }
+      
+      if (error.code === 'P1001') {
+        return NextResponse.json(
+          { error: 'لا يمكن الاتصال بقاعدة البيانات' },
+          { status: 500 }
+        )
+      }
+    }
+
     return NextResponse.json(
       { error: 'حدث خطأ أثناء إنشاء الحساب' },
       { status: 500 }
