@@ -41,15 +41,30 @@ export async function POST(request: Request) {
       )
     }
 
-    // Find user in database
+    // Find user in database with password field
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        fullName: true,
+        role: true,
+        password: true // Explicitly select the password field
+      }
     })
 
     if (!user) {
       return NextResponse.json(
         { error: 'البريد الإلكتروني غير موجود' },
         { status: 404 }
+      )
+    }
+
+    // Check if password exists
+    if (!user.password) {
+      return NextResponse.json(
+        { error: 'كلمة المرور غير موجودة' },
+        { status: 401 }
       )
     }
 
@@ -64,7 +79,7 @@ export async function POST(request: Request) {
 
     // Try to sign in
     const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-      email: user.email,
+      email: user.email || '',
       password: password
     })
 
@@ -73,15 +88,11 @@ export async function POST(request: Request) {
       if (signInError.message.includes('Invalid login credentials')) {
         console.log('Creating Supabase auth user...')
         const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
-          email: user.email,
+          email: user.email || '',
           password: password,
           email_confirm: true,
           user_metadata: {
-            full_name: user.fullName,
-            governorate: user.governorate,
-            town: user.town,
-            phone_prefix: user.phonePrefix,
-            phone_number: user.phoneNumber
+            full_name: user.fullName
           }
         })
 
@@ -95,7 +106,7 @@ export async function POST(request: Request) {
 
         // Try to sign in again after creating the user
         const { data: newSignInData, error: newSignInError } = await supabase.auth.signInWithPassword({
-          email: user.email,
+          email: user.email || '',
           password: password
         })
 
