@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
-import { Prisma } from '@prisma/client'
+import { createClient } from '@supabase/supabase-js'
+import { UserRole } from '@prisma/client'
+
+// Initialize Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 export async function POST(request: Request) {
   try {
@@ -9,61 +15,89 @@ export async function POST(request: Request) {
     const body = await request.json()
     console.log('Request body:', { ...body, password: '[REDACTED]' })
     
-    const { fullName, email, governorate, town, phonePrefix, phoneNumber, password, role = 'REGULAR' } = body
+    const { 
+      email, 
+      password, 
+      fullName,
+      governorate,
+      town,
+      phonePrefix,
+      phoneNumber
+    } = body
 
     // Validate required fields
-    if (!fullName || !email || !governorate || !town || !phonePrefix || !phoneNumber || !password) {
-      console.log('Missing required fields:', { fullName, email, governorate, town, phonePrefix, phoneNumber, hasPassword: !!password })
+    if (!email || !password || !fullName || !governorate || !town || !phonePrefix || !phoneNumber) {
+      console.log('Missing required fields:', { 
+        email, 
+        hasPassword: !!password, 
+        fullName,
+        governorate,
+        town,
+        phonePrefix,
+        phoneNumber
+      })
       return NextResponse.json(
         { error: 'جميع الحقول مطلوبة' },
         { status: 400 }
       )
     }
 
-    // Validate role
-    const validRoles = ['REGULAR', 'SHOP', 'ADMIN', 'OWNER']
-    if (!validRoles.includes(role)) {
-      console.log('Invalid role:', role)
-      return NextResponse.json(
-        { error: 'نوع الحساب غير صالح' },
-        { status: 400 }
-      )
-    }
-
-    console.log('Checking for existing user...')
-    // Check if email already exists
+    // Check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email }
     })
 
     if (existingUser) {
-      console.log('Email already exists:', email)
+      console.log('User already exists:', email)
       return NextResponse.json(
         { error: 'البريد الإلكتروني مستخدم بالفعل' },
         { status: 400 }
       )
     }
 
-    console.log('Hashing password...')
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    console.log('Creating user...')
-    // Create user
+    // Create user in database
     const user = await prisma.user.create({
       data: {
-        fullName,
         email,
+        password: hashedPassword,
+        fullName,
         governorate,
         town,
         phonePrefix,
         phoneNumber,
-        password: hashedPassword,
-        role
+        role: UserRole.REGULAR
       }
     })
 
-    console.log('User created successfully:', { id: user.id, email: user.email })
+    // Create Supabase auth user
+    const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+      email: user.email,
+      password: password, // Use the original password for Supabase auth
+      email_confirm: true,
+      user_metadata: {
+        fullName: user.fullName,
+        role: user.role,
+        governorate: user.governorate,
+        town: user.town,
+        phonePrefix: user.phonePrefix,
+        phoneNumber: user.phoneNumber
+      }
+    })
+
+    if (authError) {
+      console.error('Supabase auth error:', authError)
+      // Delete the user from our database if Supabase auth fails
+      await prisma.user.delete({
+        where: { id: user.id }
+      })
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء إنشاء الحساب' },
+        { status: 500 }
+      )
+    }
 
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user
@@ -76,33 +110,9 @@ export async function POST(request: Request) {
     console.error('Detailed error in signup:', {
       name: error?.name,
       message: error?.message,
-      code: error?.code,
       stack: error?.stack
     })
     
-    // Handle specific database errors
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      console.error('Prisma error details:', {
-        code: error.code,
-        meta: error.meta,
-        message: error.message
-      })
-      
-      if (error.code === 'P2002') {
-        return NextResponse.json(
-          { error: 'البريد الإلكتروني مستخدم بالفعل' },
-          { status: 400 }
-        )
-      }
-      
-      if (error.code === 'P1001') {
-        return NextResponse.json(
-          { error: 'لا يمكن الاتصال بقاعدة البيانات' },
-          { status: 500 }
-        )
-      }
-    }
-
     return NextResponse.json(
       { error: 'حدث خطأ أثناء إنشاء الحساب' },
       { status: 500 }

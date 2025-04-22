@@ -16,6 +16,9 @@ export default function Signup() {
     confirmPassword: ''
   })
 
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
+
   const governorates = [
     'محافظة قلقيلية',
     'محافظة نابلس',
@@ -36,13 +39,17 @@ export default function Signup() {
       ...prev,
       [name]: value
     }))
+    setError('') // Clear error when user makes changes
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError('')
+    setIsLoading(true)
     
     if (formData.password !== formData.confirmPassword) {
-      alert('كلمات المرور غير متطابقة')
+      setError('كلمات المرور غير متطابقة')
+      setIsLoading(false)
       return
     }
 
@@ -66,16 +73,17 @@ export default function Signup() {
       const data = await response.json()
 
       if (!response.ok) {
-        alert(data.error || 'حدث خطأ أثناء إنشاء الحساب')
+        setError(data.error || 'حدث خطأ أثناء إنشاء الحساب')
         return
       }
 
-      alert('تم إنشاء الحساب بنجاح')
-      // Redirect to login page or dashboard
+      // Redirect to login page
       window.location.href = '/auth/login'
     } catch (error) {
       console.error('Error:', error)
-      alert('حدث خطأ أثناء إنشاء الحساب')
+      setError('حدث خطأ أثناء إنشاء الحساب')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -96,10 +104,16 @@ export default function Signup() {
           </div>
 
           <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-8 space-y-6">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded relative" role="alert">
+                <span className="block sm:inline">{error}</span>
+              </div>
+            )}
+
             {/* Full Name */}
             <div>
-              <label htmlFor="fullName" className="block text-gray-700 mb-2">
-                الاسم الكامل <span className="text-red-500">*</span>
+              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
+                الاسم الكامل
               </label>
               <input
                 type="text"
@@ -107,16 +121,16 @@ export default function Signup() {
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="الاسم الكامل"
                 required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                placeholder="أدخل اسمك الكامل"
               />
             </div>
 
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-gray-700 mb-2">
-                البريد الإلكتروني <span className="text-red-500">*</span>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                البريد الإلكتروني
               </label>
               <input
                 type="email"
@@ -124,26 +138,26 @@ export default function Signup() {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="البريد الإلكتروني"
                 required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                placeholder="أدخل بريدك الإلكتروني"
               />
             </div>
 
             {/* Governorate */}
             <div>
-              <label htmlFor="governorate" className="block text-gray-700 mb-2">
-                المحافظة <span className="text-red-500">*</span>
+              <label htmlFor="governorate" className="block text-sm font-medium text-gray-700 mb-1">
+                المحافظة
               </label>
               <select
                 id="governorate"
                 name="governorate"
                 value={formData.governorate}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
                 required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
               >
-                <option value="">المحافظة</option>
+                <option value="">اختر المحافظة</option>
                 {governorates.map((gov) => (
                   <option key={gov} value={gov}>{gov}</option>
                 ))}
@@ -152,8 +166,8 @@ export default function Signup() {
 
             {/* Town */}
             <div>
-              <label htmlFor="town" className="block text-gray-700 mb-2">
-                البلدة <span className="text-red-500">*</span>
+              <label htmlFor="town" className="block text-sm font-medium text-gray-700 mb-1">
+                المدينة/البلدية
               </label>
               <input
                 type="text"
@@ -161,43 +175,49 @@ export default function Signup() {
                 name="town"
                 value={formData.town}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="البلدة"
                 required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                placeholder="أدخل المدينة أو البلدية"
               />
             </div>
 
             {/* Phone Number */}
-            <div>
-              <label className="block text-gray-700 mb-2">
-                رقم الهاتف <span className="text-red-500">*</span>
-              </label>
-              <div className="flex gap-4">
+            <div className="flex gap-2">
+              <div className="w-1/4">
+                <label htmlFor="phonePrefix" className="block text-sm font-medium text-gray-700 mb-1">
+                  رمز الدولة
+                </label>
                 <input
-                  type="tel"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={handleChange}
-                  className="flex-1 border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="رقم الهاتف"
-                  required
-                />
-                <select
+                  type="text"
+                  id="phonePrefix"
                   name="phonePrefix"
                   value={formData.phonePrefix}
                   onChange={handleChange}
-                  className="w-24 border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-                >
-                  <option value="+970">+970</option>
-                  <option value="+972">+972</option>
-                </select>
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                />
+              </div>
+              <div className="w-3/4">
+                <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                  رقم الهاتف
+                </label>
+                <input
+                  type="tel"
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                  placeholder="أدخل رقم هاتفك"
+                />
               </div>
             </div>
 
             {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-gray-700 mb-2">
-                كلمة المرور <span className="text-red-500">*</span>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                كلمة المرور
               </label>
               <input
                 type="password"
@@ -205,16 +225,16 @@ export default function Signup() {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="كلمة المرور"
                 required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                placeholder="أدخل كلمة المرور"
               />
             </div>
 
             {/* Confirm Password */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-gray-700 mb-2">
-                تأكيد كلمة المرور <span className="text-red-500">*</span>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                تأكيد كلمة المرور
               </label>
               <input
                 type="password"
@@ -222,28 +242,31 @@ export default function Signup() {
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="تأكيد كلمة المرور"
                 required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                placeholder="أدخل كلمة المرور مرة أخرى"
               />
             </div>
 
-            {/* Submit Button */}
-            <div className="pt-4">
+            <div className="flex items-center justify-between">
               <button
                 type="submit"
-                className="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition-colors"
+                disabled={isLoading}
+                className={`w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                  isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
-                إنشاء الحساب
+                {isLoading ? 'جاري إنشاء الحساب...' : 'إنشاء حساب'}
               </button>
             </div>
 
-            {/* Login Link */}
-            <div className="text-center text-gray-600">
-              لديك حساب بالفعل؟{' '}
-              <Link href="/auth/login" className="text-green-500 hover:text-green-600">
-                تسجيل الدخول
-              </Link>
+            <div className="text-center mt-4">
+              <p className="text-sm text-gray-600">
+                لديك حساب بالفعل؟{' '}
+                <Link href="/auth/login" className="text-green-600 hover:text-green-700">
+                  تسجيل الدخول
+                </Link>
+              </p>
             </div>
           </form>
         </div>
