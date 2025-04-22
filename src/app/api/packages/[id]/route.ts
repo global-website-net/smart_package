@@ -3,9 +3,15 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]/authOptions'
 import prisma from '@/lib/prisma'
 
+interface RouteSegment {
+  params: {
+    id: string
+  }
+}
+
 export async function GET(
   request: Request,
-  context: { params: { id: string } }
+  { params }: RouteSegment
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -23,7 +29,7 @@ export async function GET(
     }
 
     const packageData = await prisma.package.findUnique({
-      where: { id: context.params.id },
+      where: { id: params.id },
       include: {
         user: {
           select: {
@@ -66,7 +72,7 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  context: { params: { id: string } }
+  { params }: RouteSegment
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -101,7 +107,7 @@ export async function PATCH(
     }
 
     const updatedPackage = await prisma.package.update({
-      where: { id: context.params.id },
+      where: { id: params.id },
       data: { status },
       include: {
         user: {
