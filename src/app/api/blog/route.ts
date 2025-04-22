@@ -6,7 +6,7 @@ const prisma = new PrismaClient()
 // Get all blogs
 export async function GET() {
   try {
-    const blogs = await prisma.blog.findMany({
+    const blogs = await prisma.blogPost.findMany({
       include: {
         author: {
           select: {
@@ -30,7 +30,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { title, subtitle, content, imageUrl, authorId } = body
+    const { title, content, authorId } = body
 
     // Get user role
     const user = await prisma.user.findUnique({
@@ -44,12 +44,10 @@ export async function POST(request: Request) {
       )
     }
 
-    const blog = await prisma.blog.create({
+    const blog = await prisma.blogPost.create({
       data: {
         title,
-        subtitle,
         content,
-        imageUrl,
         authorId
       }
     })
@@ -68,7 +66,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json()
-    const { id, title, subtitle, content, imageUrl, authorId } = body
+    const { id, title, content, authorId } = body
 
     // Get user role
     const user = await prisma.user.findUnique({
@@ -82,13 +80,11 @@ export async function PUT(request: Request) {
       )
     }
 
-    const blog = await prisma.blog.update({
+    const blog = await prisma.blogPost.update({
       where: { id },
       data: {
         title,
-        subtitle,
-        content,
-        imageUrl
+        content
       }
     })
 
