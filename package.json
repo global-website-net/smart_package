@@ -16,6 +16,7 @@
     "@supabase/supabase-js": "^2.49.4",
     "@types/bcryptjs": "^2.4.6",
     "@types/pg": "^8.11.13",
+    "@types/uuid": "^10.0.0",
     "bcryptjs": "^3.0.2",
     "framer-motion": "^12.7.4",
     "next": "15.3.1",
@@ -24,7 +25,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@svgr/webpack": "^8.1.0",

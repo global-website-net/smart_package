@@ -1,5 +1,6 @@
 import { PrismaClient, UserRole } from '@prisma/client'
 import { Pool } from 'pg'
+import { v4 as uuidv4 } from 'uuid'
 
 // Create a PostgreSQL connection pool
 const pool = new Pool({
@@ -43,13 +44,17 @@ export const db = {
   }) {
     const client = await pool.connect()
     try {
+      // Generate a UUID for the user ID
+      const id = uuidv4()
+      
       const result = await client.query(
         `INSERT INTO "User" (
-          "email", "password", "fullName", "governorate", "town", 
+          "id", "email", "password", "fullName", "governorate", "town", 
           "phonePrefix", "phoneNumber", "role", "createdAt", "updatedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
         RETURNING *`,
         [
+          id,
           userData.email,
           userData.password,
           userData.fullName,
