@@ -7,16 +7,16 @@ declare module "next-auth" {
   interface Session {
     user: {
       id: string
-      name?: string | null
+      fullName?: string | null
       email?: string | null
-      isAdmin: boolean
+      role: 'REGULAR' | 'SHOP' | 'ADMIN' | 'OWNER'
     }
   }
   interface User {
     id: string
-    name?: string | null
+    fullName?: string | null
     email: string
-    isAdmin: boolean
+    role: 'REGULAR' | 'SHOP' | 'ADMIN' | 'OWNER'
   }
 }
 
@@ -45,16 +45,20 @@ const handler = NextAuth({
             const newUser = await prisma.user.create({
               data: {
                 email: "test@example.com",
-                name: "Test User",
+                fullName: "Test User",
                 password: await bcrypt.hash("password", 10),
-                isAdmin: true
+                role: "ADMIN",
+                governorate: "Test Governorate",
+                town: "Test Town",
+                phonePrefix: "+1",
+                phoneNumber: "1234567890"
               }
             })
             return {
               id: newUser.id,
-              email: newUser.email || "",
-              name: newUser.name,
-              isAdmin: newUser.isAdmin
+              email: newUser.email,
+              fullName: newUser.fullName,
+              role: newUser.role
             }
           }
           throw new Error('User not found')
@@ -73,8 +77,8 @@ const handler = NextAuth({
         return {
           id: user.id,
           email: user.email,
-          name: user.name,
-          isAdmin: user.isAdmin
+          fullName: user.fullName,
+          role: user.role
         }
       }
     })
@@ -86,14 +90,14 @@ const handler = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
-        token.isAdmin = user.isAdmin
+        token.role = user.role
       }
       return token
     },
     async session({ session, token }: { session: any, token: any }) {
       if (session.user && token) {
         session.user.id = token.id
-        session.user.isAdmin = token.isAdmin
+        session.user.role = token.role
       }
       return session
     }
