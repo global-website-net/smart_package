@@ -36,19 +36,19 @@ export async function GET() {
       const packagesResult = await client.query(
         `SELECT p.*, s.name as status_name 
          FROM "Package" p 
-         JOIN "Status" s ON p.status_id = s.id 
-         WHERE p.user_id = $1 
-         ORDER BY p.created_at DESC`,
+         LEFT JOIN "Status" s ON p.status = s.name 
+         WHERE p."userId" = $1 
+         ORDER BY p."createdAt" DESC`,
         [userId]
       )
 
       // Format the response
       const packages = packagesResult.rows.map(pkg => ({
         id: pkg.id,
-        trackingNumber: pkg.tracking_number,
-        status: pkg.status_name,
-        currentLocation: pkg.current_location,
-        lastUpdated: pkg.updated_at
+        trackingNumber: pkg.trackingNumber,
+        status: pkg.status,
+        currentLocation: pkg.description || 'Not specified',
+        lastUpdated: pkg.updatedAt
       }))
 
       return NextResponse.json(packages)

@@ -52,14 +52,14 @@ async function checkAndApplySchema() {
         SELECT table_name 
         FROM information_schema.tables 
         WHERE table_schema = 'public' 
-        AND table_name IN ('User', 'Package', 'PackageStatus', 'PackageHistory')
+        AND table_name IN ('User', 'Package', 'Status', 'PackageHistory')
       `);
       
       const existingTables = tableCheckResult.rows.map(row => row.table_name);
       console.log('Existing tables:', existingTables);
       
       // If all required tables exist, skip schema application
-      const requiredTables = ['User', 'Package', 'PackageStatus', 'PackageHistory'];
+      const requiredTables = ['User', 'Package', 'Status', 'PackageHistory'];
       const allTablesExist = requiredTables.every(table => existingTables.includes(table));
       
       if (allTablesExist) {
@@ -73,6 +73,12 @@ async function checkAndApplySchema() {
       await client.query('BEGIN');
       
       for (const statement of statements) {
+        // Skip DROP TABLE statements to preserve existing data
+        if (statement.toLowerCase().includes('drop table')) {
+          console.log('Skipping DROP TABLE statement to preserve data');
+          continue;
+        }
+        
         console.log(`Executing: ${statement.substring(0, 50)}...`);
         await client.query(statement);
       }
