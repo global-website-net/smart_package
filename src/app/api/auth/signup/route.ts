@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // Create user
+    // Create user in database
     let user = null
     try {
       user = await prisma.user.create({
@@ -76,6 +76,45 @@ export async function POST(request: Request) {
     }
 
     if (!user) {
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء إنشاء الحساب' },
+        { status: 500 }
+      )
+    }
+
+    // Create user in Supabase auth
+    try {
+      const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+        email: user.email,
+        password: password, // Use the original password for Supabase auth
+        email_confirm: true,
+        user_metadata: {
+          full_name: user.fullName,
+          role: user.role,
+          governorate: user.governorate,
+          town: user.town,
+          phone_prefix: user.phonePrefix,
+          phone_number: user.phoneNumber
+        }
+      })
+
+      if (authError) {
+        console.error('Supabase auth error:', authError)
+        // Delete the user from our database if Supabase auth fails
+        await prisma.user.delete({
+          where: { id: user.id }
+        })
+        return NextResponse.json(
+          { error: 'حدث خطأ أثناء إنشاء الحساب' },
+          { status: 500 }
+        )
+      }
+    } catch (authError) {
+      console.error('Error creating Supabase auth user:', authError)
+      // Delete the user from our database if Supabase auth fails
+      await prisma.user.delete({
+        where: { id: user.id }
+      })
       return NextResponse.json(
         { error: 'حدث خطأ أثناء إنشاء الحساب' },
         { status: 500 }
