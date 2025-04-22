@@ -4,11 +4,16 @@ import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma'
 import PackageDetails from '@/components/PackageDetails'
 
+type PageProps = {
+  params: {
+    id: string
+  }
+  searchParams: Record<string, string | string[] | undefined>
+}
+
 export default async function PackagePage({
   params,
-}: {
-  params: { id: string }
-}) {
+}: PageProps) {
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.email) {
