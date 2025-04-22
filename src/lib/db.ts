@@ -3,7 +3,7 @@ import { Pool } from 'pg'
 import { v4 as uuidv4 } from 'uuid'
 
 // Create a PostgreSQL connection pool
-const pool = new Pool({
+export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   max: 20, // Maximum number of clients in the pool
   idleTimeoutMillis: 30000, // How long a client is allowed to remain idle before being closed

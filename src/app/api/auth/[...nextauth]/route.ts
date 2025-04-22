@@ -1,7 +1,7 @@
 import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { db } from '@/lib/db'
 
 declare module "next-auth" {
   interface Session {
@@ -35,25 +35,34 @@ const handler = NextAuth({
         }
 
         try {
-          const user = await prisma.user.findUnique({
-            where: { email: credentials.email }
-          })
+          // Use our database utility to find the user
+          const client = await db.pool.connect()
+          try {
+            const result = await client.query(
+              'SELECT * FROM "User" WHERE email = $1',
+              [credentials.email]
+            )
+            
+            const user = result.rows[0]
+            
+            if (!user) {
+              throw new Error('البريد الإلكتروني غير موجود')
+            }
 
-          if (!user) {
-            throw new Error('البريد الإلكتروني غير موجود')
-          }
+            const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
 
-          const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
+            if (!isPasswordValid) {
+              throw new Error('كلمة المرور غير صحيحة')
+            }
 
-          if (!isPasswordValid) {
-            throw new Error('كلمة المرور غير صحيحة')
-          }
-
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.fullName,
-            role: user.role
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.fullName,
+              role: user.role
+            }
+          } finally {
+            client.release()
           }
         } catch (error) {
           console.error('Auth error:', error)

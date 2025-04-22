@@ -4,11 +4,14 @@ import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Header from '../../components/Header'
+import { signIn } from 'next-auth/react'
 
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectPath = searchParams?.get('redirect') || '/'
+  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   const [formData, setFormData] = useState({
     email: '',
@@ -25,12 +28,38 @@ function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    alert('سيتم تنفيذ تسجيل الدخول قريباً')
-    // TODO: Implement login functionality
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const result = await signIn('credentials', {
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
+      })
+
+      if (result?.error) {
+        setError(result.error)
+      } else {
+        // Redirect to the intended page or home
+        router.push(redirectPath)
+      }
+    } catch (error) {
+      console.error('Login error:', error)
+      setError('حدث خطأ أثناء تسجيل الدخول')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-8 space-y-6">
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-600 p-3 rounded-lg">
+          {error}
+        </div>
+      )}
+      
       {/* Email */}
       <div>
         <label htmlFor="email" className="block text-gray-700 mb-2">
@@ -45,6 +74,7 @@ function LoginForm() {
           className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
           placeholder="البريد الإلكتروني"
           required
+          disabled={isLoading}
         />
       </div>
 
@@ -62,6 +92,7 @@ function LoginForm() {
           className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
           placeholder="كلمة المرور"
           required
+          disabled={isLoading}
         />
       </div>
 
@@ -69,9 +100,10 @@ function LoginForm() {
       <div className="pt-4">
         <button
           type="submit"
-          className="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition-colors"
+          className="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition-colors disabled:bg-green-300"
+          disabled={isLoading}
         >
-          تسجيل الدخول
+          {isLoading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
         </button>
       </div>
 
