@@ -34,9 +34,8 @@ export async function GET() {
 
       // Get user's packages
       const packagesResult = await client.query(
-        `SELECT p.*, s.name as status_name 
+        `SELECT p.* 
          FROM "Package" p 
-         LEFT JOIN "Status" s ON p.status = s.name 
          WHERE p."userId" = $1 
          ORDER BY p."createdAt" DESC`,
         [userId]

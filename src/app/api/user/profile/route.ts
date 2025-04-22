@@ -19,7 +19,7 @@ export async function GET() {
     const client = await pool.connect()
     try {
       const result = await client.query(
-        'SELECT id, email, "fullName", role, created_at as "createdAt" FROM "User" WHERE email = $1',
+        'SELECT id, email, "fullName", role, "createdAt" FROM "User" WHERE email = $1',
         [session.user.email]
       )
 
@@ -99,7 +99,7 @@ export async function PUT(request: Request) {
         // Update user with new password
         await client.query(
           `UPDATE "User" 
-           SET "fullName" = $1, password = $2, updated_at = NOW() 
+           SET "fullName" = $1, password = $2, "updatedAt" = NOW() 
            WHERE email = $3`,
           [fullName, hashedPassword, session.user.email]
         )
@@ -107,7 +107,7 @@ export async function PUT(request: Request) {
         // Update user without changing password
         await client.query(
           `UPDATE "User" 
-           SET "fullName" = $1, updated_at = NOW() 
+           SET "fullName" = $1, "updatedAt" = NOW() 
            WHERE email = $2`,
           [fullName, session.user.email]
         )
@@ -115,7 +115,7 @@ export async function PUT(request: Request) {
 
       // Get updated user data
       const updatedResult = await client.query(
-        'SELECT id, email, "fullName", role, created_at as "createdAt" FROM "User" WHERE email = $1',
+        'SELECT id, email, "fullName", role, "createdAt" FROM "User" WHERE email = $1',
         [session.user.email]
       )
 

@@ -231,7 +231,7 @@ export default function AccountPage() {
                   </>
                 )}
                 
-                <div className="flex justify-end space-x-4 rtl:space-x-reverse">
+                <div className="flex justify-end space-x-4 space-x-reverse">
                   {isEditing ? (
                     <>
                       <button
