@@ -1,11 +1,17 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]/authOptions'
 import prisma from '@/lib/prisma'
 
+type Props = {
+  params: {
+    id: string
+  }
+}
+
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  props: Props
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -23,7 +29,7 @@ export async function GET(
     }
 
     const packageData = await prisma.package.findUnique({
-      where: { id: params.id },
+      where: { id: props.params.id },
       include: {
         user: {
           select: {
@@ -65,8 +71,8 @@ export async function GET(
 }
 
 export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  props: Props
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -83,7 +89,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    const { status } = await request.json()
+    const { status } = await req.json()
 
     if (!status) {
       return NextResponse.json(
@@ -101,7 +107,7 @@ export async function PATCH(
     }
 
     const updatedPackage = await prisma.package.update({
-      where: { id: params.id },
+      where: { id: props.params.id },
       data: { status },
       include: {
         user: {
