@@ -59,72 +59,112 @@ async function checkAndApplySchema() {
       const enumExists = enumCheckResult.rows[0].exists;
       console.log('UserRole enum exists:', enumExists);
       
+      // Check if User table exists and has role column
+      const roleColumnCheckResult = await client.query(`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'User' 
+        AND column_name = 'role';
+      `);
+      
+      const roleColumnExists = roleColumnCheckResult.rows.length > 0;
+      console.log('Role column exists:', roleColumnExists);
+      
       // Check if tables exist
       const tableCheckResult = await client.query(`
         SELECT table_name 
         FROM information_schema.tables 
         WHERE table_schema = 'public' 
-        AND table_name IN ('User', 'Package', 'Status', 'PackageHistory')
+        AND table_name IN ('User', 'Package', 'BlogPost')
       `);
       
       const existingTables = tableCheckResult.rows.map(row => row.table_name);
       console.log('Existing tables:', existingTables);
       
-      // If all required tables exist and enum exists, skip schema application
-      const requiredTables = ['User', 'Package', 'Status', 'PackageHistory'];
-      const allTablesExist = requiredTables.every(table => existingTables.includes(table));
-      
-      if (allTablesExist && enumExists) {
-        console.log('All required tables and enum already exist. Skipping schema application.');
-        return;
+      // If role column doesn't exist, we need to recreate the User table
+      if (!roleColumnExists) {
+        console.log('Role column is missing. Recreating User table...');
+        
+        // Drop existing tables that depend on User
+        if (existingTables.includes('BlogPost')) {
+          await client.query('DROP TABLE IF EXISTS "BlogPost" CASCADE;');
+        }
+        if (existingTables.includes('Package')) {
+          await client.query('DROP TABLE IF EXISTS "Package" CASCADE;');
+        }
+        if (existingTables.includes('User')) {
+          await client.query('DROP TABLE IF EXISTS "User" CASCADE;');
+        }
+        
+        // Drop and recreate UserRole enum
+        if (enumExists) {
+          await client.query('DROP TYPE IF EXISTS "UserRole" CASCADE;');
+        }
+        await client.query('CREATE TYPE "UserRole" AS ENUM (\'REGULAR\', \'SHOP\', \'ADMIN\', \'OWNER\');');
+        
+        // Recreate User table with role column
+        await client.query(`
+          CREATE TABLE "User" (
+            "id" TEXT NOT NULL,
+            "fullName" TEXT NOT NULL,
+            "email" TEXT NOT NULL,
+            "password" TEXT NOT NULL,
+            "governorate" TEXT NOT NULL,
+            "town" TEXT NOT NULL,
+            "phonePrefix" TEXT NOT NULL,
+            "phoneNumber" TEXT NOT NULL,
+            "role" "UserRole" NOT NULL DEFAULT 'REGULAR',
+            "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            "updatedAt" TIMESTAMP(3) NOT NULL,
+            CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+          );
+        `);
+        
+        // Recreate Package table if it doesn't exist
+        if (!existingTables.includes('Package')) {
+          await client.query(`
+            CREATE TABLE "Package" (
+              "id" TEXT NOT NULL,
+              "trackingNumber" TEXT NOT NULL,
+              "description" TEXT,
+              "status" TEXT NOT NULL,
+              "userId" TEXT NOT NULL,
+              "shopId" TEXT,
+              "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              "updatedAt" TIMESTAMP(3) NOT NULL,
+              CONSTRAINT "Package_pkey" PRIMARY KEY ("id")
+            );
+          `);
+        }
+        
+        // Recreate BlogPost table if it doesn't exist
+        if (!existingTables.includes('BlogPost')) {
+          await client.query(`
+            CREATE TABLE "BlogPost" (
+              "id" TEXT NOT NULL,
+              "title" TEXT NOT NULL,
+              "content" TEXT NOT NULL,
+              "authorId" TEXT NOT NULL,
+              "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              "updatedAt" TIMESTAMP(3) NOT NULL,
+              CONSTRAINT "BlogPost_pkey" PRIMARY KEY ("id")
+            );
+          `);
+        }
+        
+        // Create indexes
+        await client.query('CREATE UNIQUE INDEX IF NOT EXISTS "User_email_key" ON "User"("email");');
+        await client.query('CREATE UNIQUE INDEX IF NOT EXISTS "Package_trackingNumber_key" ON "Package"("trackingNumber");');
+        
+        // Add foreign keys
+        await client.query('ALTER TABLE "Package" ADD CONSTRAINT "Package_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;');
+        await client.query('ALTER TABLE "Package" ADD CONSTRAINT "Package_shopId_fkey" FOREIGN KEY ("shopId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;');
+        await client.query('ALTER TABLE "BlogPost" ADD CONSTRAINT "BlogPost_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;');
+        
+        console.log('Schema applied successfully');
+      } else {
+        console.log('Role column already exists. No changes needed.');
       }
-      
-      console.log('Some tables or enum are missing. Applying schema...');
-      
-      // Execute each statement individually without a transaction
-      for (const statement of statements) {
-        // Skip DROP TABLE statements to preserve existing data
-        if (statement.toLowerCase().includes('drop table')) {
-          console.log('Skipping DROP TABLE statement to preserve data');
-          continue;
-        }
-        
-        // Skip DROP TYPE statement if enum exists
-        if (statement.toLowerCase().includes('drop type') && enumExists) {
-          console.log('Skipping DROP TYPE statement to preserve enum');
-          continue;
-        }
-        
-        // Skip CREATE TABLE statements for tables that already exist
-        if (statement.toLowerCase().includes('create table')) {
-          const tableNameMatch = statement.match(/create\s+table\s+(?:if\s+not\s+exists\s+)?["']?([^"'\s]+)["']?/i);
-          if (tableNameMatch && existingTables.includes(tableNameMatch[1])) {
-            console.log(`Skipping CREATE TABLE statement for existing table: ${tableNameMatch[1]}`);
-            continue;
-          }
-        }
-        
-        try {
-          console.log(`Executing: ${statement.substring(0, 50)}...`);
-          await client.query(statement);
-        } catch (error) {
-          // If the error is about a relation already existing, log it and continue
-          if (error.code === '42P07') {
-            console.log(`Table already exists, skipping: ${error.message}`);
-            continue;
-          }
-          // If the error is about a type already existing, log it and continue
-          if (error.code === '42710') {
-            console.log(`Type already exists, skipping: ${error.message}`);
-            continue;
-          }
-          // For other errors, log and continue
-          console.error(`Error executing statement: ${error.message}`);
-          console.log('Continuing with next statement...');
-        }
-      }
-      
-      console.log('Database schema applied successfully');
     } finally {
       client.release();
     }
