@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
 import { createClient } from '@supabase/supabase-js'
 import bcrypt from 'bcryptjs'
 import { pool } from '@/lib/db'
-
-const prisma = new PrismaClient()
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
