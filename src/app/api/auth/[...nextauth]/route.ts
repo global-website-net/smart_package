@@ -1,7 +1,8 @@
 import { NextAuthOptions } from 'next-auth'
-import { PrismaAdapter } from '@auth/prisma-adapter'
+import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import GoogleProvider from 'next-auth/providers/google'
 import prisma from '@/lib/prisma'
+import NextAuth from 'next-auth'
 
 // Define UserRole type
 type UserRole = 'REGULAR' | 'SHOP' | 'ADMIN' | 'OWNER'
@@ -31,7 +32,7 @@ declare module "next-auth/jwt" {
   }
 }
 
-export const authOptions: NextAuthOptions = {
+const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
@@ -53,4 +54,6 @@ export const authOptions: NextAuthOptions = {
   },
 }
 
-export { authOptions as GET, authOptions as POST } 
+const handler = NextAuth(authOptions)
+
+export { handler as GET, handler as POST } 
