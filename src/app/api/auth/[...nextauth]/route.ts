@@ -1,22 +1,23 @@
 import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 
 declare module "next-auth" {
   interface Session {
     user: {
       id: string
-      fullName?: string | null
-      email?: string | null
-      role: 'REGULAR' | 'SHOP' | 'ADMIN' | 'OWNER'
+      email: string
+      name: string
+      role: string
     }
   }
+  
   interface User {
     id: string
-    fullName?: string | null
     email: string
-    role: 'REGULAR' | 'SHOP' | 'ADMIN' | 'OWNER'
+    name: string
+    role: string
   }
 }
 
@@ -30,62 +31,37 @@ const handler = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error('Please enter your email and password')
+          throw new Error('البريد الإلكتروني وكلمة المرور مطلوبان')
         }
 
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email
+        try {
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email }
+          })
+
+          if (!user) {
+            throw new Error('البريد الإلكتروني غير موجود')
           }
-        })
 
-        if (!user) {
-          // Create a test user if it doesn't exist
-          if (credentials.email === "test@example.com" && credentials.password === "password") {
-            const newUser = await prisma.user.create({
-              data: {
-                email: "test@example.com",
-                fullName: "Test User",
-                password: await bcrypt.hash("password", 10),
-                role: "ADMIN",
-                governorate: "Test Governorate",
-                town: "Test Town",
-                phonePrefix: "+1",
-                phoneNumber: "1234567890"
-              }
-            })
-            return {
-              id: newUser.id,
-              email: newUser.email,
-              fullName: newUser.fullName,
-              role: newUser.role
-            }
+          const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
+
+          if (!isPasswordValid) {
+            throw new Error('كلمة المرور غير صحيحة')
           }
-          throw new Error('User not found')
-        }
 
-        // For existing users, verify password
-        if (!user.password) {
-          throw new Error('Invalid password')
-        }
-
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
-        if (!isPasswordValid) {
-          throw new Error('Invalid password')
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          fullName: user.fullName,
-          role: user.role
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.fullName,
+            role: user.role
+          }
+        } catch (error) {
+          console.error('Auth error:', error)
+          throw error
         }
       }
     })
   ],
-  pages: {
-    signIn: '/auth/login',
-  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -94,18 +70,21 @@ const handler = NextAuth({
       }
       return token
     },
-    async session({ session, token }: { session: any, token: any }) {
-      if (session.user && token) {
-        session.user.id = token.id
-        session.user.role = token.role
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.id as string
+        session.user.role = token.role as string
       }
       return session
     }
   },
+  pages: {
+    signIn: '/auth/login',
+    error: '/auth/login',
+  },
   session: {
     strategy: 'jwt',
   },
-  secret: process.env.NEXTAUTH_SECRET,
 })
 
 export { handler as GET, handler as POST } 
