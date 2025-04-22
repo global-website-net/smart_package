@@ -33,155 +33,166 @@ async function checkAndApplySchema() {
     }
   });
 
+  let client;
   try {
     // Start a client
-    const client = await pool.connect();
+    client = await pool.connect();
     
-    try {
-      // Check if UserRole enum exists
-      const enumCheckResult = await client.query(`
-        SELECT EXISTS (
-          SELECT 1 FROM pg_type 
-          WHERE typname = 'userrole'
-        );
-      `);
+    // Check if UserRole enum exists
+    const enumCheckResult = await client.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM pg_type 
+        WHERE typname = 'userrole'
+      );
+    `);
+    
+    const enumExists = enumCheckResult.rows[0].exists;
+    console.log('UserRole enum exists:', enumExists);
+    
+    // Check if User table exists and has role column
+    const roleColumnCheckResult = await client.query(`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'User' 
+      AND column_name = 'role';
+    `);
+    
+    const roleColumnExists = roleColumnCheckResult.rows.length > 0;
+    console.log('Role column exists:', roleColumnExists);
+    
+    // Check if tables exist
+    const tableCheckResult = await client.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public' 
+      AND table_name IN ('User', 'Package', 'BlogPost')
+    `);
+    
+    const existingTables = tableCheckResult.rows.map(row => row.table_name);
+    console.log('Existing tables:', existingTables);
+    
+    // If role column doesn't exist, we need to recreate the User table
+    if (!roleColumnExists) {
+      console.log('Role column is missing. Recreating User table...');
       
-      const enumExists = enumCheckResult.rows[0].exists;
-      console.log('UserRole enum exists:', enumExists);
+      // Start a new transaction for schema changes
+      await client.query('BEGIN');
       
-      // Check if User table exists and has role column
-      const roleColumnCheckResult = await client.query(`
-        SELECT column_name 
-        FROM information_schema.columns 
-        WHERE table_name = 'User' 
-        AND column_name = 'role';
-      `);
-      
-      const roleColumnExists = roleColumnCheckResult.rows.length > 0;
-      console.log('Role column exists:', roleColumnExists);
-      
-      // Check if tables exist
-      const tableCheckResult = await client.query(`
-        SELECT table_name 
-        FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name IN ('User', 'Package', 'BlogPost')
-      `);
-      
-      const existingTables = tableCheckResult.rows.map(row => row.table_name);
-      console.log('Existing tables:', existingTables);
-      
-      // If role column doesn't exist, we need to recreate the User table
-      if (!roleColumnExists) {
-        console.log('Role column is missing. Recreating User table...');
+      try {
+        // Drop existing tables that depend on User
+        if (existingTables.includes('BlogPost')) {
+          await client.query('DROP TABLE IF EXISTS "BlogPost" CASCADE;');
+        }
+        if (existingTables.includes('Package')) {
+          await client.query('DROP TABLE IF EXISTS "Package" CASCADE;');
+        }
+        if (existingTables.includes('User')) {
+          await client.query('DROP TABLE IF EXISTS "User" CASCADE;');
+        }
         
-        // Start a transaction for schema changes
-        await client.query('BEGIN');
-        
-        try {
-          // Drop existing tables that depend on User
-          if (existingTables.includes('BlogPost')) {
-            await client.query('DROP TABLE IF EXISTS "BlogPost" CASCADE;');
-          }
-          if (existingTables.includes('Package')) {
-            await client.query('DROP TABLE IF EXISTS "Package" CASCADE;');
-          }
-          if (existingTables.includes('User')) {
-            await client.query('DROP TABLE IF EXISTS "User" CASCADE;');
-          }
-          
-          // Create UserRole enum if it doesn't exist
-          if (!enumExists) {
-            console.log('Creating UserRole enum...');
-            try {
-              await client.query('CREATE TYPE "UserRole" AS ENUM (\'REGULAR\', \'SHOP\', \'ADMIN\', \'OWNER\');');
-              console.log('UserRole enum created successfully');
-            } catch (error) {
-              if (error.code === '42710') { // duplicate_object error
-                console.log('UserRole enum already exists, continuing...');
-              } else {
-                throw error;
-              }
+        // Create UserRole enum if it doesn't exist
+        if (!enumExists) {
+          console.log('Creating UserRole enum...');
+          try {
+            await client.query('CREATE TYPE "UserRole" AS ENUM (\'REGULAR\', \'SHOP\', \'ADMIN\', \'OWNER\');');
+            console.log('UserRole enum created successfully');
+          } catch (error) {
+            if (error.code === '42710') { // duplicate_object error
+              console.log('UserRole enum already exists, continuing...');
+            } else {
+              throw error;
             }
-          } else {
-            console.log('UserRole enum already exists, skipping creation');
           }
-          
-          // Recreate User table with role column
+        } else {
+          console.log('UserRole enum already exists, skipping creation');
+        }
+        
+        // Recreate User table with role column
+        await client.query(`
+          CREATE TABLE "User" (
+            "id" TEXT NOT NULL,
+            "fullName" TEXT NOT NULL,
+            "email" TEXT NOT NULL,
+            "password" TEXT NOT NULL,
+            "governorate" TEXT NOT NULL,
+            "town" TEXT NOT NULL,
+            "phonePrefix" TEXT NOT NULL,
+            "phoneNumber" TEXT NOT NULL,
+            "role" "UserRole" NOT NULL DEFAULT 'REGULAR',
+            "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            "updatedAt" TIMESTAMP(3) NOT NULL,
+            CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+          );
+        `);
+        
+        // Recreate Package table if it doesn't exist
+        if (!existingTables.includes('Package')) {
           await client.query(`
-            CREATE TABLE "User" (
+            CREATE TABLE "Package" (
               "id" TEXT NOT NULL,
-              "fullName" TEXT NOT NULL,
-              "email" TEXT NOT NULL,
-              "password" TEXT NOT NULL,
-              "governorate" TEXT NOT NULL,
-              "town" TEXT NOT NULL,
-              "phonePrefix" TEXT NOT NULL,
-              "phoneNumber" TEXT NOT NULL,
-              "role" "UserRole" NOT NULL DEFAULT 'REGULAR',
+              "trackingNumber" TEXT NOT NULL,
+              "description" TEXT,
+              "status" TEXT NOT NULL,
+              "userId" TEXT NOT NULL,
+              "shopId" TEXT,
               "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
               "updatedAt" TIMESTAMP(3) NOT NULL,
-              CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+              CONSTRAINT "Package_pkey" PRIMARY KEY ("id")
             );
           `);
-          
-          // Recreate Package table if it doesn't exist
-          if (!existingTables.includes('Package')) {
-            await client.query(`
-              CREATE TABLE "Package" (
-                "id" TEXT NOT NULL,
-                "trackingNumber" TEXT NOT NULL,
-                "description" TEXT,
-                "status" TEXT NOT NULL,
-                "userId" TEXT NOT NULL,
-                "shopId" TEXT,
-                "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                "updatedAt" TIMESTAMP(3) NOT NULL,
-                CONSTRAINT "Package_pkey" PRIMARY KEY ("id")
-              );
-            `);
-          }
-          
-          // Recreate BlogPost table if it doesn't exist
-          if (!existingTables.includes('BlogPost')) {
-            await client.query(`
-              CREATE TABLE "BlogPost" (
-                "id" TEXT NOT NULL,
-                "title" TEXT NOT NULL,
-                "content" TEXT NOT NULL,
-                "authorId" TEXT NOT NULL,
-                "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                "updatedAt" TIMESTAMP(3) NOT NULL,
-                CONSTRAINT "BlogPost_pkey" PRIMARY KEY ("id")
-              );
-            `);
-          }
-          
-          // Create indexes
-          await client.query('CREATE UNIQUE INDEX IF NOT EXISTS "User_email_key" ON "User"("email");');
-          await client.query('CREATE UNIQUE INDEX IF NOT EXISTS "Package_trackingNumber_key" ON "Package"("trackingNumber");');
-          
-          // Add foreign keys
-          await client.query('ALTER TABLE "Package" ADD CONSTRAINT "Package_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;');
-          await client.query('ALTER TABLE "Package" ADD CONSTRAINT "Package_shopId_fkey" FOREIGN KEY ("shopId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;');
-          await client.query('ALTER TABLE "BlogPost" ADD CONSTRAINT "BlogPost_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;');
-          
-          // Commit the transaction
-          await client.query('COMMIT');
-          console.log('Schema applied successfully');
-        } catch (error) {
-          // Rollback the transaction on error
-          await client.query('ROLLBACK');
-          console.error('Error applying schema:', error);
-          throw error;
         }
-      } else {
-        console.log('Role column already exists. No changes needed.');
+        
+        // Recreate BlogPost table if it doesn't exist
+        if (!existingTables.includes('BlogPost')) {
+          await client.query(`
+            CREATE TABLE "BlogPost" (
+              "id" TEXT NOT NULL,
+              "title" TEXT NOT NULL,
+              "content" TEXT NOT NULL,
+              "authorId" TEXT NOT NULL,
+              "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              "updatedAt" TIMESTAMP(3) NOT NULL,
+              CONSTRAINT "BlogPost_pkey" PRIMARY KEY ("id")
+            );
+          `);
+        }
+        
+        // Create indexes
+        await client.query('CREATE UNIQUE INDEX IF NOT EXISTS "User_email_key" ON "User"("email");');
+        await client.query('CREATE UNIQUE INDEX IF NOT EXISTS "Package_trackingNumber_key" ON "Package"("trackingNumber");');
+        
+        // Add foreign keys
+        await client.query('ALTER TABLE "Package" ADD CONSTRAINT "Package_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;');
+        await client.query('ALTER TABLE "Package" ADD CONSTRAINT "Package_shopId_fkey" FOREIGN KEY ("shopId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;');
+        await client.query('ALTER TABLE "BlogPost" ADD CONSTRAINT "BlogPost_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;');
+        
+        // Commit the transaction
+        await client.query('COMMIT');
+        console.log('Schema applied successfully');
+      } catch (error) {
+        // Rollback the transaction on error
+        await client.query('ROLLBACK');
+        console.error('Error applying schema:', error);
+        throw error;
       }
-    } finally {
+    } else {
+      console.log('Role column already exists. No changes needed.');
+    }
+  } catch (error) {
+    console.error('Error in checkAndApplySchema:', error);
+    // If we have a client and it's in a transaction, try to rollback
+    if (client) {
+      try {
+        await client.query('ROLLBACK');
+      } catch (rollbackError) {
+        console.error('Error rolling back transaction:', rollbackError);
+      }
+    }
+    throw error;
+  } finally {
+    if (client) {
       client.release();
     }
-  } finally {
     await pool.end();
   }
 }
