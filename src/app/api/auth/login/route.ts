@@ -108,6 +108,8 @@ export async function POST(request: Request) {
         }
 
         return NextResponse.json({
+          success: true,
+          message: 'تم تسجيل الدخول بنجاح',
           user: {
             id: user.id,
             email: user.email,
@@ -131,6 +133,8 @@ export async function POST(request: Request) {
 
     // Return user data and session from successful sign in
     return NextResponse.json({
+      success: true,
+      message: 'تم تسجيل الدخول بنجاح',
       user: {
         id: user.id,
         email: user.email,
