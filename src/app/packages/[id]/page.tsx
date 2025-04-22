@@ -4,10 +4,9 @@ import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma'
 import PackageDetails from '@/components/PackageDetails'
 
+// For Next.js 15.3.1, params should be a Promise
 type PageProps = {
-  params: {
-    id: string
-  }
+  params: Promise<{ id: string }>
   searchParams: Record<string, string | string[] | undefined>
 }
 
@@ -28,8 +27,11 @@ export default async function PackagePage({
     redirect('/auth/login')
   }
 
+  // Await the params to get the id
+  const { id } = await params
+
   const packageData = await prisma.package.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       user: {
         select: {
