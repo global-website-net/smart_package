@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs'
 import { pool } from '@/lib/db'
 
 // Initialize Supabase client
+// This is a temporary comment to force Git to detect changes
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
