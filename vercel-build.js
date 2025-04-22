@@ -34,16 +34,6 @@ async function checkAndApplySchema() {
   });
 
   try {
-    // Read the schema file
-    const schemaPath = path.join(__dirname, 'prisma', 'direct-schema.sql');
-    const schema = fs.readFileSync(schemaPath, 'utf8');
-
-    // Split the schema into individual statements
-    const statements = schema
-      .split(';')
-      .map(s => s.trim())
-      .filter(s => s.length > 0);
-
     // Start a client
     const client = await pool.connect();
     
@@ -96,7 +86,7 @@ async function checkAndApplySchema() {
           await client.query('DROP TABLE IF EXISTS "User" CASCADE;');
         }
         
-        // We don't need to recreate the UserRole enum if it already exists
+        // Create UserRole enum if it doesn't exist
         if (!enumExists) {
           console.log('Creating UserRole enum...');
           await client.query('CREATE TYPE "UserRole" AS ENUM (\'REGULAR\', \'SHOP\', \'ADMIN\', \'OWNER\');');
