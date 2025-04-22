@@ -1,105 +1,109 @@
 import { NextResponse } from 'next/server'
-import bcrypt from 'bcryptjs'
-import { prisma } from '@/lib/prisma'
+import { PrismaClient } from '@prisma/client'
 import { createClient } from '@supabase/supabase-js'
+import bcrypt from 'bcryptjs'
+
+const prisma = new PrismaClient()
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
+const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+})
 
 export async function POST(request: Request) {
   try {
-    console.log('Starting login process...')
-    const body = await request.json()
-    console.log('Request body:', { ...body, password: '[REDACTED]' })
-    
-    const { email, password } = body
+    const { email, password } = await request.json()
 
-    // Validate required fields
+    // Validate input
     if (!email || !password) {
-      console.log('Missing required fields:', { email, hasPassword: !!password })
       return NextResponse.json(
         { error: 'البريد الإلكتروني وكلمة المرور مطلوبان' },
         { status: 400 }
       )
     }
 
-    console.log('Finding user...')
-    // Find user by email
+    // Find user in database
     const user = await prisma.user.findUnique({
       where: { email }
     })
 
     if (!user) {
-      console.log('User not found:', email)
       return NextResponse.json(
-        { error: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' },
-        { status: 401 }
+        { error: 'البريد الإلكتروني غير موجود' },
+        { status: 404 }
       )
     }
 
-    console.log('Verifying password...')
     // Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.password)
-
-    if (!isPasswordValid) {
-      console.log('Invalid password for user:', email)
+    const isValidPassword = await bcrypt.compare(password, user.password)
+    if (!isValidPassword) {
       return NextResponse.json(
-        { error: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' },
+        { error: 'كلمة المرور غير صحيحة' },
         { status: 401 }
       )
     }
 
+    // Create Supabase auth user if it doesn't exist
     console.log('Creating Supabase auth user...')
-    // Create or update Supabase auth user
-    const { data: authUser, error: authError } = await supabase.auth.admin.upsertUser({
+    const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
       email: user.email,
-      password: password, // Use the original password for Supabase auth
+      password: password,
       email_confirm: true,
       user_metadata: {
-        fullName: user.fullName,
-        role: user.role
+        full_name: user.fullName,
+        governorate: user.governorate,
+        town: user.town,
+        phone_prefix: user.phonePrefix,
+        phone_number: user.phoneNumber
       }
     })
 
     if (authError) {
       console.error('Supabase auth error:', authError)
-      return NextResponse.json(
-        { error: 'حدث خطأ أثناء تسجيل الدخول' },
-        { status: 500 }
-      )
+      // If user already exists in Supabase, that's fine - we can proceed
+      if (authError.message !== 'User already registered') {
+        return NextResponse.json(
+          { error: 'حدث خطأ أثناء تسجيل الدخول' },
+          { status: 500 }
+        )
+      }
     }
 
-    console.log('Generating session...')
-    // Generate session
-    const { data: session, error: sessionError } = await supabase.auth.admin.createSession({
-      user_id: authUser.user.id
+    // Generate access token
+    const { data: tokenData, error: tokenError } = await supabase.auth.admin.generateLink({
+      type: 'magiclink',
+      email: user.email
     })
 
-    if (sessionError) {
-      console.error('Session creation error:', sessionError)
+    if (tokenError) {
+      console.error('Token generation error:', tokenError)
       return NextResponse.json(
-        { error: 'حدث خطأ أثناء تسجيل الدخول' },
+        { error: 'حدث خطأ أثناء إنشاء الجلسة' },
         { status: 500 }
       )
     }
 
-    // Remove password from response
-    const { password: _, ...userWithoutPassword } = user
-
+    // Return user data and token
     return NextResponse.json({
-      message: 'تم تسجيل الدخول بنجاح',
-      user: userWithoutPassword,
-      session: session
+      user: {
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName,
+        governorate: user.governorate,
+        town: user.town,
+        phonePrefix: user.phonePrefix,
+        phoneNumber: user.phoneNumber,
+        role: user.role
+      },
+      token: tokenData
     })
-  } catch (error: any) {
-    console.error('Detailed error in login:', {
-      name: error?.name,
-      message: error?.message,
-      stack: error?.stack
-    })
-    
+  } catch (error) {
+    console.error('Login error:', error)
     return NextResponse.json(
       { error: 'حدث خطأ أثناء تسجيل الدخول' },
       { status: 500 }
