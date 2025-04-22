@@ -38,47 +38,47 @@ async function checkAndApplySchema() {
     const client = await pool.connect();
     
     try {
-      // Start a transaction
-      await client.query('BEGIN');
+      // Check if UserRole enum exists
+      const enumCheckResult = await client.query(`
+        SELECT EXISTS (
+          SELECT 1 FROM pg_type 
+          WHERE typname = 'userrole'
+        );
+      `);
       
-      try {
-        // Check if UserRole enum exists
-        const enumCheckResult = await client.query(`
-          SELECT EXISTS (
-            SELECT 1 FROM pg_type 
-            WHERE typname = 'userrole'
-          );
-        `);
+      const enumExists = enumCheckResult.rows[0].exists;
+      console.log('UserRole enum exists:', enumExists);
+      
+      // Check if User table exists and has role column
+      const roleColumnCheckResult = await client.query(`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'User' 
+        AND column_name = 'role';
+      `);
+      
+      const roleColumnExists = roleColumnCheckResult.rows.length > 0;
+      console.log('Role column exists:', roleColumnExists);
+      
+      // Check if tables exist
+      const tableCheckResult = await client.query(`
+        SELECT table_name 
+        FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name IN ('User', 'Package', 'BlogPost')
+      `);
+      
+      const existingTables = tableCheckResult.rows.map(row => row.table_name);
+      console.log('Existing tables:', existingTables);
+      
+      // If role column doesn't exist, we need to recreate the User table
+      if (!roleColumnExists) {
+        console.log('Role column is missing. Recreating User table...');
         
-        const enumExists = enumCheckResult.rows[0].exists;
-        console.log('UserRole enum exists:', enumExists);
+        // Start a transaction for schema changes
+        await client.query('BEGIN');
         
-        // Check if User table exists and has role column
-        const roleColumnCheckResult = await client.query(`
-          SELECT column_name 
-          FROM information_schema.columns 
-          WHERE table_name = 'User' 
-          AND column_name = 'role';
-        `);
-        
-        const roleColumnExists = roleColumnCheckResult.rows.length > 0;
-        console.log('Role column exists:', roleColumnExists);
-        
-        // Check if tables exist
-        const tableCheckResult = await client.query(`
-          SELECT table_name 
-          FROM information_schema.tables 
-          WHERE table_schema = 'public' 
-          AND table_name IN ('User', 'Package', 'BlogPost')
-        `);
-        
-        const existingTables = tableCheckResult.rows.map(row => row.table_name);
-        console.log('Existing tables:', existingTables);
-        
-        // If role column doesn't exist, we need to recreate the User table
-        if (!roleColumnExists) {
-          console.log('Role column is missing. Recreating User table...');
-          
+        try {
           // Drop existing tables that depend on User
           if (existingTables.includes('BlogPost')) {
             await client.query('DROP TABLE IF EXISTS "BlogPost" CASCADE;');
@@ -166,17 +166,17 @@ async function checkAndApplySchema() {
           await client.query('ALTER TABLE "Package" ADD CONSTRAINT "Package_shopId_fkey" FOREIGN KEY ("shopId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;');
           await client.query('ALTER TABLE "BlogPost" ADD CONSTRAINT "BlogPost_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;');
           
+          // Commit the transaction
+          await client.query('COMMIT');
           console.log('Schema applied successfully');
-        } else {
-          console.log('Role column already exists. No changes needed.');
+        } catch (error) {
+          // Rollback the transaction on error
+          await client.query('ROLLBACK');
+          console.error('Error applying schema:', error);
+          throw error;
         }
-        
-        // Commit the transaction
-        await client.query('COMMIT');
-      } catch (error) {
-        // Rollback the transaction on error
-        await client.query('ROLLBACK');
-        throw error;
+      } else {
+        console.log('Role column already exists. No changes needed.');
       }
     } finally {
       client.release();
