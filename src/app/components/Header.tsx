@@ -31,27 +31,27 @@ export default function Header() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center">
+          <nav className="hidden md:flex items-center space-x-6 rtl:space-x-reverse">
             <Link href="/packages" className="hover:text-green-500 transition-colors">
               الباقات
             </Link>
             {isLoggedIn && (
-              <Link href="/blog" className="hover:text-green-500 transition-colors mr-10">
+              <Link href="/blog" className="hover:text-green-500 transition-colors">
                 المدونة
               </Link>
             )}
-            <Link href="/contact" className="hover:text-green-500 transition-colors mr-10">
+            <Link href="/contact" className="hover:text-green-500 transition-colors">
               اتصل بنا
             </Link>
             {!isLoggedIn && (
-              <Link href="/track" className="hover:text-green-500 transition-colors mr-10">
+              <Link href="/track" className="hover:text-green-500 transition-colors">
                 تتبع الطرود
               </Link>
             )}
             {!isLoggedIn && !isLoginPage && (
               <Link
                 href="/auth/login"
-                className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600 transition-colors mr-10"
+                className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600 transition-colors"
               >
                 تسجيل الدخول
               </Link>

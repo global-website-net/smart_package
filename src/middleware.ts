@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { getToken } from 'next-auth/jwt'
 
 // Add the paths that require authentication
-const protectedPaths = ['/profile', '/wallet', '/blog/create', '/blog/edit', '/account']
+const protectedPaths = ['/profile', '/wallet', '/blog/create', '/blog/edit', '/account', '/my-packages']
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   // Get the pathname of the request
   const path = request.nextUrl.pathname
 
@@ -14,8 +15,8 @@ export function middleware(request: NextRequest) {
   )
 
   if (isProtectedPath) {
-    // Check if user is authenticated (has session token)
-    const token = request.cookies.get('session')
+    // Check if user is authenticated
+    const token = await getToken({ req: request })
     
     if (!token) {
       // Redirect to login page if not authenticated
@@ -36,6 +37,7 @@ export const config = {
     '/wallet/:path*',
     '/blog/create/:path*',
     '/blog/edit/:path*',
-    '/account/:path*'
+    '/account/:path*',
+    '/my-packages/:path*'
   ]
 } 

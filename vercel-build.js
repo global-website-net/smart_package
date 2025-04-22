@@ -90,24 +90,20 @@ async function checkAndApplySchema() {
   }
 }
 
-// Execute schema application
-(async () => {
+// Run the build process
+async function build() {
   try {
+    // Check and apply schema if needed
     await checkAndApplySchema();
-  } catch (error) {
-    console.error('Error checking/applying database schema:', error);
-    process.exit(1);
-  }
-
-  // Step 3: Build Next.js application
-  console.log('Building Next.js application...');
-  try {
+    
+    // Run Next.js build
     execSync('next build', { stdio: 'inherit' });
-    console.log('Next.js application built successfully');
+    
+    console.log('Build completed successfully');
   } catch (error) {
-    console.error('Error building Next.js application:', error);
+    console.error('Build failed:', error);
     process.exit(1);
   }
+}
 
-  console.log('Vercel build process completed successfully');
-})(); 
+build(); 
