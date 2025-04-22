@@ -17,8 +17,8 @@ try {
 }
 
 // Step 2: Apply database schema directly
-console.log('Applying database schema...');
-async function applySchema() {
+console.log('Checking database schema...');
+async function checkAndApplySchema() {
   const dbUrl = process.env.DATABASE_URL;
   if (!dbUrl) {
     throw new Error('DATABASE_URL environment variable is not set');
@@ -47,6 +47,28 @@ async function applySchema() {
     const client = await pool.connect();
     
     try {
+      // Check if tables exist
+      const tableCheckResult = await client.query(`
+        SELECT table_name 
+        FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name IN ('User', 'Package', 'PackageStatus', 'PackageHistory')
+      `);
+      
+      const existingTables = tableCheckResult.rows.map(row => row.table_name);
+      console.log('Existing tables:', existingTables);
+      
+      // If all required tables exist, skip schema application
+      const requiredTables = ['User', 'Package', 'PackageStatus', 'PackageHistory'];
+      const allTablesExist = requiredTables.every(table => existingTables.includes(table));
+      
+      if (allTablesExist) {
+        console.log('All required tables already exist. Skipping schema application.');
+        return;
+      }
+      
+      console.log('Some tables are missing. Applying schema...');
+      
       // Execute each statement in a transaction
       await client.query('BEGIN');
       
@@ -71,9 +93,9 @@ async function applySchema() {
 // Execute schema application
 (async () => {
   try {
-    await applySchema();
+    await checkAndApplySchema();
   } catch (error) {
-    console.error('Error applying database schema:', error);
+    console.error('Error checking/applying database schema:', error);
     process.exit(1);
   }
 
