@@ -32,15 +32,9 @@ export async function POST(request: Request) {
     }
 
     // Check if user already exists
-    let existingUser = null
-    try {
-      existingUser = await prisma.user.findUnique({
-        where: { email }
-      })
-    } catch (dbError) {
-      console.error('Database error when checking existing user:', dbError)
-      // Continue with signup process even if this check fails
-    }
+    const existingUser = await prisma.user.findUnique({
+      where: { email }
+    })
 
     if (existingUser) {
       return NextResponse.json(
@@ -53,72 +47,40 @@ export async function POST(request: Request) {
     const hashedPassword = await bcrypt.hash(password, 10)
 
     // Create user in database
-    let user = null
-    try {
-      user = await prisma.user.create({
-        data: {
-          email,
-          password: hashedPassword,
-          fullName,
-          governorate,
-          town,
-          phonePrefix,
-          phoneNumber,
-          role: UserRole.REGULAR
-        }
-      })
-    } catch (createError) {
-      console.error('Error creating user:', createError)
-      return NextResponse.json(
-        { error: 'حدث خطأ أثناء إنشاء الحساب' },
-        { status: 500 }
-      )
-    }
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'حدث خطأ أثناء إنشاء الحساب' },
-        { status: 500 }
-      )
-    }
+    const user = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        fullName,
+        governorate,
+        town,
+        phonePrefix,
+        phoneNumber,
+        role: UserRole.REGULAR
+      }
+    })
 
     // Create user in Supabase auth
-    try {
-      const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
-        email: user.email,
-        password: password, // Use the original password for Supabase auth
-        email_confirm: true,
-        user_metadata: {
-          full_name: user.fullName,
-          role: user.role,
-          governorate: user.governorate,
-          town: user.town,
-          phone_prefix: user.phonePrefix,
-          phone_number: user.phoneNumber
-        }
-      })
-
-      if (authError) {
-        console.error('Supabase auth error:', authError)
-        // Delete the user from our database if Supabase auth fails
-        await prisma.user.delete({
-          where: { id: user.id }
-        })
-        return NextResponse.json(
-          { error: 'حدث خطأ أثناء إنشاء الحساب' },
-          { status: 500 }
-        )
+    const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+      email: user.email,
+      password: password,
+      email_confirm: true,
+      user_metadata: {
+        full_name: user.fullName,
+        role: user.role,
+        governorate: user.governorate,
+        town: user.town,
+        phone_prefix: user.phonePrefix,
+        phone_number: user.phoneNumber
       }
-    } catch (authError) {
-      console.error('Error creating Supabase auth user:', authError)
+    })
+
+    if (authError) {
       // Delete the user from our database if Supabase auth fails
       await prisma.user.delete({
         where: { id: user.id }
       })
-      return NextResponse.json(
-        { error: 'حدث خطأ أثناء إنشاء الحساب' },
-        { status: 500 }
-      )
+      throw new Error('Failed to create Supabase auth user')
     }
 
     // Return success response without password
@@ -129,10 +91,24 @@ export async function POST(request: Request) {
       user: userWithoutPassword
     })
   } catch (error) {
-    console.error('Detailed error in signup:', error)
+    console.error('Error in signup:', error)
+    
+    // Handle specific error cases
+    if (error instanceof Error) {
+      if (error.message.includes('Failed to create Supabase auth user')) {
+        return NextResponse.json(
+          { error: 'حدث خطأ أثناء إنشاء الحساب في نظام المصادقة' },
+          { status: 500 }
+        )
+      }
+    }
+
     return NextResponse.json(
       { error: 'حدث خطأ أثناء إنشاء الحساب' },
       { status: 500 }
     )
+  } finally {
+    // Ensure the Prisma connection is properly closed
+    await prisma.$disconnect()
   }
 } 
