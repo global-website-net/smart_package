@@ -10,6 +10,10 @@ interface UserProfile {
   email: string
   fullName: string
   role: string
+  governorate: string
+  town: string
+  phonePrefix: string
+  phoneNumber: string
   createdAt: string
 }
 
@@ -20,6 +24,10 @@ export default function AccountPage() {
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
     fullName: '',
+    governorate: '',
+    town: '',
+    phonePrefix: '',
+    phoneNumber: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
@@ -47,7 +55,14 @@ export default function AccountPage() {
 
         const data = await response.json()
         setProfile(data)
-        setFormData(prev => ({ ...prev, fullName: data.fullName }))
+        setFormData(prev => ({
+          ...prev,
+          fullName: data.fullName,
+          governorate: data.governorate,
+          town: data.town,
+          phonePrefix: data.phonePrefix,
+          phoneNumber: data.phoneNumber
+        }))
       } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : 'An error occurred while fetching your profile'
         setError(errorMessage)
@@ -91,6 +106,10 @@ export default function AccountPage() {
         },
         body: JSON.stringify({
           fullName: formData.fullName,
+          governorate: formData.governorate,
+          town: formData.town,
+          phonePrefix: formData.phonePrefix,
+          phoneNumber: formData.phoneNumber,
           currentPassword: formData.currentPassword || undefined,
           newPassword: formData.newPassword || undefined,
         }),
@@ -180,6 +199,68 @@ export default function AccountPage() {
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-50"
                   />
                 </div>
+
+                <div>
+                  <label htmlFor="governorate" className="block text-sm font-medium text-gray-700 mb-1">
+                    المحافظة
+                  </label>
+                  <input
+                    type="text"
+                    id="governorate"
+                    name="governorate"
+                    value={formData.governorate}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-50"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="town" className="block text-sm font-medium text-gray-700 mb-1">
+                    المدينة
+                  </label>
+                  <input
+                    type="text"
+                    id="town"
+                    name="town"
+                    value={formData.town}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-50"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="phonePrefix" className="block text-sm font-medium text-gray-700 mb-1">
+                      رمز الهاتف
+                    </label>
+                    <input
+                      type="text"
+                      id="phonePrefix"
+                      name="phonePrefix"
+                      value={formData.phonePrefix}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-50"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                      رقم الهاتف
+                    </label>
+                    <input
+                      type="text"
+                      id="phoneNumber"
+                      name="phoneNumber"
+                      value={formData.phoneNumber}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-50"
+                    />
+                  </div>
+                </div>
                 
                 {isEditing && (
                   <>
@@ -231,31 +312,44 @@ export default function AccountPage() {
                   </>
                 )}
                 
-                <div className="flex justify-end space-x-4 space-x-reverse">
-                  {isEditing ? (
+                <div className="flex justify-end space-x-4 rtl:space-x-reverse">
+                  {!isEditing ? (
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(true)}
+                      className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                    >
+                      تعديل الملف الشخصي
+                    </button>
+                  ) : (
                     <>
                       <button
                         type="button"
-                        onClick={() => setIsEditing(false)}
-                        className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={() => {
+                          setIsEditing(false)
+                          setFormData(prev => ({
+                            ...prev,
+                            fullName: profile?.fullName || '',
+                            governorate: profile?.governorate || '',
+                            town: profile?.town || '',
+                            phonePrefix: profile?.phonePrefix || '',
+                            phoneNumber: profile?.phoneNumber || '',
+                            currentPassword: '',
+                            newPassword: '',
+                            confirmPassword: ''
+                          }))
+                        }}
+                        className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                       >
                         إلغاء
                       </button>
                       <button
                         type="submit"
-                        className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+                        className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                       >
                         حفظ التغييرات
                       </button>
                     </>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setIsEditing(true)}
-                      className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
-                    >
-                      تعديل الملف الشخصي
-                    </button>
                   )}
                 </div>
               </form>

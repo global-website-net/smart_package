@@ -32,7 +32,7 @@ export default function Header() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8 space-x-reverse">
+          <nav className="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
             <Link href="/packages" className="hover:text-green-500 transition-colors">
               الباقات
             </Link>
@@ -67,6 +67,15 @@ export default function Header() {
                     >
                       حسابي
                     </Link>
+                    {isAdmin && (
+                      <Link
+                        href="/tracking_packages"
+                        className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        ادارة الطرود
+                      </Link>
+                    )}
                     {!isAdmin && (
                       <Link
                         href="/my-packages"
@@ -150,6 +159,11 @@ export default function Header() {
                   <Link href="/account" className="hover:text-green-500 transition-colors">
                     حسابي
                   </Link>
+                  {isAdmin && (
+                    <Link href="/tracking_packages" className="hover:text-green-500 transition-colors">
+                      ادارة الطرود
+                    </Link>
+                  )}
                   {!isAdmin && (
                     <Link href="/my-packages" className="hover:text-green-500 transition-colors">
                       طرودي
