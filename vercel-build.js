@@ -79,8 +79,27 @@ async function checkAndApplySchema() {
           continue;
         }
         
-        console.log(`Executing: ${statement.substring(0, 50)}...`);
-        await client.query(statement);
+        // Skip CREATE TABLE statements for tables that already exist
+        if (statement.toLowerCase().includes('create table')) {
+          const tableNameMatch = statement.match(/create\s+table\s+(?:if\s+not\s+exists\s+)?["']?([^"'\s]+)["']?/i);
+          if (tableNameMatch && existingTables.includes(tableNameMatch[1])) {
+            console.log(`Skipping CREATE TABLE statement for existing table: ${tableNameMatch[1]}`);
+            continue;
+          }
+        }
+        
+        try {
+          console.log(`Executing: ${statement.substring(0, 50)}...`);
+          await client.query(statement);
+        } catch (error) {
+          // If the error is about a relation already existing, log it and continue
+          if (error.code === '42P07') {
+            console.log(`Table already exists, skipping: ${error.message}`);
+            continue;
+          }
+          // For other errors, rethrow
+          throw error;
+        }
       }
       
       await client.query('COMMIT');
