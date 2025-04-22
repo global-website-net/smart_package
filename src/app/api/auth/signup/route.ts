@@ -20,8 +20,6 @@ const supabase = createClient(
 )
 
 export async function POST(request: Request) {
-  let user = null
-  
   try {
     const { email, password, fullName, governorate, town, phonePrefix, phoneNumber } = await request.json()
 
@@ -36,30 +34,31 @@ export async function POST(request: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // Create user in database
-    user = await prisma.$transaction(async (tx) => {
-      // Check if user exists within the transaction
-      const existingUser = await tx.user.findUnique({
-        where: { email }
-      })
+    // Create user in database - using a simpler approach without transactions
+    // First check if user exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email }
+    })
 
-      if (existingUser) {
-        throw new Error('البريد الإلكتروني مستخدم بالفعل')
+    if (existingUser) {
+      return NextResponse.json(
+        { error: 'البريد الإلكتروني مستخدم بالفعل' },
+        { status: 400 }
+      )
+    }
+
+    // Create the user
+    const user = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        fullName,
+        governorate,
+        town,
+        phonePrefix,
+        phoneNumber,
+        role: UserRole.REGULAR
       }
-
-      // Create the user
-      return tx.user.create({
-        data: {
-          email,
-          password: hashedPassword,
-          fullName,
-          governorate,
-          town,
-          phonePrefix,
-          phoneNumber,
-          role: UserRole.REGULAR
-        }
-      })
     })
 
     // Create user in Supabase auth
@@ -97,12 +96,6 @@ export async function POST(request: Request) {
     
     // Handle specific error cases
     if (error instanceof Error) {
-      if (error.message === 'البريد الإلكتروني مستخدم بالفعل') {
-        return NextResponse.json(
-          { error: error.message },
-          { status: 400 }
-        )
-      }
       if (error.message.includes('Failed to create Supabase auth user')) {
         return NextResponse.json(
           { error: 'حدث خطأ أثناء إنشاء الحساب في نظام المصادقة' },
