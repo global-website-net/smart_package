@@ -21,7 +21,8 @@ console.log('Checking database schema...');
 async function checkAndApplySchema() {
   const dbUrl = process.env.DATABASE_URL;
   if (!dbUrl) {
-    throw new Error('DATABASE_URL environment variable is not set');
+    console.log('DATABASE_URL environment variable is not set. Skipping schema check.');
+    return;
   }
 
   // Create a connection pool

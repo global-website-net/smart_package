@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
   images: {
     domains: ['images.unsplash.com'],
     dangerouslyAllowSVG: true,
@@ -35,4 +34,4 @@ const nextConfig = {
   },
 }
 
-export default nextConfig 
+module.exports = nextConfig 
