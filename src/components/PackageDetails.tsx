@@ -6,8 +6,8 @@ interface Package {
   id: string
   trackingNumber: string
   status: string
-  createdAt: string
-  updatedAt: string
+  createdAt: Date | string
+  updatedAt: Date | string
   user: {
     fullName: string
     email: string
@@ -15,7 +15,7 @@ interface Package {
   shop: {
     fullName: string
     email: string
-  }
+  } | null
 }
 
 interface PackageDetailsProps {
@@ -164,31 +164,33 @@ export default function PackageDetails({ package: packageData, userRole }: Packa
                 </div>
               </div>
 
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  معلومات المتجر
-                </h3>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">
-                        الاسم
-                      </p>
-                      <p className="mt-1 text-sm text-gray-900">
-                        {packageData.shop.fullName}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">
-                        البريد الإلكتروني
-                      </p>
-                      <p className="mt-1 text-sm text-gray-900">
-                        {packageData.shop.email}
-                      </p>
+              {packageData.shop && (
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    معلومات المتجر
+                  </h3>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm font-medium text-gray-500">
+                          الاسم
+                        </p>
+                        <p className="mt-1 text-sm text-gray-900">
+                          {packageData.shop.fullName}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-500">
+                          البريد الإلكتروني
+                        </p>
+                        <p className="mt-1 text-sm text-gray-900">
+                          {packageData.shop.email}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
