@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
-import prisma from '@/lib/prisma'
 import { createClient } from '@supabase/supabase-js'
 import { UserRole } from '@prisma/client'
+import { db } from '@/lib/db'
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -34,33 +34,28 @@ export async function POST(request: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // Create user in database - using a different approach
-    // First check if user exists using a raw query to avoid prepared statement issues
-    const existingUsers = await prisma.$queryRaw`
-      SELECT id FROM "User" WHERE email = ${email}
-    `
+    // Check if user exists
+    const userExists = await db.userExists(email)
     
-    if (Array.isArray(existingUsers) && existingUsers.length > 0) {
+    if (userExists) {
       return NextResponse.json(
         { error: 'البريد الإلكتروني مستخدم بالفعل' },
         { status: 400 }
       )
     }
 
-    // Create the user using a raw query with proper enum casting
-    const newUser = await prisma.$queryRaw`
-      INSERT INTO "User" (
-        "email", "password", "fullName", "governorate", "town", 
-        "phonePrefix", "phoneNumber", "role", "createdAt", "updatedAt"
-      ) VALUES (
-        ${email}, ${hashedPassword}, ${fullName}, ${governorate}, ${town},
-        ${phonePrefix}, ${phoneNumber}, ${UserRole.REGULAR}::"UserRole", NOW(), NOW()
-      ) RETURNING *
-    `
-    
-    // Extract the user from the raw query result
-    const user = Array.isArray(newUser) && newUser.length > 0 ? newUser[0] : null
-    
+    // Create the user
+    const user = await db.createUser({
+      email,
+      password: hashedPassword,
+      fullName,
+      governorate,
+      town,
+      phonePrefix,
+      phoneNumber,
+      role: UserRole.REGULAR
+    })
+
     if (!user) {
       throw new Error('Failed to create user')
     }
@@ -82,9 +77,7 @@ export async function POST(request: Request) {
 
     if (authError) {
       // Delete the user from our database if Supabase auth fails
-      await prisma.$queryRaw`
-        DELETE FROM "User" WHERE id = ${user.id}
-      `
+      await db.deleteUser(user.id)
       throw new Error('Failed to create Supabase auth user')
     }
 
