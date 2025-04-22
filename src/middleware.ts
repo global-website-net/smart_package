@@ -2,42 +2,48 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 
-// Add the paths that require authentication
-const protectedPaths = ['/profile', '/wallet', '/blog/create', '/blog/edit', '/account', '/my-packages']
-
 export async function middleware(request: NextRequest) {
-  // Get the pathname of the request
-  const path = request.nextUrl.pathname
+  const token = await getToken({ req: request })
+  const { pathname } = request.nextUrl
 
-  // Check if the path is protected
-  const isProtectedPath = protectedPaths.some(protectedPath => 
-    path.startsWith(protectedPath)
-  )
+  // Public paths that don't require authentication
+  const publicPaths = ['/', '/auth/login', '/auth/signup', '/packages', '/blog', '/contact']
+  if (publicPaths.includes(pathname)) {
+    return NextResponse.next()
+  }
 
-  if (isProtectedPath) {
-    // Check if user is authenticated
-    const token = await getToken({ req: request })
-    
-    if (!token) {
-      // Redirect to login page if not authenticated
-      const loginUrl = new URL('/auth/login', request.url)
-      // Store the original URL to redirect back after login
-      loginUrl.searchParams.set('redirect', path)
-      return NextResponse.redirect(loginUrl)
-    }
+  // Check if user is authenticated
+  if (!token) {
+    const url = new URL('/auth/login', request.url)
+    url.searchParams.set('callbackUrl', pathname)
+    return NextResponse.redirect(url)
+  }
+
+  // Role-based access control
+  const userRole = token.role as string
+
+  // Admin/Owner only routes
+  if (pathname.startsWith('/admin') && !['ADMIN', 'OWNER'].includes(userRole)) {
+    return NextResponse.redirect(new URL('/', request.url))
+  }
+
+  // Shop only routes
+  if (pathname.startsWith('/shop') && userRole !== 'SHOP') {
+    return NextResponse.redirect(new URL('/', request.url))
   }
 
   return NextResponse.next()
 }
 
-// Configure the paths that middleware will run on
 export const config = {
   matcher: [
-    '/profile/:path*',
-    '/wallet/:path*',
-    '/blog/create/:path*',
-    '/blog/edit/:path*',
-    '/account/:path*',
-    '/my-packages/:path*'
-  ]
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
 } 

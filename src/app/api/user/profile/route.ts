@@ -18,26 +18,40 @@ export async function GET() {
     // Get user profile
     const client = await pool.connect()
     try {
-      const result = await client.query(
-        'SELECT id, email, "fullName", role, "createdAt" FROM "User" WHERE email = $1',
+      console.log('Fetching user profile for:', session.user.email)
+      
+      // First check if the user exists
+      const userExistsResult = await client.query(
+        'SELECT id FROM "User" WHERE email = $1',
         [session.user.email]
       )
-
-      if (result.rows.length === 0) {
+      
+      if (userExistsResult.rows.length === 0) {
+        console.log('User not found in database')
         return NextResponse.json(
           { message: 'User not found' },
           { status: 404 }
         )
       }
+      
+      // Get full user profile
+      const result = await client.query(
+        'SELECT id, email, "fullName", role, "createdAt" FROM "User" WHERE email = $1',
+        [session.user.email]
+      )
 
+      console.log('User profile fetched successfully')
       return NextResponse.json(result.rows[0])
+    } catch (dbError) {
+      console.error('Database error in GET profile:', dbError)
+      throw dbError
     } finally {
       client.release()
     }
   } catch (error) {
     console.error('Error fetching user profile:', error)
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { message: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
@@ -120,13 +134,16 @@ export async function PUT(request: Request) {
       )
 
       return NextResponse.json(updatedResult.rows[0])
+    } catch (dbError) {
+      console.error('Database error in PUT profile:', dbError)
+      throw dbError
     } finally {
       client.release()
     }
   } catch (error) {
     console.error('Error updating user profile:', error)
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { message: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }

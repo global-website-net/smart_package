@@ -8,47 +8,41 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' }
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error('البريد الإلكتروني وكلمة المرور مطلوبان')
+          throw new Error('Email and password are required')
         }
 
+        const client = await pool.connect()
         try {
-          // Use the pool directly to find the user
-          const client = await pool.connect()
-          try {
-            const result = await client.query(
-              'SELECT * FROM "User" WHERE email = $1',
-              [credentials.email]
-            )
-            
-            const user = result.rows[0]
-            
-            if (!user) {
-              throw new Error('البريد الإلكتروني غير موجود')
-            }
+          const result = await client.query(
+            'SELECT * FROM "User" WHERE email = $1',
+            [credentials.email]
+          )
 
-            const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
+          const user = result.rows[0]
 
-            if (!isPasswordValid) {
-              throw new Error('كلمة المرور غير صحيحة')
-            }
-
-            return {
-              id: user.id,
-              email: user.email,
-              name: user.fullName,
-              role: user.role
-            }
-          } finally {
-            client.release()
+          if (!user) {
+            throw new Error('No user found with this email')
           }
-        } catch (error) {
-          console.error('Auth error:', error)
-          throw error
+
+          const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
+
+          if (!isPasswordValid) {
+            throw new Error('Invalid password')
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.fullName,
+            role: user.role
+          }
+        } finally {
+          client.release()
         }
       }
     })
@@ -62,7 +56,7 @@ export const authOptions: NextAuthOptions = {
       return token
     },
     async session({ session, token }) {
-      if (token) {
+      if (session.user) {
         session.user.id = token.id as string
         session.user.role = token.role as string
       }
@@ -71,11 +65,10 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/auth/login',
-    error: '/auth/login',
+    error: '/auth/login'
   },
   session: {
-    strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    strategy: 'jwt'
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === 'development',
