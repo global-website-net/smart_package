@@ -9,8 +9,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum UserRole {
@@ -21,27 +21,38 @@ enum UserRole {
 }
 
 model User {
-  id        String    @id @default(uuid())
-  name      String?
-  email     String    @unique
-  password  String
-  isAdmin   Boolean   @default(false)
-  isShop    Boolean   @default(false)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  packages  Package[]
-  shopPackages Package[] @relation("ShopPackages")
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String
+  isAdmin       Boolean   @default(false)
+  isShop        Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  packages      Package[]
+  shopPackages  Package[] @relation("ShopPackages")
+  blogPosts     BlogPost[]
 }
 
 model Package {
-  id             String   @id @default(uuid())
+  id            String    @id @default(cuid())
   trackingNumber String   @unique
-  description    String?
-  status         String   @default("pending")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  userId         String
-  user           User     @relation(fields: [userId], references: [id])
-  shopId         String?
-  shop           User?    @relation("ShopPackages", fields: [shopId], references: [id])
+  description   String?
+  status        String
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  shopId        String?
+  shop          User?     @relation("ShopPackages", fields: [shopId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model BlogPost {
+  id            String    @id @default(cuid())
+  title         String
+  content       String
+  authorId      String
+  author        User      @relation(fields: [authorId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
