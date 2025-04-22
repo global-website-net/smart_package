@@ -2,16 +2,19 @@ const { createClient } = require('@supabase/supabase-js')
 const fs = require('fs')
 const path = require('path')
 
-// Load environment variables
-require('dotenv').config()
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-if (!supabaseUrl || !supabaseKey) {
-  console.error('Missing required environment variables')
-  process.exit(1)
+// Load environment variables if .env file exists
+try {
+  require('dotenv').config()
+} catch (error) {
+  console.log('No .env file found, using default values')
 }
+
+// Use environment variables or default values
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://your-supabase-project-url.supabase.co'
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'your-supabase-service-role-key'
+
+console.log('Using Supabase URL:', supabaseUrl)
+console.log('Using Supabase Key:', supabaseKey.substring(0, 5) + '...')
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
