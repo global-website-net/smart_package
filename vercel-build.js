@@ -96,11 +96,13 @@ async function checkAndApplySchema() {
           await client.query('DROP TABLE IF EXISTS "User" CASCADE;');
         }
         
-        // Drop and recreate UserRole enum
-        if (enumExists) {
-          await client.query('DROP TYPE IF EXISTS "UserRole" CASCADE;');
+        // We don't need to recreate the UserRole enum if it already exists
+        if (!enumExists) {
+          console.log('Creating UserRole enum...');
+          await client.query('CREATE TYPE "UserRole" AS ENUM (\'REGULAR\', \'SHOP\', \'ADMIN\', \'OWNER\');');
+        } else {
+          console.log('UserRole enum already exists, skipping creation');
         }
-        await client.query('CREATE TYPE "UserRole" AS ENUM (\'REGULAR\', \'SHOP\', \'ADMIN\', \'OWNER\');');
         
         // Recreate User table with role column
         await client.query(`
