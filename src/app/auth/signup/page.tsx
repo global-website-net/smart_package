@@ -51,6 +51,13 @@ export default function Signup() {
     setIsLoading(true)
     setError('')
 
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setError('كلمات المرور غير متطابقة')
+      setIsLoading(false)
+      return
+    }
+
     try {
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
@@ -75,10 +82,6 @@ export default function Signup() {
       }
 
       setSuccess(true)
-      // Remove automatic redirect
-      // setTimeout(() => {
-      //   router.push('/auth/login')
-      // }, 2000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'حدث خطأ أثناء إنشاء الحساب')
     } finally {
@@ -138,164 +141,166 @@ export default function Signup() {
             </div>
           )}
 
-          {/* Full Name */}
-          <div>
-            <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
-              الاسم الكامل
-            </label>
-            <input
-              type="text"
-              id="fullName"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
-              placeholder="أدخل اسمك الكامل"
-            />
-          </div>
-
-          {/* Email */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              البريد الإلكتروني
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
-              placeholder="أدخل بريدك الإلكتروني"
-            />
-          </div>
-
-          {/* Governorate */}
-          <div>
-            <label htmlFor="governorate" className="block text-sm font-medium text-gray-700 mb-1">
-              المحافظة
-            </label>
-            <select
-              id="governorate"
-              name="governorate"
-              value={formData.governorate}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
-            >
-              <option value="">اختر المحافظة</option>
-              {governorates.map((gov) => (
-                <option key={gov} value={gov}>{gov}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Town */}
-          <div>
-            <label htmlFor="town" className="block text-sm font-medium text-gray-700 mb-1">
-              المدينة/البلدية
-            </label>
-            <input
-              type="text"
-              id="town"
-              name="town"
-              value={formData.town}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
-              placeholder="أدخل المدينة أو البلدية"
-            />
-          </div>
-
-          {/* Phone Number */}
-          <div className="flex gap-2">
-            <div className="w-1/4">
-              <label htmlFor="phonePrefix" className="block text-sm font-medium text-gray-700 mb-1">
-                رمز الدولة
+          <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-8 space-y-6">
+            {/* Full Name */}
+            <div>
+              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
+                الاسم الكامل <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                id="phonePrefix"
-                name="phonePrefix"
-                value={formData.phonePrefix}
+                id="fullName"
+                name="fullName"
+                value={formData.fullName}
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                placeholder="أدخل اسمك الكامل"
               />
             </div>
-            <div className="w-3/4">
-              <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                رقم الهاتف
+
+            {/* Email */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                البريد الإلكتروني <span className="text-red-500">*</span>
               </label>
               <input
-                type="tel"
-                id="phoneNumber"
-                name="phoneNumber"
-                value={formData.phoneNumber}
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
-                placeholder="أدخل رقم هاتفك"
+                placeholder="أدخل بريدك الإلكتروني"
               />
             </div>
-          </div>
 
-          {/* Password */}
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              كلمة المرور
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
-              placeholder="أدخل كلمة المرور"
-            />
-          </div>
+            {/* Governorate */}
+            <div>
+              <label htmlFor="governorate" className="block text-sm font-medium text-gray-700 mb-1">
+                المحافظة <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="governorate"
+                name="governorate"
+                value={formData.governorate}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+              >
+                <option value="">اختر المحافظة</option>
+                {governorates.map((gov) => (
+                  <option key={gov} value={gov}>{gov}</option>
+                ))}
+              </select>
+            </div>
 
-          {/* Confirm Password */}
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-              تأكيد كلمة المرور
-            </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
-              placeholder="أدخل كلمة المرور مرة أخرى"
-            />
-          </div>
+            {/* Town */}
+            <div>
+              <label htmlFor="town" className="block text-sm font-medium text-gray-700 mb-1">
+                المدينة/البلدية <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="town"
+                name="town"
+                value={formData.town}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                placeholder="أدخل المدينة أو البلدية"
+              />
+            </div>
 
-          <div className="flex items-center justify-between">
-            <button
-              type="submit"
-              disabled={isLoading}
-              className={`w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
-                isLoading ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              {isLoading ? 'جاري إنشاء الحساب...' : 'إنشاء حساب'}
-            </button>
-          </div>
+            {/* Phone Number */}
+            <div className="flex gap-2">
+              <div className="w-3/4">
+                <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                  رقم الهاتف <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="tel"
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                  placeholder="أدخل رقم هاتفك"
+                />
+              </div>
+              <div className="w-1/4">
+                <label htmlFor="phonePrefix" className="block text-sm font-medium text-gray-700 mb-1">
+                  رمز الدولة <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="phonePrefix"
+                  name="phonePrefix"
+                  value={formData.phonePrefix}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                />
+              </div>
+            </div>
 
-          <div className="text-center mt-4">
-            <p className="text-sm text-gray-600">
-              لديك حساب بالفعل؟{' '}
-              <Link href="/auth/login" className="text-green-600 hover:text-green-700">
-                تسجيل الدخول
-              </Link>
-            </p>
-          </div>
+            {/* Password */}
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                كلمة المرور <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                placeholder="أدخل كلمة المرور"
+              />
+            </div>
+
+            {/* Confirm Password */}
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                تأكيد كلمة المرور <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                placeholder="أدخل كلمة المرور مرة أخرى"
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className={`w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                  isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                {isLoading ? 'جاري إنشاء الحساب...' : 'إنشاء حساب'}
+              </button>
+            </div>
+
+            <div className="text-center mt-4">
+              <p className="text-sm text-gray-600">
+                لديك حساب بالفعل؟{' '}
+                <Link href="/auth/login" className="text-green-600 hover:text-green-700">
+                  تسجيل الدخول
+                </Link>
+              </p>
+            </div>
+          </form>
         </div>
       </main>
     </div>
