@@ -2,11 +2,12 @@
 
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const pathname = usePathname()
   const isLoginPage = pathname === '/auth/login'
   const { data: session, status } = useSession()
@@ -54,6 +55,51 @@ export default function Header() {
               >
                 تسجيل الدخول
               </Link>
+            )}
+            {isLoggedIn && (
+              <div className="relative">
+                <button
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="flex items-center hover:text-green-500 transition-colors"
+                >
+                  <span className="mr-2">{session?.user?.name || 'حسابي'}</span>
+                  <svg
+                    className={`w-4 h-4 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {isUserMenuOpen && (
+                  <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
+                    <Link
+                      href="/account"
+                      className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      حسابي
+                    </Link>
+                    <Link
+                      href="/my-packages"
+                      className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      طرودي
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setIsUserMenuOpen(false)
+                        signOut()
+                      }}
+                      className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
+                    >
+                      تسجيل الخروج
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </nav>
 
@@ -129,6 +175,33 @@ export default function Header() {
                 >
                   تتبع الطرود
                 </Link>
+              )}
+              {isLoggedIn && (
+                <>
+                  <Link
+                    href="/account"
+                    className="hover:text-green-500 transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    حسابي
+                  </Link>
+                  <Link
+                    href="/my-packages"
+                    className="hover:text-green-500 transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    طرودي
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false)
+                      signOut()
+                    }}
+                    className="text-right hover:text-green-500 transition-colors"
+                  >
+                    تسجيل الخروج
+                  </button>
+                </>
               )}
               {!isLoggedIn && !isLoginPage && (
                 <Link
