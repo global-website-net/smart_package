@@ -62,47 +62,61 @@ export async function POST(request: Request) {
       )
     }
 
-    // Create Supabase auth user if it doesn't exist
-    console.log('Creating Supabase auth user...')
-    const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
-      email: user.email,
-      password: password,
-      email_confirm: true,
-      user_metadata: {
-        full_name: user.fullName,
-        governorate: user.governorate,
-        town: user.town,
-        phone_prefix: user.phonePrefix,
-        phone_number: user.phoneNumber
-      }
-    })
+    // Check if user exists in Supabase auth
+    const { data: existingUser, error: getUserError } = await supabase.auth.admin.getUserByEmail(email)
 
-    if (authError) {
-      console.error('Supabase auth error:', authError)
-      // If user already exists in Supabase, that's fine - we can proceed
-      if (authError.message !== 'User already registered') {
+    if (getUserError && getUserError.message !== 'User not found') {
+      console.error('Error checking Supabase user:', getUserError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء تسجيل الدخول' },
+        { status: 500 }
+      )
+    }
+
+    let authUser = existingUser
+
+    // If user doesn't exist in Supabase auth, create them
+    if (!existingUser) {
+      console.log('Creating Supabase auth user...')
+      const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
+        email: user.email,
+        password: password,
+        email_confirm: true,
+        user_metadata: {
+          full_name: user.fullName,
+          governorate: user.governorate,
+          town: user.town,
+          phone_prefix: user.phonePrefix,
+          phone_number: user.phoneNumber
+        }
+      })
+
+      if (createError) {
+        console.error('Error creating Supabase user:', createError)
         return NextResponse.json(
           { error: 'حدث خطأ أثناء تسجيل الدخول' },
           { status: 500 }
         )
       }
+
+      authUser = newUser
     }
 
-    // Generate access token
-    const { data: tokenData, error: tokenError } = await supabase.auth.admin.generateLink({
-      type: 'magiclink',
+    // Create a session for the user
+    const { data: session, error: sessionError } = await supabase.auth.admin.createSession({
+      user_id: authUser.user.id,
       email: user.email
     })
 
-    if (tokenError) {
-      console.error('Token generation error:', tokenError)
+    if (sessionError) {
+      console.error('Error creating session:', sessionError)
       return NextResponse.json(
         { error: 'حدث خطأ أثناء إنشاء الجلسة' },
         { status: 500 }
       )
     }
 
-    // Return user data and token
+    // Return user data and session
     return NextResponse.json({
       user: {
         id: user.id,
@@ -114,7 +128,7 @@ export async function POST(request: Request) {
         phoneNumber: user.phoneNumber,
         role: user.role
       },
-      token: tokenData
+      session: session
     })
   } catch (error) {
     console.error('Login error:', error)
