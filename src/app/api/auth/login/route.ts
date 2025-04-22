@@ -62,23 +62,16 @@ export async function POST(request: Request) {
       )
     }
 
-    // Check if user exists in Supabase auth
-    const { data: existingUser, error: getUserError } = await supabase.auth.admin.getUserByEmail(email)
+    // Try to sign in first
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: password
+    })
 
-    if (getUserError && getUserError.message !== 'User not found') {
-      console.error('Error checking Supabase user:', getUserError)
-      return NextResponse.json(
-        { error: 'حدث خطأ أثناء تسجيل الدخول' },
-        { status: 500 }
-      )
-    }
-
-    let authUser = existingUser
-
-    // If user doesn't exist in Supabase auth, create them
-    if (!existingUser) {
+    // If sign in fails, create the user
+    if (signInError) {
       console.log('Creating Supabase auth user...')
-      const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
+      const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
         email: user.email,
         password: password,
         email_confirm: true,
@@ -91,32 +84,44 @@ export async function POST(request: Request) {
         }
       })
 
-      if (createError) {
-        console.error('Error creating Supabase user:', createError)
+      if (authError) {
+        console.error('Supabase auth error:', authError)
         return NextResponse.json(
           { error: 'حدث خطأ أثناء تسجيل الدخول' },
           { status: 500 }
         )
       }
 
-      authUser = newUser
+      // Try to sign in again after creating the user
+      const { data: newSignInData, error: newSignInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: password
+      })
+
+      if (newSignInError) {
+        console.error('Sign in error after user creation:', newSignInError)
+        return NextResponse.json(
+          { error: 'حدث خطأ أثناء تسجيل الدخول' },
+          { status: 500 }
+        )
+      }
+
+      return NextResponse.json({
+        user: {
+          id: user.id,
+          email: user.email,
+          fullName: user.fullName,
+          governorate: user.governorate,
+          town: user.town,
+          phonePrefix: user.phonePrefix,
+          phoneNumber: user.phoneNumber,
+          role: user.role
+        },
+        session: newSignInData.session
+      })
     }
 
-    // Create a session for the user
-    const { data: session, error: sessionError } = await supabase.auth.admin.createSession({
-      user_id: authUser.user.id,
-      email: user.email
-    })
-
-    if (sessionError) {
-      console.error('Error creating session:', sessionError)
-      return NextResponse.json(
-        { error: 'حدث خطأ أثناء إنشاء الجلسة' },
-        { status: 500 }
-      )
-    }
-
-    // Return user data and session
+    // Return user data and session from successful sign in
     return NextResponse.json({
       user: {
         id: user.id,
@@ -128,7 +133,7 @@ export async function POST(request: Request) {
         phoneNumber: user.phoneNumber,
         role: user.role
       },
-      session: session
+      session: signInData.session
     })
   } catch (error) {
     console.error('Login error:', error)
