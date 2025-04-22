@@ -92,7 +92,8 @@ export async function POST(request: Request) {
           password: password,
           email_confirm: true,
           user_metadata: {
-            full_name: user.fullName
+            full_name: user.fullName,
+            role: user.role
           }
         })
 
@@ -125,10 +126,6 @@ export async function POST(request: Request) {
             id: user.id,
             email: user.email,
             fullName: user.fullName,
-            governorate: user.governorate,
-            town: user.town,
-            phonePrefix: user.phonePrefix,
-            phoneNumber: user.phoneNumber,
             role: user.role
           },
           session: newSignInData.session
@@ -150,10 +147,6 @@ export async function POST(request: Request) {
         id: user.id,
         email: user.email,
         fullName: user.fullName,
-        governorate: user.governorate,
-        town: user.town,
-        phonePrefix: user.phonePrefix,
-        phoneNumber: user.phoneNumber,
         role: user.role
       },
       session: signInData.session
