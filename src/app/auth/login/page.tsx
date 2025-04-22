@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Header from '../../components/Header'
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectPath = searchParams?.get('redirect') || '/'
@@ -30,6 +30,64 @@ export default function LoginPage() {
   }
 
   return (
+    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-8 space-y-6">
+      {/* Email */}
+      <div>
+        <label htmlFor="email" className="block text-gray-700 mb-2">
+          البريد الإلكتروني <span className="text-red-500">*</span>
+        </label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+          placeholder="البريد الإلكتروني"
+          required
+        />
+      </div>
+
+      {/* Password */}
+      <div>
+        <label htmlFor="password" className="block text-gray-700 mb-2">
+          كلمة المرور <span className="text-red-500">*</span>
+        </label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
+          className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+          placeholder="كلمة المرور"
+          required
+        />
+      </div>
+
+      {/* Submit Button */}
+      <div className="pt-4">
+        <button
+          type="submit"
+          className="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition-colors"
+        >
+          تسجيل الدخول
+        </button>
+      </div>
+
+      {/* Signup Link */}
+      <div className="text-center text-gray-600">
+        ليس لديك حساب؟{' '}
+        <Link href="/auth/signup" className="text-green-500 hover:text-green-600">
+          إنشاء حساب جديد
+        </Link>
+      </div>
+    </form>
+  )
+}
+
+export default function LoginPage() {
+  return (
     <div className="min-h-screen bg-gray-50">
       <Header />
       
@@ -45,59 +103,9 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-8 space-y-6">
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="block text-gray-700 mb-2">
-                البريد الإلكتروني <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="البريد الإلكتروني"
-                required
-              />
-            </div>
-
-            {/* Password */}
-            <div>
-              <label htmlFor="password" className="block text-gray-700 mb-2">
-                كلمة المرور <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="كلمة المرور"
-                required
-              />
-            </div>
-
-            {/* Submit Button */}
-            <div className="pt-4">
-              <button
-                type="submit"
-                className="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition-colors"
-              >
-                تسجيل الدخول
-              </button>
-            </div>
-
-            {/* Signup Link */}
-            <div className="text-center text-gray-600">
-              ليس لديك حساب؟{' '}
-              <Link href="/auth/signup" className="text-green-500 hover:text-green-600">
-                إنشاء حساب جديد
-              </Link>
-            </div>
-          </form>
+          <Suspense fallback={<div>Loading...</div>}>
+            <LoginForm />
+          </Suspense>
         </div>
       </main>
     </div>
