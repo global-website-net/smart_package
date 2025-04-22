@@ -20,28 +20,30 @@ export async function GET() {
     try {
       console.log('Fetching user profile for:', session.user.email)
       
-      // First check if the user exists
-      const userExistsResult = await client.query(
-        'SELECT id FROM "User" WHERE email = $1',
-        [session.user.email]
-      )
-      
-      if (userExistsResult.rows.length === 0) {
-        console.log('User not found in database')
-        return NextResponse.json(
-          { message: 'User not found' },
-          { status: 404 }
-        )
-      }
-      
       // Get full user profile
       const result = await client.query(
         'SELECT id, email, "fullName", role, "createdAt" FROM "User" WHERE email = $1',
         [session.user.email]
       )
 
-      console.log('User profile fetched successfully')
-      return NextResponse.json(result.rows[0])
+      if (result.rows.length === 0) {
+        console.log('User not found in database')
+        return NextResponse.json(
+          { message: 'User not found' },
+          { status: 404 }
+        )
+      }
+
+      const user = result.rows[0]
+      console.log('User profile fetched successfully:', user)
+      
+      return NextResponse.json({
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName,
+        role: user.role,
+        createdAt: user.createdAt
+      })
     } catch (dbError) {
       console.error('Database error in GET profile:', dbError)
       throw dbError

@@ -12,6 +12,7 @@ export default function Header() {
   const isLoginPage = pathname === '/auth/login'
   const { data: session, status } = useSession()
   const isLoggedIn = status === 'authenticated'
+  const isAdmin = session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER'
 
   return (
     <header className="bg-black text-white fixed w-full top-0 z-50">
@@ -66,13 +67,15 @@ export default function Header() {
                     >
                       حسابي
                     </Link>
-                    <Link
-                      href="/my-packages"
-                      className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      طرودي
-                    </Link>
+                    {!isAdmin && (
+                      <Link
+                        href="/my-packages"
+                        className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        طرودي
+                      </Link>
+                    )}
                     <button
                       onClick={() => {
                         setIsUserMenuOpen(false)
@@ -87,9 +90,6 @@ export default function Header() {
               </div>
             ) : (
               <>
-                <Link href="/track" className="hover:text-green-500 transition-colors">
-                  تتبع الطرود
-                </Link>
                 {!isLoginPage && (
                   <Link
                     href="/auth/login"
@@ -102,24 +102,31 @@ export default function Header() {
             )}
           </nav>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile menu button */}
           <button
-            className="md:hidden text-white"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden text-white"
           >
             <svg
               className="w-6 h-6"
               fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
               stroke="currentColor"
+              viewBox="0 0 24 24"
             >
               {isMenuOpen ? (
-                <path d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               ) : (
-                <path d="M4 6h16M4 12h16M4 18h16" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               )}
             </svg>
           </button>
@@ -127,92 +134,46 @@ export default function Header() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <nav className="md:hidden py-4">
-            <div className="flex flex-col space-y-6">
-              <Link
-                href="/#how-it-works"
-                className="hover:text-green-500 transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                كيف يعمل
-              </Link>
-              <Link
-                href="/#shopping-sites"
-                className="hover:text-green-500 transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                مواقع التسوق
-              </Link>
-              <Link
-                href="/packages"
-                className="hover:text-green-500 transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
+          <div className="md:hidden py-4">
+            <nav className="flex flex-col space-y-4">
+              <Link href="/packages" className="hover:text-green-500 transition-colors">
                 الباقات
               </Link>
-              {isLoggedIn && (
-                <Link
-                  href="/blog"
-                  className="hover:text-green-500 transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  المدونة
-                </Link>
-              )}
-              <Link
-                href="/contact"
-                className="hover:text-green-500 transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
+              <Link href="/blog" className="hover:text-green-500 transition-colors">
+                المدونة
+              </Link>
+              <Link href="/contact" className="hover:text-green-500 transition-colors">
                 اتصل بنا
               </Link>
-              {!isLoggedIn && (
-                <Link
-                  href="/track"
-                  className="hover:text-green-500 transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  تتبع الطرود
-                </Link>
-              )}
-              {isLoggedIn && (
+              {isLoggedIn ? (
                 <>
-                  <Link
-                    href="/account"
-                    className="hover:text-green-500 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
+                  <Link href="/account" className="hover:text-green-500 transition-colors">
                     حسابي
                   </Link>
-                  <Link
-                    href="/my-packages"
-                    className="hover:text-green-500 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    طرودي
-                  </Link>
+                  {!isAdmin && (
+                    <Link href="/my-packages" className="hover:text-green-500 transition-colors">
+                      طرودي
+                    </Link>
+                  )}
                   <button
-                    onClick={() => {
-                      setIsMenuOpen(false)
-                      signOut()
-                    }}
+                    onClick={() => signOut()}
                     className="text-right hover:text-green-500 transition-colors"
                   >
                     تسجيل الخروج
                   </button>
                 </>
+              ) : (
+                !isLoginPage && (
+                  <Link
+                    href="/auth/login"
+                    className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600 transition-colors inline-block text-center"
+                  >
+                    تسجيل الدخول
+                  </Link>
+                )
               )}
-              {!isLoggedIn && !isLoginPage && (
-                <Link
-                  href="/auth/login"
-                  className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600 transition-colors text-center"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  تسجيل الدخول
-                </Link>
-              )}
-            </div>
-          </nav>
+            </nav>
+          </div>
         )}
       </div>
     </header>

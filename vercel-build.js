@@ -48,6 +48,17 @@ async function checkAndApplySchema() {
     const client = await pool.connect();
     
     try {
+      // Check if UserRole enum exists
+      const enumCheckResult = await client.query(`
+        SELECT EXISTS (
+          SELECT 1 FROM pg_type 
+          WHERE typname = 'userrole'
+        );
+      `);
+      
+      const enumExists = enumCheckResult.rows[0].exists;
+      console.log('UserRole enum exists:', enumExists);
+      
       // Check if tables exist
       const tableCheckResult = await client.query(`
         SELECT table_name 
@@ -59,22 +70,28 @@ async function checkAndApplySchema() {
       const existingTables = tableCheckResult.rows.map(row => row.table_name);
       console.log('Existing tables:', existingTables);
       
-      // If all required tables exist, skip schema application
+      // If all required tables exist and enum exists, skip schema application
       const requiredTables = ['User', 'Package', 'Status', 'PackageHistory'];
       const allTablesExist = requiredTables.every(table => existingTables.includes(table));
       
-      if (allTablesExist) {
-        console.log('All required tables already exist. Skipping schema application.');
+      if (allTablesExist && enumExists) {
+        console.log('All required tables and enum already exist. Skipping schema application.');
         return;
       }
       
-      console.log('Some tables are missing. Applying schema...');
+      console.log('Some tables or enum are missing. Applying schema...');
       
       // Execute each statement individually without a transaction
       for (const statement of statements) {
         // Skip DROP TABLE statements to preserve existing data
         if (statement.toLowerCase().includes('drop table')) {
           console.log('Skipping DROP TABLE statement to preserve data');
+          continue;
+        }
+        
+        // Skip DROP TYPE statement if enum exists
+        if (statement.toLowerCase().includes('drop type') && enumExists) {
+          console.log('Skipping DROP TYPE statement to preserve enum');
           continue;
         }
         
@@ -94,6 +111,11 @@ async function checkAndApplySchema() {
           // If the error is about a relation already existing, log it and continue
           if (error.code === '42P07') {
             console.log(`Table already exists, skipping: ${error.message}`);
+            continue;
+          }
+          // If the error is about a type already existing, log it and continue
+          if (error.code === '42710') {
+            console.log(`Type already exists, skipping: ${error.message}`);
             continue;
           }
           // For other errors, log and continue
