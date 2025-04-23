@@ -56,6 +56,11 @@ export default function Header() {
     }
   }
 
+  const handleNavigation = (path: string) => {
+    setIsUserMenuOpen(false)
+    router.push(path)
+  }
+
   const isLoggedIn = !!user
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'OWNER'
 
@@ -81,7 +86,7 @@ export default function Header() {
             <Link href="/packages" className="hover:text-green-500 transition-colors">
               الباقات
             </Link>
-            <Link href="/blog" className="hover:text-green-500 transition-colors mx-4">
+            <Link href="/blog" className="hover:text-green-500 transition-colors mx-8">
               المدونة
             </Link>
             <Link href="/contact" className="hover:text-green-500 transition-colors">
@@ -105,39 +110,27 @@ export default function Header() {
                 </button>
                 {isUserMenuOpen && (
                   <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
-                    <Link
-                      href="/account"
-                      className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
-                      onClick={() => {
-                        setIsUserMenuOpen(false)
-                        router.push('/account')
-                      }}
+                    <button
+                      onClick={() => handleNavigation('/account')}
+                      className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
                     >
                       حسابي
-                    </Link>
+                    </button>
                     {isAdmin && (
-                      <Link
-                        href="/tracking_packages"
-                        className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
-                        onClick={() => {
-                          setIsUserMenuOpen(false)
-                          router.push('/tracking_packages')
-                        }}
+                      <button
+                        onClick={() => handleNavigation('/tracking_packages')}
+                        className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
                       >
                         ادارة الطرود
-                      </Link>
+                      </button>
                     )}
                     {!isAdmin && (
-                      <Link
-                        href="/my-packages"
-                        className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
-                        onClick={() => {
-                          setIsUserMenuOpen(false)
-                          router.push('/my-packages')
-                        }}
+                      <button
+                        onClick={() => handleNavigation('/my-packages')}
+                        className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
                       >
                         طرودي
-                      </Link>
+                      </button>
                     )}
                     <button
                       onClick={() => {
@@ -218,39 +211,27 @@ export default function Header() {
               </Link>
               {isLoggedIn ? (
                 <>
-                  <Link
-                    href="/account"
-                    className="hover:text-green-500 transition-colors"
-                    onClick={() => {
-                      setIsMenuOpen(false)
-                      router.push('/account')
-                    }}
+                  <button
+                    onClick={() => handleNavigation('/account')}
+                    className="text-left hover:text-green-500 transition-colors"
                   >
                     حسابي
-                  </Link>
+                  </button>
                   {isAdmin && (
-                    <Link
-                      href="/tracking_packages"
-                      className="hover:text-green-500 transition-colors"
-                      onClick={() => {
-                        setIsMenuOpen(false)
-                        router.push('/tracking_packages')
-                      }}
+                    <button
+                      onClick={() => handleNavigation('/tracking_packages')}
+                      className="text-left hover:text-green-500 transition-colors"
                     >
                       ادارة الطرود
-                    </Link>
+                    </button>
                   )}
                   {!isAdmin && (
-                    <Link
-                      href="/my-packages"
-                      className="hover:text-green-500 transition-colors"
-                      onClick={() => {
-                        setIsMenuOpen(false)
-                        router.push('/my-packages')
-                      }}
+                    <button
+                      onClick={() => handleNavigation('/my-packages')}
+                      className="text-left hover:text-green-500 transition-colors"
                     >
                       طرودي
-                    </Link>
+                    </button>
                   )}
                   <button
                     onClick={() => {
