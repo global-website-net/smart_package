@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import { redirect } from 'next/navigation'
-import prisma from '@/lib/prisma'
+import { supabase } from '@/lib/supabase'
 import PackageDetails from '@/components/PackageDetails'
 
 // For Next.js 15.3.1, both params and searchParams should be Promises
@@ -20,11 +20,14 @@ export default async function PackagePage({
     redirect('/auth/login')
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-  })
+  // Get user from Supabase
+  const { data: user, error: userError } = await supabase
+    .from('User')
+    .select('*')
+    .eq('email', session.user.email)
+    .single()
 
-  if (!user) {
+  if (userError || !user) {
     redirect('/auth/login')
   }
 
@@ -33,25 +36,24 @@ export default async function PackagePage({
   // Await the searchParams (even though we're not using them)
   await searchParams
 
-  const packageData = await prisma.package.findUnique({
-    where: { id },
-    include: {
-      user: {
-        select: {
-          fullName: true,
-          email: true,
-        },
-      },
-      shop: {
-        select: {
-          fullName: true,
-          email: true,
-        },
-      },
-    },
-  })
+  // Get package from Supabase
+  const { data: packageData, error: packageError } = await supabase
+    .from('Package')
+    .select(`
+      *,
+      user:userId (
+        fullName,
+        email
+      ),
+      shop:shopId (
+        fullName,
+        email
+      )
+    `)
+    .eq('id', id)
+    .single()
 
-  if (!packageData) {
+  if (packageError || !packageData) {
     return <div>Package not found</div>
   }
 

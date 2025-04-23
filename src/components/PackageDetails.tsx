@@ -10,11 +10,11 @@ interface Package {
   updatedAt: Date | string
   user: {
     fullName: string
-    email: string
+    email: string | null
   }
   shop: {
     fullName: string
-    email: string
+    email: string | null
   } | null
 }
 
