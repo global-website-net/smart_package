@@ -1,21 +1,47 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { useSession, signOut } from 'next-auth/react'
+import { supabase } from '@/lib/supabase'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const [user, setUser] = useState<any>(null)
   const pathname = usePathname()
   const router = useRouter()
-  const { data: session, status } = useSession()
   const isLoginPage = pathname === '/auth/login'
+
+  useEffect(() => {
+    // Check for existing session
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        setUser(session.user)
+      }
+    }
+
+    checkSession()
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        setUser(session.user)
+      } else {
+        setUser(null)
+      }
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [])
 
   const handleSignOut = async () => {
     try {
-      await signOut({ redirect: false })
+      await supabase.auth.signOut()
+      setUser(null)
       router.push('/')
     } catch (error) {
       console.error('Error signing out:', error)
@@ -28,8 +54,8 @@ export default function Header() {
     router.push(path)
   }
 
-  const isLoggedIn = status === 'authenticated'
-  const isAdmin = session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER'
+  const isLoggedIn = !!user
+  const isAdmin = user?.user_metadata?.role === 'ADMIN' || user?.user_metadata?.role === 'OWNER'
 
   return (
     <header className="bg-black text-white fixed w-full top-0 z-50">
@@ -65,7 +91,7 @@ export default function Header() {
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center hover:text-green-500 transition-colors"
                 >
-                  <span className="mr-2">{session?.user?.name || 'حسابي'}</span>
+                  <span className="mr-2">{user?.user_metadata?.name || 'حسابي'}</span>
                   <svg
                     className={`w-4 h-4 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`}
                     fill="none"
