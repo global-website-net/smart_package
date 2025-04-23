@@ -4,7 +4,7 @@ import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Header from '../../components/Header'
-import { signIn } from 'next-auth/react'
+import { supabase } from '@/lib/supabase'
 
 function LoginForm() {
   const router = useRouter()
@@ -32,15 +32,38 @@ function LoginForm() {
     setError(null)
 
     try {
-      const result = await signIn('credentials', {
+      // Sign in with Supabase Auth
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
-        password: formData.password,
-        redirect: false,
+        password: formData.password
       })
 
-      if (result?.error) {
-        setError(result.error)
-      } else {
+      if (error) {
+        setError(error.message)
+        return
+      }
+
+      if (data?.user) {
+        // Get user role from our database
+        const { data: userData, error: userError } = await supabase
+          .from('User')
+          .select('*')
+          .eq('email', formData.email)
+          .single()
+
+        if (userError) {
+          setError('حدث خطأ أثناء جلب بيانات المستخدم')
+          return
+        }
+
+        // Store user data in localStorage
+        localStorage.setItem('user', JSON.stringify({
+          id: userData.id,
+          email: userData.email,
+          name: userData.fullName,
+          role: userData.role
+        }))
+
         // Redirect to the intended page or home
         router.push(redirectPath)
       }
@@ -100,17 +123,19 @@ function LoginForm() {
       <div className="pt-4">
         <button
           type="submit"
-          className="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition-colors disabled:bg-green-300"
+          className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={isLoading}
         >
           {isLoading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
         </button>
       </div>
 
-      {/* Signup Link */}
-      <div className="text-center text-gray-600">
-        ليس لديك حساب؟{' '}
-        <Link href="/auth/signup" className="text-green-500 hover:text-green-600">
+      {/* Register Link */}
+      <div className="text-center">
+        <Link
+          href="/auth/register"
+          className="text-green-600 hover:text-green-700"
+        >
           إنشاء حساب جديد
         </Link>
       </div>
@@ -120,21 +145,11 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-100">
       <Header />
-      
-      <main className="p-4 pt-24">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-6">تسجيل الدخول</h1>
-            <div className="flex justify-center items-center">
-              <div className="relative">
-                <div className="w-96 h-0.5 bg-green-500"></div>
-                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
-              </div>
-            </div>
-          </div>
-
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-md mx-auto">
+          <h1 className="text-3xl font-bold text-center mb-8">تسجيل الدخول</h1>
           <Suspense fallback={<div>Loading...</div>}>
             <LoginForm />
           </Suspense>
