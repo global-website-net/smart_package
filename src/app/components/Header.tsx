@@ -1,55 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
+import { useSession, signOut } from 'next-auth/react'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
-  const [user, setUser] = useState<any>(null)
   const pathname = usePathname()
   const router = useRouter()
+  const { data: session, status } = useSession()
   const isLoginPage = pathname === '/auth/login'
-
-  useEffect(() => {
-    // Check for existing session
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        // Get user data from localStorage
-        const userData = localStorage.getItem('user')
-        if (userData) {
-          setUser(JSON.parse(userData))
-        }
-      }
-    }
-
-    checkSession()
-
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        const userData = localStorage.getItem('user')
-        if (userData) {
-          setUser(JSON.parse(userData))
-        }
-      } else {
-        setUser(null)
-      }
-    })
-
-    return () => {
-      subscription.unsubscribe()
-    }
-  }, [])
 
   const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut()
-      localStorage.removeItem('user')
-      setUser(null)
+      await signOut({ redirect: false })
       router.push('/')
     } catch (error) {
       console.error('Error signing out:', error)
@@ -58,11 +24,12 @@ export default function Header() {
 
   const handleNavigation = (path: string) => {
     setIsUserMenuOpen(false)
+    setIsMenuOpen(false)
     router.push(path)
   }
 
-  const isLoggedIn = !!user
-  const isAdmin = user?.role === 'ADMIN' || user?.role === 'OWNER'
+  const isLoggedIn = status === 'authenticated'
+  const isAdmin = session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER'
 
   return (
     <header className="bg-black text-white fixed w-full top-0 z-50">
@@ -98,7 +65,7 @@ export default function Header() {
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center hover:text-green-500 transition-colors"
                 >
-                  <span className="mr-2">{user?.name || 'حسابي'}</span>
+                  <span className="mr-2">{session?.user?.name || 'حسابي'}</span>
                   <svg
                     className={`w-4 h-4 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`}
                     fill="none"
@@ -133,10 +100,7 @@ export default function Header() {
                       </button>
                     )}
                     <button
-                      onClick={() => {
-                        setIsUserMenuOpen(false)
-                        handleSignOut()
-                      }}
+                      onClick={handleSignOut}
                       className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
                     >
                       تسجيل الخروج
@@ -234,10 +198,7 @@ export default function Header() {
                     </button>
                   )}
                   <button
-                    onClick={() => {
-                      setIsMenuOpen(false)
-                      handleSignOut()
-                    }}
+                    onClick={handleSignOut}
                     className="text-left hover:text-green-500 transition-colors"
                   >
                     تسجيل الخروج
