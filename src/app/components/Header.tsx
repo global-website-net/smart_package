@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
@@ -10,7 +10,6 @@ export default function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [user, setUser] = useState<any>(null)
   const pathname = usePathname()
-  const router = useRouter()
   const isLoginPage = pathname === '/auth/login'
 
   useEffect(() => {
@@ -60,7 +59,7 @@ export default function Header() {
     try {
       await supabase.auth.signOut()
       setUser(null)
-      router.push('/')
+      window.location.href = '/'
     } catch (error) {
       console.error('Error signing out:', error)
     }
@@ -69,7 +68,7 @@ export default function Header() {
   const handleNavigation = (path: string) => {
     setIsUserMenuOpen(false)
     setIsMenuOpen(false)
-    window.location.href = path // Using direct navigation instead of router
+    window.location.href = path
   }
 
   const isLoggedIn = !!user
@@ -121,30 +120,27 @@ export default function Header() {
                 </button>
                 {isUserMenuOpen && (
                   <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
-                    <Link
-                      href="/account"
+                    <button
+                      onClick={() => handleNavigation('/account')}
                       className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
-                      onClick={() => setIsUserMenuOpen(false)}
                     >
                       حسابي
-                    </Link>
+                    </button>
                     {isAdmin && (
-                      <Link
-                        href="/tracking_packages"
+                      <button
+                        onClick={() => handleNavigation('/tracking_packages')}
                         className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
-                        onClick={() => setIsUserMenuOpen(false)}
                       >
                         ادارة الطرود
-                      </Link>
+                      </button>
                     )}
                     {!isAdmin && (
-                      <Link
-                        href="/my-packages"
+                      <button
+                        onClick={() => handleNavigation('/my-packages')}
                         className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
-                        onClick={() => setIsUserMenuOpen(false)}
                       >
                         طرودي
-                      </Link>
+                      </button>
                     )}
                     <button
                       onClick={handleSignOut}
@@ -222,30 +218,27 @@ export default function Header() {
               </Link>
               {isLoggedIn ? (
                 <>
-                  <Link
-                    href="/account"
+                  <button
+                    onClick={() => handleNavigation('/account')}
                     className="text-left hover:text-green-500 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
                   >
                     حسابي
-                  </Link>
+                  </button>
                   {isAdmin && (
-                    <Link
-                      href="/tracking_packages"
+                    <button
+                      onClick={() => handleNavigation('/tracking_packages')}
                       className="text-left hover:text-green-500 transition-colors"
-                      onClick={() => setIsMenuOpen(false)}
                     >
                       ادارة الطرود
-                    </Link>
+                    </button>
                   )}
                   {!isAdmin && (
-                    <Link
-                      href="/my-packages"
+                    <button
+                      onClick={() => handleNavigation('/my-packages')}
                       className="text-left hover:text-green-500 transition-colors"
-                      onClick={() => setIsMenuOpen(false)}
                     >
                       طرودي
-                    </Link>
+                    </button>
                   )}
                   <button
                     onClick={handleSignOut}
