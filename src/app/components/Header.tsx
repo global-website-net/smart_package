@@ -1,72 +1,27 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
+import { signOut, useSession } from 'next-auth/react'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
-  const [user, setUser] = useState<any>(null)
+  const { data: session } = useSession()
   const pathname = usePathname()
   const isLoginPage = pathname === '/auth/login'
 
-  useEffect(() => {
-    // Check for existing session
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        // Get user details from our database
-        const { data: userData } = await supabase
-          .from('User')
-          .select('*')
-          .eq('email', session.user.email)
-          .single()
-        
-        if (userData) {
-          setUser(userData)
-        }
-      }
-    }
-
-    checkSession()
-
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session) {
-        // Get user details from our database
-        const { data: userData } = await supabase
-          .from('User')
-          .select('*')
-          .eq('email', session.user.email)
-          .single()
-        
-        if (userData) {
-          setUser(userData)
-        }
-      } else {
-        setUser(null)
-      }
-    })
-
-    return () => {
-      subscription.unsubscribe()
-    }
-  }, [])
-
   const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut()
-      setUser(null)
-      window.location.href = '/'
+      await signOut({ callbackUrl: '/' })
     } catch (error) {
       console.error('Error signing out:', error)
     }
   }
 
-  const isLoggedIn = !!user
-  const isAdmin = user?.role === 'ADMIN' || user?.role === 'OWNER'
+  const isLoggedIn = !!session?.user
+  const isAdmin = session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER'
 
   return (
     <header className="bg-black text-white fixed w-full top-0 z-50">
@@ -102,7 +57,7 @@ export default function Header() {
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center hover:text-green-500 transition-colors"
                 >
-                  <span className="mr-2">{user?.fullName || 'حسابي'}</span>
+                  <span className="mr-2">{session?.user?.name || 'حسابي'}</span>
                   <svg
                     className={`w-4 h-4 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`}
                     fill="none"
@@ -114,30 +69,30 @@ export default function Header() {
                 </button>
                 {isUserMenuOpen && (
                   <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
-                    <a
+                    <Link
                       href="/account"
                       className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
                       onClick={() => setIsUserMenuOpen(false)}
                     >
                       حسابي
-                    </a>
+                    </Link>
                     {isAdmin && (
-                      <a
+                      <Link
                         href="/tracking_packages"
                         className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
                         ادارة الطرود
-                      </a>
+                      </Link>
                     )}
                     {!isAdmin && (
-                      <a
+                      <Link
                         href="/my-packages"
                         className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
                         طرودي
-                      </a>
+                      </Link>
                     )}
                     <button
                       onClick={handleSignOut}
@@ -215,30 +170,30 @@ export default function Header() {
               </Link>
               {isLoggedIn ? (
                 <>
-                  <a
+                  <Link
                     href="/account"
                     className="text-left hover:text-green-500 transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     حسابي
-                  </a>
+                  </Link>
                   {isAdmin && (
-                    <a
+                    <Link
                       href="/tracking_packages"
                       className="text-left hover:text-green-500 transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       ادارة الطرود
-                    </a>
+                    </Link>
                   )}
                   {!isAdmin && (
-                    <a
+                    <Link
                       href="/my-packages"
                       className="text-left hover:text-green-500 transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       طرودي
-                    </a>
+                    </Link>
                   )}
                   <button
                     onClick={handleSignOut}
