@@ -18,16 +18,34 @@ export default function Header() {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
-        setUser(session.user)
+        // Get user details from our database
+        const { data: userData } = await supabase
+          .from('User')
+          .select('*')
+          .eq('email', session.user.email)
+          .single()
+        
+        if (userData) {
+          setUser(userData)
+        }
       }
     }
 
     checkSession()
 
     // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session) {
-        setUser(session.user)
+        // Get user details from our database
+        const { data: userData } = await supabase
+          .from('User')
+          .select('*')
+          .eq('email', session.user.email)
+          .single()
+        
+        if (userData) {
+          setUser(userData)
+        }
       } else {
         setUser(null)
       }
@@ -55,7 +73,7 @@ export default function Header() {
   }
 
   const isLoggedIn = !!user
-  const isAdmin = user?.user_metadata?.role === 'ADMIN' || user?.user_metadata?.role === 'OWNER'
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'OWNER'
 
   return (
     <header className="bg-black text-white fixed w-full top-0 z-50">
@@ -79,7 +97,7 @@ export default function Header() {
             <Link href="/packages" className="hover:text-green-500 transition-colors">
               الباقات
             </Link>
-            <Link href="/blog" className="hover:text-green-500 transition-colors mx-8">
+            <Link href="/blog" className="hover:text-green-500 transition-colors mx-12">
               المدونة
             </Link>
             <Link href="/contact" className="hover:text-green-500 transition-colors">
@@ -91,7 +109,7 @@ export default function Header() {
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center hover:text-green-500 transition-colors"
                 >
-                  <span className="mr-2">{user?.user_metadata?.name || 'حسابي'}</span>
+                  <span className="mr-2">{user?.fullName || 'حسابي'}</span>
                   <svg
                     className={`w-4 h-4 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`}
                     fill="none"
