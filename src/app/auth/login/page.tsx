@@ -12,7 +12,7 @@ function LoginForm() {
   const redirectPath = searchParams?.get('redirect') || '/'
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
 
   const [formData, setFormData] = useState({
     email: '',
@@ -21,10 +21,10 @@ function LoginForm() {
 
   // Check for existing session
   useEffect(() => {
-    if (session) {
+    if (status === 'authenticated') {
       router.push(redirectPath)
     }
-  }, [session, router, redirectPath])
+  }, [status, router, redirectPath])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -43,7 +43,8 @@ function LoginForm() {
       const result = await signIn('credentials', {
         email: formData.email,
         password: formData.password,
-        redirect: false
+        redirect: false,
+        callbackUrl: redirectPath
       })
 
       if (result?.error) {
@@ -61,6 +62,14 @@ function LoginForm() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  if (status === 'loading') {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+      </div>
+    )
   }
 
   return (

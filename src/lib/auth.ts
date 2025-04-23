@@ -45,17 +45,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          // First, try to sign in with Supabase Auth
-          const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-            email: credentials.email,
-            password: credentials.password
-          })
-
-          if (authError) {
-            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
-          }
-
-          // Then get the user details from our database
+          // Get user from database
           const { data: user, error: userError } = await supabase
             .from('User')
             .select('*')
@@ -63,6 +53,12 @@ export const authOptions: NextAuthOptions = {
             .single()
 
           if (userError || !user) {
+            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
+          }
+
+          // Verify password
+          const isValid = await bcrypt.compare(credentials.password, user.password)
+          if (!isValid) {
             throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
           }
 
@@ -100,7 +96,8 @@ export const authOptions: NextAuthOptions = {
     error: '/auth/error'
   },
   session: {
-    strategy: 'jwt'
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === 'development',
