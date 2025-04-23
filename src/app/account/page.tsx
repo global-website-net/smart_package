@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Header from '../components/Header'
+import { supabase } from '@/lib/supabase'
 
 interface UserProfile {
   id: string
@@ -34,47 +34,45 @@ export default function AccountPage() {
   })
   const [updateSuccess, setUpdateSuccess] = useState('')
   const [updateError, setUpdateError] = useState('')
-  const { data: session, status } = useSession()
   const router = useRouter()
 
-  // Redirect if not logged in
-  if (status === 'unauthenticated') {
-    router.push('/auth/login')
-    return null
-  }
-
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await fetch('/api/user/profile')
-        
-        if (!response.ok) {
-          const errorData = await response.json()
-          throw new Error(errorData.message || 'Failed to fetch profile')
-        }
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        router.push('/auth/login')
+        return
+      }
 
-        const data = await response.json()
-        setProfile(data)
-        setFormData(prev => ({
-          ...prev,
-          fullName: data.fullName,
-          governorate: data.governorate,
-          town: data.town,
-          phonePrefix: data.phonePrefix,
-          phoneNumber: data.phoneNumber
-        }))
-      } catch (err: unknown) {
-        const errorMessage = err instanceof Error ? err.message : 'An error occurred while fetching your profile'
-        setError(errorMessage)
+      try {
+        const { data: userData, error } = await supabase
+          .from('User')
+          .select('*')
+          .eq('email', session.user.email)
+          .single()
+
+        if (error) throw error
+        if (userData) {
+          setProfile(userData)
+          setFormData({
+            ...formData,
+            fullName: userData.fullName || '',
+            governorate: userData.governorate || '',
+            town: userData.town || '',
+            phonePrefix: userData.phonePrefix || '',
+            phoneNumber: userData.phoneNumber || '',
+          })
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error)
+        setError('حدث خطأ أثناء جلب بيانات الملف الشخصي')
       } finally {
         setIsLoading(false)
       }
     }
 
-    if (status === 'authenticated') {
-      fetchProfile()
-    }
-  }, [status])
+    checkSession()
+  }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target

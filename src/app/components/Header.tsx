@@ -65,12 +65,6 @@ export default function Header() {
     }
   }
 
-  const handleNavigation = (path: string) => {
-    setIsUserMenuOpen(false)
-    setIsMenuOpen(false)
-    window.location.href = path
-  }
-
   const isLoggedIn = !!user
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'OWNER'
 
@@ -120,27 +114,30 @@ export default function Header() {
                 </button>
                 {isUserMenuOpen && (
                   <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
-                    <button
-                      onClick={() => handleNavigation('/account')}
+                    <a
+                      href="/account"
                       className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
+                      onClick={() => setIsUserMenuOpen(false)}
                     >
                       حسابي
-                    </button>
+                    </a>
                     {isAdmin && (
-                      <button
-                        onClick={() => handleNavigation('/tracking_packages')}
+                      <a
+                        href="/tracking_packages"
                         className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
+                        onClick={() => setIsUserMenuOpen(false)}
                       >
                         ادارة الطرود
-                      </button>
+                      </a>
                     )}
                     {!isAdmin && (
-                      <button
-                        onClick={() => handleNavigation('/my-packages')}
+                      <a
+                        href="/my-packages"
                         className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
+                        onClick={() => setIsUserMenuOpen(false)}
                       >
                         طرودي
-                      </button>
+                      </a>
                     )}
                     <button
                       onClick={handleSignOut}
@@ -218,27 +215,30 @@ export default function Header() {
               </Link>
               {isLoggedIn ? (
                 <>
-                  <button
-                    onClick={() => handleNavigation('/account')}
+                  <a
+                    href="/account"
                     className="text-left hover:text-green-500 transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
                   >
                     حسابي
-                  </button>
+                  </a>
                   {isAdmin && (
-                    <button
-                      onClick={() => handleNavigation('/tracking_packages')}
+                    <a
+                      href="/tracking_packages"
                       className="text-left hover:text-green-500 transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
                     >
                       ادارة الطرود
-                    </button>
+                    </a>
                   )}
                   {!isAdmin && (
-                    <button
-                      onClick={() => handleNavigation('/my-packages')}
+                    <a
+                      href="/my-packages"
                       className="text-left hover:text-green-500 transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
                     >
                       طرودي
-                    </button>
+                    </a>
                   )}
                   <button
                     onClick={handleSignOut}
