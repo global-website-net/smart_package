@@ -69,7 +69,7 @@ export default function Header() {
   const handleNavigation = (path: string) => {
     setIsUserMenuOpen(false)
     setIsMenuOpen(false)
-    router.push(path)
+    window.location.href = path // Using direct navigation instead of router
   }
 
   const isLoggedIn = !!user
@@ -97,7 +97,7 @@ export default function Header() {
             <Link href="/packages" className="hover:text-green-500 transition-colors">
               الباقات
             </Link>
-            <Link href="/blog" className="hover:text-green-500 transition-colors mx-12">
+            <Link href="/blog" className="hover:text-green-500 transition-colors mx-16">
               المدونة
             </Link>
             <Link href="/contact" className="hover:text-green-500 transition-colors">
@@ -121,27 +121,30 @@ export default function Header() {
                 </button>
                 {isUserMenuOpen && (
                   <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
-                    <button
-                      onClick={() => handleNavigation('/account')}
+                    <Link
+                      href="/account"
                       className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
+                      onClick={() => setIsUserMenuOpen(false)}
                     >
                       حسابي
-                    </button>
+                    </Link>
                     {isAdmin && (
-                      <button
-                        onClick={() => handleNavigation('/tracking_packages')}
+                      <Link
+                        href="/tracking_packages"
                         className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
+                        onClick={() => setIsUserMenuOpen(false)}
                       >
                         ادارة الطرود
-                      </button>
+                      </Link>
                     )}
                     {!isAdmin && (
-                      <button
-                        onClick={() => handleNavigation('/my-packages')}
+                      <Link
+                        href="/my-packages"
                         className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
+                        onClick={() => setIsUserMenuOpen(false)}
                       >
                         طرودي
-                      </button>
+                      </Link>
                     )}
                     <button
                       onClick={handleSignOut}
@@ -219,27 +222,30 @@ export default function Header() {
               </Link>
               {isLoggedIn ? (
                 <>
-                  <button
-                    onClick={() => handleNavigation('/account')}
+                  <Link
+                    href="/account"
                     className="text-left hover:text-green-500 transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
                   >
                     حسابي
-                  </button>
+                  </Link>
                   {isAdmin && (
-                    <button
-                      onClick={() => handleNavigation('/tracking_packages')}
+                    <Link
+                      href="/tracking_packages"
                       className="text-left hover:text-green-500 transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
                     >
                       ادارة الطرود
-                    </button>
+                    </Link>
                   )}
                   {!isAdmin && (
-                    <button
-                      onClick={() => handleNavigation('/my-packages')}
+                    <Link
+                      href="/my-packages"
                       className="text-left hover:text-green-500 transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
                     >
                       طرودي
-                    </button>
+                    </Link>
                   )}
                   <button
                     onClick={handleSignOut}
