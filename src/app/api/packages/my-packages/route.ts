@@ -1,63 +1,56 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { pool } from '@/lib/db'
+import { supabase } from '@/lib/supabase'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    // Check authentication
     const session = await getServerSession(authOptions)
-    if (!session?.user?.email) {
+    if (!session) {
       return NextResponse.json(
-        { message: 'Unauthorized' },
+        { error: 'غير مصرح لك' },
         { status: 401 }
       )
     }
 
-    // Get user's packages
-    const client = await pool.connect()
-    try {
-      // First get the user ID
-      const userResult = await client.query(
-        'SELECT id FROM "User" WHERE email = $1',
-        [session.user.email]
-      )
+    const userId = session.user.id
 
-      if (userResult.rows.length === 0) {
-        return NextResponse.json(
-          { message: 'User not found' },
-          { status: 404 }
+    // Get user's packages using Supabase
+    const { data: packages, error: packagesError } = await supabase
+      .from('Package')
+      .select(`
+        *,
+        Status:status_id (
+          name,
+          description
+        ),
+        Shop:shop_id (
+          fullName,
+          email
         )
-      }
+      `)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
 
-      const userId = userResult.rows[0].id
-
-      // Get user's packages
-      const packagesResult = await client.query(
-        `SELECT p.* 
-         FROM "Package" p 
-         WHERE p."userId" = $1 
-         ORDER BY p."createdAt" DESC`,
-        [userId]
+    if (packagesError) {
+      console.error('Error fetching packages:', packagesError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء جلب الشحنات' },
+        { status: 500 }
       )
-
-      // Format the response
-      const packages = packagesResult.rows.map(pkg => ({
-        id: pkg.id,
-        trackingNumber: pkg.trackingNumber,
-        status: pkg.status,
-        currentLocation: pkg.description || 'Not specified',
-        lastUpdated: pkg.updatedAt
-      }))
-
-      return NextResponse.json(packages)
-    } finally {
-      client.release()
     }
+
+    return NextResponse.json({
+      packages: packages?.map(pkg => ({
+        ...pkg,
+        status: pkg.Status,
+        shop: pkg.Shop
+      }))
+    })
   } catch (error) {
-    console.error('Error fetching user packages:', error)
+    console.error('Error fetching packages:', error)
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { error: 'حدث خطأ أثناء جلب الشحنات' },
       { status: 500 }
     )
   }

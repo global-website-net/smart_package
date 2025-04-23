@@ -1,26 +1,42 @@
 import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { pool } from '@/lib/db'
 
 // Get all blogs
 export async function GET() {
   try {
-    const blogs = await prisma.blogPost.findMany({
-      include: {
+    const client = await pool.connect()
+    try {
+      const result = await client.query(`
+        SELECT 
+          bp.*,
+          u."fullName" as "authorName",
+          u.email as "authorEmail"
+        FROM "BlogPost" bp
+        LEFT JOIN "User" u ON bp."authorId" = u.id
+        ORDER BY bp."createdAt" DESC
+      `)
+
+      const blogs = result.rows.map(blog => ({
+        id: blog.id,
+        title: blog.title,
+        content: blog.content,
+        createdAt: blog.createdAt,
+        updatedAt: blog.updatedAt,
         author: {
-          select: {
-            fullName: true,
-            role: true
-          }
+          id: blog.authorId,
+          fullName: blog.authorName,
+          email: blog.authorEmail
         }
-      }
-    })
-    return NextResponse.json(blogs)
+      }))
+
+      return NextResponse.json(blogs)
+    } finally {
+      client.release()
+    }
   } catch (error) {
     console.error('Error fetching blogs:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch blogs' },
+      { error: 'Failed to fetch blog posts' },
       { status: 500 }
     )
   }

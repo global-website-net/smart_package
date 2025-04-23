@@ -1,59 +1,51 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { pool } from '@/lib/db'
+import { supabase } from '@/lib/supabase'
 import bcrypt from 'bcryptjs'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    // Check authentication
     const session = await getServerSession(authOptions)
-    if (!session?.user?.email) {
+    if (!session) {
       return NextResponse.json(
-        { message: 'Unauthorized' },
+        { error: 'غير مصرح لك' },
         { status: 401 }
       )
     }
 
-    // Get user profile
-    const client = await pool.connect()
-    try {
-      console.log('Fetching user profile for:', session.user.email)
-      
-      // Get full user profile
-      const result = await client.query(
-        'SELECT id, email, "fullName", role, "createdAt" FROM "User" WHERE email = $1',
-        [session.user.email]
+    const userId = session.user.id
+
+    // Get user profile using Supabase
+    const { data: user, error: userError } = await supabase
+      .from('User')
+      .select('*')
+      .eq('id', userId)
+      .single()
+
+    if (userError) {
+      console.error('Error fetching user profile:', userError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء جلب بيانات المستخدم' },
+        { status: 500 }
       )
-
-      if (result.rows.length === 0) {
-        console.log('User not found in database')
-        return NextResponse.json(
-          { message: 'User not found' },
-          { status: 404 }
-        )
-      }
-
-      const user = result.rows[0]
-      console.log('User profile fetched successfully:', user)
-      
-      return NextResponse.json({
-        id: user.id,
-        email: user.email,
-        fullName: user.fullName,
-        role: user.role,
-        createdAt: user.createdAt
-      })
-    } catch (dbError) {
-      console.error('Database error in GET profile:', dbError)
-      throw dbError
-    } finally {
-      client.release()
     }
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'المستخدم غير موجود' },
+        { status: 404 }
+      )
+    }
+
+    // Remove sensitive data
+    const { password, ...userWithoutPassword } = user
+
+    return NextResponse.json(userWithoutPassword)
   } catch (error) {
     console.error('Error fetching user profile:', error)
     return NextResponse.json(
-      { message: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'حدث خطأ أثناء جلب بيانات المستخدم' },
       { status: 500 }
     )
   }
@@ -61,91 +53,54 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   try {
-    // Check authentication
     const session = await getServerSession(authOptions)
-    if (!session?.user?.email) {
+    if (!session) {
       return NextResponse.json(
-        { message: 'Unauthorized' },
+        { error: 'غير مصرح لك' },
         { status: 401 }
       )
     }
 
-    // Parse request body
-    const body = await request.json()
-    const { fullName, currentPassword, newPassword } = body
+    const userId = session.user.id
+    const updates = await request.json()
 
-    // Get user profile
-    const client = await pool.connect()
-    try {
-      // Get current user data
-      const userResult = await client.query(
-        'SELECT * FROM "User" WHERE email = $1',
-        [session.user.email]
+    // Update user profile using Supabase
+    const { data: user, error: userError } = await supabase
+      .from('User')
+      .update({
+        ...updates,
+        updatedAt: new Date()
+      })
+      .eq('id', userId)
+      .select()
+      .single()
+
+    if (userError) {
+      console.error('Error updating user profile:', userError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء تحديث بيانات المستخدم' },
+        { status: 500 }
       )
-
-      if (userResult.rows.length === 0) {
-        return NextResponse.json(
-          { message: 'User not found' },
-          { status: 404 }
-        )
-      }
-
-      const user = userResult.rows[0]
-
-      // If changing password, verify current password
-      if (newPassword) {
-        if (!currentPassword) {
-          return NextResponse.json(
-            { message: 'Current password is required' },
-            { status: 400 }
-          )
-        }
-
-        const isPasswordValid = await bcrypt.compare(currentPassword, user.password)
-        if (!isPasswordValid) {
-          return NextResponse.json(
-            { message: 'Current password is incorrect' },
-            { status: 400 }
-          )
-        }
-
-        // Hash new password
-        const hashedPassword = await bcrypt.hash(newPassword, 10)
-
-        // Update user with new password
-        await client.query(
-          `UPDATE "User" 
-           SET "fullName" = $1, password = $2, "updatedAt" = NOW() 
-           WHERE email = $3`,
-          [fullName, hashedPassword, session.user.email]
-        )
-      } else {
-        // Update user without changing password
-        await client.query(
-          `UPDATE "User" 
-           SET "fullName" = $1, "updatedAt" = NOW() 
-           WHERE email = $2`,
-          [fullName, session.user.email]
-        )
-      }
-
-      // Get updated user data
-      const updatedResult = await client.query(
-        'SELECT id, email, "fullName", role, "createdAt" FROM "User" WHERE email = $1',
-        [session.user.email]
-      )
-
-      return NextResponse.json(updatedResult.rows[0])
-    } catch (dbError) {
-      console.error('Database error in PUT profile:', dbError)
-      throw dbError
-    } finally {
-      client.release()
     }
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'المستخدم غير موجود' },
+        { status: 404 }
+      )
+    }
+
+    // Remove sensitive data
+    const { password, ...userWithoutPassword } = user
+
+    return NextResponse.json({
+      message: 'تم تحديث بيانات المستخدم بنجاح',
+      user: userWithoutPassword
+    })
   } catch (error) {
     console.error('Error updating user profile:', error)
     return NextResponse.json(
-      { message: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'حدث خطأ أثناء تحديث بيانات المستخدم' },
       { status: 500 }
     )
   }

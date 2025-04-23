@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import bcrypt from 'bcryptjs'
-import { pool } from '@/lib/db'
+import { supabase } from '@/lib/supabase'
 
 // Initialize Supabase client
 // This is a temporary comment to force Git to detect changes
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-const supabase = createClient(
+const supabaseAdmin = createClient(
   supabaseUrl || '',
   supabaseServiceKey || '',
   {
@@ -40,116 +40,110 @@ export async function POST(request: Request) {
       )
     }
 
-    // Find user in database with password field using PostgreSQL
-    const client = await pool.connect()
-    try {
-      const result = await client.query(
-        'SELECT id, email, "fullName", role, password FROM "User" WHERE email = $1',
-        [email]
+    // Find user in database with password field using Supabase
+    const { data: user, error: userError } = await supabase
+      .from('User')
+      .select('*')
+      .eq('email', email)
+      .single()
+
+    if (userError) {
+      console.error('Error finding user:', userError)
+      return NextResponse.json(
+        { error: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' },
+        { status: 401 }
       )
-      const user = result.rows[0]
+    }
 
-      if (!user) {
-        return NextResponse.json(
-          { error: 'البريد الإلكتروني غير موجود' },
-          { status: 404 }
-        )
-      }
+    if (!user) {
+      return NextResponse.json(
+        { error: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' },
+        { status: 401 }
+      )
+    }
 
-      // Check if password exists
-      if (!user.password) {
-        return NextResponse.json(
-          { error: 'كلمة المرور غير موجودة' },
-          { status: 401 }
-        )
-      }
+    // Verify password
+    const isValidPassword = await bcrypt.compare(password, user.password)
+    if (!isValidPassword) {
+      return NextResponse.json(
+        { error: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' },
+        { status: 401 }
+      )
+    }
 
-      // Verify password
-      const isValidPassword = await bcrypt.compare(password, user.password)
-      if (!isValidPassword) {
-        return NextResponse.json(
-          { error: 'كلمة المرور غير صحيحة' },
-          { status: 401 }
-        )
-      }
+    // Try to sign in with Supabase auth
+    const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
+      email: user.email || '',
+      password: password
+    })
 
-      // Try to sign in
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: user.email || '',
-        password: password
-      })
-
-      if (signInError) {
-        // Only create user if they don't exist in Supabase auth
-        if (signInError.message.includes('Invalid login credentials')) {
-          console.log('Creating Supabase auth user...')
-          const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
-            email: user.email || '',
-            password: password,
-            email_confirm: true,
-            user_metadata: {
-              full_name: user.fullName,
-              role: user.role
-            }
-          })
-
-          if (authError) {
-            console.error('Supabase auth error:', authError)
-            return NextResponse.json(
-              { error: 'حدث خطأ أثناء تسجيل الدخول' },
-              { status: 500 }
-            )
+    if (signInError) {
+      // Only create user if they don't exist in Supabase auth
+      if (signInError.message.includes('Invalid login credentials')) {
+        console.log('Creating Supabase auth user...')
+        const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
+          email: user.email || '',
+          password: password,
+          email_confirm: true,
+          user_metadata: {
+            full_name: user.fullName,
+            role: user.role
           }
+        })
 
-          // Try to sign in again after creating the user
-          const { data: newSignInData, error: newSignInError } = await supabase.auth.signInWithPassword({
-            email: user.email || '',
-            password: password
-          })
-
-          if (newSignInError) {
-            console.error('Sign in error after user creation:', newSignInError)
-            return NextResponse.json(
-              { error: 'حدث خطأ أثناء تسجيل الدخول' },
-              { status: 500 }
-            )
-          }
-
-          return NextResponse.json({
-            success: true,
-            message: 'تم تسجيل الدخول بنجاح',
-            user: {
-              id: user.id,
-              email: user.email,
-              fullName: user.fullName,
-              role: user.role
-            },
-            session: newSignInData.session
-          })
+        if (authError) {
+          console.error('Supabase auth error:', authError)
+          return NextResponse.json(
+            { error: 'حدث خطأ أثناء تسجيل الدخول' },
+            { status: 500 }
+          )
         }
 
-        console.error('Sign in error:', signInError)
-        return NextResponse.json(
-          { error: 'حدث خطأ أثناء تسجيل الدخول' },
-          { status: 500 }
-        )
+        // Try to sign in again after creating the user
+        const { data: newSignInData, error: newSignInError } = await supabaseAdmin.auth.signInWithPassword({
+          email: user.email || '',
+          password: password
+        })
+
+        if (newSignInError) {
+          console.error('Sign in error after user creation:', newSignInError)
+          return NextResponse.json(
+            { error: 'حدث خطأ أثناء تسجيل الدخول' },
+            { status: 500 }
+          )
+        }
+
+        return NextResponse.json({
+          success: true,
+          message: 'تم تسجيل الدخول بنجاح',
+          user: {
+            id: user.id,
+            email: user.email,
+            fullName: user.fullName,
+            role: user.role
+          },
+          session: newSignInData.session
+        })
       }
 
-      // Return user data and session from successful sign in
-      return NextResponse.json({
-        success: true,
-        message: 'تم تسجيل الدخول بنجاح',
-        user: {
-          id: user.id,
-          email: user.email,
-          fullName: user.fullName,
-          role: user.role
-        },
-        session: signInData.session
-      })
-    } finally {
-      client.release()
+      console.error('Sign in error:', signInError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء تسجيل الدخول' },
+        { status: 500 }
+      )
     }
+
+    return NextResponse.json({
+      success: true,
+      message: 'تم تسجيل الدخول بنجاح',
+      user: {
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName,
+        role: user.role
+      },
+      session: signInData.session
+    })
   } catch (error) {
     console.error('Login error:', error)
     return NextResponse.json(

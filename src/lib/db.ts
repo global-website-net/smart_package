@@ -1,34 +1,23 @@
-import { PrismaClient, UserRole } from '@prisma/client'
-import { Pool } from 'pg'
+import { UserRole } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
+import { supabase } from './supabase'
 
-// Create a PostgreSQL connection pool
-export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  max: 20, // Maximum number of clients in the pool
-  idleTimeoutMillis: 30000, // How long a client is allowed to remain idle before being closed
-  connectionTimeoutMillis: 2000, // How long to wait for a connection
-})
-
-// Initialize Prisma client
-const prisma = new PrismaClient({
-  log: ['error'],
-})
-
-// Database operations using direct PostgreSQL queries
+// Database operations using Supabase
 export const db = {
   // Check if a user exists by email
   async userExists(email: string): Promise<boolean> {
-    const client = await pool.connect()
-    try {
-      const result = await client.query(
-        'SELECT id FROM "User" WHERE email = $1',
-        [email]
-      )
-      return result.rows.length > 0
-    } finally {
-      client.release()
+    const { data, error } = await supabase
+      .from('User')
+      .select('id')
+      .eq('email', email)
+      .single()
+    
+    if (error) {
+      console.error('Error checking user existence:', error)
+      return false
     }
+    
+    return !!data
   },
 
   // Create a new user
@@ -42,56 +31,59 @@ export const db = {
     phoneNumber: string
     role: UserRole
   }) {
-    const client = await pool.connect()
-    try {
-      // Generate a UUID for the user ID
-      const id = uuidv4()
-      
-      const result = await client.query(
-        `INSERT INTO "User" (
-          "id", "email", "password", "fullName", "governorate", "town", 
-          "phonePrefix", "phoneNumber", "role", "createdAt", "updatedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
-        RETURNING *`,
-        [
-          id,
-          userData.email,
-          userData.password,
-          userData.fullName,
-          userData.governorate,
-          userData.town,
-          userData.phonePrefix,
-          userData.phoneNumber,
-          userData.role,
-        ]
-      )
-      return result.rows[0]
-    } finally {
-      client.release()
+    const id = uuidv4()
+    
+    const { data, error } = await supabase
+      .from('User')
+      .insert({
+        id,
+        email: userData.email,
+        password: userData.password,
+        fullName: userData.fullName,
+        governorate: userData.governorate,
+        town: userData.town,
+        phonePrefix: userData.phonePrefix,
+        phoneNumber: userData.phoneNumber,
+        role: userData.role,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Error creating user:', error)
+      throw error
     }
+
+    return data
   },
 
   // Delete a user by ID
   async deleteUser(id: string) {
-    const client = await pool.connect()
-    try {
-      await client.query('DELETE FROM "User" WHERE id = $1', [id])
-    } finally {
-      client.release()
+    const { error } = await supabase
+      .from('User')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      console.error('Error deleting user:', error)
+      throw error
     }
   },
 
   // Test database connection
   async testConnection() {
-    const client = await pool.connect()
-    try {
-      const result = await client.query('SELECT 1 as test')
-      return result.rows[0]
-    } finally {
-      client.release()
-    }
-  }
-}
+    const { data, error } = await supabase
+      .from('User')
+      .select('id')
+      .limit(1)
 
-// Export Prisma client for other operations
-export { prisma } 
+    if (error) {
+      console.error('Error testing connection:', error)
+      throw error
+    }
+
+    return { test: 1 }
+  }
+} 

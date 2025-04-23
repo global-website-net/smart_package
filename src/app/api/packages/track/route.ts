@@ -1,82 +1,86 @@
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { pool } from '@/lib/db'
+import { supabase } from '@/lib/supabase'
 
-export async function POST(request: Request) {
+export async function GET(request: Request) {
   try {
-    // Check authentication
-    const session = await getServerSession(authOptions)
-    if (!session) {
-      return NextResponse.json(
-        { message: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    // Parse request body
-    const body = await request.json()
-    const { trackingNumber } = body
+    const { searchParams } = new URL(request.url)
+    const trackingNumber = searchParams.get('trackingNumber')
 
     if (!trackingNumber) {
       return NextResponse.json(
-        { message: 'Tracking number is required' },
+        { error: 'رقم التتبع مطلوب' },
         { status: 400 }
       )
     }
 
-    // Find the package
-    const client = await pool.connect()
-    try {
-      // Get package details
-      const packageResult = await client.query(
-        `SELECT p.*, s.name as status_name 
-         FROM "Package" p 
-         JOIN "Status" s ON p.status_id = s.id 
-         WHERE p.tracking_number = $1`,
-        [trackingNumber]
-      )
-
-      if (packageResult.rows.length === 0) {
-        return NextResponse.json(
-          { message: 'Package not found' },
-          { status: 404 }
+    // Get package details using Supabase
+    const { data: packageData, error: packageError } = await supabase
+      .from('Package')
+      .select(`
+        *,
+        Status:status_id (
+          name,
+          description
+        ),
+        User:user_id (
+          fullName,
+          email
         )
-      }
+      `)
+      .eq('tracking_number', trackingNumber)
+      .single()
 
-      const packageData = packageResult.rows[0]
-
-      // Get package history
-      const historyResult = await client.query(
-        `SELECT h.*, s.name as status_name 
-         FROM "PackageHistory" h 
-         JOIN "Status" s ON h.status_id = s.id 
-         WHERE h.package_id = $1 
-         ORDER BY h.timestamp DESC`,
-        [packageData.id]
+    if (packageError) {
+      console.error('Error fetching package:', packageError)
+      return NextResponse.json(
+        { error: 'لم يتم العثور على الشحنة' },
+        { status: 404 }
       )
-
-      // Format the response
-      const formattedResponse = {
-        trackingNumber: packageData.tracking_number,
-        status: packageData.status_name,
-        currentLocation: packageData.current_location,
-        lastUpdated: packageData.updated_at,
-        history: historyResult.rows.map(item => ({
-          status: item.status_name,
-          location: item.location,
-          timestamp: item.timestamp,
-        })),
-      }
-
-      return NextResponse.json(formattedResponse)
-    } finally {
-      client.release()
     }
+
+    if (!packageData) {
+      return NextResponse.json(
+        { error: 'لم يتم العثور على الشحنة' },
+        { status: 404 }
+      )
+    }
+
+    // Get package history using Supabase
+    const { data: historyData, error: historyError } = await supabase
+      .from('PackageHistory')
+      .select(`
+        *,
+        Status:status_id (
+          name,
+          description
+        )
+      `)
+      .eq('package_id', packageData.id)
+      .order('timestamp', { ascending: false })
+
+    if (historyError) {
+      console.error('Error fetching package history:', historyError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء جلب سجل الشحنة' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      package: {
+        ...packageData,
+        status: packageData.Status,
+        user: packageData.User
+      },
+      history: historyData?.map(record => ({
+        ...record,
+        status: record.Status
+      }))
+    })
   } catch (error) {
     console.error('Error tracking package:', error)
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { error: 'حدث خطأ أثناء تتبع الشحنة' },
       { status: 500 }
     )
   }
