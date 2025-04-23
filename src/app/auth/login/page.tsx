@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Header from '../../components/Header'
@@ -17,6 +17,17 @@ function LoginForm() {
     email: '',
     password: ''
   })
+
+  // Check for existing session
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        router.push(redirectPath)
+      }
+    }
+    checkSession()
+  }, [router, redirectPath])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -66,6 +77,7 @@ function LoginForm() {
 
         // Redirect to the intended page or home
         router.push(redirectPath)
+        router.refresh() // Refresh the page to update the session
       }
     } catch (error) {
       console.error('Login error:', error)
