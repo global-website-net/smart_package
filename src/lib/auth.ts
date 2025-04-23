@@ -90,15 +90,18 @@ export const authOptions: NextAuthOptions = {
       }
       return session
     },
-    async redirect() {
-      // Always redirect to home page after login
-      return "/"
+    async redirect({ url, baseUrl }) {
+      // Allow relative URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      // Allow URLs from the same origin
+      else if (new URL(url).origin === baseUrl) return url
+      return baseUrl
     }
   },
   pages: {
     signIn: '/auth/login',
     error: '/auth/error',
-    newUser: '/auth/register'
+    newUser: '/auth/signup'
   },
   session: {
     strategy: 'jwt',

@@ -129,7 +129,7 @@ function LoginForm() {
       <div className="text-center">
         <button
           type="button"
-          onClick={() => router.push('/auth/register')}
+          onClick={() => router.push('/auth/signup')}
           className="text-green-600 hover:text-green-700"
         >
           إنشاء حساب جديد
