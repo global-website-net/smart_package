@@ -91,10 +91,11 @@ export const authOptions: NextAuthOptions = {
       return session
     },
     async redirect({ url, baseUrl }) {
-      // Allow relative URLs
-      if (url.startsWith("/")) return `${baseUrl}${url}`
-      // Allow callback URLs on the same origin
-      else if (new URL(url).origin === baseUrl) return url
+      // If the URL is relative, allow it
+      if (url.startsWith("/")) return url
+      // If the URL is absolute and on the same origin, allow it
+      if (new URL(url).origin === baseUrl) return url
+      // Otherwise, redirect to the home page
       return baseUrl
     }
   },

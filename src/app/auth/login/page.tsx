@@ -9,7 +9,7 @@ import { signIn, useSession } from 'next-auth/react'
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectPath = searchParams?.get('redirect') || '/'
+  const callbackUrl = searchParams?.get('callbackUrl') || '/'
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const { data: session, status } = useSession()
@@ -22,9 +22,9 @@ function LoginForm() {
   // Check for existing session
   useEffect(() => {
     if (status === 'authenticated') {
-      router.push(redirectPath)
+      router.push(callbackUrl)
     }
-  }, [status, router, redirectPath])
+  }, [status, router, callbackUrl])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -44,7 +44,7 @@ function LoginForm() {
         email: formData.email,
         password: formData.password,
         redirect: false,
-        callbackUrl: redirectPath
+        callbackUrl: callbackUrl
       })
 
       if (result?.error) {
@@ -53,7 +53,7 @@ function LoginForm() {
       }
 
       if (result?.ok) {
-        router.push(redirectPath)
+        router.push(callbackUrl)
         router.refresh()
       }
     } catch (error) {
@@ -129,13 +129,12 @@ function LoginForm() {
 
       {/* Register Link */}
       <div className="text-center">
-        <button
-          type="button"
-          onClick={() => router.push('/auth/register')}
+        <Link
+          href="/auth/register"
           className="text-green-600 hover:text-green-700"
         >
           إنشاء حساب جديد
-        </button>
+        </Link>
       </div>
     </form>
   )
