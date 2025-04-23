@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { signIn } from 'next-auth/react'
 
 export async function POST(request: Request) {
   try {
@@ -13,16 +14,16 @@ export async function POST(request: Request) {
       )
     }
 
-    // Sign in with Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+    // Sign in with NextAuth
+    const result = await signIn('credentials', {
       email,
-      password
+      password,
+      redirect: false
     })
 
-    if (authError) {
-      console.error('Supabase auth error:', authError)
+    if (result?.error) {
       return NextResponse.json(
-        { error: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' },
+        { error: result.error },
         { status: 401 }
       )
     }
@@ -42,12 +43,15 @@ export async function POST(request: Request) {
       )
     }
 
-    // Return user data for NextAuth.js
+    // Return success response
     return NextResponse.json({
-      id: user.id,
-      email: user.email,
-      name: user.fullName,
-      role: user.role
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.fullName,
+        role: user.role
+      }
     })
   } catch (error) {
     console.error('Login error:', error)

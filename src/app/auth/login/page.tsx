@@ -4,7 +4,7 @@ import { useState, Suspense, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Header from '../../components/Header'
-import { supabase } from '@/lib/supabase'
+import { signIn, useSession } from 'next-auth/react'
 
 function LoginForm() {
   const router = useRouter()
@@ -12,6 +12,7 @@ function LoginForm() {
   const redirectPath = searchParams?.get('redirect') || '/'
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const { data: session } = useSession()
 
   const [formData, setFormData] = useState({
     email: '',
@@ -20,14 +21,10 @@ function LoginForm() {
 
   // Check for existing session
   useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        router.push(redirectPath)
-      }
+    if (session) {
+      router.push(redirectPath)
     }
-    checkSession()
-  }, [router, redirectPath])
+  }, [session, router, redirectPath])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -43,41 +40,20 @@ function LoginForm() {
     setError(null)
 
     try {
-      // Sign in with Supabase Auth
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const result = await signIn('credentials', {
         email: formData.email,
-        password: formData.password
+        password: formData.password,
+        redirect: false
       })
 
-      if (error) {
-        setError(error.message)
+      if (result?.error) {
+        setError(result.error)
         return
       }
 
-      if (data?.user) {
-        // Get user role from our database
-        const { data: userData, error: userError } = await supabase
-          .from('User')
-          .select('*')
-          .eq('email', formData.email)
-          .single()
-
-        if (userError) {
-          setError('حدث خطأ أثناء جلب بيانات المستخدم')
-          return
-        }
-
-        // Store user data in localStorage
-        localStorage.setItem('user', JSON.stringify({
-          id: userData.id,
-          email: userData.email,
-          name: userData.fullName,
-          role: userData.role
-        }))
-
-        // Redirect to the intended page or home
+      if (result?.ok) {
         router.push(redirectPath)
-        router.refresh() // Refresh the page to update the session
+        router.refresh()
       }
     } catch (error) {
       console.error('Login error:', error)
