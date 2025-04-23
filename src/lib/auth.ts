@@ -40,27 +40,45 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' }
       },
       async authorize(credentials) {
+        console.log('Attempting to authorize with credentials:', credentials?.email)
+        
         if (!credentials?.email || !credentials?.password) {
+          console.log('Missing credentials')
           throw new Error('البريد الإلكتروني وكلمة المرور مطلوبان')
         }
 
         try {
           // Get user from database
+          console.log('Fetching user from database...')
           const { data: user, error: userError } = await supabase
             .from('User')
             .select('*')
             .eq('email', credentials.email)
             .single()
 
+          console.log('Database response:', { user, error: userError })
+
           if (userError || !user) {
+            console.log('User not found or error:', userError)
             throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
           }
 
           // Verify password
+          console.log('Verifying password...')
           const isValid = await bcrypt.compare(credentials.password, user.password)
+          console.log('Password verification result:', isValid)
+
           if (!isValid) {
+            console.log('Invalid password')
             throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
           }
+
+          console.log('Authentication successful, returning user:', {
+            id: user.id,
+            email: user.email,
+            name: user.fullName,
+            role: user.role
+          })
 
           return {
             id: user.id,
@@ -77,6 +95,7 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user }) {
+      console.log('JWT callback:', { token, user })
       if (user) {
         token.id = user.id
         token.role = user.role
@@ -84,6 +103,7 @@ export const authOptions: NextAuthOptions = {
       return token
     },
     async session({ session, token }) {
+      console.log('Session callback:', { session, token })
       if (session.user) {
         session.user.id = token.id
         session.user.role = token.role
@@ -91,6 +111,7 @@ export const authOptions: NextAuthOptions = {
       return session
     },
     async redirect({ url, baseUrl }) {
+      console.log('Redirect callback:', { url, baseUrl })
       // If the URL is relative, allow it
       if (url.startsWith("/")) return url
       // If the URL is absolute and on the same origin, allow it
@@ -109,5 +130,5 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: process.env.NODE_ENV === 'development',
+  debug: true, // Enable debug mode
 } 

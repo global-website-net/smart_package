@@ -14,17 +14,21 @@ function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
   const { data: session, status } = useSession()
 
+  console.log('LoginForm render:', { session, status, callbackUrl })
+
+  // Check for existing session
+  useEffect(() => {
+    console.log('Session status changed:', { status, session })
+    if (status === 'authenticated') {
+      console.log('User is authenticated, redirecting to:', callbackUrl)
+      router.push(callbackUrl)
+    }
+  }, [status, router, callbackUrl, session])
+
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   })
-
-  // Check for existing session
-  useEffect(() => {
-    if (status === 'authenticated') {
-      router.push(callbackUrl)
-    }
-  }, [status, router, callbackUrl])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -39,6 +43,8 @@ function LoginForm() {
     setIsLoading(true)
     setError(null)
 
+    console.log('Attempting to sign in with:', { email: formData.email, callbackUrl })
+
     try {
       const result = await signIn('credentials', {
         email: formData.email,
@@ -47,12 +53,16 @@ function LoginForm() {
         callbackUrl: callbackUrl
       })
 
+      console.log('Sign in result:', result)
+
       if (result?.error) {
+        console.log('Sign in error:', result.error)
         setError(result.error)
         return
       }
 
       if (result?.ok) {
+        console.log('Sign in successful, redirecting to:', callbackUrl)
         router.push(callbackUrl)
         router.refresh()
       }
