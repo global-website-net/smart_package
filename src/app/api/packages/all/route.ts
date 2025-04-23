@@ -37,38 +37,38 @@ export async function GET(request: Request) {
     }
 
     // Fetch all packages with user information
-    const { data: packages, error: packagesError } = await supabase
+    const { data: packages, error } = await supabase
       .from('Package')
       .select(`
-        *,
-        User:user_id (
-          fullName,
-          email
-        )
+        id,
+        trackingNumber,
+        current_location,
+        updated_at,
+        status,
+        shop_name,
+        createdAt,
+        user_email
       `)
-      .order('created_at', { ascending: false })
+      .order('createdAt', { ascending: false })
 
-    if (packagesError) {
-      console.error('Error fetching packages:', packagesError)
-      return NextResponse.json({ error: 'Failed to fetch packages' }, { status: 500 })
+    if (error) {
+      console.error('Error fetching packages:', error)
+      return NextResponse.json({ error: 'حدث خطأ أثناء جلب الشحنات' }, { status: 500 })
     }
 
     if (!packages) {
       return NextResponse.json({ packages: [] })
     }
 
-    // Format the packages data
-    const formattedPackages = packages.map((pkg: any) => ({
+    const formattedPackages = packages.map(pkg => ({
       id: pkg.id,
-      trackingNumber: pkg.tracking_number,
+      trackingNumber: pkg.trackingNumber,
       status: pkg.status,
-      shopName: pkg.shop_name,
       currentLocation: pkg.current_location,
       lastUpdated: pkg.updated_at,
-      createdAt: pkg.created_at,
-      userId: pkg.user_id,
-      userName: pkg.User?.fullName || 'Unknown User',
-      userEmail: pkg.User?.email || 'Unknown Email'
+      shopName: pkg.shop_name,
+      createdAt: pkg.createdAt,
+      userEmail: pkg.user_email
     }))
 
     return NextResponse.json({ packages: formattedPackages })

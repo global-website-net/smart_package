@@ -45,7 +45,7 @@ export default function Header() {
             <Link href="/packages" className="hover:text-green-500 transition-colors">
               الباقات
             </Link>
-            <Link href="/blog" className="hover:text-green-500 transition-colors mx-8">
+            <Link href="/blog" className="hover:text-green-500 transition-colors mx-24">
               المدونة
             </Link>
             <Link href="/contact" className="hover:text-green-500 transition-colors">

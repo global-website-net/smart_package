@@ -122,6 +122,9 @@ export default function AccountPage() {
 
       if (!response.ok) {
         const errorData = await response.json()
+        if (errorData.message === 'Invalid password') {
+          throw new Error('كلمة المرور غير صحيحة')
+        }
         throw new Error(errorData.message || 'Failed to update profile')
       }
 
@@ -164,13 +167,12 @@ export default function AccountPage() {
           ) : (
             <div className="bg-white rounded-lg shadow-md p-6">
               {updateSuccess && (
-                <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md">
+                <div className="p-4 bg-green-50 text-green-800 rounded-md">
                   {updateSuccess}
                 </div>
               )}
-              
-              {updateError && (
-                <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+              {updateError && updateError !== 'كلمة المرور الحالية مطلوبة للتعديل' && updateError !== 'كلمات المرور الجديدة غير متطابقة' && (
+                <div className="p-4 bg-red-50 text-red-800 rounded-md">
                   {updateError}
                 </div>
               )}
@@ -267,7 +269,6 @@ export default function AccountPage() {
                       disabled={!isEditing}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-50"
                     >
-                      <option value="">اختر رمز الهاتف</option>
                       <option value="+972">+972</option>
                       <option value="+970">+970</option>
                     </select>
@@ -353,7 +354,7 @@ export default function AccountPage() {
                   </>
                 )}
                 
-                <div className="flex justify-end space-x-4 rtl:space-x-reverse">
+                <div className="flex justify-end space-x-8 rtl:space-x-reverse">
                   {!isEditing ? (
                     <button
                       type="button"

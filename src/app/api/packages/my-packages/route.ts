@@ -5,11 +5,12 @@ import { supabase } from '@/lib/supabase'
 
 interface Package {
   id: string
-  tracking_number: string
+  trackingNumber: string
   current_location: string
   updated_at: string
   status: string
   shop_name: string
+  createdAt: string
 }
 
 export async function GET(request: Request) {
@@ -29,14 +30,15 @@ export async function GET(request: Request) {
       .from('Package')
       .select(`
         id,
-        tracking_number,
+        trackingNumber,
         current_location,
         updated_at,
         status,
-        shop_name
+        shop_name,
+        createdAt
       `)
       .eq('user_id', userId)
-      .order('created_at', { ascending: false })
+      .order('createdAt', { ascending: false })
 
     if (packagesError) {
       console.error('Error fetching packages:', packagesError)
@@ -53,11 +55,12 @@ export async function GET(request: Request) {
     // Format the packages data
     const formattedPackages = packages.map((pkg: Package) => ({
       id: pkg.id,
-      trackingNumber: pkg.tracking_number,
+      trackingNumber: pkg.trackingNumber,
       status: pkg.status,
       currentLocation: pkg.current_location,
       lastUpdated: pkg.updated_at,
-      shopName: pkg.shop_name
+      shopName: pkg.shop_name,
+      createdAt: pkg.createdAt
     }))
 
     return NextResponse.json(formattedPackages)
