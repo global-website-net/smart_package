@@ -81,7 +81,7 @@ export default function Header() {
             <Link href="/packages" className="hover:text-green-500 transition-colors">
               الباقات
             </Link>
-            <Link href="/blog" className="hover:text-green-500 transition-colors">
+            <Link href="/blog" className="hover:text-green-500 transition-colors mx-4">
               المدونة
             </Link>
             <Link href="/contact" className="hover:text-green-500 transition-colors">
@@ -108,7 +108,10 @@ export default function Header() {
                     <Link
                       href="/account"
                       className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
-                      onClick={() => setIsUserMenuOpen(false)}
+                      onClick={() => {
+                        setIsUserMenuOpen(false)
+                        router.push('/account')
+                      }}
                     >
                       حسابي
                     </Link>
@@ -116,7 +119,10 @@ export default function Header() {
                       <Link
                         href="/tracking_packages"
                         className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
-                        onClick={() => setIsUserMenuOpen(false)}
+                        onClick={() => {
+                          setIsUserMenuOpen(false)
+                          router.push('/tracking_packages')
+                        }}
                       >
                         ادارة الطرود
                       </Link>
@@ -125,7 +131,10 @@ export default function Header() {
                       <Link
                         href="/my-packages"
                         className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
-                        onClick={() => setIsUserMenuOpen(false)}
+                        onClick={() => {
+                          setIsUserMenuOpen(false)
+                          router.push('/my-packages')
+                        }}
                       >
                         طرودي
                       </Link>
@@ -145,7 +154,7 @@ export default function Header() {
             ) : (
               <Link
                 href="/auth/login"
-                className={`hover:text-green-500 transition-colors ${isLoginPage ? 'text-green-500' : ''}`}
+                className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600 transition-colors"
               >
                 تسجيل الدخول
               </Link>
@@ -212,7 +221,10 @@ export default function Header() {
                   <Link
                     href="/account"
                     className="hover:text-green-500 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
+                    onClick={() => {
+                      setIsMenuOpen(false)
+                      router.push('/account')
+                    }}
                   >
                     حسابي
                   </Link>
@@ -220,7 +232,10 @@ export default function Header() {
                     <Link
                       href="/tracking_packages"
                       className="hover:text-green-500 transition-colors"
-                      onClick={() => setIsMenuOpen(false)}
+                      onClick={() => {
+                        setIsMenuOpen(false)
+                        router.push('/tracking_packages')
+                      }}
                     >
                       ادارة الطرود
                     </Link>
@@ -229,7 +244,10 @@ export default function Header() {
                     <Link
                       href="/my-packages"
                       className="hover:text-green-500 transition-colors"
-                      onClick={() => setIsMenuOpen(false)}
+                      onClick={() => {
+                        setIsMenuOpen(false)
+                        router.push('/my-packages')
+                      }}
                     >
                       طرودي
                     </Link>
@@ -247,7 +265,7 @@ export default function Header() {
               ) : (
                 <Link
                   href="/auth/login"
-                  className={`hover:text-green-500 transition-colors ${isLoginPage ? 'text-green-500' : ''}`}
+                  className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600 transition-colors inline-block text-center"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   تسجيل الدخول
