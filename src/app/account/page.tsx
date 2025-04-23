@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Header from '../components/Header'
 import { useSession } from 'next-auth/react'
 import { supabase } from '@/lib/supabase'
+import bcrypt from 'bcrypt'
 
 interface UserProfile {
   id: string
@@ -37,6 +38,8 @@ export default function AccountPage() {
   const [updateSuccess, setUpdateSuccess] = useState('')
   const [updateError, setUpdateError] = useState('')
   const router = useRouter()
+
+  const isAdmin = session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER'
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -87,19 +90,38 @@ export default function AccountPage() {
     setUpdateSuccess('')
     setUpdateError('')
 
+    // Validate current password if editing
+    if (isEditing && !formData.currentPassword) {
+      setUpdateError('كلمة المرور الحالية مطلوبة للتعديل')
+      return
+    }
+
     // Validate passwords if changing password
     if (formData.newPassword) {
       if (formData.newPassword !== formData.confirmPassword) {
         setUpdateError('كلمات المرور الجديدة غير متطابقة')
         return
       }
-      if (!formData.currentPassword) {
-        setUpdateError('كلمة المرور الحالية مطلوبة لتغيير كلمة المرور')
-        return
-      }
     }
 
     try {
+      // First verify the current password
+      if (isEditing) {
+        const { data: user, error: authError } = await supabase
+          .from('User')
+          .select('password')
+          .eq('email', session?.user?.email)
+          .single()
+
+        if (authError) throw authError
+
+        const isValid = await bcrypt.compare(formData.currentPassword, user.password)
+        if (!isValid) {
+          setUpdateError('كلمة المرور الحالية غير صحيحة')
+          return
+        }
+      }
+
       const response = await fetch('/api/user/profile', {
         method: 'PUT',
         headers: {
@@ -107,11 +129,11 @@ export default function AccountPage() {
         },
         body: JSON.stringify({
           fullName: formData.fullName,
-          governorate: formData.governorate,
-          town: formData.town,
+          governorate: isAdmin ? undefined : formData.governorate,
+          town: isAdmin ? undefined : formData.town,
           phonePrefix: formData.phonePrefix,
           phoneNumber: formData.phoneNumber,
-          currentPassword: formData.currentPassword || undefined,
+          currentPassword: formData.currentPassword,
           newPassword: formData.newPassword || undefined,
         }),
       })
@@ -201,35 +223,39 @@ export default function AccountPage() {
                   />
                 </div>
 
-                <div>
-                  <label htmlFor="governorate" className="block text-sm font-medium text-gray-700 mb-1">
-                    المحافظة
-                  </label>
-                  <input
-                    type="text"
-                    id="governorate"
-                    name="governorate"
-                    value={formData.governorate}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-50"
-                  />
-                </div>
+                {!isAdmin && (
+                  <>
+                    <div>
+                      <label htmlFor="governorate" className="block text-sm font-medium text-gray-700 mb-1">
+                        المحافظة
+                      </label>
+                      <input
+                        type="text"
+                        id="governorate"
+                        name="governorate"
+                        value={formData.governorate}
+                        onChange={handleInputChange}
+                        disabled={!isEditing}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-50"
+                      />
+                    </div>
 
-                <div>
-                  <label htmlFor="town" className="block text-sm font-medium text-gray-700 mb-1">
-                    المدينة
-                  </label>
-                  <input
-                    type="text"
-                    id="town"
-                    name="town"
-                    value={formData.town}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-50"
-                  />
-                </div>
+                    <div>
+                      <label htmlFor="town" className="block text-sm font-medium text-gray-700 mb-1">
+                        المدينة
+                      </label>
+                      <input
+                        type="text"
+                        id="town"
+                        name="town"
+                        value={formData.town}
+                        onChange={handleInputChange}
+                        disabled={!isEditing}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-50"
+                      />
+                    </div>
+                  </>
+                )}
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -262,11 +288,11 @@ export default function AccountPage() {
                     />
                   </div>
                 </div>
-                
+
                 {isEditing && (
                   <>
                     <div className="border-t border-gray-200 pt-4">
-                      <h3 className="text-lg font-medium mb-4">تغيير كلمة المرور</h3>
+                      <h3 className="text-lg font-medium mb-4">تأكيد التعديلات</h3>
                       
                       <div className="mb-4">
                         <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
@@ -279,8 +305,13 @@ export default function AccountPage() {
                           value={formData.currentPassword}
                           onChange={handleInputChange}
                           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                          placeholder="أدخل كلمة المرور الحالية للتأكيد"
                         />
                       </div>
+                    </div>
+
+                    <div className="border-t border-gray-200 pt-4">
+                      <h3 className="text-lg font-medium mb-4">تغيير كلمة المرور (اختياري)</h3>
                       
                       <div className="mb-4">
                         <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
@@ -293,6 +324,7 @@ export default function AccountPage() {
                           value={formData.newPassword}
                           onChange={handleInputChange}
                           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                          placeholder="كلمة المرور الجديدة"
                         />
                       </div>
                       
@@ -307,6 +339,7 @@ export default function AccountPage() {
                           value={formData.confirmPassword}
                           onChange={handleInputChange}
                           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                          placeholder="تأكيد كلمة المرور الجديدة"
                         />
                       </div>
                     </div>

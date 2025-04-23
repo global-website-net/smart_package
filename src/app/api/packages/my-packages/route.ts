@@ -3,6 +3,28 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 
+interface SupabasePackage {
+  id: string
+  tracking_number: string
+  current_location: string
+  updated_at: string
+  status: {
+    name: string
+  }[]
+  shop: {
+    fullName: string
+  }[]
+}
+
+interface FormattedPackage {
+  id: string
+  trackingNumber: string
+  status: string
+  currentLocation: string
+  lastUpdated: string
+  shopName: string
+}
+
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions)
@@ -21,16 +43,13 @@ export async function GET(request: Request) {
       .select(`
         id,
         tracking_number,
-        status_id,
         current_location,
         updated_at,
-        Status:status_id (
-          name,
-          description
+        status:status_id (
+          name
         ),
-        Shop:shop_id (
-          fullName,
-          email
+        shop:shop_id (
+          fullName
         )
       `)
       .eq('user_id', userId)
@@ -45,13 +64,13 @@ export async function GET(request: Request) {
     }
 
     // Transform the data to match the frontend interface
-    const formattedPackages = packages?.map(pkg => ({
+    const formattedPackages: FormattedPackage[] = (packages as SupabasePackage[])?.map(pkg => ({
       id: pkg.id,
       trackingNumber: pkg.tracking_number,
-      status: pkg.Status?.[0]?.name || 'Unknown',
+      status: pkg.status?.[0]?.name || 'Unknown',
       currentLocation: pkg.current_location || 'غير معروف',
       lastUpdated: pkg.updated_at,
-      shopName: pkg.Shop?.[0]?.fullName || 'غير معروف'
+      shopName: pkg.shop?.[0]?.fullName || 'غير معروف'
     })) || []
 
     return NextResponse.json(formattedPackages)
