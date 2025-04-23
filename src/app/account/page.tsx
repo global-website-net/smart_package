@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import Header from '../components/Header'
 import { useSession } from 'next-auth/react'
 import { supabase } from '@/lib/supabase'
-import bcrypt from 'bcrypt'
 
 interface UserProfile {
   id: string
@@ -39,7 +38,7 @@ export default function AccountPage() {
   const [updateError, setUpdateError] = useState('')
   const router = useRouter()
 
-  const isAdmin = session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER'
+  const isAdminOrOwner = session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER'
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -105,23 +104,6 @@ export default function AccountPage() {
     }
 
     try {
-      // First verify the current password
-      if (isEditing) {
-        const { data: user, error: authError } = await supabase
-          .from('User')
-          .select('password')
-          .eq('email', session?.user?.email)
-          .single()
-
-        if (authError) throw authError
-
-        const isValid = await bcrypt.compare(formData.currentPassword, user.password)
-        if (!isValid) {
-          setUpdateError('كلمة المرور الحالية غير صحيحة')
-          return
-        }
-      }
-
       const response = await fetch('/api/user/profile', {
         method: 'PUT',
         headers: {
@@ -129,8 +111,8 @@ export default function AccountPage() {
         },
         body: JSON.stringify({
           fullName: formData.fullName,
-          governorate: isAdmin ? undefined : formData.governorate,
-          town: isAdmin ? undefined : formData.town,
+          governorate: isAdminOrOwner ? undefined : formData.governorate,
+          town: isAdminOrOwner ? undefined : formData.town,
           phonePrefix: formData.phonePrefix,
           phoneNumber: formData.phoneNumber,
           currentPassword: formData.currentPassword,
@@ -223,7 +205,7 @@ export default function AccountPage() {
                   />
                 </div>
 
-                {!isAdmin && (
+                {!isAdminOrOwner && (
                   <>
                     <div>
                       <label htmlFor="governorate" className="block text-sm font-medium text-gray-700 mb-1">
