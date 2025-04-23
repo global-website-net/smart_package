@@ -2,7 +2,6 @@
 
 import { useState, Suspense, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import Link from 'next/link'
 import Header from '../../components/Header'
 import { signIn, useSession } from 'next-auth/react'
 
@@ -129,12 +128,13 @@ function LoginForm() {
 
       {/* Register Link */}
       <div className="text-center">
-        <Link
-          href="/auth/register"
+        <button
+          type="button"
+          onClick={() => router.push('/auth/register')}
           className="text-green-600 hover:text-green-700"
         >
           إنشاء حساب جديد
-        </Link>
+        </button>
       </div>
     </form>
   )
