@@ -18,7 +18,7 @@ export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'غير مصرح لك' }, { status: 401 })
     }
 
     // Check if user is admin or owner
@@ -29,21 +29,19 @@ export async function GET(request: Request) {
       .single()
 
     if (userError || !user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+      return NextResponse.json({ error: 'لم يتم العثور على المستخدم' }, { status: 404 })
     }
 
     if (user.role !== 'ADMIN' && user.role !== 'OWNER') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'غير مصرح لك' }, { status: 401 })
     }
 
-    // Fetch all packages with user information
+    // Fetch all packages
     const { data: packages, error } = await supabase
       .from('Package')
       .select(`
         id,
         trackingNumber,
-        current_location,
-        updated_at,
         status,
         shop_name,
         createdAt,
@@ -64,8 +62,6 @@ export async function GET(request: Request) {
       id: pkg.id,
       trackingNumber: pkg.trackingNumber,
       status: pkg.status,
-      currentLocation: pkg.current_location,
-      lastUpdated: pkg.updated_at,
       shopName: pkg.shop_name,
       createdAt: pkg.createdAt,
       userEmail: pkg.user_email
@@ -75,7 +71,7 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Error in packages API:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch packages' },
+      { error: 'حدث خطأ أثناء جلب الشحنات' },
       { status: 500 }
     )
   }

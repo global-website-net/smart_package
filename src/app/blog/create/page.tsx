@@ -33,12 +33,15 @@ export default function CreateBlogPost() {
     setSuccess('')
 
     try {
-      const response = await fetch('/api/blog', {
+      const response = await fetch('/api/blog/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          title: formData.title,
+          content: formData.content,
+        }),
       })
 
       const data = await response.json()

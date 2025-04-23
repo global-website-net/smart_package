@@ -26,39 +26,32 @@ export async function GET(request: Request) {
     const userId = session.user.id
 
     // Get user's packages using Supabase
-    const { data: packages, error: packagesError } = await supabase
+    const { data: packages, error } = await supabase
       .from('Package')
       .select(`
         id,
         trackingNumber,
-        current_location,
-        updated_at,
         status,
         shop_name,
-        createdAt
+        createdAt,
+        user_email
       `)
-      .eq('user_id', userId)
+      .eq('user_email', session.user.email)
       .order('createdAt', { ascending: false })
 
-    if (packagesError) {
-      console.error('Error fetching packages:', packagesError)
-      return NextResponse.json(
-        { error: 'حدث خطأ أثناء جلب الشحنات' },
-        { status: 500 }
-      )
+    if (error) {
+      console.error('Error fetching packages:', error)
+      return NextResponse.json({ error: 'حدث خطأ أثناء جلب الشحنات' }, { status: 500 })
     }
 
-    if (!packages) {
-      return NextResponse.json([])
+    if (!packages || packages.length === 0) {
+      return NextResponse.json({ packages: [] })
     }
 
-    // Format the packages data
-    const formattedPackages = packages.map((pkg: Package) => ({
+    const formattedPackages = packages.map(pkg => ({
       id: pkg.id,
       trackingNumber: pkg.trackingNumber,
       status: pkg.status,
-      currentLocation: pkg.current_location,
-      lastUpdated: pkg.updated_at,
       shopName: pkg.shop_name,
       createdAt: pkg.createdAt
     }))

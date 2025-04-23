@@ -123,9 +123,10 @@ export default function AccountPage() {
       if (!response.ok) {
         const errorData = await response.json()
         if (errorData.message === 'Invalid password') {
-          throw new Error('كلمة المرور غير صحيحة')
+          setUpdateError('كلمة المرور غير صحيحة')
+          return
         }
-        throw new Error(errorData.message || 'Failed to update profile')
+        throw new Error(errorData.message || 'حدث خطأ أثناء تحديث الملف الشخصي')
       }
 
       const data = await response.json()
@@ -354,7 +355,7 @@ export default function AccountPage() {
                   </>
                 )}
                 
-                <div className="flex justify-end space-x-8 rtl:space-x-reverse">
+                <div className="flex justify-end space-x-12 rtl:space-x-reverse">
                   {!isEditing ? (
                     <button
                       type="button"
