@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 // Get all blogs
 export async function GET() {
@@ -39,34 +41,59 @@ export async function GET() {
 // Create new blog - only for admin/owner
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    const { title, content, authorId } = body
-
-    // Get user role
-    const user = await prisma.user.findUnique({
-      where: { id: authorId }
-    })
-
-    if (!user || (user.role !== 'ADMIN' && user.role !== 'OWNER')) {
+    const session = await getServerSession(authOptions)
+    if (!session) {
       return NextResponse.json(
-        { error: 'Unauthorized - Only admin and owner can create blogs' },
+        { error: 'غير مصرح لك' },
+        { status: 401 }
+      )
+    }
+
+    const body = await request.json()
+    const { title, content } = body
+
+    // Check if user is admin or owner
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER') {
+      return NextResponse.json(
+        { error: 'غير مصرح لك - فقط المدير والمالك يمكنهم إنشاء المدونات' },
         { status: 403 }
       )
     }
 
-    const blog = await prisma.blogPost.create({
-      data: {
+    const { data: blog, error } = await supabase
+      .from('BlogPost')
+      .insert({
         title,
         content,
-        authorId
-      }
-    })
+        authorId: session.user.id,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .select(`
+        *,
+        User:authorId (
+          fullName,
+          email
+        )
+      `)
+      .single()
 
-    return NextResponse.json(blog)
+    if (error) {
+      console.error('Error creating blog:', error)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء إنشاء المدونة' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      ...blog,
+      author: blog.User
+    })
   } catch (error) {
     console.error('Error creating blog:', error)
     return NextResponse.json(
-      { error: 'Failed to create blog' },
+      { error: 'حدث خطأ أثناء إنشاء المدونة' },
       { status: 500 }
     )
   }
@@ -75,34 +102,58 @@ export async function POST(request: Request) {
 // Update blog - only for admin/owner
 export async function PUT(request: Request) {
   try {
-    const body = await request.json()
-    const { id, title, content, authorId } = body
-
-    // Get user role
-    const user = await prisma.user.findUnique({
-      where: { id: authorId }
-    })
-
-    if (!user || (user.role !== 'ADMIN' && user.role !== 'OWNER')) {
+    const session = await getServerSession(authOptions)
+    if (!session) {
       return NextResponse.json(
-        { error: 'Unauthorized - Only admin and owner can update blogs' },
+        { error: 'غير مصرح لك' },
+        { status: 401 }
+      )
+    }
+
+    const body = await request.json()
+    const { id, title, content } = body
+
+    // Check if user is admin or owner
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER') {
+      return NextResponse.json(
+        { error: 'غير مصرح لك - فقط المدير والمالك يمكنهم تحديث المدونات' },
         { status: 403 }
       )
     }
 
-    const blog = await prisma.blogPost.update({
-      where: { id },
-      data: {
+    const { data: blog, error } = await supabase
+      .from('BlogPost')
+      .update({
         title,
-        content
-      }
-    })
+        content,
+        updatedAt: new Date()
+      })
+      .eq('id', id)
+      .select(`
+        *,
+        User:authorId (
+          fullName,
+          email
+        )
+      `)
+      .single()
 
-    return NextResponse.json(blog)
+    if (error) {
+      console.error('Error updating blog:', error)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء تحديث المدونة' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      ...blog,
+      author: blog.User
+    })
   } catch (error) {
     console.error('Error updating blog:', error)
     return NextResponse.json(
-      { error: 'Failed to update blog' },
+      { error: 'حدث خطأ أثناء تحديث المدونة' },
       { status: 500 }
     )
   }
