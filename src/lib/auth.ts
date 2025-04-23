@@ -1,7 +1,7 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
+import { supabase } from './supabase'
 import bcrypt from 'bcryptjs'
-import { pool } from '@/lib/db'
 
 // Define UserRole type
 type UserRole = 'REGULAR' | 'SHOP' | 'ADMIN' | 'OWNER'
@@ -41,36 +41,36 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error('Email and password are required')
+          throw new Error('البريد الإلكتروني وكلمة المرور مطلوبان')
         }
 
-        const client = await pool.connect()
         try {
-          const result = await client.query(
-            'SELECT * FROM "User" WHERE email = $1',
-            [credentials.email]
-          )
+          // Find user in database
+          const { data: user, error } = await supabase
+            .from('User')
+            .select('*')
+            .eq('email', credentials.email)
+            .single()
 
-          const user = result.rows[0]
-
-          if (!user) {
-            throw new Error('No user found with this email')
+          if (error || !user) {
+            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
           }
 
-          const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
-
-          if (!isPasswordValid) {
-            throw new Error('Invalid password')
+          // Verify password
+          const isValidPassword = await bcrypt.compare(credentials.password, user.password)
+          if (!isValidPassword) {
+            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
           }
 
           return {
             id: user.id,
             email: user.email,
             name: user.fullName,
-            role: user.role as UserRole
+            role: user.role
           }
-        } finally {
-          client.release()
+        } catch (error) {
+          console.error('Authentication error:', error)
+          throw error
         }
       }
     })
@@ -78,14 +78,12 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id
         token.role = user.role
       }
       return token
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id
         session.user.role = token.role
       }
       return session
@@ -93,7 +91,7 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/auth/login',
-    error: '/auth/login'
+    error: '/auth/error'
   },
   session: {
     strategy: 'jwt'

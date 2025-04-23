@@ -1,42 +1,36 @@
 import { NextResponse } from 'next/server'
-import { pool } from '@/lib/db'
+import { supabase } from '@/lib/supabase'
 
 // Get all blogs
 export async function GET() {
   try {
-    const client = await pool.connect()
-    try {
-      const result = await client.query(`
-        SELECT 
-          bp.*,
-          u."fullName" as "authorName",
-          u.email as "authorEmail"
-        FROM "BlogPost" bp
-        LEFT JOIN "User" u ON bp."authorId" = u.id
-        ORDER BY bp."createdAt" DESC
+    const { data: blogs, error } = await supabase
+      .from('BlogPost')
+      .select(`
+        *,
+        User:authorId (
+          fullName,
+          email
+        )
       `)
+      .order('createdAt', { ascending: false })
 
-      const blogs = result.rows.map(blog => ({
-        id: blog.id,
-        title: blog.title,
-        content: blog.content,
-        createdAt: blog.createdAt,
-        updatedAt: blog.updatedAt,
-        author: {
-          id: blog.authorId,
-          fullName: blog.authorName,
-          email: blog.authorEmail
-        }
-      }))
-
-      return NextResponse.json(blogs)
-    } finally {
-      client.release()
+    if (error) {
+      console.error('Error fetching blogs:', error)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء جلب المدونات' },
+        { status: 500 }
+      )
     }
+
+    return NextResponse.json(blogs?.map(blog => ({
+      ...blog,
+      author: blog.User
+    })))
   } catch (error) {
-    console.error('Error fetching blogs:', error)
+    console.error('Error in GET /api/blog:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch blog posts' },
+      { error: 'حدث خطأ أثناء جلب المدونات' },
       { status: 500 }
     )
   }
