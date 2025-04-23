@@ -79,7 +79,7 @@ export default function AccountPage() {
     }
   }, [status, session])
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
   }
@@ -241,21 +241,6 @@ export default function AccountPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="phonePrefix" className="block text-sm font-medium text-gray-700 mb-1">
-                      رمز الهاتف
-                    </label>
-                    <input
-                      type="text"
-                      id="phonePrefix"
-                      name="phonePrefix"
-                      value={formData.phonePrefix}
-                      onChange={handleInputChange}
-                      disabled={!isEditing}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-50"
-                    />
-                  </div>
-
-                  <div>
                     <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
                       رقم الهاتف
                     </label>
@@ -268,6 +253,24 @@ export default function AccountPage() {
                       disabled={!isEditing}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-50"
                     />
+                  </div>
+
+                  <div>
+                    <label htmlFor="phonePrefix" className="block text-sm font-medium text-gray-700 mb-1">
+                      رمز الهاتف
+                    </label>
+                    <select
+                      id="phonePrefix"
+                      name="phonePrefix"
+                      value={formData.phonePrefix}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-50"
+                    >
+                      <option value="">اختر رمز الهاتف</option>
+                      <option value="+972">+972</option>
+                      <option value="+970">+970</option>
+                    </select>
                   </div>
                 </div>
 
@@ -286,9 +289,18 @@ export default function AccountPage() {
                           name="currentPassword"
                           value={formData.currentPassword}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                          className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 ${
+                            updateError === 'كلمة المرور الحالية مطلوبة للتعديل' 
+                              ? 'border-red-500 bg-red-50' 
+                              : 'border-gray-300'
+                          }`}
                           placeholder="أدخل كلمة المرور الحالية للتأكيد"
                         />
+                        {updateError === 'كلمة المرور الحالية مطلوبة للتعديل' && (
+                          <p className="mt-2 text-sm text-red-600">
+                            {updateError}
+                          </p>
+                        )}
                       </div>
                     </div>
 
@@ -305,7 +317,11 @@ export default function AccountPage() {
                           name="newPassword"
                           value={formData.newPassword}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                          className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 ${
+                            updateError === 'كلمات المرور الجديدة غير متطابقة' 
+                              ? 'border-red-500 bg-red-50' 
+                              : 'border-gray-300'
+                          }`}
                           placeholder="كلمة المرور الجديدة"
                         />
                       </div>
@@ -320,9 +336,18 @@ export default function AccountPage() {
                           name="confirmPassword"
                           value={formData.confirmPassword}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                          className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 ${
+                            updateError === 'كلمات المرور الجديدة غير متطابقة' 
+                              ? 'border-red-500 bg-red-50' 
+                              : 'border-gray-300'
+                          }`}
                           placeholder="تأكيد كلمة المرور الجديدة"
                         />
+                        {updateError === 'كلمات المرور الجديدة غير متطابقة' && (
+                          <p className="mt-2 text-sm text-red-600">
+                            {updateError}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </>

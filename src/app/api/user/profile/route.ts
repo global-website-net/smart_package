@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
-import bcrypt from 'bcryptjs'
+import bcrypt from 'bcrypt'
 
 export async function GET(request: Request) {
   try {
@@ -54,53 +54,72 @@ export async function GET(request: Request) {
 export async function PUT(request: Request) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session) {
-      return NextResponse.json(
-        { error: 'غير مصرح لك' },
-        { status: 401 }
-      )
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const userId = session.user.id
-    const updates = await request.json()
+    const body = await request.json()
+    const { 
+      fullName, 
+      governorate, 
+      town, 
+      phonePrefix, 
+      phoneNumber, 
+      currentPassword,
+      newPassword 
+    } = body
 
-    // Update user profile using Supabase
-    const { data: user, error: userError } = await supabase
+    // First verify the current password if provided
+    if (currentPassword) {
+      const { data: user, error: userError } = await supabase
+        .from('User')
+        .select('password')
+        .eq('email', session.user.email)
+        .single()
+
+      if (userError || !user) {
+        return NextResponse.json({ error: 'User not found' }, { status: 404 })
+      }
+
+      const isValid = await bcrypt.compare(currentPassword, user.password)
+      if (!isValid) {
+        return NextResponse.json({ error: 'كلمة المرور الحالية غير صحيحة' }, { status: 400 })
+      }
+    }
+
+    // Prepare the update data
+    const updateData: any = {
+      fullName,
+      governorate,
+      town,
+      phonePrefix,
+      phoneNumber,
+    }
+
+    // Only include new password if provided
+    if (newPassword) {
+      const hashedPassword = await bcrypt.hash(newPassword, 10)
+      updateData.password = hashedPassword
+    }
+
+    // Update the user profile
+    const { data: updatedUser, error: updateError } = await supabase
       .from('User')
-      .update({
-        ...updates,
-        updatedAt: new Date()
-      })
-      .eq('id', userId)
+      .update(updateData)
+      .eq('email', session.user.email)
       .select()
       .single()
 
-    if (userError) {
-      console.error('Error updating user profile:', userError)
-      return NextResponse.json(
-        { error: 'حدث خطأ أثناء تحديث بيانات المستخدم' },
-        { status: 500 }
-      )
+    if (updateError) {
+      console.error('Error updating user:', updateError)
+      return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 })
     }
 
-    if (!user) {
-      return NextResponse.json(
-        { error: 'المستخدم غير موجود' },
-        { status: 404 }
-      )
-    }
-
-    // Remove sensitive data
-    const { password, ...userWithoutPassword } = user
-
-    return NextResponse.json({
-      message: 'تم تحديث بيانات المستخدم بنجاح',
-      user: userWithoutPassword
-    })
+    return NextResponse.json(updatedUser)
   } catch (error) {
     console.error('Error updating user profile:', error)
     return NextResponse.json(
-      { error: 'حدث خطأ أثناء تحديث بيانات المستخدم' },
+      { error: 'Failed to update profile' },
       { status: 500 }
     )
   }

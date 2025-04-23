@@ -3,15 +3,20 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '../../components/Header'
+import { useSession } from 'next-auth/react'
 
 export default function CreateBlogPost() {
   const router = useRouter()
+  const { data: session } = useSession()
   const [formData, setFormData] = useState({
     title: '',
     content: '',
     summary: '',
     coverImage: ''
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -23,16 +28,42 @@ export default function CreateBlogPost() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Implement blog post creation
-    alert('سيتم تنفيذ إنشاء المقال قريباً')
+    setIsSubmitting(true)
+    setError('')
+    setSuccess('')
+
+    try {
+      const response = await fetch('/api/blog', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'حدث خطأ أثناء إنشاء المقال')
+      }
+
+      setSuccess('تم إنشاء المقال بنجاح')
+      setTimeout(() => {
+        router.push('/blog')
+      }, 2000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'حدث خطأ أثناء إنشاء المقال')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      <main className="p-4 pt-24">
-        <div className="max-w-4xl mx-auto">
+      <main className="pt-24 pb-12">
+        <div className="max-w-4xl mx-auto px-4">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold mb-6">إنشاء مقال جديد</h1>
             <div className="flex justify-center items-center">
@@ -42,6 +73,18 @@ export default function CreateBlogPost() {
               </div>
             </div>
           </div>
+
+          {error && (
+            <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg">
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="mb-6 p-4 bg-green-100 text-green-700 rounded-lg">
+              {success}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-8 space-y-6">
             {/* Title */}
@@ -58,6 +101,7 @@ export default function CreateBlogPost() {
                 className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
                 placeholder="عنوان المقال"
                 required
+                disabled={isSubmitting}
               />
             </div>
 
@@ -75,6 +119,7 @@ export default function CreateBlogPost() {
                 className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
                 placeholder="ملخص قصير للمقال"
                 required
+                disabled={isSubmitting}
               />
             </div>
 
@@ -92,6 +137,7 @@ export default function CreateBlogPost() {
                 className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
                 placeholder="https://example.com/image.jpg"
                 required
+                disabled={isSubmitting}
               />
             </div>
 
@@ -108,6 +154,7 @@ export default function CreateBlogPost() {
                 className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500 min-h-[300px]"
                 placeholder="اكتب محتوى المقال هنا..."
                 required
+                disabled={isSubmitting}
               />
             </div>
 
@@ -115,9 +162,10 @@ export default function CreateBlogPost() {
             <div className="pt-4">
               <button
                 type="submit"
-                className="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition-colors"
+                className="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                disabled={isSubmitting}
               >
-                نشر المقال
+                {isSubmitting ? 'جاري النشر...' : 'نشر المقال'}
               </button>
             </div>
           </form>

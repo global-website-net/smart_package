@@ -3,26 +3,13 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 
-interface SupabasePackage {
+interface Package {
   id: string
   tracking_number: string
   current_location: string
   updated_at: string
-  status: {
-    name: string
-  }[]
-  shop: {
-    fullName: string
-  }[]
-}
-
-interface FormattedPackage {
-  id: string
-  trackingNumber: string
   status: string
-  currentLocation: string
-  lastUpdated: string
-  shopName: string
+  shop_name: string
 }
 
 export async function GET(request: Request) {
@@ -45,12 +32,8 @@ export async function GET(request: Request) {
         tracking_number,
         current_location,
         updated_at,
-        status:status_id (
-          name
-        ),
-        shop:shop_id (
-          fullName
-        )
+        status,
+        shop_name
       `)
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
@@ -63,15 +46,19 @@ export async function GET(request: Request) {
       )
     }
 
-    // Transform the data to match the frontend interface
-    const formattedPackages: FormattedPackage[] = (packages as SupabasePackage[])?.map(pkg => ({
+    if (!packages) {
+      return NextResponse.json([])
+    }
+
+    // Format the packages data
+    const formattedPackages = packages.map((pkg: Package) => ({
       id: pkg.id,
       trackingNumber: pkg.tracking_number,
-      status: pkg.status?.[0]?.name || 'Unknown',
-      currentLocation: pkg.current_location || 'غير معروف',
+      status: pkg.status,
+      currentLocation: pkg.current_location,
       lastUpdated: pkg.updated_at,
-      shopName: pkg.shop?.[0]?.fullName || 'غير معروف'
-    })) || []
+      shopName: pkg.shop_name
+    }))
 
     return NextResponse.json(formattedPackages)
   } catch (error) {
