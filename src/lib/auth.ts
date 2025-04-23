@@ -45,20 +45,24 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          // Find user in database
-          const { data: user, error } = await supabase
+          // First, try to sign in with Supabase Auth
+          const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+            email: credentials.email,
+            password: credentials.password
+          })
+
+          if (authError) {
+            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
+          }
+
+          // Then get the user details from our database
+          const { data: user, error: userError } = await supabase
             .from('User')
             .select('*')
             .eq('email', credentials.email)
             .single()
 
-          if (error || !user) {
-            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
-          }
-
-          // Verify password
-          const isValidPassword = await bcrypt.compare(credentials.password, user.password)
-          if (!isValidPassword) {
+          if (userError || !user) {
             throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
           }
 
@@ -78,12 +82,14 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        token.id = user.id
         token.role = user.role
       }
       return token
     },
     async session({ session, token }) {
       if (session.user) {
+        session.user.id = token.id
         session.user.role = token.role
       }
       return session
