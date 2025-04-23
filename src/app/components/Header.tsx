@@ -1,18 +1,63 @@
 'use client'
 
-import { useState } from 'react'
-import { usePathname } from 'next/navigation'
-import { useSession, signOut } from 'next-auth/react'
+import { useState, useEffect } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const [user, setUser] = useState<any>(null)
   const pathname = usePathname()
+  const router = useRouter()
   const isLoginPage = pathname === '/auth/login'
-  const { data: session, status } = useSession()
-  const isLoggedIn = status === 'authenticated'
-  const isAdmin = session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER'
+
+  useEffect(() => {
+    // Check for existing session
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        // Get user data from localStorage
+        const userData = localStorage.getItem('user')
+        if (userData) {
+          setUser(JSON.parse(userData))
+        }
+      }
+    }
+
+    checkSession()
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        const userData = localStorage.getItem('user')
+        if (userData) {
+          setUser(JSON.parse(userData))
+        }
+      } else {
+        setUser(null)
+      }
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut()
+      localStorage.removeItem('user')
+      setUser(null)
+      router.push('/')
+    } catch (error) {
+      console.error('Error signing out:', error)
+    }
+  }
+
+  const isLoggedIn = !!user
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'OWNER'
 
   return (
     <header className="bg-black text-white fixed w-full top-0 z-50">
@@ -48,7 +93,7 @@ export default function Header() {
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center hover:text-green-500 transition-colors"
                 >
-                  <span className="mr-2">{session?.user?.name || 'حسابي'}</span>
+                  <span className="mr-2">{user?.name || 'حسابي'}</span>
                   <svg
                     className={`w-4 h-4 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`}
                     fill="none"
@@ -88,7 +133,7 @@ export default function Header() {
                     <button
                       onClick={() => {
                         setIsUserMenuOpen(false)
-                        signOut()
+                        handleSignOut()
                       }}
                       className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
                     >
@@ -98,23 +143,19 @@ export default function Header() {
                 )}
               </div>
             ) : (
-              <>
-                {!isLoginPage && (
-                  <Link
-                    href="/auth/login"
-                    className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600 transition-colors"
-                  >
-                    تسجيل الدخول
-                  </Link>
-                )}
-              </>
+              <Link
+                href="/auth/login"
+                className={`hover:text-green-500 transition-colors ${isLoginPage ? 'text-green-500' : ''}`}
+              >
+                تسجيل الدخول
+              </Link>
             )}
           </nav>
 
-          {/* Mobile menu button */}
+          {/* Mobile Menu Button */}
           <button
+            className="md:hidden p-2"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden text-white"
           >
             <svg
               className="w-6 h-6"
@@ -141,50 +182,76 @@ export default function Header() {
           </button>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden py-4">
             <nav className="flex flex-col space-y-4">
-              <Link href="/packages" className="hover:text-green-500 transition-colors">
+              <Link
+                href="/packages"
+                className="hover:text-green-500 transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
                 الباقات
               </Link>
-              <Link href="/blog" className="hover:text-green-500 transition-colors">
+              <Link
+                href="/blog"
+                className="hover:text-green-500 transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
                 المدونة
               </Link>
-              <Link href="/contact" className="hover:text-green-500 transition-colors">
+              <Link
+                href="/contact"
+                className="hover:text-green-500 transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
                 اتصل بنا
               </Link>
               {isLoggedIn ? (
                 <>
-                  <Link href="/account" className="hover:text-green-500 transition-colors">
+                  <Link
+                    href="/account"
+                    className="hover:text-green-500 transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
                     حسابي
                   </Link>
                   {isAdmin && (
-                    <Link href="/tracking_packages" className="hover:text-green-500 transition-colors">
+                    <Link
+                      href="/tracking_packages"
+                      className="hover:text-green-500 transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
                       ادارة الطرود
                     </Link>
                   )}
                   {!isAdmin && (
-                    <Link href="/my-packages" className="hover:text-green-500 transition-colors">
+                    <Link
+                      href="/my-packages"
+                      className="hover:text-green-500 transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
                       طرودي
                     </Link>
                   )}
                   <button
-                    onClick={() => signOut()}
-                    className="text-right hover:text-green-500 transition-colors"
+                    onClick={() => {
+                      setIsMenuOpen(false)
+                      handleSignOut()
+                    }}
+                    className="text-left hover:text-green-500 transition-colors"
                   >
                     تسجيل الخروج
                   </button>
                 </>
               ) : (
-                !isLoginPage && (
-                  <Link
-                    href="/auth/login"
-                    className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600 transition-colors inline-block text-center"
-                  >
-                    تسجيل الدخول
-                  </Link>
-                )
+                <Link
+                  href="/auth/login"
+                  className={`hover:text-green-500 transition-colors ${isLoginPage ? 'text-green-500' : ''}`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  تسجيل الدخول
+                </Link>
               )}
             </nav>
           </div>
