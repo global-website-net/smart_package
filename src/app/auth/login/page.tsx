@@ -129,16 +129,13 @@ function LoginForm() {
 
       {/* Register Link */}
       <div className="text-center">
-        <Link
-          href="/auth/register"
+        <button
+          type="button"
+          onClick={() => router.push('/auth/register')}
           className="text-green-600 hover:text-green-700"
-          onClick={(e) => {
-            e.preventDefault()
-            router.push('/auth/register')
-          }}
         >
           إنشاء حساب جديد
-        </Link>
+        </button>
       </div>
     </form>
   )

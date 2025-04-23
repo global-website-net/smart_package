@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Header from '../../components/Header'
+import { signIn } from 'next-auth/react'
 import { supabase } from '@/lib/supabase'
 import bcrypt from 'bcryptjs'
 
@@ -76,8 +77,20 @@ export default function RegisterPage() {
         throw new Error('حدث خطأ أثناء إنشاء الحساب')
       }
 
-      // Redirect to login page
-      router.push('/auth/login?registered=true')
+      // Sign in the user after successful registration
+      const result = await signIn('credentials', {
+        email: formData.email,
+        password: formData.password,
+        redirect: false
+      })
+
+      if (result?.error) {
+        throw new Error(result.error)
+      }
+
+      // Redirect to home page
+      router.push('/')
+      router.refresh()
     } catch (error) {
       console.error('Registration error:', error)
       setError(error instanceof Error ? error.message : 'حدث خطأ أثناء إنشاء الحساب')
