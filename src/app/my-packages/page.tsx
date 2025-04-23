@@ -11,6 +11,7 @@ interface Package {
   status: string
   currentLocation: string
   lastUpdated: string
+  shopName: string
 }
 
 export default function MyPackagesPage() {
@@ -20,20 +21,19 @@ export default function MyPackagesPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
 
-  // Redirect if not logged in
-  if (status === 'unauthenticated') {
-    router.push('/auth/login')
-    return null
-  }
-
   useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/login')
+      return
+    }
+
     const fetchPackages = async () => {
       try {
         const response = await fetch('/api/packages/my-packages')
         
         if (!response.ok) {
           const errorData = await response.json()
-          throw new Error(errorData.message || 'Failed to fetch packages')
+          throw new Error(errorData.error || 'Failed to fetch packages')
         }
 
         const data = await response.json()
@@ -49,7 +49,25 @@ export default function MyPackagesPage() {
     if (status === 'authenticated') {
       fetchPackages()
     }
-  }, [status])
+  }, [status, router])
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        <Header />
+        <div className="pt-24 pb-12">
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="text-center py-12">
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-green-500 border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" role="status">
+                <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Loading...</span>
+              </div>
+              <p className="mt-4 text-gray-600">جاري تحميل...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -101,6 +119,11 @@ export default function MyPackagesPage() {
                   <div className="mb-4">
                     <p className="text-sm text-gray-500 mb-1">آخر تحديث</p>
                     <p className="font-medium">{new Date(pkg.lastUpdated).toLocaleDateString('ar-SA')}</p>
+                  </div>
+
+                  <div className="mb-4">
+                    <p className="text-sm text-gray-500 mb-1">المتجر</p>
+                    <p className="font-medium">{pkg.shopName}</p>
                   </div>
                   
                   <a 

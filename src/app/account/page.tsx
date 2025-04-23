@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '../components/Header'
+import { useSession } from 'next-auth/react'
 import { supabase } from '@/lib/supabase'
 
 interface UserProfile {
@@ -18,6 +19,7 @@ interface UserProfile {
 }
 
 export default function AccountPage() {
+  const { data: session, status } = useSession()
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
@@ -37,42 +39,43 @@ export default function AccountPage() {
   const router = useRouter()
 
   useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        router.push('/auth/login')
-        return
-      }
-
-      try {
-        const { data: userData, error } = await supabase
-          .from('User')
-          .select('*')
-          .eq('email', session.user.email)
-          .single()
-
-        if (error) throw error
-        if (userData) {
-          setProfile(userData)
-          setFormData({
-            ...formData,
-            fullName: userData.fullName || '',
-            governorate: userData.governorate || '',
-            town: userData.town || '',
-            phonePrefix: userData.phonePrefix || '',
-            phoneNumber: userData.phoneNumber || '',
-          })
-        }
-      } catch (error) {
-        console.error('Error fetching profile:', error)
-        setError('حدث خطأ أثناء جلب بيانات الملف الشخصي')
-      } finally {
-        setIsLoading(false)
-      }
+    if (status === 'unauthenticated') {
+      router.push('/auth/login')
+      return
     }
 
-    checkSession()
-  }, [])
+    if (status === 'authenticated' && session?.user?.email) {
+      const fetchProfile = async () => {
+        try {
+          const { data: userData, error } = await supabase
+            .from('User')
+            .select('*')
+            .eq('email', session.user.email)
+            .single()
+
+          if (error) throw error
+          if (userData) {
+            setProfile(userData)
+            setFormData({
+              ...formData,
+              fullName: userData.fullName || '',
+              governorate: userData.governorate || '',
+              town: userData.town || '',
+              phonePrefix: userData.phonePrefix || '',
+              phoneNumber: userData.phoneNumber || '',
+            })
+          }
+        } catch (error) {
+          console.error('Error fetching profile:', error)
+          setError('حدث خطأ أثناء جلب بيانات الملف الشخصي')
+        } finally {
+          setIsLoading(false)
+        }
+      }
+
+      fetchProfile()
+    }
+  }, [status, session])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target

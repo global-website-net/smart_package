@@ -19,7 +19,11 @@ export async function GET(request: Request) {
     const { data: packages, error: packagesError } = await supabase
       .from('Package')
       .select(`
-        *,
+        id,
+        tracking_number,
+        status_id,
+        current_location,
+        updated_at,
         Status:status_id (
           name,
           description
@@ -40,13 +44,17 @@ export async function GET(request: Request) {
       )
     }
 
-    return NextResponse.json({
-      packages: packages?.map(pkg => ({
-        ...pkg,
-        status: pkg.Status,
-        shop: pkg.Shop
-      }))
-    })
+    // Transform the data to match the frontend interface
+    const formattedPackages = packages?.map(pkg => ({
+      id: pkg.id,
+      trackingNumber: pkg.tracking_number,
+      status: pkg.Status?.[0]?.name || 'Unknown',
+      currentLocation: pkg.current_location || 'غير معروف',
+      lastUpdated: pkg.updated_at,
+      shopName: pkg.Shop?.[0]?.fullName || 'غير معروف'
+    })) || []
+
+    return NextResponse.json(formattedPackages)
   } catch (error) {
     console.error('Error fetching packages:', error)
     return NextResponse.json(
