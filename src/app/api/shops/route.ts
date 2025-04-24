@@ -13,12 +13,15 @@ export async function GET() {
       )
     }
 
-    // Fetch shops from the User table where isShop is true
     const { data: shops, error } = await supabase
       .from('User')
-      .select('id, fullName')
-      .eq('isShop', true)
-      .order('fullName')
+      .select(`
+        id,
+        fullName,
+        email
+      `)
+      .eq('role', 'SHOP')
+      .order('fullName', { ascending: true })
 
     if (error) {
       console.error('Error fetching shops:', error)
@@ -28,7 +31,14 @@ export async function GET() {
       )
     }
 
-    return NextResponse.json({ shops })
+    // Transform the data to match the expected format
+    const formattedShops = shops.map(shop => ({
+      id: shop.id,
+      name: shop.fullName,
+      email: shop.email
+    }))
+
+    return NextResponse.json(formattedShops)
   } catch (error) {
     console.error('Error in shops route:', error)
     return NextResponse.json(

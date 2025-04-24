@@ -3,36 +3,60 @@ import { supabase } from '@/lib/supabase'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
+interface BlogPost {
+  id: string
+  title: string
+  content: string
+  createdAt: string
+  User: {
+    id: string
+    fullName: string
+  }[]
+}
+
 // Get all blogs
 export async function GET() {
   try {
-    const { data: blogs, error } = await supabase
+    const { data: posts, error } = await supabase
       .from('BlogPost')
       .select(`
         id,
         title,
         content,
-        created_at,
-        user_id,
-        User:user_id (
+        createdAt,
+        User (
+          id,
           fullName
         )
       `)
-      .order('created_at', { ascending: false })
+      .order('createdAt', { ascending: false })
 
     if (error) {
       console.error('Error fetching blogs:', error)
       return NextResponse.json(
-        { error: 'حدث خطأ أثناء جلب المدونات' },
+        { error: 'حدث خطأ أثناء جلب المقالات' },
         { status: 500 }
       )
     }
 
-    return NextResponse.json(blogs)
+    // Transform the data to match the expected format
+    const formattedPosts = posts.map(post => ({
+      id: post.id,
+      title: post.title,
+      content: post.content,
+      createdAt: post.createdAt,
+      author: post.User?.[0] ? {
+        name: post.User[0].fullName
+      } : {
+        name: 'مجهول'
+      }
+    }))
+
+    return NextResponse.json(formattedPosts)
   } catch (error) {
-    console.error('Error in GET /api/blog:', error)
+    console.error('Error in blog route:', error)
     return NextResponse.json(
-      { error: 'حدث خطأ أثناء جلب المدونات' },
+      { error: 'حدث خطأ أثناء جلب المقالات' },
       { status: 500 }
     )
   }

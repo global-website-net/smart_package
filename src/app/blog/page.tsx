@@ -1,28 +1,32 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useSession } from 'next-auth/react'
+import { useState, useEffect } from 'react'
 import Header from '../components/Header'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 interface BlogPost {
   id: string
   title: string
   content: string
+  author: string
   createdAt: string
-  author: {
-    name: string
-  }
 }
 
 export default function BlogPage() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
-  const [isAdmin, setIsAdmin] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
-    const fetchBlogPosts = async () => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/login')
+      return
+    }
+
+    const fetchPosts = async () => {
       try {
         const response = await fetch('/api/blog')
         if (!response.ok) {
@@ -35,58 +39,35 @@ export default function BlogPage() {
           id: post.id,
           title: post.title,
           content: post.content,
-          createdAt: post.created_at,
-          author: {
-            name: post.author?.fullName || 'مجهول'
-          }
+          author: post.author?.[0]?.name || 'مجهول',
+          createdAt: post.createdAt
         }))
-
-        setPosts(transformedPosts)
         
-        // Check if user is admin
-        if (session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') {
-          setIsAdmin(true)
-        }
-      } catch (error) {
-        console.error('Error:', error)
+        setPosts(transformedPosts)
+      } catch (err) {
+        console.error('Error fetching blog posts:', err)
         setError('حدث خطأ أثناء جلب المقالات')
       } finally {
         setIsLoading(false)
       }
     }
 
-    fetchBlogPosts()
-  }, [session])
+    if (status === 'authenticated') {
+      fetchPosts()
+    }
+  }, [status, router])
 
-  if (isLoading) {
+  if (status === 'loading' || isLoading) {
     return (
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="pt-24 pb-12">
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="text-center">
-              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-green-500 border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" role="status">
-                <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Loading...</span>
-              </div>
-              <p className="mt-4 text-gray-600">جاري تحميل المقالات...</p>
+        <main className="p-4 pt-24">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
             </div>
           </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-100">
-        <Header />
-        <div className="pt-24 pb-12">
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="bg-red-100 text-red-700 p-4 rounded-md">
-              {error}
-            </div>
-          </div>
-        </div>
+        </main>
       </div>
     )
   }
@@ -96,36 +77,29 @@ export default function BlogPage() {
       <Header />
       
       <main className="p-4 pt-24">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold">المدونة</h1>
-            {isAdmin && (
-              <button
-                onClick={() => window.location.href = '/blog/create'}
-                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-              >
-                إضافة مقال جديد
-              </button>
-            )}
-          </div>
-
-          {posts.length === 0 ? (
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold text-center mb-8">المدونة</h1>
+          
+          {error ? (
+            <div className="bg-red-50 text-red-800 p-4 rounded-md text-center">
+              {error}
+            </div>
+          ) : posts.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-600">لا توجد مقالات متاحة حالياً</p>
+              <p className="text-gray-600 text-lg">لا توجد مقالات متاحة حالياً</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-8">
               {posts.map((post) => (
-                <div key={post.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-                  <div className="p-6">
-                    <h2 className="text-xl font-semibold mb-2">{post.title}</h2>
-                    <p className="text-gray-600 mb-4 line-clamp-3">{post.content}</p>
-                    <div className="flex justify-between items-center text-sm text-gray-500">
-                      <span>{post.author.name}</span>
-                      <span>{new Date(post.createdAt).toLocaleDateString('ar-SA')}</span>
-                    </div>
+                <article key={post.id} className="bg-white rounded-lg shadow-md p-6">
+                  <h2 className="text-2xl font-semibold mb-4">{post.title}</h2>
+                  <div className="text-gray-600 mb-4">
+                    <span className="font-medium">{post.author}</span>
+                    <span className="mx-2">•</span>
+                    <span>{new Date(post.createdAt).toLocaleDateString('ar-SA')}</span>
                   </div>
-                </div>
+                  <p className="text-gray-700 leading-relaxed">{post.content}</p>
+                </article>
               ))}
             </div>
           )}

@@ -37,8 +37,9 @@ export default function AccountPage() {
   })
   const [updateSuccess, setUpdateSuccess] = useState('')
   const [updateError, setUpdateError] = useState('')
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
   const router = useRouter()
 
   const isAdminOrOwner = session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER'
@@ -79,6 +80,10 @@ export default function AccountPage() {
       }
 
       fetchProfile()
+    }
+
+    if (session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') {
+      setIsAdmin(true)
     }
   }, [status, session])
 
@@ -153,12 +158,22 @@ export default function AccountPage() {
   const handleDeleteAccount = async () => {
     setIsDeleting(true)
     try {
-      const response = await fetch('/api/user/delete', {
+      // First, delete from authentication
+      const authResponse = await fetch('/api/auth/delete', {
         method: 'DELETE',
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to delete account')
+      if (!authResponse.ok) {
+        throw new Error('Failed to delete authentication account')
+      }
+
+      // Then delete from database
+      const dbResponse = await fetch('/api/user/delete', {
+        method: 'DELETE',
+      })
+
+      if (!dbResponse.ok) {
+        throw new Error('Failed to delete database account')
       }
 
       // Sign out the user
@@ -410,42 +425,35 @@ export default function AccountPage() {
                 </>
               )}
               
-              {isEditing && (
-                <div className="flex justify-end space-x-16 rtl:space-x-reverse">
+              <div className="flex justify-center space-x-4 rtl:space-x-reverse">
+                <button
+                  onClick={() => setIsEditing(!isEditing)}
+                  className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                >
+                  {isEditing ? 'حفظ التغييرات' : 'تعديل الملف الشخصي'}
+                </button>
+                {isEditing && (
                   <button
-                    type="button"
                     onClick={() => setIsEditing(false)}
-                    className="px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors"
+                    className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                   >
                     إلغاء
                   </button>
+                )}
+                {!isAdmin && (
                   <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors disabled:opacity-50"
+                    onClick={() => setShowDeleteModal(true)}
+                    className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                   >
-                    {isSubmitting ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+                    حذف الحساب
                   </button>
-                </div>
-              )}
+                )}
+              </div>
             </form>
           </div>
 
-          <div className="mt-8 pt-8 border-t border-gray-200">
-            <h2 className="text-xl font-semibold text-red-600 mb-4">حذف الحساب</h2>
-            <p className="text-gray-600 mb-4">
-              حذف حسابك سيمحي جميع بياناتك بشكل نهائي ولا يمكن استعادتها.
-            </p>
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-            >
-              حذف الحساب
-            </button>
-          </div>
-
           {/* Delete Confirmation Modal */}
-          {showDeleteConfirm && (
+          {showDeleteModal && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
               <div className="bg-white rounded-lg p-6 max-w-md w-full">
                 <h3 className="text-xl font-semibold text-red-600 mb-4">تأكيد حذف الحساب</h3>
@@ -462,7 +470,7 @@ export default function AccountPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setShowDeleteConfirm(false)}
+                    onClick={() => setShowDeleteModal(false)}
                     className="bg-gray-200 text-gray-800 px-6 py-2 rounded-full hover:bg-gray-300 transition-colors"
                   >
                     إلغاء

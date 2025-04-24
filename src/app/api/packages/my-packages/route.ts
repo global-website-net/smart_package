@@ -17,15 +17,15 @@ export async function GET() {
       .from('Package')
       .select(`
         id,
-        tracking_number,
+        trackingNumber,
         status,
         shop,
-        current_location,
-        created_at,
-        user_id
+        currentLocation,
+        createdAt,
+        userId
       `)
-      .eq('user_id', session.user.id)
-      .order('created_at', { ascending: false })
+      .eq('userId', session.user.id)
+      .order('createdAt', { ascending: false })
 
     if (error) {
       console.error('Error fetching packages:', error)
@@ -37,12 +37,12 @@ export async function GET() {
 
     const formattedPackages = packages.map(pkg => ({
       id: pkg.id,
-      trackingNumber: pkg.tracking_number,
+      trackingNumber: pkg.trackingNumber,
       status: pkg.status,
       shop: pkg.shop,
-      currentLocation: pkg.current_location,
-      createdAt: pkg.created_at,
-      userId: pkg.user_id
+      currentLocation: pkg.currentLocation,
+      createdAt: pkg.createdAt,
+      userId: pkg.userId
     }))
 
     return NextResponse.json(formattedPackages)

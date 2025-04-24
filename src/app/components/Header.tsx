@@ -38,13 +38,13 @@ export default function Header() {
             <Link href="/#shopping-sites" className="hover:text-green-500 transition-colors mr-10">
               مواقع التسوق
             </Link>
+            <Link href="/packages" className="hover:text-green-500 transition-colors">
+              الباقات
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-12 rtl:space-x-reverse">
-            <Link href="/packages" className="text-white hover:text-green-600">
-              الباقات
-            </Link>
             {isLoggedIn ? (
               <div className="relative">
                 <button
