@@ -1,157 +1,113 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Image from 'next/image'
-import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import Header from '../components/Header'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import Link from 'next/link'
 
 interface BlogPost {
   id: string
   title: string
-  subtitle: string
   content: string
-  imageUrl?: string
-  authorId: string
+  createdAt: string
+  user: {
+    name: string
+  }
 }
 
 export default function BlogPage() {
-  const [blogs, setBlogs] = useState<BlogPost[]>([])
+  const [posts, setPosts] = useState<BlogPost[]>([])
   const [isAdmin, setIsAdmin] = useState(false)
-  const { data: session, status } = useSession()
+  const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
-    const fetchBlogs = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/blog')
-        if (!response.ok) {
-          throw new Error('Failed to fetch blogs')
+        // Fetch user role and posts in parallel
+        const [roleResponse, postsResponse] = await Promise.all([
+          fetch('/api/user/role'),
+          fetch('/api/blog')
+        ])
+
+        if (!roleResponse.ok || !postsResponse.ok) {
+          throw new Error('Failed to fetch data')
         }
-        const data = await response.json()
-        setBlogs(data)
+
+        const roleData = await roleResponse.json()
+        const postsData = await postsResponse.json()
+
+        setIsAdmin(roleData.role === 'ADMIN' || roleData.role === 'OWNER')
+        setPosts(postsData.posts)
       } catch (error) {
-        console.error('Error fetching blogs:', error)
+        console.error('Error fetching data:', error)
+      } finally {
+        setIsLoading(false)
       }
     }
 
-    const checkAdminStatus = async () => {
-      if (status === 'authenticated' && session?.user?.email) {
-        try {
-          const response = await fetch('/api/user/profile')
-          if (response.ok) {
-            const data = await response.json()
-            setIsAdmin(data.role === 'ADMIN' || data.role === 'OWNER')
-          }
-        } catch (error) {
-          console.error('Error checking admin status:', error)
-        }
-      }
-    }
+    fetchData()
+  }, [])
 
-    fetchBlogs()
-    checkAdminStatus()
-  }, [status, session])
-
-  const handleDelete = async (blogId: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذا المقال؟')) {
-      return
-    }
-
-    try {
-      const response = await fetch(`/api/blog/${blogId}`, {
-        method: 'DELETE',
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to delete blog')
-      }
-
-      setBlogs(blogs.filter(blog => blog.id !== blogId))
-    } catch (error) {
-      console.error('Error deleting blog:', error)
-      alert('حدث خطأ أثناء حذف المقال')
-    }
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-gray-900 mb-8">المدونة</h1>
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-200 rounded w-1/4 mx-auto mb-8"></div>
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-24 bg-gray-200 rounded"></div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      
-      <main className="p-4 pt-24">
-        <div className="max-w-4xl mx-auto">
-          {/* Title Section */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-6">بلوج</h1>
-            <div className="flex justify-center items-center">
-              <div className="relative">
-                <div className="w-96 h-0.5 bg-green-500"></div>
-                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
-              </div>
-            </div>
-            <h2 className="text-xl mt-6">شرح قصير عن البلوج</h2>
-          </div>
-
-          {/* Admin Controls */}
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">المدونة</h1>
+          
           {isAdmin && (
-            <div className="mb-8 flex justify-center">
-              <button
-                onClick={() => router.push('/blog/create')}
-                className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+            <div className="mb-8">
+              <Link
+                href="/blog/create"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
               >
                 إضافة مقال جديد
-              </button>
+              </Link>
             </div>
           )}
 
-          {/* Blog Posts */}
           <div className="space-y-8">
-            {blogs.map((blog) => (
-              <div key={blog.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
-                {blog.imageUrl && (
-                  <div className="w-full h-64 bg-gray-600 relative">
-                    <Image
-                      src={blog.imageUrl}
-                      alt={blog.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                )}
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-xl font-semibold">{blog.title}</h3>
-                    {isAdmin && (
-                      <div className="flex space-x-2 rtl:space-x-reverse">
-                        <button
-                          onClick={() => router.push(`/blog/edit/${blog.id}`)}
-                          className="text-blue-500 hover:text-blue-600"
-                        >
-                          تعديل
-                        </button>
-                        <button
-                          onClick={() => handleDelete(blog.id)}
-                          className="text-red-500 hover:text-red-600"
-                        >
-                          حذف
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  <p className="text-gray-600 mb-4">{blog.subtitle}</p>
-                  <p className="text-gray-700">{blog.content}</p>
+            {posts.map((post) => (
+              <div
+                key={post.id}
+                className="bg-white shadow rounded-lg p-6 hover:shadow-md transition-shadow duration-200"
+              >
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                  {post.title}
+                </h2>
+                <p className="text-gray-600 mb-4">{post.content}</p>
+                <div className="flex justify-between items-center text-sm text-gray-500">
+                  <span>بواسطة: {post.user.name}</span>
+                  <span>
+                    {new Date(post.createdAt).toLocaleDateString('ar-SA')}
+                  </span>
                 </div>
               </div>
             ))}
-
-            {blogs.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-gray-600">لا توجد مقالات حالياً</p>
-              </div>
-            )}
           </div>
         </div>
-      </main>
+      </div>
     </div>
   )
 } 

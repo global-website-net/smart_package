@@ -19,29 +19,29 @@ export async function POST(request: Request) {
       )
     }
 
-    // Create blog post in Supabase
-    const { data: blog, error } = await supabase
+    const { data: blogPost, error } = await supabase
       .from('BlogPost')
       .insert([
         {
           title,
           content,
-          user_id: session.user.id,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          user_id: session.user.id
         }
       ])
       .select()
       .single()
 
     if (error) {
-      console.error('Error creating blog:', error)
-      return NextResponse.json({ error: 'حدث خطأ أثناء إنشاء المقال' }, { status: 500 })
+      console.error('Error creating blog post:', error)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء إنشاء المقال' },
+        { status: 500 }
+      )
     }
 
-    return NextResponse.json(blog)
+    return NextResponse.json({ blogPost })
   } catch (error) {
-    console.error('Error in blog creation:', error)
+    console.error('Error in blog creation route:', error)
     return NextResponse.json(
       { error: 'حدث خطأ أثناء إنشاء المقال' },
       { status: 500 }

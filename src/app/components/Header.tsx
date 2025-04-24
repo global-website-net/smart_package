@@ -45,8 +45,8 @@ export default function Header() {
             <Link href="/packages" className="text-white hover:text-green-600">
               الباقات
             </Link>
-            <Link href="/blog" className="text-white hover:text-green-600">
-              المدونة
+            <Link href="/faq" className="text-white hover:text-green-600">
+              الأسئلة الشائعة
             </Link>
             <Link href="/contact" className="text-white hover:text-green-600">
               اتصل بنا
@@ -94,6 +94,13 @@ export default function Header() {
                         طرودي
                       </Link>
                     )}
+                    <Link
+                      href="/blog"
+                      className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      المدونة
+                    </Link>
                     <button
                       onClick={handleSignOut}
                       className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
@@ -155,11 +162,11 @@ export default function Header() {
                 الباقات
               </Link>
               <Link
-                href="/blog"
+                href="/faq"
                 className="hover:text-green-500 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                المدونة
+                الأسئلة الشائعة
               </Link>
               <Link
                 href="/contact"
@@ -195,6 +202,13 @@ export default function Header() {
                       طرودي
                     </Link>
                   )}
+                  <Link
+                    href="/blog"
+                    className="text-left hover:text-green-500 transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    المدونة
+                  </Link>
                   <button
                     onClick={handleSignOut}
                     className="text-left hover:text-green-500 transition-colors"

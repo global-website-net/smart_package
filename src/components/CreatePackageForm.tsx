@@ -13,7 +13,7 @@ interface User {
   email: string
 }
 
-export default function CreatePackageForm() {
+export default function CreatePackageForm({ onClose }: { onClose: () => void }) {
   const [isOpen, setIsOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -36,7 +36,7 @@ export default function CreatePackageForm() {
           throw new Error('Failed to fetch shops')
         }
         const shopsData = await shopsResponse.json()
-        setShops(shopsData.shops)
+        setShops(shopsData.shops || [])
 
         // Fetch users
         const usersResponse = await fetch('/api/users/regular')
@@ -44,9 +44,10 @@ export default function CreatePackageForm() {
           throw new Error('Failed to fetch users')
         }
         const usersData = await usersResponse.json()
-        setUsers(usersData.users)
+        setUsers(usersData.users || [])
       } catch (error) {
         console.error('Error fetching data:', error)
+        setError('حدث خطأ أثناء جلب البيانات')
       }
     }
 
@@ -88,6 +89,11 @@ export default function CreatePackageForm() {
     }
   }
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setFormData({ ...formData, [name]: value })
+  }
+
   return (
     <>
       <button
@@ -99,16 +105,16 @@ export default function CreatePackageForm() {
 
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4">إضافة شحنة جديدة</h2>
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
+            <h2 className="text-2xl font-bold mb-6">إضافة شحنة جديدة</h2>
             
             {error && (
-              <div className="bg-red-50 text-red-800 p-4 rounded-md mb-4">
+              <div className="bg-red-50 text-red-800 p-4 rounded-md mb-6">
                 {error}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label htmlFor="trackingNumber" className="block text-sm font-medium text-gray-700 mb-1">
                   رقم التتبع
@@ -147,13 +153,14 @@ export default function CreatePackageForm() {
                 </label>
                 <select
                   id="shopId"
+                  name="shopId"
                   value={formData.shopId}
-                  onChange={(e) => setFormData({ ...formData, shopId: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  onChange={handleInputChange}
                   required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
                   <option value="">اختر المتجر</option>
-                  {shops.map((shop) => (
+                  {shops.map(shop => (
                     <option key={shop.id} value={shop.id}>
                       {shop.name}
                     </option>
@@ -181,13 +188,14 @@ export default function CreatePackageForm() {
                 </label>
                 <select
                   id="userId"
+                  name="userId"
                   value={formData.userId}
-                  onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  onChange={handleInputChange}
                   required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
                   <option value="">اختر المستخدم</option>
-                  {users.map((user) => (
+                  {users.map(user => (
                     <option key={user.id} value={user.id}>
                       {user.name} ({user.email})
                     </option>

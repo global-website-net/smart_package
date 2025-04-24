@@ -13,16 +13,23 @@ export async function GET() {
     // Fetch regular users from the database
     const { data: users, error } = await supabase
       .from('User')
-      .select('id, name, email')
+      .select('id, fullName, email')
       .eq('role', 'REGULAR')
-      .order('name', { ascending: true })
+      .order('fullName', { ascending: true })
 
     if (error) {
       console.error('Error fetching users:', error)
       return NextResponse.json({ error: 'حدث خطأ أثناء جلب المستخدمين' }, { status: 500 })
     }
 
-    return NextResponse.json({ users })
+    // Format the response to match the expected structure
+    const formattedUsers = users.map(user => ({
+      id: user.id,
+      name: user.fullName,
+      email: user.email
+    }))
+
+    return NextResponse.json({ users: formattedUsers })
   } catch (error) {
     console.error('Error in users route:', error)
     return NextResponse.json(
