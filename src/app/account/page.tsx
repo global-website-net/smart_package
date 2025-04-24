@@ -452,20 +452,20 @@ export default function AccountPage() {
                 <p className="text-gray-600 mb-6">
                   هل أنت متأكد من رغبتك في حذف حسابك؟ هذا الإجراء سيمحي حسابك بشكل نهائي ولا يمكن التراجع عنه. سيتم حذف جميع بياناتك وستفقد الوصول إلى جميع الخدمات المرتبطة بحسابك.
                 </p>
-                <div className="mt-6 flex justify-end space-x-16 rtl:space-x-reverse">
-                  <button
-                    type="button"
-                    onClick={() => setShowDeleteConfirm(false)}
-                    className="px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors"
-                  >
-                    إلغاء
-                  </button>
+                <div className="flex justify-center space-x-16 rtl:space-x-reverse">
                   <button
                     type="button"
                     onClick={handleDeleteAccount}
-                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                    className="bg-red-500 text-white px-6 py-2 rounded-full hover:bg-red-600 transition-colors"
                   >
                     نعم، احذف حسابي
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="bg-gray-200 text-gray-800 px-6 py-2 rounded-full hover:bg-gray-300 transition-colors"
+                  >
+                    إلغاء
                   </button>
                 </div>
               </div>

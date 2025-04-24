@@ -1,10 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Header from '../components/Header'
-import { supabase } from '@/lib/supabase'
 
 interface BlogPost {
   id: string
@@ -17,77 +15,48 @@ interface BlogPost {
 }
 
 export default function BlogPage() {
-  const { data: session, status } = useSession()
+  const { data: session } = useSession()
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [isAdmin, setIsAdmin] = useState(false)
-  const router = useRouter()
 
   useEffect(() => {
-    const checkAuth = async () => {
-      if (status === 'unauthenticated') {
-        router.push('/auth/login')
-        return
-      }
-
-      if (status === 'authenticated' && session?.user?.email) {
-        try {
-          // Check if user is admin
-          const { data: user, error: userError } = await supabase
-            .from('User')
-            .select('role')
-            .eq('email', session.user.email)
-            .single()
-
-          if (userError) {
-            console.error('Error checking user role:', userError)
-            setError('حدث خطأ أثناء التحقق من الصلاحيات')
-            return
-          }
-
-          if (user && (user.role === 'ADMIN' || user.role === 'OWNER')) {
-            setIsAdmin(true)
-          }
-
-          // Fetch blog posts
-          const { data: blogPosts, error: postsError } = await supabase
-            .from('BlogPost')
-            .select(`
-              id,
-              title,
-              content,
-              createdAt,
-              author:User (
-                name
-              )
-            `)
-            .order('createdAt', { ascending: false })
-
-          if (postsError) {
-            throw postsError
-          }
-
-          // Transform the data to match the BlogPost interface
-          const transformedPosts = (blogPosts || []).map(post => ({
-            ...post,
-            author: {
-              name: post.author?.[0]?.name || 'مجهول'
-            }
-          }))
-
-          setPosts(transformedPosts)
-        } catch (error) {
-          console.error('Error:', error)
-          setError('حدث خطأ أثناء جلب المقالات')
-        } finally {
-          setIsLoading(false)
+    const fetchBlogPosts = async () => {
+      try {
+        const response = await fetch('/api/blog')
+        if (!response.ok) {
+          throw new Error('Failed to fetch blog posts')
         }
+        const data = await response.json()
+        
+        // Transform the data to match the BlogPost interface
+        const transformedPosts = data.map((post: any) => ({
+          id: post.id,
+          title: post.title,
+          content: post.content,
+          createdAt: post.created_at,
+          author: {
+            name: post.author?.fullName || 'مجهول'
+          }
+        }))
+
+        setPosts(transformedPosts)
+        
+        // Check if user is admin
+        if (session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') {
+          setIsAdmin(true)
+        }
+      } catch (error) {
+        console.error('Error:', error)
+        setError('حدث خطأ أثناء جلب المقالات')
+      } finally {
+        setIsLoading(false)
       }
     }
 
-    checkAuth()
-  }, [status, session, router])
+    fetchBlogPosts()
+  }, [session])
 
   if (isLoading) {
     return (
@@ -132,7 +101,7 @@ export default function BlogPage() {
             <h1 className="text-3xl font-bold">المدونة</h1>
             {isAdmin && (
               <button
-                onClick={() => router.push('/blog/create')}
+                onClick={() => window.location.href = '/blog/create'}
                 className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
               >
                 إضافة مقال جديد

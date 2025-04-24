@@ -9,13 +9,16 @@ export async function GET() {
     const { data: blogs, error } = await supabase
       .from('BlogPost')
       .select(`
-        *,
-        User:authorId (
-          fullName,
-          email
+        id,
+        title,
+        content,
+        created_at,
+        user_id,
+        User:user_id (
+          fullName
         )
       `)
-      .order('createdAt', { ascending: false })
+      .order('created_at', { ascending: false })
 
     if (error) {
       console.error('Error fetching blogs:', error)
@@ -25,10 +28,7 @@ export async function GET() {
       )
     }
 
-    return NextResponse.json(blogs?.map(blog => ({
-      ...blog,
-      author: blog.User
-    })))
+    return NextResponse.json(blogs)
   } catch (error) {
     console.error('Error in GET /api/blog:', error)
     return NextResponse.json(

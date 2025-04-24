@@ -13,11 +13,12 @@ export async function GET() {
       )
     }
 
-    // Fetch shops from the correct table
+    // Fetch shops from the User table where isShop is true
     const { data: shops, error } = await supabase
-      .from('shops') // Using lowercase 'shops' as table name
-      .select('id, name')
-      .order('name')
+      .from('User')
+      .select('id, fullName')
+      .eq('isShop', true)
+      .order('fullName')
 
     if (error) {
       console.error('Error fetching shops:', error)

@@ -45,9 +45,6 @@ export default function Header() {
             <Link href="/packages" className="text-white hover:text-green-600">
               الباقات
             </Link>
-            <Link href="/contact" className="text-white hover:text-green-600">
-              اتصل بنا
-            </Link>
             {isLoggedIn ? (
               <div className="relative">
                 <button
@@ -157,13 +154,6 @@ export default function Header() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 الباقات
-              </Link>
-              <Link
-                href="/contact"
-                className="hover:text-green-500 transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                اتصل بنا
               </Link>
               {isLoggedIn ? (
                 <>
