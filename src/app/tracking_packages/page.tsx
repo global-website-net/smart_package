@@ -140,7 +140,7 @@ export default function TrackingPackagesPage() {
                         {pkg.status}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {pkg.shopName}
+                        {pkg.shop}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {pkg.currentLocation}
