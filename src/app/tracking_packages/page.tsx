@@ -14,6 +14,7 @@ export default function TrackingPackagesPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [isAdminOrOwner, setIsAdminOrOwner] = useState(false)
+  const [showCreateForm, setShowCreateForm] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -97,14 +98,27 @@ export default function TrackingPackagesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="pt-24 pb-12">
-        <div className="max-w-6xl mx-auto px-4">
+      
+      <main className="p-4 pt-24">
+        <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold text-center mb-8">إدارة الشحنات</h1>
-            {isAdminOrOwner && <CreatePackageForm />}
+            {isAdminOrOwner && (
+              <button
+                onClick={() => setShowCreateForm(true)}
+                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+              >
+                إضافة شحنة جديدة
+              </button>
+            )}
           </div>
+
+          {showCreateForm && (
+            <CreatePackageForm onClose={() => setShowCreateForm(false)} />
+          )}
+
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
@@ -158,7 +172,7 @@ export default function TrackingPackagesPage() {
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   )
 } 
