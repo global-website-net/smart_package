@@ -6,15 +6,18 @@ import { supabase } from '@/lib/supabase'
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'غير مصرح لك' }, { status: 401 })
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: 'غير مصرح لك بتنفيذ هذا الإجراء' },
+        { status: 401 }
+      )
     }
 
-    // Fetch shops from the database
+    // Fetch shops from the correct table
     const { data: shops, error } = await supabase
-      .from('Shop')
+      .from('shops') // Using lowercase 'shops' as table name
       .select('id, name')
-      .order('name', { ascending: true })
+      .order('name')
 
     if (error) {
       console.error('Error fetching shops:', error)

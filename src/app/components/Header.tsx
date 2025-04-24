@@ -45,9 +45,6 @@ export default function Header() {
             <Link href="/packages" className="text-white hover:text-green-600">
               الباقات
             </Link>
-            <Link href="/faq" className="text-white hover:text-green-600">
-              الأسئلة الشائعة
-            </Link>
             <Link href="/contact" className="text-white hover:text-green-600">
               اتصل بنا
             </Link>
@@ -160,13 +157,6 @@ export default function Header() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 الباقات
-              </Link>
-              <Link
-                href="/faq"
-                className="hover:text-green-500 transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                الأسئلة الشائعة
               </Link>
               <Link
                 href="/contact"

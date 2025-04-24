@@ -410,22 +410,24 @@ export default function AccountPage() {
                 </>
               )}
               
-              <div className="flex justify-end space-x-16 rtl:space-x-reverse">
-                <button
-                  type="button"
-                  onClick={() => setIsEditing(false)}
-                  className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                >
-                  إلغاء
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
-                >
-                  {isSubmitting ? 'جاري الحفظ...' : 'حفظ التغييرات'}
-                </button>
-              </div>
+              {isEditing && (
+                <div className="flex justify-end space-x-16 rtl:space-x-reverse">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditing(false)}
+                    className="px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors"
+                  >
+                    إلغاء
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors disabled:opacity-50"
+                  >
+                    {isSubmitting ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+                  </button>
+                </div>
+              )}
             </form>
           </div>
 
@@ -450,19 +452,20 @@ export default function AccountPage() {
                 <p className="text-gray-600 mb-6">
                   هل أنت متأكد من رغبتك في حذف حسابك؟ هذا الإجراء سيمحي حسابك بشكل نهائي ولا يمكن التراجع عنه. سيتم حذف جميع بياناتك وستفقد الوصول إلى جميع الخدمات المرتبطة بحسابك.
                 </p>
-                <div className="flex justify-end space-x-4 rtl:space-x-reverse">
+                <div className="mt-6 flex justify-end space-x-16 rtl:space-x-reverse">
                   <button
+                    type="button"
                     onClick={() => setShowDeleteConfirm(false)}
-                    className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                    className="px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors"
                   >
                     إلغاء
                   </button>
                   <button
+                    type="button"
                     onClick={handleDeleteAccount}
-                    disabled={isDeleting}
-                    className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50"
+                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
                   >
-                    {isDeleting ? 'جاري الحذف...' : 'نعم، احذف حسابي'}
+                    نعم، احذف حسابي
                   </button>
                 </div>
               </div>
