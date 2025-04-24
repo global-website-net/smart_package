@@ -19,12 +19,13 @@ export async function POST(request: Request) {
       )
     }
 
+    // Create blog post in Supabase
     const { data: blog, error } = await supabase
       .from('BlogPost')
       .insert([
         {
-          title: title,
-          content: content,
+          title,
+          content,
           author_id: session.user.id,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()

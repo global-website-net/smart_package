@@ -32,7 +32,7 @@ export async function GET(request: Request) {
         id,
         trackingNumber,
         status,
-        shop_name,
+        shop,
         createdAt,
         user_email
       `)
@@ -52,7 +52,7 @@ export async function GET(request: Request) {
       id: pkg.id,
       trackingNumber: pkg.trackingNumber,
       status: pkg.status,
-      shopName: pkg.shop_name,
+      shopName: pkg.shop,
       createdAt: pkg.createdAt
     }))
 

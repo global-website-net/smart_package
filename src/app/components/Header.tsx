@@ -42,16 +42,16 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
-            <Link href="/packages" className="hover:text-green-500 transition-colors">
+            <Link href="/packages" className="text-white hover:text-green-600">
               الباقات
             </Link>
-            <Link href="/blog" className="text-gray-700 hover:text-green-600">
+            <Link href="/blog" className="text-white hover:text-green-600">
               المدونة
             </Link>
-            <Link href="/tracking_packages" className="text-gray-700 hover:text-green-600 mr-44">
+            <Link href="/tracking_packages" className="text-white hover:text-green-600">
               الباقات
             </Link>
-            <Link href="/contact" className="hover:text-green-500 transition-colors">
+            <Link href="/contact" className="text-white hover:text-green-600">
               اتصل بنا
             </Link>
             {isLoggedIn ? (

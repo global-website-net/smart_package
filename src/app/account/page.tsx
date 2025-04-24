@@ -142,7 +142,7 @@ export default function AccountPage() {
         confirmPassword: ''
       }))
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred while updating your profile'
+      const errorMessage = err instanceof Error ? err.message : 'حدث خطأ أثناء تحديث الملف الشخصي'
       setUpdateError(errorMessage)
     }
   }
@@ -172,7 +172,7 @@ export default function AccountPage() {
                   {updateSuccess}
                 </div>
               )}
-              {updateError && updateError !== 'كلمة المرور الحالية مطلوبة للتعديل' && updateError !== 'كلمات المرور الجديدة غير متطابقة' && (
+              {updateError && updateError !== 'كلمة المرور غير صحيحة' && (
                 <div className="p-4 bg-red-50 text-red-800 rounded-md">
                   {updateError}
                 </div>
@@ -214,15 +214,32 @@ export default function AccountPage() {
                       <label htmlFor="governorate" className="block text-sm font-medium text-gray-700 mb-1">
                         المحافظة
                       </label>
-                      <input
-                        type="text"
+                      <select
                         id="governorate"
                         name="governorate"
                         value={formData.governorate}
                         onChange={handleInputChange}
                         disabled={!isEditing}
                         className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-50"
-                      />
+                      >
+                        <option value="">اختر المحافظة</option>
+                        <option value="القدس">القدس</option>
+                        <option value="رام الله والبيرة">رام الله والبيرة</option>
+                        <option value="بيت لحم">بيت لحم</option>
+                        <option value="الخليل">الخليل</option>
+                        <option value="أريحا">أريحا</option>
+                        <option value="نابلس">نابلس</option>
+                        <option value="طولكرم">طولكرم</option>
+                        <option value="قلقيلية">قلقيلية</option>
+                        <option value="سلفيت">سلفيت</option>
+                        <option value="جنين">جنين</option>
+                        <option value="طوباس">طوباس</option>
+                        <option value="غزة">غزة</option>
+                        <option value="شمال غزة">شمال غزة</option>
+                        <option value="دير البلح">دير البلح</option>
+                        <option value="خان يونس">خان يونس</option>
+                        <option value="رفح">رفح</option>
+                      </select>
                     </div>
 
                     <div>
@@ -292,15 +309,15 @@ export default function AccountPage() {
                           value={formData.currentPassword}
                           onChange={handleInputChange}
                           className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                            updateError === 'كلمة المرور الحالية مطلوبة للتعديل' 
+                            updateError === 'كلمة المرور غير صحيحة' 
                               ? 'border-red-500 bg-red-50' 
                               : 'border-gray-300'
                           }`}
                           placeholder="أدخل كلمة المرور الحالية للتأكيد"
                         />
-                        {updateError === 'كلمة المرور الحالية مطلوبة للتعديل' && (
+                        {updateError === 'كلمة المرور غير صحيحة' && (
                           <p className="mt-2 text-sm text-red-600">
-                            {updateError}
+                            كلمة المرور غير صحيحة
                           </p>
                         )}
                       </div>
@@ -355,7 +372,7 @@ export default function AccountPage() {
                   </>
                 )}
                 
-                <div className="flex justify-end space-x-12 rtl:space-x-reverse">
+                <div className="flex justify-end space-x-40 rtl:space-x-reverse">
                   {!isEditing ? (
                     <button
                       type="button"

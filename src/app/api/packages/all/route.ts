@@ -28,25 +28,19 @@ export async function GET(request: Request) {
       .eq('email', session.user.email)
       .single()
 
-    if (userError || !user) {
-      return NextResponse.json({ error: 'لم يتم العثور على المستخدم' }, { status: 404 })
+    if (userError) {
+      console.error('Error checking user role:', userError)
+      return NextResponse.json({ error: 'حدث خطأ أثناء التحقق من الصلاحيات' }, { status: 500 })
     }
 
-    if (user.role !== 'ADMIN' && user.role !== 'OWNER') {
+    if (!user || (user.role !== 'ADMIN' && user.role !== 'OWNER')) {
       return NextResponse.json({ error: 'غير مصرح لك' }, { status: 401 })
     }
 
     // Fetch all packages
     const { data: packages, error } = await supabase
       .from('Package')
-      .select(`
-        id,
-        trackingNumber,
-        status,
-        shop_name,
-        createdAt,
-        user_email
-      `)
+      .select('*')
       .order('createdAt', { ascending: false })
 
     if (error) {
@@ -62,7 +56,7 @@ export async function GET(request: Request) {
       id: pkg.id,
       trackingNumber: pkg.trackingNumber,
       status: pkg.status,
-      shopName: pkg.shop_name,
+      shopName: pkg.shop,
       createdAt: pkg.createdAt,
       userEmail: pkg.user_email
     }))
