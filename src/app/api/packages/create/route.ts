@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     }
 
     // Create package in Supabase
-    const { data: package, error } = await supabase
+    const { data: newPackage, error } = await supabase
       .from('Package')
       .insert([
         {
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'حدث خطأ أثناء إنشاء الشحنة' }, { status: 500 })
     }
 
-    return NextResponse.json(package)
+    return NextResponse.json(newPackage)
   } catch (error) {
     console.error('Error in package creation:', error)
     return NextResponse.json(
