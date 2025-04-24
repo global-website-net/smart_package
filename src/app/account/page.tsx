@@ -122,11 +122,11 @@ export default function AccountPage() {
 
       if (!response.ok) {
         const errorData = await response.json()
-        if (errorData.message === 'Invalid password') {
+        if (errorData.error === 'Invalid password') {
           setUpdateError('كلمة المرور غير صحيحة')
           return
         }
-        throw new Error(errorData.message || 'حدث خطأ أثناء تحديث الملف الشخصي')
+        throw new Error(errorData.error || 'حدث خطأ أثناء تحديث الملف الشخصي')
       }
 
       const data = await response.json()
@@ -222,7 +222,6 @@ export default function AccountPage() {
                           onChange={handleInputChange}
                           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                         >
-                          <option value="">اختر المحافظة</option>
                           <option value="القدس">القدس</option>
                           <option value="رام الله والبيرة">رام الله والبيرة</option>
                           <option value="بيت لحم">بيت لحم</option>
@@ -381,7 +380,7 @@ export default function AccountPage() {
                   </>
                 )}
                 
-                <div className="flex justify-center space-x-16 rtl:space-x-reverse">
+                <div className="flex justify-center space-x-24 rtl:space-x-reverse">
                   {!isEditing ? (
                     <button
                       type="button"

@@ -41,7 +41,7 @@ export default function Header() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
+          <nav className="hidden md:flex items-center space-x-12 rtl:space-x-reverse">
             <Link href="/packages" className="text-white hover:text-green-600">
               الباقات
             </Link>

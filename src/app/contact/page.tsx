@@ -1,159 +1,173 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import Header from '../components/Header'
+import { FaPhone, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa'
 
-export default function Contact() {
+export default function ContactPage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    phone: '',
     subject: '',
     message: ''
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<{
+    type: 'success' | 'error' | null
+    message: string
+  }>({ type: null, message: '' })
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle form submission here
-    console.log('Form submitted:', formData)
+    setIsSubmitting(true)
+    setSubmitStatus({ type: null, message: '' })
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to send message')
+      }
+
+      setSubmitStatus({
+        type: 'success',
+        message: 'تم إرسال رسالتك بنجاح. سنتواصل معك قريباً.'
+      })
+      setFormData({ name: '', email: '', subject: '', message: '' })
+    } catch (error) {
+      setSubmitStatus({
+        type: 'error',
+        message: 'حدث خطأ أثناء إرسال الرسالة. يرجى المحاولة مرة أخرى.'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-100">
       <Header />
-      
-      <main className="p-4 pt-24">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-6">التواصل</h1>
-            <div className="flex justify-center items-center">
-              <div className="relative">
-                <div className="w-48 h-0.5 bg-green-500"></div>
-                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
+      <div className="pt-24 pb-12">
+        <div className="max-w-6xl mx-auto px-4">
+          <h1 className="text-3xl font-bold text-center mb-8">اتصل بنا</h1>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            <div className="bg-white p-6 rounded-lg shadow-md text-center">
+              <div className="flex justify-center mb-4">
+                <FaPhone className="text-green-500 text-3xl" />
               </div>
+              <h3 className="text-lg font-semibold mb-2">اتصل بنا</h3>
+              <p className="text-gray-600">+972 59 123 4567</p>
             </div>
-            <p className="mt-6 text-gray-600">شرح قصير عن التواصل</p>
-          </div>
-
-          {/* Contact Info Icons */}
-          <div className="flex justify-center items-center mb-12 rtl" dir="rtl">
-            <div className="flex-1 flex justify-center">
-              <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center">
-                <Image
-                  src="/images/clock-icon.svg"
-                  alt="Working Hours"
-                  width={32}
-                  height={32}
-                  className="invert"
-                />
+            
+            <div className="bg-white p-6 rounded-lg shadow-md text-center">
+              <div className="flex justify-center mb-4">
+                <FaEnvelope className="text-green-500 text-3xl" />
               </div>
+              <h3 className="text-lg font-semibold mb-2">راسلنا</h3>
+              <p className="text-gray-600">info@smartpackage.com</p>
             </div>
-            <div className="flex-1 flex justify-center">
-              <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center">
-                <Image
-                  src="/images/email-icon.svg"
-                  alt="Email"
-                  width={32}
-                  height={32}
-                  className="invert"
-                />
+            
+            <div className="bg-white p-6 rounded-lg shadow-md text-center">
+              <div className="flex justify-center mb-4">
+                <FaMapMarkerAlt className="text-green-500 text-3xl" />
               </div>
-            </div>
-            <div className="flex-1 flex justify-center">
-              <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center">
-                <Image
-                  src="/images/phone-icon.svg"
-                  alt="Phone"
-                  width={32}
-                  height={32}
-                  className="invert"
-                />
-              </div>
+              <h3 className="text-lg font-semibold mb-2">موقعنا</h3>
+              <p className="text-gray-600">رام الله، فلسطين</p>
             </div>
           </div>
 
-          {/* Contact Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="الاسم"
-                className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-green-500 text-right"
-                required
-              />
-            </div>
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                    الاسم
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                    البريد الإلكتروني
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    required
+                  />
+                </div>
+              </div>
 
-            <div>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="البريد الألكتروني"
-                className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-green-500 text-right"
-                required
-              />
-            </div>
+              <div>
+                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
+                  الموضوع
+                </label>
+                <input
+                  type="text"
+                  id="subject"
+                  value={formData.subject}
+                  onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                />
+              </div>
 
-            <div>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder="رقم الهاتف"
-                className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-green-500 text-right"
-                required
-              />
-            </div>
+              <div>
+                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                  الرسالة
+                </label>
+                <textarea
+                  id="message"
+                  value={formData.message}
+                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                  rows={4}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                />
+              </div>
 
-            <div>
-              <input
-                type="text"
-                name="subject"
-                value={formData.subject}
-                onChange={handleChange}
-                placeholder="الموضوع"
-                className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-green-500 text-right"
-                required
-              />
-            </div>
+              {submitStatus.type && (
+                <div
+                  className={`p-4 rounded-md ${
+                    submitStatus.type === 'success'
+                      ? 'bg-green-50 text-green-800'
+                      : 'bg-red-50 text-red-800'
+                  }`}
+                >
+                  {submitStatus.message}
+                </div>
+              )}
 
-            <div>
-              <input
-                type="text"
-                name="message"
-                value={formData.message}
-                onChange={handleChange}
-                placeholder="الرسالة"
-                className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-green-500 text-right"
-                required
-              />
-            </div>
-
-            <div className="text-center pt-6">
-              <button
-                type="submit"
-                className="bg-green-500 text-white px-12 py-3 rounded-full hover:bg-green-600 transition-colors"
-              >
-                Call To Action
-              </button>
-            </div>
-          </form>
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
+                >
+                  {isSubmitting ? 'جاري الإرسال...' : 'إرسال'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </main>
+      </div>
     </div>
   )
 } 

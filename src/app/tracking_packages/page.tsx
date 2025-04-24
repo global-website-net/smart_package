@@ -5,22 +5,15 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Header from '../components/Header'
 import { supabase } from '@/lib/supabase'
-
-interface Package {
-  id: string
-  trackingNumber: string
-  status: string
-  shopName: string
-  createdAt: string
-  currentLocation: string
-  updatedAt: string
-}
+import { Package } from '@/types'
+import CreatePackageForm from '@/components/CreatePackageForm'
 
 export default function TrackingPackagesPage() {
   const { data: session, status } = useSession()
   const [packages, setPackages] = useState<Package[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const [isAdminOrOwner, setIsAdminOrOwner] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -57,6 +50,7 @@ export default function TrackingPackagesPage() {
           }
           const data = await response.json()
           setPackages(data.packages)
+          setIsAdminOrOwner(true)
         } catch (error) {
           console.error('Error:', error)
           setError('حدث خطأ أثناء جلب الشحنات')
@@ -107,7 +101,10 @@ export default function TrackingPackagesPage() {
       <Header />
       <div className="pt-24 pb-12">
         <div className="max-w-6xl mx-auto px-4">
-          <h1 className="text-3xl font-bold text-center mb-8">إدارة الشحنات</h1>
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold text-center mb-8">إدارة الشحنات</h1>
+            {isAdminOrOwner && <CreatePackageForm />}
+          </div>
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">

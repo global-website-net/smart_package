@@ -9,7 +9,7 @@ interface Package {
   status: string
   shopId: string
   created_at: string
-  user_id: string
+  userId: string
   current_location: string
   updated_at: string
 }
@@ -25,7 +25,7 @@ export async function GET(request: Request) {
     const { data: packages, error } = await supabase
       .from('Package')
       .select('*')
-      .eq('user_id', session.user.id)
+      .eq('userId', session.user.id)
       .order('created_at', { ascending: false })
 
     if (error) {
