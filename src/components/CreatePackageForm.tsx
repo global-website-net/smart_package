@@ -27,18 +27,27 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
     userId: ''
   })
 
+  const fetchShops = async () => {
+    try {
+      const response = await fetch('/api/shops')
+      if (!response.ok) {
+        throw new Error('Failed to fetch shops')
+      }
+      const data = await response.json()
+      setShops(data)
+    } catch (error) {
+      console.error('Error fetching shops:', error)
+      setError('حدث خطأ في جلب المتاجر')
+    }
+  }
+
+  useEffect(() => {
+    fetchShops()
+  }, [])
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch shops
-        const shopsResponse = await fetch('/api/shops')
-        if (!shopsResponse.ok) {
-          const errorData = await shopsResponse.json()
-          throw new Error(errorData.error || 'Failed to fetch shops')
-        }
-        const shopsData = await shopsResponse.json()
-        setShops(shopsData.shops || [])
-
         // Fetch users
         const usersResponse = await fetch('/api/users/regular')
         if (!usersResponse.ok) {
@@ -159,11 +168,11 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
               name="shopId"
               value={formData.shopId}
               onChange={handleInputChange}
-              required
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              required
             >
               <option value="">اختر المتجر</option>
-              {shops.map(shop => (
+              {shops.map((shop) => (
                 <option key={shop.id} value={shop.id}>
                   {shop.name}
                 </option>
@@ -206,7 +215,7 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
             </select>
           </div>
 
-          <div className="flex justify-end space-x-16 rtl:space-x-reverse">
+          <div className="flex justify-center space-x-16 rtl:space-x-reverse">
             <button
               type="button"
               onClick={onClose}

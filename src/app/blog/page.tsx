@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Header from '../components/Header'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 interface BlogPost {
   id: string
@@ -78,7 +79,17 @@ export default function BlogPage() {
       
       <main className="p-4 pt-24">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold text-center mb-8">المدونة</h1>
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold">المدونة</h1>
+            {session?.user?.role === 'ADMIN' && (
+              <Link
+                href="/blog/create"
+                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+              >
+                إضافة مقال جديد
+              </Link>
+            )}
+          </div>
           
           {error ? (
             <div className="bg-red-50 text-red-800 p-4 rounded-md text-center">

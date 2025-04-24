@@ -6,30 +6,46 @@ import { supabase } from '@/lib/supabase'
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
+    if (!session) {
       return NextResponse.json({ error: 'غير مصرح لك' }, { status: 401 })
     }
 
-    const { title, content } = await request.json()
+    // Check if user is admin
+    const { data: userData, error: userError } = await supabase
+      .from('User')
+      .select('role')
+      .eq('id', session.user.id)
+      .single()
 
-    if (!title || !content) {
+    if (userError) {
+      console.error('Error fetching user role:', userError)
+      return NextResponse.json({ error: 'حدث خطأ في التحقق من الصلاحيات' }, { status: 500 })
+    }
+
+    if (userData.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'غير مصرح لك' }, { status: 403 })
+    }
+
+    const { title, content, authorId } = await request.json()
+
+    if (!title || !content || !authorId) {
       return NextResponse.json(
-        { error: 'العنوان والمحتوى مطلوبان' },
+        { error: 'جميع الحقول مطلوبة' },
         { status: 400 }
       )
     }
 
-    const { data: blogPost, error } = await supabase
+    const { data, error } = await supabase
       .from('BlogPost')
       .insert([
         {
           title,
           content,
-          user_id: session.user.id
-        }
+          authorId,
+          createdAt: new Date().toISOString(),
+        },
       ])
       .select()
-      .single()
 
     if (error) {
       console.error('Error creating blog post:', error)
@@ -39,11 +55,11 @@ export async function POST(request: Request) {
       )
     }
 
-    return NextResponse.json({ blogPost })
+    return NextResponse.json(data[0])
   } catch (error) {
-    console.error('Error in blog creation route:', error)
+    console.error('Error in blog creation API:', error)
     return NextResponse.json(
-      { error: 'حدث خطأ أثناء إنشاء المقال' },
+      { error: 'حدث خطأ في الخادم' },
       { status: 500 }
     )
   }

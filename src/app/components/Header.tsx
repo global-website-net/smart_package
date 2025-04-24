@@ -44,74 +44,25 @@ export default function Header() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-12 rtl:space-x-reverse">
-            {isLoggedIn ? (
-              <div className="relative">
-                <button
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center hover:text-green-500 transition-colors"
-                >
-                  <span className="mr-2">{session?.user?.name || 'حسابي'}</span>
-                  <svg
-                    className={`w-4 h-4 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                {isUserMenuOpen && (
-                  <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
-                    <Link
-                      href="/account"
-                      className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      حسابي
-                    </Link>
-                    {isAdmin && (
-                      <Link
-                        href="/tracking_packages"
-                        className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
-                        onClick={() => setIsUserMenuOpen(false)}
-                      >
-                        ادارة الطرود
-                      </Link>
-                    )}
-                    {!isAdmin && (
-                      <Link
-                        href="/my-packages"
-                        className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
-                        onClick={() => setIsUserMenuOpen(false)}
-                      >
-                        طرودي
-                      </Link>
-                    )}
-                    <Link
-                      href="/blog"
-                      className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      المدونة
-                    </Link>
-                    <button
-                      onClick={handleSignOut}
-                      className="block w-full text-right px-4 py-2 text-gray-800 hover:bg-gray-100"
-                    >
-                      تسجيل الخروج
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <Link
-                href="/auth/login"
-                className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600 transition-colors"
-              >
-                تسجيل الدخول
-              </Link>
-            )}
+          <nav className="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
+            <Link href="/" className="text-white hover:text-green-400 transition-colors">
+              الرئيسية
+            </Link>
+            <Link href="/how-it-works" className="text-white hover:text-green-400 transition-colors">
+              كيف يعمل
+            </Link>
+            <Link href="/shopping-sites" className="text-white hover:text-green-400 transition-colors">
+              مواقع التسوق
+            </Link>
+            <Link href="/packages" className="text-white hover:text-green-400 transition-colors mr-10">
+              الباقات
+            </Link>
+            <Link href="/blog" className="text-white hover:text-green-400 transition-colors">
+              المدونة
+            </Link>
+            <Link href="/contact" className="text-white hover:text-green-400 transition-colors">
+              اتصل بنا
+            </Link>
           </nav>
 
           {/* Mobile Menu Button */}

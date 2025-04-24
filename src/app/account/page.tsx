@@ -97,8 +97,8 @@ export default function AccountPage() {
     setUpdateSuccess('')
     setUpdateError('')
 
-    // Validate current password if editing
-    if (isEditing && !formData.currentPassword) {
+    // Only validate current password if we're actually submitting changes
+    if (isEditing && formData.currentPassword === '') {
       setUpdateError('كلمة المرور الحالية مطلوبة للتعديل')
       return
     }
@@ -195,14 +195,6 @@ export default function AccountPage() {
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-2xl font-bold">الملف الشخصي</h1>
-              {!isEditing && (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                >
-                  تعديل الملف الشخصي
-                </button>
-              )}
             </div>
 
             {error && (
