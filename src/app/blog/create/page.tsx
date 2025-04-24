@@ -10,9 +10,8 @@ export default function CreateBlogPost() {
   const { data: session } = useSession()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
-  const [itemLink, setItemLink] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,19 +27,18 @@ export default function CreateBlogPost() {
         body: JSON.stringify({
           title,
           content,
-          itemLink,
           authorId: session?.user?.id,
         }),
       })
 
       if (!response.ok) {
-        throw new Error('Failed to create blog post')
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to create blog post')
       }
 
       router.push('/blog')
-    } catch (error) {
-      console.error('Error creating blog post:', error)
-      setError('حدث خطأ أثناء إنشاء المقال')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       setIsSubmitting(false)
     }
@@ -78,20 +76,6 @@ export default function CreateBlogPost() {
                   onChange={(e) => setTitle(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="itemLink" className="block text-sm font-medium text-gray-700 mb-1">
-                  رابط المنتج
-                </label>
-                <input
-                  type="url"
-                  id="itemLink"
-                  value={itemLink}
-                  onChange={(e) => setItemLink(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="https://example.com/product"
                 />
               </div>
 
