@@ -29,11 +29,11 @@ export default function Header() {
             <Link href="/packages" className="text-white hover:text-green-400 transition-colors">
               الباقات
             </Link>
-            <Link href="/contact" className="text-white hover:text-green-400 transition-colors">
-              اتصل بنا
-            </Link>
             <Link href="/faq" className="text-white hover:text-green-400 transition-colors">
               الأسئلة الشائعة
+            </Link>
+            <Link href="/contact" className="text-white hover:text-green-400 transition-colors">
+              اتصل بنا
             </Link>
           </div>
 

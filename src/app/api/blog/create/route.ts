@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
+import { v4 as uuidv4 } from 'uuid'
 
 export async function POST(request: Request) {
   try {
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'غير مصرح لك' }, { status: 403 })
     }
 
-    const { title, content, authorId } = await request.json()
+    const { title, content, authorId, itemLink } = await request.json()
 
     if (!title || !content || !authorId) {
       return NextResponse.json(
@@ -39,9 +40,11 @@ export async function POST(request: Request) {
       .from('BlogPost')
       .insert([
         {
+          id: uuidv4(),
           title,
           content,
           authorId,
+          itemLink,
           createdAt: new Date().toISOString(),
         },
       ])
