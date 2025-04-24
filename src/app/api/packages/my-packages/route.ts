@@ -5,60 +5,51 @@ import { supabase } from '@/lib/supabase'
 
 interface Package {
   id: string
-  trackingNumber: string
+  tracking_number: string
+  status: string
+  shopId: string
+  created_at: string
+  user_id: string
   current_location: string
   updated_at: string
-  status: string
-  shop_name: string
-  createdAt: string
 }
 
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session) {
-      return NextResponse.json(
-        { error: 'غير مصرح لك' },
-        { status: 401 }
-      )
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'غير مصرح لك' }, { status: 401 })
     }
 
-    const userId = session.user.id
-
-    // Get user's packages using Supabase
+    // Fetch packages for the current user
     const { data: packages, error } = await supabase
       .from('Package')
-      .select(`
-        id,
-        trackingNumber,
-        status,
-        shop,
-        createdAt,
-        user_email
-      `)
-      .eq('user_email', session.user.email)
-      .order('createdAt', { ascending: false })
+      .select('*')
+      .eq('user_id', session.user.id)
+      .order('created_at', { ascending: false })
 
     if (error) {
       console.error('Error fetching packages:', error)
       return NextResponse.json({ error: 'حدث خطأ أثناء جلب الشحنات' }, { status: 500 })
     }
 
-    if (!packages || packages.length === 0) {
+    if (!packages) {
       return NextResponse.json({ packages: [] })
     }
 
     const formattedPackages = packages.map(pkg => ({
       id: pkg.id,
-      trackingNumber: pkg.trackingNumber,
+      trackingNumber: pkg.tracking_number,
       status: pkg.status,
-      shopName: pkg.shop,
-      createdAt: pkg.createdAt
+      shopName: pkg.shopId,
+      createdAt: pkg.created_at,
+      currentLocation: pkg.current_location,
+      updatedAt: pkg.updated_at
     }))
 
-    return NextResponse.json(formattedPackages)
+    return NextResponse.json({ packages: formattedPackages })
   } catch (error) {
-    console.error('Error fetching packages:', error)
+    console.error('Error in packages API:', error)
     return NextResponse.json(
       { error: 'حدث خطأ أثناء جلب الشحنات' },
       { status: 500 }

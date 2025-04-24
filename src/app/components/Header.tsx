@@ -48,9 +48,6 @@ export default function Header() {
             <Link href="/blog" className="text-white hover:text-green-600">
               المدونة
             </Link>
-            <Link href="/tracking_packages" className="text-white hover:text-green-600">
-              الباقات
-            </Link>
             <Link href="/contact" className="text-white hover:text-green-600">
               اتصل بنا
             </Link>

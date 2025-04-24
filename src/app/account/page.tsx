@@ -214,32 +214,41 @@ export default function AccountPage() {
                       <label htmlFor="governorate" className="block text-sm font-medium text-gray-700 mb-1">
                         المحافظة
                       </label>
-                      <select
-                        id="governorate"
-                        name="governorate"
-                        value={formData.governorate}
-                        onChange={handleInputChange}
-                        disabled={!isEditing}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-50"
-                      >
-                        <option value="">اختر المحافظة</option>
-                        <option value="القدس">القدس</option>
-                        <option value="رام الله والبيرة">رام الله والبيرة</option>
-                        <option value="بيت لحم">بيت لحم</option>
-                        <option value="الخليل">الخليل</option>
-                        <option value="أريحا">أريحا</option>
-                        <option value="نابلس">نابلس</option>
-                        <option value="طولكرم">طولكرم</option>
-                        <option value="قلقيلية">قلقيلية</option>
-                        <option value="سلفيت">سلفيت</option>
-                        <option value="جنين">جنين</option>
-                        <option value="طوباس">طوباس</option>
-                        <option value="غزة">غزة</option>
-                        <option value="شمال غزة">شمال غزة</option>
-                        <option value="دير البلح">دير البلح</option>
-                        <option value="خان يونس">خان يونس</option>
-                        <option value="رفح">رفح</option>
-                      </select>
+                      {isEditing ? (
+                        <select
+                          id="governorate"
+                          name="governorate"
+                          value={formData.governorate}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                        >
+                          <option value="">اختر المحافظة</option>
+                          <option value="القدس">القدس</option>
+                          <option value="رام الله والبيرة">رام الله والبيرة</option>
+                          <option value="بيت لحم">بيت لحم</option>
+                          <option value="الخليل">الخليل</option>
+                          <option value="أريحا">أريحا</option>
+                          <option value="نابلس">نابلس</option>
+                          <option value="طولكرم">طولكرم</option>
+                          <option value="قلقيلية">قلقيلية</option>
+                          <option value="سلفيت">سلفيت</option>
+                          <option value="جنين">جنين</option>
+                          <option value="طوباس">طوباس</option>
+                          <option value="غزة">غزة</option>
+                          <option value="شمال غزة">شمال غزة</option>
+                          <option value="دير البلح">دير البلح</option>
+                          <option value="خان يونس">خان يونس</option>
+                          <option value="رفح">رفح</option>
+                        </select>
+                      ) : (
+                        <input
+                          type="text"
+                          id="governorate"
+                          value={formData.governorate || 'لم يتم تحديد المحافظة'}
+                          disabled
+                          className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-50"
+                        />
+                      )}
                     </div>
 
                     <div>
@@ -372,7 +381,7 @@ export default function AccountPage() {
                   </>
                 )}
                 
-                <div className="flex justify-end space-x-40 rtl:space-x-reverse">
+                <div className="flex justify-center space-x-16 rtl:space-x-reverse">
                   {!isEditing ? (
                     <button
                       type="button"

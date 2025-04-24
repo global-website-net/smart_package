@@ -1,83 +1,87 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import Header from '../components/Header'
+import { supabase } from '@/lib/supabase'
 
 interface Package {
   id: string
   trackingNumber: string
   status: string
+  shopName: string
   createdAt: string
-  user: {
-    fullName: string
-    email: string
-  }
-  shop: {
-    fullName: string
-    email: string
-  }
+  currentLocation: string
+  updatedAt: string
 }
 
-export default function TrackingPackages() {
+export default function TrackingPackagesPage() {
   const { data: session, status } = useSession()
-  const router = useRouter()
   const [packages, setPackages] = useState<Package[]>([])
-  const [loading, setLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const router = useRouter()
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/login')
-    } else if (status === 'authenticated') {
-      fetchPackages()
-    }
-  }, [status, router])
-
-  const fetchPackages = async () => {
-    try {
-      const response = await fetch('/api/packages/all')
-      if (!response.ok) {
-        throw new Error('Failed to fetch packages')
-      }
-      const data = await response.json()
-      setPackages(data)
-    } catch (err) {
-      setError('Failed to load packages')
-      console.error('Error fetching packages:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const updatePackageStatus = async (packageId: string, newStatus: string) => {
-    try {
-      const response = await fetch(`/api/packages/${packageId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to update package status')
+    const checkAuth = async () => {
+      if (status === 'unauthenticated') {
+        router.push('/auth/login')
+        return
       }
 
-      // Refresh the packages list
-      fetchPackages()
-    } catch (err) {
-      console.error('Error updating package status:', err)
-      alert('Failed to update package status')
-    }
-  }
+      if (status === 'authenticated' && session?.user?.email) {
+        try {
+          // Check if user is admin or owner
+          const { data: user, error: userError } = await supabase
+            .from('User')
+            .select('role')
+            .eq('email', session.user.email)
+            .single()
 
-  if (loading) {
+          if (userError) {
+            console.error('Error checking user role:', userError)
+            setError('حدث خطأ أثناء التحقق من الصلاحيات')
+            return
+          }
+
+          if (!user || (user.role !== 'ADMIN' && user.role !== 'OWNER')) {
+            router.push('/')
+            return
+          }
+
+          // Fetch packages
+          const response = await fetch('/api/packages/all')
+          if (!response.ok) {
+            throw new Error('Failed to fetch packages')
+          }
+          const data = await response.json()
+          setPackages(data.packages)
+        } catch (error) {
+          console.error('Error:', error)
+          setError('حدث خطأ أثناء جلب الشحنات')
+        } finally {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    checkAuth()
+  }, [status, session, router])
+
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-100 pt-20">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center">Loading...</div>
+      <div className="min-h-screen bg-gray-100">
+        <Header />
+        <div className="pt-24 pb-12">
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="text-center">
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-green-500 border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" role="status">
+                <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Loading...</span>
+              </div>
+              <p className="mt-4 text-gray-600">جاري تحميل الشحنات...</p>
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -85,85 +89,77 @@ export default function TrackingPackages() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-100 pt-20">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center text-red-500">{error}</div>
+      <div className="min-h-screen bg-gray-100">
+        <Header />
+        <div className="pt-24 pb-12">
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="bg-red-100 text-red-700 p-4 rounded-md">
+              {error}
+            </div>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 pt-20">
-      <div className="max-w-6xl mx-auto px-4">
-        <h1 className="text-3xl font-bold mb-8 text-center">ادارة الطرود</h1>
-        
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  رقم التتبع
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  العميل
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  المتجر
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  الحالة
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  تاريخ الإنشاء
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  الإجراءات
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {packages.map((pkg) => (
-                <tr key={pkg.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {pkg.trackingNumber}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <div>{pkg.user.fullName}</div>
-                    <div className="text-gray-500">{pkg.user.email}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <div>{pkg.shop.fullName}</div>
-                    <div className="text-gray-500">{pkg.shop.email}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <select
-                      value={pkg.status}
-                      onChange={(e) => updatePackageStatus(pkg.id, e.target.value)}
-                      className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md"
-                    >
-                      <option value="PENDING">قيد الانتظار</option>
-                      <option value="PROCESSING">قيد المعالجة</option>
-                      <option value="SHIPPED">تم الشحن</option>
-                      <option value="DELIVERED">تم التسليم</option>
-                      <option value="CANCELLED">ملغي</option>
-                    </select>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {new Date(pkg.createdAt).toLocaleDateString('ar-SA')}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <button
-                      onClick={() => router.push(`/packages/${pkg.id}`)}
-                      className="text-green-600 hover:text-green-900"
-                    >
-                      عرض التفاصيل
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <div className="min-h-screen bg-gray-100">
+      <Header />
+      <div className="pt-24 pb-12">
+        <div className="max-w-6xl mx-auto px-4">
+          <h1 className="text-3xl font-bold text-center mb-8">إدارة الشحنات</h1>
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      رقم التتبع
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      الحالة
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      المتجر
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      الموقع الحالي
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      تاريخ الإنشاء
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      آخر تحديث
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {packages.map((pkg) => (
+                    <tr key={pkg.id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {pkg.trackingNumber}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {pkg.status}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {pkg.shopName}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {pkg.currentLocation}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {new Date(pkg.createdAt).toLocaleDateString('ar-SA')}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {new Date(pkg.updatedAt).toLocaleDateString('ar-SA')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>

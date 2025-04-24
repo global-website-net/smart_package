@@ -26,7 +26,7 @@ export async function POST(request: Request) {
         {
           title,
           content,
-          author_id: session.user.id,
+          user_id: session.user.id,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         }
