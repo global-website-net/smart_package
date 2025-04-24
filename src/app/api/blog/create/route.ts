@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
+import { supabase } from '@/lib/supabase'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { v4 as uuidv4 } from 'uuid'
@@ -19,8 +19,6 @@ export async function POST(request: Request) {
         { status: 400 }
       )
     }
-
-    const supabase = createClient()
 
     const { data, error } = await supabase
       .from('BlogPost')
