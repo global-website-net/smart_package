@@ -68,7 +68,15 @@ export default function BlogPage() {
             throw postsError
           }
 
-          setPosts(blogPosts || [])
+          // Transform the data to match the BlogPost interface
+          const transformedPosts = (blogPosts || []).map(post => ({
+            ...post,
+            author: {
+              name: post.author?.[0]?.name || 'مجهول'
+            }
+          }))
+
+          setPosts(transformedPosts)
         } catch (error) {
           console.error('Error:', error)
           setError('حدث خطأ أثناء جلب المقالات')
