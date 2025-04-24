@@ -94,7 +94,7 @@ export default function BlogPage() {
 
           {/* Admin Controls */}
           {isAdmin && (
-            <div className="mb-8 flex justify-end">
+            <div className="mb-8 flex justify-center">
               <button
                 onClick={() => router.push('/blog/create')}
                 className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"

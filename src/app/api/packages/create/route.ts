@@ -11,18 +11,17 @@ export async function POST(request: Request) {
     }
 
     // Check if user is admin or owner
-    const { data: user, error: userError } = await supabase
-      .from('User')
-      .select('role')
-      .eq('id', session.user.id)
-      .single()
-
-    if (userError || !user || (user.role !== 'ADMIN' && user.role !== 'OWNER')) {
-      return NextResponse.json({ error: 'غير مصرح لك' }, { status: 403 })
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER') {
+      return NextResponse.json(
+        { error: 'غير مصرح لك - فقط المدير والمالك يمكنهم إنشاء الشحنات' },
+        { status: 403 }
+      )
     }
 
-    const { trackingNumber, status, shopId, currentLocation, userId } = await request.json()
+    const body = await request.json()
+    const { trackingNumber, status, shopId, currentLocation, userId } = body
 
+    // Validate required fields
     if (!trackingNumber || !status || !shopId || !currentLocation || !userId) {
       return NextResponse.json(
         { error: 'جميع الحقول مطلوبة' },
@@ -30,31 +29,44 @@ export async function POST(request: Request) {
       )
     }
 
-    // Create package in Supabase
     const { data: newPackage, error } = await supabase
       .from('Package')
-      .insert([
-        {
-          trackingNumber,
-          status,
-          shop: shopId,
-          currentLocation,
-          userId,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
-      ])
-      .select()
+      .insert({
+        tracking_number: trackingNumber,
+        status,
+        shop_id: shopId,
+        current_location: currentLocation,
+        user_id: userId,
+        created_at: new Date(),
+        updated_at: new Date()
+      })
+      .select(`
+        *,
+        User:user_id (
+          fullName,
+          email
+        ),
+        Shop:shop_id (
+          name
+        )
+      `)
       .single()
 
     if (error) {
       console.error('Error creating package:', error)
-      return NextResponse.json({ error: 'حدث خطأ أثناء إنشاء الشحنة' }, { status: 500 })
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء إنشاء الشحنة' },
+        { status: 500 }
+      )
     }
 
-    return NextResponse.json(newPackage)
+    return NextResponse.json({
+      ...newPackage,
+      user: newPackage.User,
+      shop: newPackage.Shop
+    })
   } catch (error) {
-    console.error('Error in package creation:', error)
+    console.error('Error creating package:', error)
     return NextResponse.json(
       { error: 'حدث خطأ أثناء إنشاء الشحنة' },
       { status: 500 }

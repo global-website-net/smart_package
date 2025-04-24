@@ -14,7 +14,7 @@ interface Package {
   updated_at: string
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
@@ -26,7 +26,7 @@ export async function GET(request: Request) {
       .from('Package')
       .select('*')
       .eq('userId', session.user.id)
-      .order('created_at', { ascending: false })
+      .order('createdAt', { ascending: false })
 
     if (error) {
       console.error('Error fetching packages:', error)
@@ -37,19 +37,20 @@ export async function GET(request: Request) {
       return NextResponse.json({ packages: [] })
     }
 
+    // Format the response
     const formattedPackages = packages.map(pkg => ({
       id: pkg.id,
       trackingNumber: pkg.tracking_number,
       status: pkg.status,
-      shopName: pkg.shopId,
-      createdAt: pkg.created_at,
+      shop: pkg.shopId,
       currentLocation: pkg.current_location,
+      createdAt: pkg.created_at,
       updatedAt: pkg.updated_at
     }))
 
     return NextResponse.json({ packages: formattedPackages })
   } catch (error) {
-    console.error('Error in packages API:', error)
+    console.error('Error in my-packages route:', error)
     return NextResponse.json(
       { error: 'حدث خطأ أثناء جلب الشحنات' },
       { status: 500 }

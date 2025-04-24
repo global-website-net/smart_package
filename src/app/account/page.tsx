@@ -172,7 +172,7 @@ export default function AccountPage() {
                   {updateSuccess}
                 </div>
               )}
-              {updateError && updateError !== 'كلمة المرور غير صحيحة' && (
+              {updateError && updateError !== 'كلمة المرور غير صحيحة' && updateError !== 'كلمات المرور الجديدة غير متطابقة' && (
                 <div className="p-4 bg-red-50 text-red-800 rounded-md">
                   {updateError}
                 </div>
@@ -380,45 +380,21 @@ export default function AccountPage() {
                   </>
                 )}
                 
-                <div className="flex justify-center space-x-24 rtl:space-x-reverse">
-                  {!isEditing ? (
-                    <button
-                      type="button"
-                      onClick={() => setIsEditing(true)}
-                      className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                    >
-                      تعديل الملف الشخصي
-                    </button>
-                  ) : (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsEditing(false)
-                          setFormData(prev => ({
-                            ...prev,
-                            fullName: profile?.fullName || '',
-                            governorate: profile?.governorate || '',
-                            town: profile?.town || '',
-                            phonePrefix: profile?.phonePrefix || '',
-                            phoneNumber: profile?.phoneNumber || '',
-                            currentPassword: '',
-                            newPassword: '',
-                            confirmPassword: ''
-                          }))
-                        }}
-                        className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                      >
-                        إلغاء
-                      </button>
-                      <button
-                        type="submit"
-                        className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                      >
-                        حفظ التغييرات
-                      </button>
-                    </>
-                  )}
+                <div className="flex justify-end space-x-24 rtl:space-x-reverse">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditing(false)}
+                    className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                  >
+                    إلغاء
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
+                  >
+                    {isSubmitting ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+                  </button>
                 </div>
               </form>
             </div>

@@ -65,13 +65,13 @@ export async function POST(request: Request) {
       .insert({
         title,
         content,
-        authorId: session.user.id,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        user_id: session.user.id,
+        created_at: new Date(),
+        updated_at: new Date()
       })
       .select(`
         *,
-        User:authorId (
+        User:user_id (
           fullName,
           email
         )
