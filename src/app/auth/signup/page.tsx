@@ -234,15 +234,16 @@ export default function Signup() {
                 <label htmlFor="phonePrefix" className="block text-sm font-medium text-gray-700 mb-1">
                   رمز الدولة <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
+                <select
                   id="phonePrefix"
                   name="phonePrefix"
                   value={formData.phonePrefix}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
-                />
+                >
+                  <option value="+970">+970</option>
+                </select>
               </div>
             </div>
 

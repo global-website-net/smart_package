@@ -29,7 +29,7 @@ export default function Header() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-24 rtl:space-x-reverse">
+          <div className="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
             <Link href="/blog" className="text-white hover:text-green-400 transition-colors">
               المدونة
             </Link>
@@ -61,7 +61,7 @@ export default function Header() {
           </div>
 
           {/* Desktop Auth Buttons */}
-          <div className="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
+          <div className="hidden md:flex items-center space-x-4 rtl:space-x-reverse">
             {status === 'loading' ? (
               <div className="w-8 h-8 rounded-full bg-gray-700 animate-pulse" />
             ) : session ? (
