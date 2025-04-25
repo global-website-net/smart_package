@@ -5,12 +5,24 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Header from '@/components/Header'
 import { supabase } from '@/lib/supabase'
-import { Package } from '@/types'
 import CreatePackageForm from '@/components/CreatePackageForm'
 
 interface Shop {
   id: string
   name: string
+}
+
+interface Package {
+  id: string
+  trackingNumber: string
+  status: string
+  shopId: string
+  shop: {
+    name: string
+  }
+  createdAt: string
+  updatedAt: string
+  currentLocation: string
 }
 
 export default function TrackingPackagesPage() {
@@ -21,6 +33,8 @@ export default function TrackingPackagesPage() {
   const [error, setError] = useState('')
   const [isAdminOrOwner, setIsAdminOrOwner] = useState(false)
   const [showCreateForm, setShowCreateForm] = useState(false)
+  const [selectedShop, setSelectedShop] = useState('')
+  const [trackingNumber, setTrackingNumber] = useState('')
   const router = useRouter()
 
   useEffect(() => {
