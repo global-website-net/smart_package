@@ -67,6 +67,11 @@ export default function TrackingPackagesPage() {
           // Fetch shops
           const shopsResponse = await fetch('/api/shops')
           if (!shopsResponse.ok) {
+            const errorData = await shopsResponse.json()
+            if (errorData.error?.includes('relation "public.Shop" does not exist')) {
+              setError('جدول المتاجر غير موجود. يرجى إنشاء الجدول أولاً.')
+              return
+            }
             throw new Error('Failed to fetch shops')
           }
           const shopsData = await shopsResponse.json()

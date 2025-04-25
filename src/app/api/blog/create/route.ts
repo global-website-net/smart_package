@@ -30,8 +30,6 @@ export async function POST(request: Request) {
           title,
           content,
           authorId: session.user.id,
-          authorName: session.user.name,
-          authorEmail: session.user.email,
           itemLink,
           createdAt: currentTime,
           updatedAt: currentTime

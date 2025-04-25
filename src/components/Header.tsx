@@ -2,192 +2,186 @@
 
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 
 export default function Header() {
   const { data: session, status } = useSession()
-  const router = useRouter()
+  const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
-  const handleSignOut = async () => {
-    await signOut({ callbackUrl: '/' })
-  }
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen)
-  }
+  const navigation = [
+    { name: 'الرئيسية', href: '/' },
+    { name: 'كيف يعمل', href: '/how-it-works' },
+    { name: 'مواقع التسوق', href: '/shopping-sites' },
+    { name: 'الباقات', href: '/packages' },
+    { name: 'المدونة', href: '/blog' },
+    { name: 'تواصل معنا', href: '/contact' },
+  ]
 
   return (
-    <header className="bg-gray-800 text-white fixed w-full top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
-            <Link href="/" className="text-xl font-bold">
-              Smart Package
-            </Link>
-          </div>
-
-          {/* Desktop Navigation */}
-          <div className="flex items-center space-x-6 rtl:space-x-reverse">
-            <Link href="/blog" className="text-white hover:text-green-400 transition-colors">
-              المدونة
-            </Link>
-            <Link href="/packages" className="text-white hover:text-green-400 transition-colors">
-              الباقات
-            </Link>
-            <Link href="/faq" className="text-white hover:text-green-400 transition-colors">
-              الأسئلة الشائعة
-            </Link>
-            <Link href="/contact" className="text-white hover:text-green-400 transition-colors">
-              اتصل بنا
-            </Link>
-          </div>
-
-          {/* Desktop Auth Buttons */}
-          <div className="flex items-center space-x-4 rtl:space-x-reverse">
-            {status === 'loading' ? (
-              <div className="w-8 h-8 rounded-full bg-gray-700 animate-pulse" />
-            ) : session ? (
-              <>
-                {session.user.role === 'ADMIN' && (
-                  <Link
-                    href="/tracking_packages"
-                    className="text-white hover:text-green-400 transition-colors"
-                  >
-                    تتبع الشحنات
-                  </Link>
-                )}
+    <header className="bg-white shadow-md">
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex">
+            <div className="flex-shrink-0 flex items-center">
+              <Link href="/" className="text-2xl font-bold text-green-600">
+                Smart Package
+              </Link>
+            </div>
+            <div className="hidden md:flex items-center space-x-8 rtl:space-x-reverse mr-6">
+              {navigation.map((item) => (
                 <Link
-                  href="/my-packages"
-                  className="text-white hover:text-green-400 transition-colors"
+                  key={item.name}
+                  href={item.href}
+                  className={`${
+                    pathname === item.href
+                      ? 'text-green-600'
+                      : 'text-gray-700 hover:text-green-600'
+                  } px-3 py-2 text-sm font-medium`}
                 >
-                  شحناتي
+                  {item.name}
                 </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="hidden md:flex items-center space-x-4 rtl:space-x-reverse">
+            {status === 'authenticated' ? (
+              <div className="flex items-center space-x-4 rtl:space-x-reverse">
                 <Link
                   href="/account"
-                  className="text-white hover:text-green-400 transition-colors"
+                  className="text-gray-700 hover:text-green-600 px-3 py-2 text-sm font-medium"
                 >
                   حسابي
                 </Link>
                 <button
-                  onClick={handleSignOut}
-                  className="text-white hover:text-green-400 transition-colors"
+                  onClick={() => signOut()}
+                  className="text-gray-700 hover:text-green-600 px-3 py-2 text-sm font-medium"
                 >
                   تسجيل خروج
                 </button>
-              </>
+              </div>
             ) : (
-              <>
+              <div className="flex items-center space-x-4 rtl:space-x-reverse">
                 <Link
                   href="/auth/login"
-                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
+                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 text-sm font-medium"
                 >
                   تسجيل دخول
                 </Link>
                 <Link
-                  href="/auth/register"
-                  className="text-white hover:text-green-400 transition-colors"
+                  href="/auth/signup"
+                  className="text-gray-700 hover:text-green-600 px-3 py-2 text-sm font-medium"
                 >
                   إنشاء حساب
                 </Link>
-              </>
+              </div>
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
+          <div className="flex items-center md:hidden">
             <button
-              onClick={toggleMobileMenu}
-              className="text-white hover:text-green-400 focus:outline-none"
+              type="button"
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-green-600 focus:outline-none"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                {isMobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
+              <span className="sr-only">فتح القائمة</span>
+              {isMobileMenuOpen ? (
+                <svg
+                  className="block h-6 w-6"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  className="block h-6 w-6"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              )}
             </button>
           </div>
         </div>
+      </nav>
 
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+      {/* Mobile menu */}
+      <div
+        className={`${
+          isMobileMenuOpen ? 'block' : 'hidden'
+        } md:hidden bg-white shadow-md`}
+      >
+        <div className="px-2 pt-2 pb-3 space-y-1">
+          {navigation.map((item) => (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={`${
+                pathname === item.href
+                  ? 'text-green-600'
+                  : 'text-gray-700 hover:text-green-600'
+              } block px-3 py-2 text-base font-medium`}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              {item.name}
+            </Link>
+          ))}
+          {status === 'authenticated' ? (
+            <>
               <Link
-                href="/blog"
-                className="block px-3 py-2 text-white hover:text-green-400 transition-colors"
+                href="/account"
+                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-green-600"
+                onClick={() => setIsMobileMenuOpen(false)}
               >
-                المدونة
+                حسابي
+              </Link>
+              <button
+                onClick={() => {
+                  signOut()
+                  setIsMobileMenuOpen(false)
+                }}
+                className="block w-full text-right px-3 py-2 text-base font-medium text-gray-700 hover:text-green-600"
+              >
+                تسجيل خروج
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/auth/login"
+                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-green-600"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                تسجيل دخول
               </Link>
               <Link
-                href="/packages"
-                className="block px-3 py-2 text-white hover:text-green-400 transition-colors"
+                href="/auth/signup"
+                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-green-600"
+                onClick={() => setIsMobileMenuOpen(false)}
               >
-                الباقات
+                إنشاء حساب
               </Link>
-              <Link
-                href="/faq"
-                className="block px-3 py-2 text-white hover:text-green-400 transition-colors"
-              >
-                الأسئلة الشائعة
-              </Link>
-              <Link
-                href="/contact"
-                className="block px-3 py-2 text-white hover:text-green-400 transition-colors"
-              >
-                اتصل بنا
-              </Link>
-              {session ? (
-                <>
-                  {session.user.role === 'ADMIN' && (
-                    <Link
-                      href="/tracking_packages"
-                      className="block px-3 py-2 text-white hover:text-green-400 transition-colors"
-                    >
-                      تتبع الشحنات
-                    </Link>
-                  )}
-                  <Link
-                    href="/my-packages"
-                    className="block px-3 py-2 text-white hover:text-green-400 transition-colors"
-                  >
-                    شحناتي
-                  </Link>
-                  <Link
-                    href="/account"
-                    className="block px-3 py-2 text-white hover:text-green-400 transition-colors"
-                  >
-                    حسابي
-                  </Link>
-                  <button
-                    onClick={handleSignOut}
-                    className="block w-full text-right px-3 py-2 text-white hover:text-green-400 transition-colors"
-                  >
-                    تسجيل خروج
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/auth/login"
-                    className="block px-3 py-2 text-white hover:text-green-400 transition-colors"
-                  >
-                    تسجيل دخول
-                  </Link>
-                  <Link
-                    href="/auth/register"
-                    className="block px-3 py-2 text-white hover:text-green-400 transition-colors"
-                  >
-                    إنشاء حساب
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        )}
+            </>
+          )}
+        </div>
       </div>
     </header>
   )
