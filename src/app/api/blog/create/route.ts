@@ -11,11 +11,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { title, content } = await request.json()
+    const { title, content, itemLink } = await request.json()
 
-    if (!title || !content) {
+    if (!title || !content || !session.user.id) {
       return NextResponse.json(
-        { error: 'Title and content are required' },
+        { error: 'Title, content, and authorId are required' },
         { status: 400 }
       )
     }
@@ -30,6 +30,7 @@ export async function POST(request: Request) {
           title,
           content,
           authorId: session.user.id,
+          itemLink,
           createdAt: currentTime,
           updatedAt: currentTime
         }
@@ -38,12 +39,15 @@ export async function POST(request: Request) {
 
     if (error) {
       console.error('Error creating blog post:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json(
+        { error: 'Failed to create blog post' },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json(data[0])
   } catch (error) {
-    console.error('Error creating blog post:', error)
+    console.error('Error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -10,6 +10,7 @@ export default function CreateBlogPost() {
   const { data: session, status } = useSession()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
+  const [itemLink, setItemLink] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -47,6 +48,7 @@ export default function CreateBlogPost() {
         body: JSON.stringify({
           title,
           content,
+          itemLink,
           authorId: session?.user?.id
         }),
       })
@@ -95,6 +97,20 @@ export default function CreateBlogPost() {
             </div>
 
             <div className="mb-6">
+              <label htmlFor="itemLink" className="block text-sm font-medium text-gray-700 mb-1">
+                رابط المنتج
+              </label>
+              <input
+                type="url"
+                id="itemLink"
+                value={itemLink}
+                onChange={(e) => setItemLink(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="https://"
+              />
+            </div>
+
+            <div className="mb-6">
               <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">
                 محتوى المقال
               </label>
@@ -107,13 +123,23 @@ export default function CreateBlogPost() {
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'جاري إنشاء المقال...' : 'إنشاء المقال'}
-            </button>
+            <div className="flex gap-4">
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex-1 bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'جاري إنشاء المقال...' : 'إنشاء المقال'}
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push('/blog')}
+                className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              >
+                إلغاء
+              </button>
+            </div>
+
           </form>
         </div>
       </main>
