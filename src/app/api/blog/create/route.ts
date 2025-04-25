@@ -11,7 +11,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { title, content, itemLink } = await request.json()
+    const { title, content } = await request.json()
 
     if (!title || !content) {
       return NextResponse.json(
@@ -30,7 +30,6 @@ export async function POST(request: Request) {
           title,
           content,
           authorId: session.user.id,
-          itemLink,
           createdAt: currentTime,
           updatedAt: currentTime
         }

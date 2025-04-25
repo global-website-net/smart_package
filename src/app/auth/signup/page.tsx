@@ -14,7 +14,8 @@ export default function Signup() {
     phonePrefix: '+970',
     phoneNumber: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    countryCode: '+972'
   })
 
   const [isLoading, setIsLoading] = useState(false)
@@ -71,7 +72,7 @@ export default function Signup() {
           governorate: formData.governorate,
           town: formData.town,
           phonePrefix: formData.phonePrefix,
-          phoneNumber: formData.phoneNumber,
+          phoneNumber: formData.countryCode + formData.phoneNumber,
         }),
       })
 
@@ -253,9 +254,9 @@ export default function Signup() {
               </div>
               <div className="w-1/4">
                 <select
-                  id="phonePrefix"
-                  name="phonePrefix"
-                  value={formData.phonePrefix}
+                  id="countryCode"
+                  name="countryCode"
+                  value={formData.countryCode}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"

@@ -12,11 +12,11 @@ export default function Header() {
 
   const navigation = [
     { name: 'الرئيسية', href: '/' },
-    { name: 'كيف يعمل', href: '/how-it-works' },
-    { name: 'مواقع التسوق', href: '/shopping-sites' },
+    { name: 'كيف يعمل', href: '/#how-it-works' },
+    { name: 'مواقع التسوق', href: '/#shopping-sites' },
     { name: 'الباقات', href: '/packages' },
     { name: 'المدونة', href: '/blog' },
-    { name: 'تواصل معنا', href: '/contact' },
+    { name: 'اتصل بنا', href: '/contact' },
   ]
 
   return (
@@ -29,7 +29,7 @@ export default function Header() {
                 Smart Package
               </Link>
             </div>
-            <div className="hidden md:flex items-center space-x-8 rtl:space-x-reverse mr-6">
+            <div className="flex">
               {navigation.map((item) => (
                 <Link
                   key={item.name}

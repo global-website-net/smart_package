@@ -7,17 +7,36 @@ import Header from '@/components/Header'
 
 export default function CreateBlogPost() {
   const router = useRouter()
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
-  const [itemLink, setItemLink] = useState('')
   const [error, setError] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <main className="p-4 pt-24">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+            </div>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  if (status === 'unauthenticated') {
+    router.push('/auth/login')
+    return null
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSubmitting(true)
     setError('')
+    setLoading(true)
 
     try {
       const response = await fetch('/api/blog/create', {
@@ -28,27 +47,22 @@ export default function CreateBlogPost() {
         body: JSON.stringify({
           title,
           content,
-          itemLink,
-          authorId: session?.user?.id,
+          authorId: session?.user?.id
         }),
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Failed to create blog post')
+        throw new Error(data.error || 'حدث خطأ أثناء إنشاء المقال')
       }
 
       router.push('/blog')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      setError(err instanceof Error ? err.message : 'حدث خطأ أثناء إنشاء المقال')
     } finally {
-      setIsSubmitting(false)
+      setLoading(false)
     }
-  }
-
-  if (session?.user?.role !== 'ADMIN') {
-    router.push('/blog')
-    return null
   }
 
   return (
@@ -57,76 +71,50 @@ export default function CreateBlogPost() {
       
       <main className="p-4 pt-24">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h1 className="text-2xl font-bold mb-6">إضافة مقال جديد</h1>
+          <h1 className="text-3xl font-bold mb-8">إنشاء مقال جديد</h1>
 
-            {error && (
-              <div className="bg-red-50 text-red-800 p-4 rounded-md mb-6">
-                {error}
-              </div>
-            )}
+          {error && (
+            <div className="bg-red-50 text-red-800 p-4 rounded-md mb-6">
+              {error}
+            </div>
+          )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                  عنوان المقال
-                </label>
-                <input
-                  type="text"
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  required
-                />
-              </div>
+          <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
+            <div className="mb-6">
+              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                عنوان المقال
+              </label>
+              <input
+                type="text"
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                required
+              />
+            </div>
 
-              <div>
-                <label htmlFor="itemLink" className="block text-sm font-medium text-gray-700 mb-1">
-                  رابط المنتج
-                </label>
-                <input
-                  type="url"
-                  id="itemLink"
-                  value={itemLink}
-                  onChange={(e) => setItemLink(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="https://example.com/product"
-                />
-              </div>
+            <div className="mb-6">
+              <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">
+                محتوى المقال
+              </label>
+              <textarea
+                id="content"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 h-64"
+                required
+              />
+            </div>
 
-              <div>
-                <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">
-                  محتوى المقال
-                </label>
-                <textarea
-                  id="content"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  rows={10}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  required
-                />
-              </div>
-
-              <div className="flex justify-center space-x-16 rtl:space-x-reverse">
-                <button
-                  type="button"
-                  onClick={() => router.push('/blog')}
-                  className="px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors"
-                >
-                  إلغاء
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors disabled:opacity-50"
-                >
-                  {isSubmitting ? 'جاري الإضافة...' : 'إضافة'}
-                </button>
-              </div>
-            </form>
-          </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'جاري إنشاء المقال...' : 'إنشاء المقال'}
+            </button>
+          </form>
         </div>
       </main>
     </div>
