@@ -24,26 +24,6 @@ export default function Packages() {
         </div>
       </main>
 
-      {/* Bottom Banner */}
-      <div className="bg-black text-white py-16 mt-16">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <h3 className="text-xl font-bold mb-4">تتبع الشحنات</h3>
-              <p className="text-gray-300">تتبع شحناتك من مختلف المتاجر في مكان واحد</p>
-            </div>
-            <div className="text-center">
-              <h3 className="text-xl font-bold mb-4">إدارة الطرود</h3>
-              <p className="text-gray-300">إدارة وتنظيم شحناتك بسهولة وكفاءة</p>
-            </div>
-            <div className="text-center">
-              <h3 className="text-xl font-bold mb-4">دعم فني</h3>
-              <p className="text-gray-300">فريق دعم فني متاح لمساعدتك على مدار الساعة</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Footer */}
       <footer className="bg-gray-800 text-white py-12">
         <div className="max-w-6xl mx-auto px-4">

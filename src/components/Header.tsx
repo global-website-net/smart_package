@@ -46,7 +46,7 @@ export default function Header() {
             </div>
           </div>
 
-          <div className="hidden md:flex items-center space-x-4 rtl:space-x-reverse">
+          <div className="flex items-center space-x-4 rtl:space-x-reverse">
             {status === 'authenticated' ? (
               <div className="flex items-center space-x-4 rtl:space-x-reverse">
                 <Link
