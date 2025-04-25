@@ -20,6 +20,8 @@ export async function POST(request: Request) {
       )
     }
 
+    const currentTime = new Date().toISOString()
+
     const { data, error } = await supabase
       .from('BlogPost')
       .insert([
@@ -28,7 +30,8 @@ export async function POST(request: Request) {
           title,
           content,
           authorId,
-          createdAt: new Date().toISOString()
+          createdAt: currentTime,
+          updatedAt: currentTime
         }
       ])
       .select()

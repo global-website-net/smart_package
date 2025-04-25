@@ -29,7 +29,7 @@ export default function Header() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
+          <div className="hidden md:flex items-center space-x-6 rtl:space-x-reverse">
             <Link href="/blog" className="text-white hover:text-green-400 transition-colors">
               المدونة
             </Link>
