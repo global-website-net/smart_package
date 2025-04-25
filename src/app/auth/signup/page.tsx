@@ -242,6 +242,7 @@ export default function Signup() {
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
                 >
+                  <option value="+972">+972</option>
                   <option value="+970">+970</option>
                 </select>
               </div>

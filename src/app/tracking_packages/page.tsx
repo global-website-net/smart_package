@@ -1,17 +1,23 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import Header from '../components/Header'
+import Header from '@/components/Header'
 import { supabase } from '@/lib/supabase'
 import { Package } from '@/types'
 import CreatePackageForm from '@/components/CreatePackageForm'
 
+interface Shop {
+  id: string
+  name: string
+}
+
 export default function TrackingPackagesPage() {
   const { data: session, status } = useSession()
   const [packages, setPackages] = useState<Package[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [shops, setShops] = useState<Shop[]>([])
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [isAdminOrOwner, setIsAdminOrOwner] = useState(false)
   const [showCreateForm, setShowCreateForm] = useState(false)
@@ -44,19 +50,27 @@ export default function TrackingPackagesPage() {
             return
           }
 
+          // Fetch shops
+          const shopsResponse = await fetch('/api/shops')
+          if (!shopsResponse.ok) {
+            throw new Error('Failed to fetch shops')
+          }
+          const shopsData = await shopsResponse.json()
+          setShops(shopsData)
+
           // Fetch packages
-          const response = await fetch('/api/packages/all')
-          if (!response.ok) {
+          const packagesResponse = await fetch('/api/packages')
+          if (!packagesResponse.ok) {
             throw new Error('Failed to fetch packages')
           }
-          const data = await response.json()
-          setPackages(data.packages)
+          const packagesData = await packagesResponse.json()
+          setPackages(packagesData)
           setIsAdminOrOwner(true)
         } catch (error) {
           console.error('Error:', error)
-          setError('حدث خطأ أثناء جلب الشحنات')
+          setError('حدث خطأ أثناء جلب البيانات')
         } finally {
-          setIsLoading(false)
+          setLoading(false)
         }
       }
     }
@@ -64,20 +78,47 @@ export default function TrackingPackagesPage() {
     checkAuth()
   }, [status, session, router])
 
-  if (isLoading) {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedShop || !trackingNumber) return
+
+    try {
+      const response = await fetch('/api/packages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          shopId: selectedShop,
+          trackingNumber,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to add package')
+      }
+
+      const newPackage = await response.json()
+      setPackages([...packages, newPackage])
+      setTrackingNumber('')
+      setSelectedShop('')
+    } catch (err) {
+      console.error('Error adding package:', err)
+      setError('حدث خطأ أثناء إضافة الشحنة')
+    }
+  }
+
+  if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="pt-24 pb-12">
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="text-center">
-              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-green-500 border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" role="status">
-                <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Loading...</span>
-              </div>
-              <p className="mt-4 text-gray-600">جاري تحميل الشحنات...</p>
+        <main className="p-4 pt-24">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
             </div>
           </div>
-        </div>
+        </main>
       </div>
     )
   }
@@ -154,7 +195,7 @@ export default function TrackingPackagesPage() {
                         {pkg.status}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {pkg.shop}
+                        {pkg.shop?.name || 'متجر غير معروف'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {pkg.currentLocation}

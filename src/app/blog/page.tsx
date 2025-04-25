@@ -5,13 +5,18 @@ import Header from '../components/Header'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { format } from 'date-fns'
+import { ar } from 'date-fns/locale'
 
 interface BlogPost {
   id: string
   title: string
   content: string
-  author: string
+  authorId: string
+  authorName: string
+  authorEmail: string
   createdAt: string
+  itemLink?: string
 }
 
 export default function BlogPage() {
@@ -40,8 +45,11 @@ export default function BlogPage() {
           id: post.id,
           title: post.title,
           content: post.content,
-          author: post.author?.[0]?.name || 'مجهول',
-          createdAt: post.createdAt
+          authorId: post.author?.[0]?.id,
+          authorName: post.author?.[0]?.name || 'مجهول',
+          authorEmail: post.author?.[0]?.email || 'مجهول',
+          createdAt: post.createdAt,
+          itemLink: post.itemLink
         }))
         
         setPosts(transformedPosts)
@@ -105,11 +113,25 @@ export default function BlogPage() {
                 <article key={post.id} className="bg-white rounded-lg shadow-md p-6">
                   <h2 className="text-2xl font-semibold mb-4">{post.title}</h2>
                   <div className="text-gray-600 mb-4">
-                    <span className="font-medium">{post.author}</span>
+                    <span className="font-medium">{post.authorName}</span>
                     <span className="mx-2">•</span>
-                    <span>{new Date(post.createdAt).toLocaleDateString('ar-SA')}</span>
+                    <span className="text-gray-400">{post.authorEmail}</span>
+                    <span className="mx-2">•</span>
+                    <span>{format(new Date(post.createdAt), 'dd MMMM yyyy', { locale: ar })}</span>
                   </div>
                   <p className="text-gray-700 leading-relaxed">{post.content}</p>
+                  {post.itemLink && (
+                    <div className="mt-4">
+                      <a
+                        href={post.itemLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-green-600 hover:text-green-800"
+                      >
+                        رابط المنتج
+                      </a>
+                    </div>
+                  )}
                 </article>
               ))}
             </div>

@@ -26,20 +26,22 @@ export async function GET() {
       return NextResponse.json({ error: 'غير مصرح لك' }, { status: 403 })
     }
 
-    // Fetch all shops from the Shop table
-    const { data: shops, error } = await supabase
+    const { data, error } = await supabase
       .from('Shop')
-      .select('id, name')
+      .select('*')
       .order('name', { ascending: true })
 
     if (error) {
       console.error('Error fetching shops:', error)
-      return NextResponse.json({ error: 'حدث خطأ في جلب المتاجر' }, { status: 500 })
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json(shops)
+    return NextResponse.json(data || [])
   } catch (error) {
-    console.error('Error in shops API:', error)
-    return NextResponse.json({ error: 'حدث خطأ في الخادم' }, { status: 500 })
+    console.error('Error fetching shops:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
 } 

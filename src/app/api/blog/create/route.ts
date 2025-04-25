@@ -11,11 +11,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { title, content, authorId } = await request.json()
+    const { title, content, itemLink } = await request.json()
 
-    if (!title || !content || !authorId) {
+    if (!title || !content) {
       return NextResponse.json(
-        { error: 'Title, content, and authorId are required' },
+        { error: 'Title and content are required' },
         { status: 400 }
       )
     }
@@ -29,7 +29,10 @@ export async function POST(request: Request) {
           id: uuidv4(),
           title,
           content,
-          authorId,
+          authorId: session.user.id,
+          authorName: session.user.name,
+          authorEmail: session.user.email,
+          itemLink,
           createdAt: currentTime,
           updatedAt: currentTime
         }

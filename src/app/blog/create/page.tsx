@@ -10,6 +10,7 @@ export default function CreateBlogPost() {
   const { data: session } = useSession()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
+  const [itemLink, setItemLink] = useState('')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -27,6 +28,7 @@ export default function CreateBlogPost() {
         body: JSON.stringify({
           title,
           content,
+          itemLink,
           authorId: session?.user?.id,
         }),
       })
@@ -76,6 +78,20 @@ export default function CreateBlogPost() {
                   onChange={(e) => setTitle(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="itemLink" className="block text-sm font-medium text-gray-700 mb-1">
+                  رابط المنتج
+                </label>
+                <input
+                  type="url"
+                  id="itemLink"
+                  value={itemLink}
+                  onChange={(e) => setItemLink(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="https://example.com/product"
                 />
               </div>
 
