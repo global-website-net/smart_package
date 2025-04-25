@@ -23,27 +23,26 @@ export default function Header() {
     <header className="bg-white shadow-md">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          <div className="flex">
-            <div className="flex-shrink-0 flex items-center">
-              <Link href="/" className="text-2xl font-bold text-green-600">
-                Smart Package
+          <div className="flex items-center">
+            <Link href="/" className="text-2xl font-bold text-green-600">
+              Smart Package
+            </Link>
+          </div>
+
+          <div className="flex items-center space-x-8 rtl:space-x-reverse">
+            {navigation.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`${
+                  pathname === item.href
+                    ? 'text-green-600'
+                    : 'text-gray-700 hover:text-green-600'
+                } px-3 py-2 text-sm font-medium`}
+              >
+                {item.name}
               </Link>
-            </div>
-            <div className="flex">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`${
-                    pathname === item.href
-                      ? 'text-green-600'
-                      : 'text-gray-700 hover:text-green-600'
-                  } px-3 py-2 text-sm font-medium`}
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </div>
+            ))}
           </div>
 
           <div className="flex items-center space-x-4 rtl:space-x-reverse">

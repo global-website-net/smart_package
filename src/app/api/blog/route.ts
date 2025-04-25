@@ -8,6 +8,7 @@ interface BlogPost {
   title: string
   content: string
   createdAt: string
+  itemLink: string
   User: {
     id: string
     fullName: string
@@ -24,6 +25,7 @@ export async function GET() {
         title,
         content,
         createdAt,
+        itemLink,
         User (
           id,
           fullName
@@ -45,6 +47,7 @@ export async function GET() {
       title: post.title,
       content: post.content,
       createdAt: post.createdAt,
+      itemLink: post.itemLink,
       author: post.User?.[0] ? {
         name: post.User[0].fullName
       } : {

@@ -146,7 +146,7 @@ export default function Signup() {
             {/* Full Name */}
             <div>
               <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
-                الاسم الكامل
+                الاسم الكامل <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -219,6 +219,16 @@ export default function Signup() {
                 رقم الهاتف <span className="text-red-500">*</span>
               </label>
               <div className="flex gap-2">
+                <input
+                  type="tel"
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  required
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                  placeholder="أدخل رقم هاتفك"
+                />
                 <select
                   id="countryCode"
                   name="countryCode"
@@ -230,16 +240,6 @@ export default function Signup() {
                   <option value="+972">+972</option>
                   <option value="+970">+970</option>
                 </select>
-                <input
-                  type="tel"
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={handleChange}
-                  required
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
-                  placeholder="أدخل رقم هاتفك"
-                />
               </div>
             </div>
 

@@ -45,9 +45,9 @@ export default function BlogPage() {
           id: post.id,
           title: post.title,
           content: post.content,
-          authorId: post.author?.[0]?.id,
-          authorName: post.author?.[0]?.name || 'مجهول',
-          authorEmail: post.author?.[0]?.email || 'مجهول',
+          authorId: post.author?.id,
+          authorName: post.author?.name || 'مجهول',
+          authorEmail: post.author?.email || 'مجهول',
           createdAt: post.createdAt,
           itemLink: post.itemLink
         }))
@@ -114,8 +114,12 @@ export default function BlogPage() {
                   <h2 className="text-2xl font-semibold mb-4">{post.title}</h2>
                   <div className="text-gray-600 mb-4">
                     <span className="font-medium">{post.authorName}</span>
-                    <span className="mx-2">•</span>
-                    <span className="text-gray-400">{post.authorEmail}</span>
+                    {post.authorName !== 'مجهول' && (
+                      <>
+                        <span className="mx-2">•</span>
+                        <span className="text-gray-400">{post.authorEmail}</span>
+                      </>
+                    )}
                     <span className="mx-2">•</span>
                     <span>{format(new Date(post.createdAt), 'dd MMMM yyyy', { locale: ar })}</span>
                   </div>
