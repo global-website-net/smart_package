@@ -14,7 +14,7 @@ interface PackageData {
     email: string;
   };
   shop: {
-    name: string;
+    fullName: string;
   };
   currentLocation?: string | null;
 }
@@ -30,7 +30,7 @@ interface RawPackageData {
     email: string;
   }>;
   shop: Array<{
-    name: string;
+    fullName: string;
   }>;
 }
 
@@ -58,7 +58,7 @@ export async function GET() {
           email
         ),
         shop:shopId (
-          name
+          fullName
         )
       `)
       .eq('userId', session.user.id)

@@ -74,6 +74,7 @@ model Package {
   id             String   @id @default(cuid())
   trackingNumber String   @unique
   status         String   @default("PENDING")
+  scannerCode    String?  // Optional scanner code field
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   userId         String

@@ -26,17 +26,25 @@ export async function GET() {
       return NextResponse.json({ error: 'غير مصرح لك' }, { status: 403 })
     }
 
+    // Fetch SHOP accounts from User table
     const { data, error } = await supabase
-      .from('Shop')
-      .select('*')
-      .order('name', { ascending: true })
+      .from('User')
+      .select('id, fullName')
+      .eq('role', 'SHOP')
+      .order('fullName', { ascending: true })
 
     if (error) {
       console.error('Error fetching shops:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json(data || [])
+    // Transform the data to match the expected format
+    const shops = data.map(user => ({
+      id: user.id,
+      name: user.fullName
+    }))
+
+    return NextResponse.json(shops || [])
   } catch (error) {
     console.error('Error fetching shops:', error)
     return NextResponse.json(
