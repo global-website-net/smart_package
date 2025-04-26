@@ -1,17 +1,23 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
+type RouteContext = {
+  params: {
+    id: string
+  }
+}
+
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: RouteContext
 ) {
   try {
     const { data, error } = await supabase
       .from('BlogPost')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', context.params.id)
       .single()
 
     if (error) {
@@ -33,8 +39,8 @@ export async function GET(
 }
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: RouteContext
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -64,7 +70,7 @@ export async function PUT(
         itemLink,
         updatedAt: new Date().toISOString(),
       })
-      .eq('id', params.id)
+      .eq('id', context.params.id)
 
     if (error) {
       console.error('Error updating blog post:', error)
@@ -85,8 +91,8 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: RouteContext
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -101,7 +107,7 @@ export async function DELETE(
     const { error } = await supabase
       .from('BlogPost')
       .delete()
-      .eq('id', params.id)
+      .eq('id', context.params.id)
 
     if (error) {
       console.error('Error deleting blog post:', error)
