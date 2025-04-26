@@ -32,22 +32,22 @@ export async function POST(request: Request) {
     const { data: newPackage, error } = await supabase
       .from('Package')
       .insert({
-        tracking_number: trackingNumber,
+        trackingNumber,
         status,
-        shop_id: shopId,
-        current_location: currentLocation,
-        user_id: userId,
-        created_at: new Date(),
-        updated_at: new Date()
+        shopId,
+        currentLocation,
+        userId,
+        createdAt: new Date(),
+        updatedAt: new Date()
       })
       .select(`
         *,
-        User:user_id (
+        user:userId (
           fullName,
           email
         ),
-        Shop:shop_id (
-          name
+        shop:shopId (
+          fullName
         )
       `)
       .single()
@@ -62,8 +62,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       ...newPackage,
-      user: newPackage.User,
-      shop: newPackage.Shop
+      user: newPackage.user,
+      shop: newPackage.shop
     })
   } catch (error) {
     console.error('Error creating package:', error)

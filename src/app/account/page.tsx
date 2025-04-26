@@ -449,16 +449,16 @@ export default function AccountPage() {
             <p className="text-gray-600 mb-6">
               هل أنت متأكد من رغبتك في حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.
             </p>
-            <div className="flex justify-center space-x-40 rtl:space-x-reverse">
+            <div className="flex justify-center space-x-4 rtl:space-x-reverse mt-6">
               <button
                 onClick={() => setShowDeleteModal(false)}
-                className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors"
+                className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors space-x-20"
               >
                 إلغاء
               </button>
               <button
                 onClick={handleDeleteAccount}
-                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
+                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors space-x-20"
                 disabled={isDeleting}
               >
                 {isDeleting ? 'جاري الحذف...' : 'تأكيد الحذف'}
