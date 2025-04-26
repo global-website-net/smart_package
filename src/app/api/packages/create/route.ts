@@ -32,21 +32,21 @@ export async function POST(request: Request) {
     const { data: newPackage, error } = await supabase
       .from('Package')
       .insert({
-        trackingNumber,
-        status,
-        shopId,
-        currentLocation,
-        userId,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        tracking_number: trackingNumber,
+        status_id: (await supabase.from('Status').select('id').eq('name', status).single()).data?.id,
+        user_id: userId,
+        shop_id: shopId,
+        current_location: currentLocation,
+        created_at: new Date(),
+        updated_at: new Date()
       })
       .select(`
         *,
-        user:userId (
+        user:user_id (
           fullName,
           email
         ),
-        shop:shopId (
+        shop:shop_id (
           fullName
         )
       `)

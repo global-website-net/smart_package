@@ -404,22 +404,24 @@ export default function AccountPage() {
                 </div>
 
                 {isEditing && (
-                  <div className="flex justify-center space-x-40 rtl:space-x-reverse mt-6 gap-4">
-                    <button
-                      type="button"
-                      onClick={handleCancelEdit}
-                      className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                      disabled={isSubmitting}
-                    >
-                      إلغاء
-                    </button>
-                    <button
-                      type="submit"
-                      className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? 'جاري الحفظ...' : 'حفظ التغييرات'}
-                    </button>
+                  <div className="flex justify-center items-center mt-6">
+                    <div className="flex space-x-4 rtl:space-x-reverse">
+                      <button
+                        type="button"
+                        onClick={handleCancelEdit}
+                        className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                        disabled={isSubmitting}
+                      >
+                        إلغاء
+                      </button>
+                      <button
+                        type="submit"
+                        className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+                      </button>
+                    </div>
                   </div>
                 )}
               </form>
