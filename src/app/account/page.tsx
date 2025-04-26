@@ -408,14 +408,14 @@ export default function AccountPage() {
                     <button
                       type="button"
                       onClick={handleCancelEdit}
-                      className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors"
+                      className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                       disabled={isSubmitting}
                     >
                       إلغاء
                     </button>
                     <button
                       type="submit"
-                      className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
+                      className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                       disabled={isSubmitting}
                     >
                       {isSubmitting ? 'جاري الحفظ...' : 'حفظ التغييرات'}

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import Header from '@/components/Header'
+import Header from '@/app/components/Header'
 
 export default function CreateBlogPost() {
   const router = useRouter()
@@ -134,7 +134,7 @@ export default function CreateBlogPost() {
               <button
                 type="button"
                 onClick={() => router.push('/blog')}
-                className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                className="flex-1 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
               >
                 إلغاء
               </button>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import Header from '@/components/Header'
+import Header from '@/app/components/Header'
 import { supabase } from '@/lib/supabase'
 import CreatePackageForm from '@/components/CreatePackageForm'
 
@@ -78,7 +78,7 @@ export default function TrackingPackagesPage() {
           setShops(shopsData)
 
           // Fetch packages
-          const packagesResponse = await fetch('/api/packages')
+          const packagesResponse = await fetch('/api/packages/all')
           if (!packagesResponse.ok) {
             throw new Error('Failed to fetch packages')
           }

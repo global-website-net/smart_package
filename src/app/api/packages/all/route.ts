@@ -3,67 +3,93 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 
-interface Package {
+interface PackageData {
   id: string
-  tracking_number: string
+  trackingNumber: string
   status: string
-  shop_name: string
-  created_at: string
-  user_id: string
-  current_location: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
+  user: {
+    fullName: string
+    email: string
+  }
+  shop: {
+    name: string
+  }
+  currentLocation?: string | null
 }
 
-export async function GET(request: Request) {
+interface RawPackageData {
+  id: string
+  trackingNumber: string
+  status: string
+  createdAt: string
+  updatedAt: string
+  user: Array<{
+    fullName: string
+    email: string
+  }>
+  shop: Array<{
+    name: string
+  }>
+}
+
+export async function GET() {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'غير مصرح لك' }, { status: 401 })
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'غير مصرح لك بالوصول' },
+        { status: 401 }
+      )
     }
 
-    // Check if user is admin or owner
-    const { data: user, error: userError } = await supabase
-      .from('User')
-      .select('role')
-      .eq('email', session.user.email)
-      .single()
-
-    if (userError) {
-      console.error('Error checking user role:', userError)
-      return NextResponse.json({ error: 'حدث خطأ أثناء التحقق من الصلاحيات' }, { status: 500 })
+    // Check if user is admin
+    if (session.user.role !== 'ADMIN') {
+      return NextResponse.json(
+        { error: 'غير مصرح لك بالوصول' },
+        { status: 403 }
+      )
     }
 
-    if (!user || (user.role !== 'ADMIN' && user.role !== 'OWNER')) {
-      return NextResponse.json({ error: 'غير مصرح لك' }, { status: 401 })
-    }
-
-    // Fetch all packages
-    const { data: packages, error } = await supabase
+    // First, fetch the packages
+    const { data: packages, error: packagesError } = await supabase
       .from('Package')
-      .select('*')
+      .select(`
+        id,
+        trackingNumber,
+        status,
+        createdAt,
+        updatedAt,
+        user:userId (
+          fullName,
+          email
+        ),
+        shop:shopId (
+          name
+        )
+      `)
       .order('createdAt', { ascending: false })
 
-    if (error) {
-      console.error('Error fetching packages:', error)
-      return NextResponse.json({ error: 'حدث خطأ أثناء جلب الشحنات' }, { status: 500 })
+    if (packagesError) {
+      console.error('Error fetching packages:', packagesError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء جلب الشحنات' },
+        { status: 500 }
+      )
     }
 
-    if (!packages) {
-      return NextResponse.json({ packages: [] })
-    }
-
-    const formattedPackages = packages.map(pkg => ({
-      id: pkg.id,
-      trackingNumber: pkg.trackingNumber,
-      status: pkg.status,
-      shopName: pkg.shop,
-      createdAt: pkg.createdAt,
-      userEmail: pkg.user_email
+    // Transform the data to match the expected format
+    const transformedPackages = (packages as RawPackageData[]).map(pkg => ({
+      ...pkg,
+      user: pkg.user[0],
+      shop: pkg.shop[0],
+      currentLocation: null
     }))
 
-    return NextResponse.json({ packages: formattedPackages })
+    return NextResponse.json(transformedPackages)
   } catch (error) {
-    console.error('Error in packages API:', error)
+    console.error('Error in packages/all route:', error)
     return NextResponse.json(
       { error: 'حدث خطأ أثناء جلب الشحنات' },
       { status: 500 }
