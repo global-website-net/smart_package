@@ -149,8 +149,8 @@ export default function BlogPage() {
       
       <main className="p-4 pt-24">
         <div className="max-w-4xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold">المدونة</h1>
+          <div className="flex flex-col items-center mb-8">
+            <h1 className="text-3xl font-bold mb-4">المدونة</h1>
             {session?.user?.role === 'ADMIN' && (
               <Link
                 href="/blog/create"

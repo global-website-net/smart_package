@@ -347,7 +347,6 @@ export default function AccountPage() {
                       disabled={!isEditing}
                       className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
                     >
-                      <option value="">اختر رمز الهاتف</option>
                       {phonePrefixes.map((prefix) => (
                         <option key={prefix} value={prefix}>{prefix}</option>
                       ))}

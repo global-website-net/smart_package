@@ -43,7 +43,45 @@ export default function Header() {
     <header className="bg-black text-white fixed w-full top-0 z-50">
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex justify-between items-center h-20">
-          {/* Left Side - Login Button or User Name with Dropdown */}
+          {/* Left Side - Logo */}
+          <div className="flex items-center">
+            <Link href="/" className="text-xl font-bold">
+              SMART PACKAGE
+            </Link>
+          </div>
+
+          {/* Center - Mobile Menu Button */}
+          <div className="md:hidden">
+            <button
+              className="p-2"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                {isMenuOpen ? (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                ) : (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                )}
+              </svg>
+            </button>
+          </div>
+
+          {/* Right Side - Login Button or User Name with Dropdown */}
           <div>
             {isLoggedIn ? (
               <div className="relative" ref={userMenuRef}>
@@ -120,44 +158,6 @@ export default function Header() {
                 </Link>
               )
             )}
-          </div>
-
-          {/* Center - Mobile Menu Button */}
-          <div className="md:hidden">
-            <button
-              className="p-2"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                {isMenuOpen ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                )}
-              </svg>
-            </button>
-          </div>
-
-          {/* Right Side - Logo */}
-          <div className="flex items-center">
-            <Link href="/" className="text-xl font-bold">
-              SMART PACKAGE
-            </Link>
           </div>
         </div>
 

@@ -85,7 +85,16 @@ export default function Home() {
         {/* How it Works Section */}
         <section id="how-it-works" className="py-20 bg-white">
           <div className="max-w-6xl mx-auto px-4">
-            <h2 className="text-4xl font-bold text-center mb-12">كيف يعمل</h2>
+            <h2 className="text-4xl font-bold text-center mb-6">كيف يعمل</h2>
+            
+            {/* Decorative Line with Diamond */}
+            <div className="flex justify-center items-center mb-12">
+              <div className="relative w-full max-w-[600px]">
+                <div className="w-full h-0.5 bg-green-500"></div>
+                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
+              </div>
+            </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {steps.map((step) => (
                 <div
@@ -136,7 +145,16 @@ export default function Home() {
         {/* Shopping Sites Section */}
         <section id="shopping-sites" className="py-16 bg-white w-full">
           <div className="max-w-6xl mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">مواقع التسوق</h2>
+            <h2 className="text-3xl font-bold text-center mb-6">مواقع التسوق</h2>
+            
+            {/* Decorative Line with Diamond */}
+            <div className="flex justify-center items-center mb-12">
+              <div className="relative w-full max-w-[600px]">
+                <div className="w-full h-0.5 bg-green-500"></div>
+                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
+              </div>
+            </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {/* Amazon */}
               <a 
