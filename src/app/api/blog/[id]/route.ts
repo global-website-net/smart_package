@@ -5,13 +5,13 @@ import { authOptions } from '@/lib/auth'
 
 export async function GET(
   request: Request,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
     const { data, error } = await supabase
       .from('BlogPost')
       .select('*')
-      .eq('id', context.params.id)
+      .eq('id', params.id)
       .single()
 
     if (error) {
@@ -34,7 +34,7 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -64,7 +64,7 @@ export async function PUT(
         itemLink,
         updatedAt: new Date().toISOString(),
       })
-      .eq('id', context.params.id)
+      .eq('id', params.id)
 
     if (error) {
       console.error('Error updating blog post:', error)
@@ -86,7 +86,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -101,7 +101,7 @@ export async function DELETE(
     const { error } = await supabase
       .from('BlogPost')
       .delete()
-      .eq('id', context.params.id)
+      .eq('id', params.id)
 
     if (error) {
       console.error('Error deleting blog post:', error)
