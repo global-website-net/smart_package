@@ -9,7 +9,7 @@ interface Package {
   id: string
   trackingNumber: string
   status: string
-  currentLocation: string
+  currentLocation?: string
   createdAt: string
   updatedAt: string
   user: {
@@ -106,7 +106,7 @@ export default function MyPackagesPage() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">الموقع الحالي</p>
-                      <p className="font-medium">{pkg.currentLocation}</p>
+                      <p className="font-medium">{pkg.currentLocation || 'غير متوفر'}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">المتجر</p>

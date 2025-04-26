@@ -338,6 +338,18 @@ export default function AccountPage() {
                   )}
 
                   <div>
+                    <label className="block text-gray-700 mb-2">رقم الهاتف</label>
+                    <input
+                      type="text"
+                      name="phoneNumber"
+                      value={formData.phoneNumber}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
+                    />
+                  </div>
+
+                  <div>
                     <label className="block text-gray-700 mb-2">رمز الهاتف</label>
                     <select
                       name="phonePrefix"
@@ -350,18 +362,6 @@ export default function AccountPage() {
                         <option key={prefix} value={prefix}>{prefix}</option>
                       ))}
                     </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-gray-700 mb-2">رقم الهاتف</label>
-                    <input
-                      type="text"
-                      name="phoneNumber"
-                      value={formData.phoneNumber}
-                      onChange={handleInputChange}
-                      disabled={!isEditing}
-                      className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
-                    />
                   </div>
 
                   {isEditing && (
@@ -404,7 +404,7 @@ export default function AccountPage() {
                 </div>
 
                 {isEditing && (
-                  <div className="flex justify-end space-x-4 rtl:space-x-reverse mt-6">
+                  <div className="flex justify-center space-x-4 rtl:space-x-reverse mt-6">
                     <button
                       type="button"
                       onClick={handleCancelEdit}
@@ -453,7 +453,7 @@ export default function AccountPage() {
             <p className="text-gray-600 mb-6">
               هل أنت متأكد من رغبتك في حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.
             </p>
-            <div className="flex justify-end space-x-4 rtl:space-x-reverse">
+            <div className="flex justify-center space-x-4 rtl:space-x-reverse">
               <button
                 onClick={() => setShowDeleteModal(false)}
                 className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors"

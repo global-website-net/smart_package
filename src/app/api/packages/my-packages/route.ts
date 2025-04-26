@@ -3,6 +3,37 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 
+interface PackageData {
+  id: string;
+  trackingNumber: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  user: {
+    fullName: string;
+    email: string;
+  };
+  shop: {
+    name: string;
+  };
+  currentLocation?: string | null;
+}
+
+interface RawPackageData {
+  id: string;
+  trackingNumber: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  user: Array<{
+    fullName: string;
+    email: string;
+  }>;
+  shop: Array<{
+    name: string;
+  }>;
+}
+
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
@@ -20,11 +51,15 @@ export async function GET() {
         id,
         trackingNumber,
         status,
-        shopId,
-        currentLocation,
         createdAt,
         updatedAt,
-        userId
+        user:userId (
+          fullName,
+          email
+        ),
+        shop:shopId (
+          name
+        )
       `)
       .eq('userId', session.user.id)
       .order('createdAt', { ascending: false })
@@ -37,45 +72,15 @@ export async function GET() {
       )
     }
 
-    // If there are packages, fetch the shop data separately
-    if (packages && packages.length > 0) {
-      // Get unique shop IDs
-      const shopIds = [...new Set(packages.map(pkg => pkg.shopId).filter(Boolean))]
-      
-      // Fetch shop data if there are shop IDs
-      let shops: Record<string, string> = {}
-      if (shopIds.length > 0) {
-        const { data: shopData, error: shopError } = await supabase
-          .from('Shop')
-          .select('id, name')
-          .in('id', shopIds)
-        
-        if (!shopError && shopData) {
-          // Create a map of shop ID to shop name
-          shops = shopData.reduce((acc, shop) => {
-            acc[shop.id] = shop.name
-            return acc
-          }, {} as Record<string, string>)
-        }
-      }
+    // Transform the data to match the expected format
+    const transformedPackages = (packages as RawPackageData[]).map(pkg => ({
+      ...pkg,
+      user: pkg.user[0],
+      shop: pkg.shop[0],
+      currentLocation: null
+    }))
 
-      // Combine package data with shop names
-      const formattedPackages = packages.map(pkg => ({
-        id: pkg.id,
-        trackingNumber: pkg.trackingNumber,
-        status: pkg.status,
-        shop: pkg.shopId ? { name: shops[pkg.shopId] || 'متجر غير معروف' } : null,
-        currentLocation: pkg.currentLocation,
-        createdAt: pkg.createdAt,
-        updatedAt: pkg.updatedAt,
-        userId: pkg.userId
-      }))
-
-      return NextResponse.json(formattedPackages)
-    }
-
-    // If no packages found, return empty array
-    return NextResponse.json([])
+    return NextResponse.json(transformedPackages)
   } catch (error) {
     console.error('Error in my-packages route:', error)
     return NextResponse.json(
