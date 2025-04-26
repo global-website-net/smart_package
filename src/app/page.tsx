@@ -243,11 +243,6 @@ export default function Home() {
                     الباقات
                   </Link>
                 </li>
-                <li>
-                  <Link href="/contact" className="text-gray-400 hover:text-white transition-colors">
-                    اتصل بنا
-                  </Link>
-                </li>
               </ul>
             </div>
             

@@ -124,69 +124,73 @@ export default function EditBlogPostClient({ id }: EditBlogPostClientProps) {
       
       <main className="p-4 pt-24">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8">تعديل المقال</h1>
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold">تعديل المقال</h1>
+          </div>
           
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                عنوان المقال *
-              </label>
-              <input
-                type="text"
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="أدخل عنوان المقال"
-              />
-            </div>
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                  عنوان المقال *
+                </label>
+                <input
+                  type="text"
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="أدخل عنوان المقال"
+                />
+              </div>
 
-            <div>
-              <label htmlFor="itemLink" className="block text-sm font-medium text-gray-700 mb-1">
-                رابط المنتج
-              </label>
-              <input
-                type="url"
-                id="itemLink"
-                value={itemLink}
-                onChange={(e) => setItemLink(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="أدخل رابط المنتج (اختياري)"
-              />
-            </div>
+              <div>
+                <label htmlFor="itemLink" className="block text-sm font-medium text-gray-700 mb-1">
+                  رابط المنتج
+                </label>
+                <input
+                  type="url"
+                  id="itemLink"
+                  value={itemLink}
+                  onChange={(e) => setItemLink(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="أدخل رابط المنتج (اختياري)"
+                />
+              </div>
 
-            <div>
-              <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">
-                محتوى المقال *
-              </label>
-              <textarea
-                id="content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                required
-                rows={10}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="أدخل محتوى المقال"
-              />
-            </div>
+              <div>
+                <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">
+                  محتوى المقال *
+                </label>
+                <textarea
+                  id="content"
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  required
+                  rows={10}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="أدخل محتوى المقال"
+                />
+              </div>
 
-            <div className="flex gap-4">
-              <button
-                type="submit"
-                className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-              >
-                حفظ التغييرات
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push('/blog')}
-                className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-              >
-                إلغاء
-              </button>
-            </div>
-          </form>
+              <div className="flex gap-4">
+                <button
+                  type="submit"
+                  className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                >
+                  حفظ التغييرات
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push('/blog')}
+                  className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                >
+                  إلغاء
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </main>
     </div>

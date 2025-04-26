@@ -43,6 +43,26 @@ export default function AccountPage() {
   const router = useRouter()
 
   const isAdminOrOwner = session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER'
+  const isRegularUser = session?.user?.role === 'REGULAR'
+
+  const governorates = [
+    'محافظة قلقيلية',
+    'محافظة نابلس',
+    'محافظة طولكرم',
+    'محافظة طوباس',
+    'محافظة جنين',
+    'محافظة القدس',
+    'محافظة سلفيت',
+    'محافظة بيت لحم',
+    'محافظة الخليل',
+    'محافظة اريحا',
+    'محافظة رام الله والبيرة'
+  ]
+
+  const phonePrefixes = [
+    '+972',
+    '+970'
+  ]
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -290,14 +310,18 @@ export default function AccountPage() {
                     <>
                       <div>
                         <label className="block text-gray-700 mb-2">المحافظة</label>
-                        <input
-                          type="text"
+                        <select
                           name="governorate"
                           value={formData.governorate}
                           onChange={handleInputChange}
                           disabled={!isEditing}
                           className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
-                        />
+                        >
+                          <option value="">اختر المحافظة</option>
+                          {governorates.map((gov) => (
+                            <option key={gov} value={gov}>{gov}</option>
+                          ))}
+                        </select>
                       </div>
 
                       <div>
@@ -316,14 +340,18 @@ export default function AccountPage() {
 
                   <div>
                     <label className="block text-gray-700 mb-2">رمز الهاتف</label>
-                    <input
-                      type="text"
+                    <select
                       name="phonePrefix"
                       value={formData.phonePrefix}
                       onChange={handleInputChange}
                       disabled={!isEditing}
                       className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
-                    />
+                    >
+                      <option value="">اختر رمز الهاتف</option>
+                      {phonePrefixes.map((prefix) => (
+                        <option key={prefix} value={prefix}>{prefix}</option>
+                      ))}
+                    </select>
                   </div>
 
                   <div>
@@ -399,19 +427,22 @@ export default function AccountPage() {
               </form>
             )}
 
-            <div className="mt-8 pt-6 border-t border-gray-200">
-              <h2 className="text-xl font-bold mb-4">حذف الحساب</h2>
-              <p className="text-gray-600 mb-4">
-                عند حذف حسابك، سيتم حذف جميع بياناتك نهائياً ولن تتمكن من استعادتها.
-              </p>
-              <button
-                onClick={() => setShowDeleteModal(true)}
-                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
-                disabled={isDeleting}
-              >
-                {isDeleting ? 'جاري الحذف...' : 'حذف الحساب'}
-              </button>
-            </div>
+            {/* Only show delete account section for REGULAR users */}
+            {isRegularUser && !isEditing && (
+              <div className="mt-8 pt-6 border-t border-gray-200">
+                <h2 className="text-xl font-bold mb-4">حذف الحساب</h2>
+                <p className="text-gray-600 mb-4">
+                  عند حذف حسابك، سيتم حذف جميع بياناتك نهائياً ولن تتمكن من استعادتها.
+                </p>
+                <button
+                  onClick={() => setShowDeleteModal(true)}
+                  className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? 'جاري الحذف...' : 'حذف الحساب'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </main>
