@@ -171,7 +171,7 @@ export default function ContactPage() {
       </div>
       <footer className="bg-gray-800 text-white py-12">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <h3 className="text-lg font-semibold mb-4">عن الشركة</h3>
               <p className="text-gray-400">
@@ -205,6 +205,10 @@ export default function ContactPage() {
                 </li>
               </ul>
             </div>
+          </div>
+          
+          <div className="mt-8 pt-8 border-t border-gray-700 text-center text-gray-400">
+            <p>© 2023 SMART PACKAGE. جميع الحقوق محفوظة.</p>
           </div>
         </div>
       </footer>

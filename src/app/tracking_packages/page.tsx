@@ -18,7 +18,7 @@ interface Package {
   status: string
   shopId: string
   shop: {
-    name: string
+    fullName: string
   }
   createdAt: string
   updatedAt: string
@@ -240,7 +240,7 @@ export default function TrackingPackagesPage() {
                         {pkg.status}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {pkg.shop?.name || 'متجر غير معروف'}
+                        {pkg.shop?.fullName || 'متجر غير معروف'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {pkg.currentLocation}

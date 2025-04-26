@@ -174,7 +174,7 @@ export default function EditBlogPostClient({ id }: EditBlogPostClientProps) {
                 />
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex justify-center gap-4">
                 <button
                   type="submit"
                   className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"

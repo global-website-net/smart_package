@@ -404,11 +404,11 @@ export default function AccountPage() {
                 </div>
 
                 {isEditing && (
-                  <div className="flex justify-center space-x-4 rtl:space-x-reverse mt-6">
+                  <div className="flex justify-center space-x-16 rtl:space-x-reverse mt-6">
                     <button
                       type="button"
                       onClick={handleCancelEdit}
-                      className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                      className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                       disabled={isSubmitting}
                     >
                       إلغاء
@@ -428,10 +428,6 @@ export default function AccountPage() {
             {/* Only show delete account section for REGULAR users */}
             {isRegularUser && !isEditing && (
               <div className="mt-8 pt-6 border-t border-gray-200">
-                <h2 className="text-xl font-bold mb-4">حذف الحساب</h2>
-                <p className="text-gray-600 mb-4">
-                  عند حذف حسابك، سيتم حذف جميع بياناتك نهائياً ولن تتمكن من استعادتها.
-                </p>
                 <button
                   onClick={() => setShowDeleteModal(true)}
                   className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
