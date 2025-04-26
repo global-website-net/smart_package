@@ -89,7 +89,7 @@ export default function Home() {
             
             {/* Decorative Line with Diamond */}
             <div className="flex justify-center items-center mb-12">
-              <div className="relative w-full max-w-[600px]">
+              <div className="relative w-full max-w-[300px]">
                 <div className="w-full h-0.5 bg-green-500"></div>
                 <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
               </div>
@@ -149,7 +149,7 @@ export default function Home() {
             
             {/* Decorative Line with Diamond */}
             <div className="flex justify-center items-center mb-12">
-              <div className="relative w-full max-w-[600px]">
+              <div className="relative w-full max-w-[300px]">
                 <div className="w-full h-0.5 bg-green-500"></div>
                 <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
               </div>

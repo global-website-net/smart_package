@@ -317,7 +317,6 @@ export default function AccountPage() {
                           disabled={!isEditing}
                           className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
                         >
-                          <option value="">اختر المحافظة</option>
                           {governorates.map((gov) => (
                             <option key={gov} value={gov}>{gov}</option>
                           ))}

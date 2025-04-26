@@ -148,8 +148,34 @@ export default function TrackingPackagesPage() {
         <Header />
         <div className="pt-24 pb-12">
           <div className="max-w-6xl mx-auto px-4">
-            <div className="bg-red-100 text-red-700 p-4 rounded-md">
-              {error}
+            <div className="bg-red-100 text-red-700 p-6 rounded-md">
+              <h2 className="text-xl font-bold mb-4">خطأ في قاعدة البيانات</h2>
+              <p className="mb-4">{error}</p>
+              {error.includes('جدول المتاجر غير موجود') && (
+                <div className="mt-4">
+                  <p className="mb-2">يجب إنشاء جدول المتاجر في قاعدة البيانات. يمكنك اتباع الخطوات التالية:</p>
+                  <ol className="list-decimal list-inside mb-4 space-y-2">
+                    <li>قم بتسجيل الدخول إلى لوحة تحكم Supabase</li>
+                    <li>انتقل إلى قسم "Table Editor"</li>
+                    <li>انقر على "New Table"</li>
+                    <li>قم بإنشاء جدول باسم "Shop" مع الأعمدة التالية:
+                      <ul className="list-disc list-inside mr-6 mt-2 space-y-1">
+                        <li>id (uuid, primary key)</li>
+                        <li>name (text, not null)</li>
+                        <li>createdAt (timestamp with time zone, default: now())</li>
+                        <li>updatedAt (timestamp with time zone, default: now())</li>
+                      </ul>
+                    </li>
+                    <li>انقر على "Save" لحفظ الجدول</li>
+                  </ol>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                  >
+                    تحديث الصفحة
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
