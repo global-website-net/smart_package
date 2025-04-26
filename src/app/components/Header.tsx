@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
@@ -11,6 +11,21 @@ export default function Header() {
   const { data: session } = useSession()
   const pathname = usePathname()
   const isLoginPage = pathname === '/auth/login'
+  const userMenuRef = useRef<HTMLDivElement>(null)
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false)
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
 
   const handleSignOut = async () => {
     try {
@@ -22,16 +37,91 @@ export default function Header() {
 
   const isLoggedIn = !!session?.user
   const isAdmin = session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER'
+  const userName = session?.user?.name || 'المستخدم'
 
   return (
     <header className="bg-black text-white fixed w-full top-0 z-50">
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex justify-between items-center h-20">
-          {/* Logo */}
+          {/* Logo and Login Button */}
           <div className="flex items-center">
             <Link href="/" className="text-xl font-bold">
               SMART PACKAGE
             </Link>
+            
+            {isLoggedIn ? (
+              <div className="relative ml-4" ref={userMenuRef}>
+                <button 
+                  className="flex items-center text-white hover:text-green-500 transition-colors"
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                >
+                  <span className="mr-2">{userName}</span>
+                  <svg 
+                    className={`w-4 h-4 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {isUserMenuOpen && (
+                  <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 text-gray-800">
+                    <Link 
+                      href="/account" 
+                      className="block px-4 py-2 text-sm hover:bg-gray-100"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      حسابي
+                    </Link>
+                    
+                    {isAdmin ? (
+                      <Link 
+                        href="/tracking_packages" 
+                        className="block px-4 py-2 text-sm hover:bg-gray-100"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        ادارة الطرود
+                      </Link>
+                    ) : (
+                      <Link 
+                        href="/my-packages" 
+                        className="block px-4 py-2 text-sm hover:bg-gray-100"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        طرودي
+                      </Link>
+                    )}
+                    
+                    <Link 
+                      href="/blog" 
+                      className="block px-4 py-2 text-sm hover:bg-gray-100"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      المدونة
+                    </Link>
+                    
+                    <button
+                      onClick={() => {
+                        setIsUserMenuOpen(false)
+                        handleSignOut()
+                      }}
+                      className="block w-full text-right px-4 py-2 text-sm hover:bg-gray-100"
+                    >
+                      تسجيل الخروج
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : !isLoginPage && (
+              <Link 
+                href="/auth/login" 
+                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors mr-4"
+              >
+                تسجيل الدخول
+              </Link>
+            )}
           </div>
 
           {/* Desktop Navigation - Empty as requested */}
