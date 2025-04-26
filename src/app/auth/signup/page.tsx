@@ -226,7 +226,7 @@ export default function Signup() {
                   value={formData.phoneNumber}
                   onChange={handleChange}
                   required
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                  className="w-1/2 px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
                   placeholder="أدخل رقم هاتفك"
                 />
                 <select

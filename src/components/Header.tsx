@@ -10,15 +10,6 @@ export default function Header() {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
-  const navigation = [
-    { name: 'الرئيسية', href: '/' },
-    { name: 'كيف يعمل', href: '/#how-it-works' },
-    { name: 'مواقع التسوق', href: '/#shopping-sites' },
-    { name: 'الباقات', href: '/packages' },
-    { name: 'المدونة', href: '/blog' },
-    { name: 'اتصل بنا', href: '/contact' },
-  ]
-
   return (
     <header className="bg-white shadow-md">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -30,19 +21,66 @@ export default function Header() {
           </div>
 
           <div className="flex items-center space-x-8 rtl:space-x-reverse">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`${
-                  pathname === item.href
-                    ? 'text-green-600'
-                    : 'text-gray-700 hover:text-green-600'
-                } px-3 py-2 text-sm font-medium`}
-              >
-                {item.name}
-              </Link>
-            ))}
+            <Link
+              href="/"
+              className={`${
+                pathname === '/'
+                  ? 'text-green-600'
+                  : 'text-gray-700 hover:text-green-600'
+              } px-3 py-2 text-sm font-medium`}
+            >
+              الرئيسية
+            </Link>
+            <Link
+              href="/how-it-works"
+              className={`${
+                pathname === '/how-it-works'
+                  ? 'text-green-600'
+                  : 'text-gray-700 hover:text-green-600'
+              } px-3 py-2 text-sm font-medium`}
+            >
+              كيف يعمل
+            </Link>
+            <Link
+              href="/#shopping-sites"
+              className={`${
+                pathname === '/#shopping-sites'
+                  ? 'text-green-600'
+                  : 'text-gray-700 hover:text-green-600'
+              } px-3 py-2 text-sm font-medium`}
+            >
+              مواقع التسوق
+            </Link>
+            <Link
+              href="/packages"
+              className={`${
+                pathname === '/packages'
+                  ? 'text-green-600'
+                  : 'text-gray-700 hover:text-green-600'
+              } px-3 py-2 text-sm font-medium`}
+            >
+              الباقات
+            </Link>
+            <Link
+              href="/blog"
+              className={`${
+                pathname === '/blog'
+                  ? 'text-green-600'
+                  : 'text-gray-700 hover:text-green-600'
+              } px-3 py-2 text-sm font-medium`}
+            >
+              المدونة
+            </Link>
+            <Link
+              href="/contact"
+              className={`${
+                pathname === '/contact'
+                  ? 'text-green-600'
+                  : 'text-gray-700 hover:text-green-600'
+              } px-3 py-2 text-sm font-medium`}
+            >
+              اتصل بنا
+            </Link>
           </div>
 
           <div className="flex items-center space-x-4 rtl:space-x-reverse">
@@ -129,20 +167,72 @@ export default function Header() {
         } md:hidden bg-white shadow-md`}
       >
         <div className="px-2 pt-2 pb-3 space-y-1">
-          {navigation.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`${
-                pathname === item.href
-                  ? 'text-green-600'
-                  : 'text-gray-700 hover:text-green-600'
-              } block px-3 py-2 text-base font-medium`}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              {item.name}
-            </Link>
-          ))}
+          <Link
+            href="/"
+            className={`${
+              pathname === '/'
+                ? 'text-green-600'
+                : 'text-gray-700 hover:text-green-600'
+            } block px-3 py-2 text-base font-medium`}
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            الرئيسية
+          </Link>
+          <Link
+            href="/how-it-works"
+            className={`${
+              pathname === '/how-it-works'
+                ? 'text-green-600'
+                : 'text-gray-700 hover:text-green-600'
+            } block px-3 py-2 text-base font-medium`}
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            كيف يعمل
+          </Link>
+          <Link
+            href="/#shopping-sites"
+            className={`${
+              pathname === '/#shopping-sites'
+                ? 'text-green-600'
+                : 'text-gray-700 hover:text-green-600'
+            } block px-3 py-2 text-base font-medium`}
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            مواقع التسوق
+          </Link>
+          <Link
+            href="/packages"
+            className={`${
+              pathname === '/packages'
+                ? 'text-green-600'
+                : 'text-gray-700 hover:text-green-600'
+            } block px-3 py-2 text-base font-medium`}
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            الباقات
+          </Link>
+          <Link
+            href="/blog"
+            className={`${
+              pathname === '/blog'
+                ? 'text-green-600'
+                : 'text-gray-700 hover:text-green-600'
+            } block px-3 py-2 text-base font-medium`}
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            المدونة
+          </Link>
+          <Link
+            href="/contact"
+            className={`${
+              pathname === '/contact'
+                ? 'text-green-600'
+                : 'text-gray-700 hover:text-green-600'
+            } block px-3 py-2 text-base font-medium`}
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            اتصل بنا
+          </Link>
           {status === 'authenticated' ? (
             <>
               <Link

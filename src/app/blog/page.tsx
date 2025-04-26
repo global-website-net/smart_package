@@ -26,6 +26,32 @@ export default function BlogPage() {
   const [error, setError] = useState('')
   const router = useRouter()
 
+  const handleDelete = async (postId: string) => {
+    if (!confirm('هل أنت متأكد من حذف هذا المقال؟')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/blog/${postId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete blog post')
+      }
+
+      // Remove the deleted post from the state
+      setPosts(posts.filter(post => post.id !== postId))
+    } catch (err) {
+      console.error('Error deleting blog post:', err)
+      alert('حدث خطأ أثناء حذف المقال')
+    }
+  }
+
+  const handleEdit = (postId: string) => {
+    router.push(`/blog/edit/${postId}`)
+  }
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/login')
@@ -46,8 +72,8 @@ export default function BlogPage() {
           title: post.title,
           content: post.content,
           authorId: post.author?.id,
-          authorName: post.author?.name || 'مجهول',
-          authorEmail: post.author?.email || 'مجهول',
+          authorName: post.author?.name || '',
+          authorEmail: post.author?.email || '',
           createdAt: post.createdAt,
           itemLink: post.itemLink
         }))
@@ -111,13 +137,35 @@ export default function BlogPage() {
             <div className="space-y-8">
               {posts.map((post) => (
                 <article key={post.id} className="bg-white rounded-lg shadow-md p-6">
-                  <h2 className="text-2xl font-semibold mb-4">{post.title}</h2>
+                  <div className="flex justify-between items-start mb-4">
+                    <h2 className="text-2xl font-semibold">{post.title}</h2>
+                    {session?.user?.role === 'ADMIN' && (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEdit(post.id)}
+                          className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        >
+                          تعديل
+                        </button>
+                        <button
+                          onClick={() => handleDelete(post.id)}
+                          className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                        >
+                          حذف
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   <div className="text-gray-600 mb-4">
-                    <span className="font-medium">{post.authorName}</span>
-                    {post.authorName !== 'مجهول' && (
+                    {post.authorName && (
                       <>
-                        <span className="mx-2">•</span>
-                        <span className="text-gray-400">{post.authorEmail}</span>
+                        <span className="font-medium">{post.authorName}</span>
+                        {post.authorEmail && (
+                          <>
+                            <span className="mx-2">•</span>
+                            <span className="text-gray-400">{post.authorEmail}</span>
+                          </>
+                        )}
                       </>
                     )}
                     <span className="mx-2">•</span>
