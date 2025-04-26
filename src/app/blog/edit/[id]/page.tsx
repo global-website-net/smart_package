@@ -12,7 +12,13 @@ interface BlogPost {
   itemLink?: string
 }
 
-export default function EditBlogPost({ params }: { params: { id: string } }) {
+interface PageProps {
+  params: {
+    id: string
+  }
+}
+
+export default function EditBlogPost({ params }: PageProps) {
   const router = useRouter()
   const { data: session, status } = useSession()
   const [post, setPost] = useState<BlogPost | null>(null)
