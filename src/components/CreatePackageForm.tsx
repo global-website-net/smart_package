@@ -215,18 +215,18 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
             </select>
           </div>
 
-          <div className="flex justify-center space-x-40 rtl:space-x-reverse">
+          <div className="flex justify-center space-x-6 rtl:space-x-reverse gap-4">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 transition-colors"
+              className="px-6 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 transition-colors"
             >
               إلغاء
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors disabled:opacity-50"
+              className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors disabled:opacity-50"
             >
               {isSubmitting ? 'جاري الإضافة...' : 'إضافة'}
             </button>
