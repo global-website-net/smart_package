@@ -92,14 +92,46 @@ export default function AccountPage() {
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
+  const handleEditClick = () => {
+    setIsEditing(true)
+    setUpdateError('')
+    setUpdateSuccess('')
+  }
+
+  const handleCancelEdit = (e: React.MouseEvent) => {
+    // Prevent the default form submission
+    e.preventDefault()
+    e.stopPropagation()
+    
+    setIsEditing(false)
+    setUpdateError('')
+    setUpdateSuccess('')
+    // Reset form data to current profile values
+    if (profile) {
+      setFormData({
+        ...formData,
+        fullName: profile.fullName || '',
+        governorate: profile.governorate || '',
+        town: profile.town || '',
+        phonePrefix: profile.phonePrefix || '',
+        phoneNumber: profile.phoneNumber || '',
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      })
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setUpdateSuccess('')
     setUpdateError('')
+    setIsSubmitting(true)
 
-    // Only validate current password if we're actually submitting changes
-    if (isEditing && formData.currentPassword === '') {
+    // Validate current password if we're submitting changes
+    if (formData.currentPassword === '') {
       setUpdateError('كلمة المرور الحالية مطلوبة للتعديل')
+      setIsSubmitting(false)
       return
     }
 
@@ -107,6 +139,7 @@ export default function AccountPage() {
     if (formData.newPassword) {
       if (formData.newPassword !== formData.confirmPassword) {
         setUpdateError('كلمات المرور الجديدة غير متطابقة')
+        setIsSubmitting(false)
         return
       }
     }
@@ -130,8 +163,9 @@ export default function AccountPage() {
 
       if (!response.ok) {
         const errorData = await response.json()
-        if (errorData.error === 'Invalid password') {
+        if (errorData.error === 'Invalid password' || errorData.error === 'كلمة المرور الحالية غير صحيحة') {
           setUpdateError('كلمة المرور غير صحيحة')
+          setIsSubmitting(false)
           return
         }
         throw new Error(errorData.error || 'حدث خطأ أثناء تحديث الملف الشخصي')
@@ -152,6 +186,8 @@ export default function AccountPage() {
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'حدث خطأ أثناء تحديث الملف الشخصي'
       setUpdateError(errorMessage)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -195,284 +231,217 @@ export default function AccountPage() {
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-2xl font-bold">الملف الشخصي</h1>
+              {!isEditing && (
+                <button
+                  onClick={handleEditClick}
+                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
+                >
+                  تعديل الملف الشخصي
+                </button>
+              )}
             </div>
 
             {error && (
-              <div className="bg-red-50 text-red-800 p-4 rounded-md mb-6">
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                 {error}
               </div>
             )}
 
             {updateSuccess && (
-              <div className="bg-green-50 text-green-800 p-4 rounded-md mb-6">
+              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
                 {updateSuccess}
               </div>
             )}
 
-            {updateError && updateError !== 'كلمة المرور غير صحيحة' && updateError !== 'كلمات المرور الجديدة غير متطابقة' && (
-              <div className="bg-red-50 text-red-800 p-4 rounded-md mb-6">
+            {updateError && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                 {updateError}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  البريد الإلكتروني
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  value={profile?.email || ''}
-                  disabled
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-50"
-                />
-                <p className="mt-1 text-xs text-gray-500">لا يمكن تغيير البريد الإلكتروني</p>
-              </div>
-              
-              <div>
-                <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
-                  الاسم الكامل
-                </label>
-                <input
-                  type="text"
-                  id="fullName"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-50"
-                />
-              </div>
-
-              {!isAdminOrOwner && (
-                <>
+            {isLoading ? (
+              <div className="text-center py-8">جاري التحميل...</div>
+            ) : (
+              <form onSubmit={handleSubmit}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="governorate" className="block text-sm font-medium text-gray-700 mb-1">
-                      المحافظة
-                    </label>
-                    {isEditing ? (
-                      <select
-                        id="governorate"
-                        name="governorate"
-                        value={formData.governorate}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                      >
-                        <option value="القدس">القدس</option>
-                        <option value="رام الله والبيرة">رام الله والبيرة</option>
-                        <option value="بيت لحم">بيت لحم</option>
-                        <option value="الخليل">الخليل</option>
-                        <option value="أريحا">أريحا</option>
-                        <option value="نابلس">نابلس</option>
-                        <option value="طولكرم">طولكرم</option>
-                        <option value="قلقيلية">قلقيلية</option>
-                        <option value="سلفيت">سلفيت</option>
-                        <option value="جنين">جنين</option>
-                        <option value="طوباس">طوباس</option>
-                        <option value="غزة">غزة</option>
-                        <option value="شمال غزة">شمال غزة</option>
-                        <option value="دير البلح">دير البلح</option>
-                        <option value="خان يونس">خان يونس</option>
-                        <option value="رفح">رفح</option>
-                      </select>
-                    ) : (
-                      <input
-                        type="text"
-                        id="governorate"
-                        value={formData.governorate || 'لم يتم تحديد المحافظة'}
-                        disabled
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-50"
-                      />
-                    )}
-                  </div>
-
-                  <div>
-                    <label htmlFor="town" className="block text-sm font-medium text-gray-700 mb-1">
-                      المدينة
-                    </label>
+                    <label className="block text-gray-700 mb-2">البريد الإلكتروني</label>
                     <input
-                      type="text"
-                      id="town"
-                      name="town"
-                      value={formData.town}
-                      onChange={handleInputChange}
-                      disabled={!isEditing}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-50"
+                      type="email"
+                      value={profile?.email || ''}
+                      disabled
+                      className="w-full p-2 border border-gray-300 rounded-md bg-gray-100"
                     />
                   </div>
-                </>
-              )}
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                    رقم الهاتف
-                  </label>
-                  <input
-                    type="text"
-                    id="phoneNumber"
-                    name="phoneNumber"
-                    value={formData.phoneNumber}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-50"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="phonePrefix" className="block text-sm font-medium text-gray-700 mb-1">
-                    رمز الهاتف
-                  </label>
-                  <select
-                    id="phonePrefix"
-                    name="phonePrefix"
-                    value={formData.phonePrefix}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-50"
-                  >
-                    <option value="+972">+972</option>
-                    <option value="+970">+970</option>
-                  </select>
-                </div>
-              </div>
-
-              {isEditing && (
-                <>
-                  <div className="border-t border-gray-200 pt-4">
-                    <h3 className="text-lg font-medium mb-4">تأكيد التعديلات</h3>
-                    
-                    <div className="mb-4">
-                      <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                        كلمة المرور الحالية
-                      </label>
-                      <input
-                        type="password"
-                        id="currentPassword"
-                        name="currentPassword"
-                        value={formData.currentPassword}
-                        onChange={handleInputChange}
-                        className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                          updateError === 'كلمة المرور غير صحيحة' 
-                            ? 'border-red-500 bg-red-50' 
-                            : 'border-gray-300'
-                        }`}
-                        placeholder="أدخل كلمة المرور الحالية للتأكيد"
-                      />
-                      {updateError === 'كلمة المرور غير صحيحة' && (
-                        <p className="mt-2 text-sm text-red-600">
-                          كلمة المرور غير صحيحة
-                        </p>
-                      )}
-                    </div>
+                  <div>
+                    <label className="block text-gray-700 mb-2">الاسم الكامل</label>
+                    <input
+                      type="text"
+                      name="fullName"
+                      value={formData.fullName}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
+                    />
                   </div>
 
-                  <div className="border-t border-gray-200 pt-4">
-                    <h3 className="text-lg font-medium mb-4">تغيير كلمة المرور (اختياري)</h3>
-                    
-                    <div className="mb-4">
-                      <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                        كلمة المرور الجديدة
-                      </label>
-                      <input
-                        type="password"
-                        id="newPassword"
-                        name="newPassword"
-                        value={formData.newPassword}
-                        onChange={handleInputChange}
-                        className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                          updateError === 'كلمات المرور الجديدة غير متطابقة' 
-                            ? 'border-red-500 bg-red-50' 
-                            : 'border-gray-300'
-                        }`}
-                        placeholder="كلمة المرور الجديدة"
-                      />
-                    </div>
-                    
-                    <div className="mb-4">
-                      <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                        تأكيد كلمة المرور الجديدة
-                      </label>
-                      <input
-                        type="password"
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        value={formData.confirmPassword}
-                        onChange={handleInputChange}
-                        className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                          updateError === 'كلمات المرور الجديدة غير متطابقة' 
-                            ? 'border-red-500 bg-red-50' 
-                            : 'border-gray-300'
-                        }`}
-                        placeholder="تأكيد كلمة المرور الجديدة"
-                      />
-                      {updateError === 'كلمات المرور الجديدة غير متطابقة' && (
-                        <p className="mt-2 text-sm text-red-600">
-                          {updateError}
-                        </p>
-                      )}
-                    </div>
+                  {!isAdminOrOwner && (
+                    <>
+                      <div>
+                        <label className="block text-gray-700 mb-2">المحافظة</label>
+                        <input
+                          type="text"
+                          name="governorate"
+                          value={formData.governorate}
+                          onChange={handleInputChange}
+                          disabled={!isEditing}
+                          className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-gray-700 mb-2">المدينة</label>
+                        <input
+                          type="text"
+                          name="town"
+                          value={formData.town}
+                          onChange={handleInputChange}
+                          disabled={!isEditing}
+                          className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  <div>
+                    <label className="block text-gray-700 mb-2">رمز الهاتف</label>
+                    <input
+                      type="text"
+                      name="phonePrefix"
+                      value={formData.phonePrefix}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
+                    />
                   </div>
-                </>
-              )}
-              
-              <div className="flex justify-center space-x-4 rtl:space-x-reverse">
-                <button
-                  onClick={() => setIsEditing(!isEditing)}
-                  className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                >
-                  {isEditing ? 'حفظ التغييرات' : 'تعديل الملف الشخصي'}
-                </button>
+
+                  <div>
+                    <label className="block text-gray-700 mb-2">رقم الهاتف</label>
+                    <input
+                      type="text"
+                      name="phoneNumber"
+                      value={formData.phoneNumber}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
+                    />
+                  </div>
+
+                  {isEditing && (
+                    <>
+                      <div>
+                        <label className="block text-gray-700 mb-2">كلمة المرور الحالية</label>
+                        <input
+                          type="password"
+                          name="currentPassword"
+                          value={formData.currentPassword}
+                          onChange={handleInputChange}
+                          required
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-gray-700 mb-2">كلمة المرور الجديدة (اختياري)</label>
+                        <input
+                          type="password"
+                          name="newPassword"
+                          value={formData.newPassword}
+                          onChange={handleInputChange}
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-gray-700 mb-2">تأكيد كلمة المرور الجديدة</label>
+                        <input
+                          type="password"
+                          name="confirmPassword"
+                          value={formData.confirmPassword}
+                          onChange={handleInputChange}
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+
                 {isEditing && (
-                  <button
-                    onClick={() => setIsEditing(false)}
-                    className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                  >
-                    إلغاء
-                  </button>
+                  <div className="flex justify-end space-x-4 rtl:space-x-reverse mt-6">
+                    <button
+                      type="button"
+                      onClick={handleCancelEdit}
+                      className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors"
+                      disabled={isSubmitting}
+                    >
+                      إلغاء
+                    </button>
+                    <button
+                      type="submit"
+                      className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+                    </button>
+                  </div>
                 )}
-                {!isAdmin && (
-                  <button
-                    onClick={() => setShowDeleteModal(true)}
-                    className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                  >
-                    حذف الحساب
-                  </button>
-                )}
-              </div>
-            </form>
-          </div>
+              </form>
+            )}
 
-          {/* Delete Confirmation Modal */}
-          {showDeleteModal && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-              <div className="bg-white rounded-lg p-6 max-w-md w-full">
-                <h3 className="text-xl font-semibold text-red-600 mb-4">تأكيد حذف الحساب</h3>
-                <p className="text-gray-600 mb-6">
-                  هل أنت متأكد من رغبتك في حذف حسابك؟ هذا الإجراء سيمحي حسابك بشكل نهائي ولا يمكن التراجع عنه. سيتم حذف جميع بياناتك وستفقد الوصول إلى جميع الخدمات المرتبطة بحسابك.
-                </p>
-                <div className="flex justify-center space-x-16 rtl:space-x-reverse">
-                  <button
-                    type="button"
-                    onClick={handleDeleteAccount}
-                    className="bg-red-500 text-white px-6 py-2 rounded-full hover:bg-red-600 transition-colors"
-                  >
-                    نعم، احذف حسابي
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowDeleteModal(false)}
-                    className="bg-gray-200 text-gray-800 px-6 py-2 rounded-full hover:bg-gray-300 transition-colors"
-                  >
-                    إلغاء
-                  </button>
-                </div>
-              </div>
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <h2 className="text-xl font-bold mb-4">حذف الحساب</h2>
+              <p className="text-gray-600 mb-4">
+                عند حذف حسابك، سيتم حذف جميع بياناتك نهائياً ولن تتمكن من استعادتها.
+              </p>
+              <button
+                onClick={() => setShowDeleteModal(true)}
+                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'جاري الحذف...' : 'حذف الحساب'}
+              </button>
             </div>
-          )}
+          </div>
         </div>
       </main>
+
+      {/* Delete Account Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4">تأكيد حذف الحساب</h2>
+            <p className="text-gray-600 mb-6">
+              هل أنت متأكد من رغبتك في حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.
+            </p>
+            <div className="flex justify-end space-x-4 rtl:space-x-reverse">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors"
+              >
+                إلغاء
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'جاري الحذف...' : 'تأكيد الحذف'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 } 

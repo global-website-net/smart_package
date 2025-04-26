@@ -26,6 +26,8 @@ export default function BlogPage() {
   const [error, setError] = useState('')
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [postToDelete, setPostToDelete] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const postsPerPage = 10
   const router = useRouter()
 
   const openDeleteModal = (postId: string) => {
@@ -61,6 +63,29 @@ export default function BlogPage() {
 
   const handleEdit = (postId: string) => {
     router.push(`/blog/edit/${postId}`)
+  }
+
+  // Calculate pagination values
+  const indexOfLastPost = currentPage * postsPerPage
+  const indexOfFirstPost = indexOfLastPost - postsPerPage
+  const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost)
+  const totalPages = Math.ceil(posts.length / postsPerPage)
+
+  // Change page
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber)
+
+  // Go to previous page
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1)
+    }
+  }
+
+  // Go to next page
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1)
+    }
   }
 
   useEffect(() => {
@@ -145,53 +170,93 @@ export default function BlogPage() {
               <p className="text-gray-600 text-lg">لا توجد مقالات متاحة حالياً</p>
             </div>
           ) : (
-            <div className="space-y-8">
-              {posts.map((post) => (
-                <article key={post.id} className="bg-white rounded-lg shadow-md p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <h2 className="text-2xl font-semibold">{post.title}</h2>
-                    {session?.user?.role === 'ADMIN' && (
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleEdit(post.id)}
-                          className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            <>
+              <div className="space-y-8">
+                {currentPosts.map((post) => (
+                  <article key={post.id} className="bg-white rounded-lg shadow-md p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <h2 className="text-2xl font-semibold">{post.title}</h2>
+                      {session?.user?.role === 'ADMIN' && (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEdit(post.id)}
+                            className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                          >
+                            تعديل
+                          </button>
+                          <button
+                            onClick={() => openDeleteModal(post.id)}
+                            className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                          >
+                            حذف
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="text-gray-600 mb-4">
+                      <p>تاريخ النشر: {format(new Date(post.createdAt), 'dd MMMM yyyy', { locale: ar })}</p>
+                    </div>
+                    
+                    <div className="prose max-w-none mb-4">
+                      <p>{post.content}</p>
+                    </div>
+                    
+                    {post.itemLink && (
+                      <div className="mt-4">
+                        <a 
+                          href={post.itemLink} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-green-600 hover:text-green-800"
                         >
-                          تعديل
-                        </button>
-                        <button
-                          onClick={() => openDeleteModal(post.id)}
-                          className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                        >
-                          حذف
-                        </button>
+                          رابط المنتج
+                        </a>
                       </div>
                     )}
-                  </div>
+                  </article>
+                ))}
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex justify-center items-center mt-8 space-x-4 rtl:space-x-reverse">
+                  <button
+                    onClick={goToPreviousPage}
+                    disabled={currentPage === 1}
+                    className={`flex items-center px-4 py-2 rounded-md ${
+                      currentPage === 1
+                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                        : 'bg-green-500 text-white hover:bg-green-600'
+                    }`}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    السابق
+                  </button>
                   
-                  <div className="text-gray-600 mb-4">
-                    <p>بواسطة: {post.authorName}</p>
-                    <p>تاريخ النشر: {format(new Date(post.createdAt), 'dd MMMM yyyy', { locale: ar })}</p>
-                  </div>
+                  <span className="text-gray-700">
+                    الصفحة {currentPage} من {totalPages}
+                  </span>
                   
-                  <div className="prose max-w-none mb-4">
-                    <p>{post.content}</p>
-                  </div>
-                  
-                  {post.itemLink && (
-                    <div className="mt-4">
-                      <a 
-                        href={post.itemLink} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-green-600 hover:text-green-800 underline"
-                      >
-                        رابط المنتج
-                      </a>
-                    </div>
-                  )}
-                </article>
-              ))}
-            </div>
+                  <button
+                    onClick={goToNextPage}
+                    disabled={currentPage === totalPages}
+                    className={`flex items-center px-4 py-2 rounded-md ${
+                      currentPage === totalPages
+                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                        : 'bg-green-500 text-white hover:bg-green-600'
+                    }`}
+                  >
+                    التالي
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>

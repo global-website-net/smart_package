@@ -19,10 +19,12 @@ export async function GET() {
         id,
         trackingNumber,
         status,
-        shop,
+        shopId,
         currentLocation,
         createdAt,
-        userId
+        updatedAt,
+        userId,
+        shop:Shop(name)
       `)
       .eq('userId', session.user.id)
       .order('createdAt', { ascending: false })
@@ -42,6 +44,7 @@ export async function GET() {
       shop: pkg.shop,
       currentLocation: pkg.currentLocation,
       createdAt: pkg.createdAt,
+      updatedAt: pkg.updatedAt,
       userId: pkg.userId
     }))
 
