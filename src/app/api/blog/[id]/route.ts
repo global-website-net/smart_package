@@ -4,14 +4,14 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  request: Request,
+  { params }: { params: { [key: string]: string | string[] } }
 ) {
   try {
     const { data, error } = await supabase
       .from('BlogPost')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', params.id as string)
       .single()
 
     if (error) {
@@ -33,8 +33,8 @@ export async function GET(
 }
 
 export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  request: Request,
+  { params }: { params: { [key: string]: string | string[] } }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -64,7 +64,7 @@ export async function PUT(
         itemLink,
         updatedAt: new Date().toISOString(),
       })
-      .eq('id', params.id)
+      .eq('id', params.id as string)
 
     if (error) {
       console.error('Error updating blog post:', error)
@@ -85,8 +85,8 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  request: Request,
+  { params }: { params: { [key: string]: string | string[] } }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -101,7 +101,7 @@ export async function DELETE(
     const { error } = await supabase
       .from('BlogPost')
       .delete()
-      .eq('id', params.id)
+      .eq('id', params.id as string)
 
     if (error) {
       console.error('Error deleting blog post:', error)
