@@ -142,7 +142,7 @@ export default function Signup() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-8 space-y-6">
+          <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-8 space-y-6 max-w-md mx-auto">
             {/* Full Name */}
             <div>
               <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
@@ -154,7 +154,7 @@ export default function Signup() {
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                 required
               />
             </div>
@@ -171,7 +171,7 @@ export default function Signup() {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                className="w-full px-3 py-1.5 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 text-sm"
                 placeholder="أدخل بريدك الإلكتروني"
               />
             </div>
@@ -187,7 +187,7 @@ export default function Signup() {
                 value={formData.governorate}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                className="w-full px-3 py-1.5 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 text-sm"
               >
                 <option value="">اختر المحافظة</option>
                 {governorates.map((gov) => (
@@ -208,7 +208,7 @@ export default function Signup() {
                 value={formData.town}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                className="w-full px-3 py-1.5 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 text-sm"
                 placeholder="أدخل المدينة أو البلدية"
               />
             </div>
@@ -226,7 +226,7 @@ export default function Signup() {
                   value={formData.phoneNumber}
                   onChange={handleChange}
                   required
-                  className="w-1/2 px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                  className="w-1/2 px-3 py-1.5 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 text-sm"
                   placeholder="أدخل رقم هاتفك"
                 />
                 <select
@@ -235,7 +235,7 @@ export default function Signup() {
                   value={formData.countryCode}
                   onChange={handleChange}
                   required
-                  className="w-24 px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                  className="w-20 px-2 py-1.5 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 text-sm"
                 >
                   <option value="+972">+972</option>
                   <option value="+970">+970</option>
@@ -255,7 +255,7 @@ export default function Signup() {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                className="w-full px-3 py-1.5 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 text-sm"
                 placeholder="أدخل كلمة المرور"
               />
             </div>
@@ -272,7 +272,7 @@ export default function Signup() {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                className="w-full px-3 py-1.5 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 text-sm"
                 placeholder="أدخل كلمة المرور مرة أخرى"
               />
             </div>

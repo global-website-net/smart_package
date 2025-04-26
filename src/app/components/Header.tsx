@@ -27,42 +27,15 @@ export default function Header() {
     <header className="bg-black text-white fixed w-full top-0 z-50">
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex justify-between items-center h-20">
-          {/* Logo and How it Works */}
+          {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="text-xl font-bold">
               SMART PACKAGE
             </Link>
-            <Link href="/#how-it-works" className="hover:text-green-500 transition-colors mr-10">
-              كيف يعمل
-            </Link>
-            <Link href="/#shopping-sites" className="hover:text-green-500 transition-colors mr-10">
-              مواقع التسوق
-            </Link>
-            <Link href="/packages" className="hover:text-green-500 transition-colors">
-              الباقات
-            </Link>
           </div>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation - Empty as requested */}
           <nav className="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
-            <Link href="/" className="text-white hover:text-green-400 transition-colors">
-              الرئيسية
-            </Link>
-            <Link href="/how-it-works" className="text-white hover:text-green-400 transition-colors">
-              كيف يعمل
-            </Link>
-            <Link href="/shopping-sites" className="text-white hover:text-green-400 transition-colors">
-              مواقع التسوق
-            </Link>
-            <Link href="/packages" className="text-white hover:text-green-400 transition-colors mr-10">
-              الباقات
-            </Link>
-            <Link href="/blog" className="text-white hover:text-green-400 transition-colors">
-              المدونة
-            </Link>
-            <Link href="/contact" className="text-white hover:text-green-400 transition-colors">
-              اتصل بنا
-            </Link>
           </nav>
 
           {/* Mobile Menu Button */}

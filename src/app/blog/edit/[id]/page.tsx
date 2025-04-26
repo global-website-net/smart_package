@@ -13,13 +13,12 @@ interface BlogPost {
 }
 
 interface PageProps {
-  params: Promise<{
+  params: {
     id: string
-  }>
+  }
 }
 
-export default async function EditBlogPost({ params }: PageProps) {
-  const resolvedParams = await params;
+export default function EditBlogPost({ params }: PageProps) {
   const router = useRouter()
   const { data: session, status } = useSession()
   const [post, setPost] = useState<BlogPost | null>(null)
@@ -42,7 +41,7 @@ export default async function EditBlogPost({ params }: PageProps) {
 
     const fetchPost = async () => {
       try {
-        const response = await fetch(`/api/blog/${resolvedParams.id}`)
+        const response = await fetch(`/api/blog/${params.id}`)
         if (!response.ok) {
           throw new Error('Failed to fetch blog post')
         }
@@ -62,13 +61,13 @@ export default async function EditBlogPost({ params }: PageProps) {
     if (status === 'authenticated') {
       fetchPost()
     }
-  }, [status, session, resolvedParams.id, router])
+  }, [status, session, params.id, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     try {
-      const response = await fetch(`/api/blog/${resolvedParams.id}`, {
+      const response = await fetch(`/api/blog/${params.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

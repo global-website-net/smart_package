@@ -24,15 +24,25 @@ export default function BlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [postToDelete, setPostToDelete] = useState<string | null>(null)
   const router = useRouter()
 
-  const handleDelete = async (postId: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذا المقال؟')) {
-      return
-    }
+  const openDeleteModal = (postId: string) => {
+    setPostToDelete(postId)
+    setDeleteModalOpen(true)
+  }
+
+  const closeDeleteModal = () => {
+    setDeleteModalOpen(false)
+    setPostToDelete(null)
+  }
+
+  const handleDelete = async () => {
+    if (!postToDelete) return
 
     try {
-      const response = await fetch(`/api/blog/${postId}`, {
+      const response = await fetch(`/api/blog/${postToDelete}`, {
         method: 'DELETE',
       })
 
@@ -41,7 +51,8 @@ export default function BlogPage() {
       }
 
       // Remove the deleted post from the state
-      setPosts(posts.filter(post => post.id !== postId))
+      setPosts(posts.filter(post => post.id !== postToDelete))
+      closeDeleteModal()
     } catch (err) {
       console.error('Error deleting blog post:', err)
       alert('حدث خطأ أثناء حذف المقال')
@@ -72,7 +83,7 @@ export default function BlogPage() {
           title: post.title,
           content: post.content,
           authorId: post.author?.id,
-          authorName: post.author?.name || '',
+          authorName: post.author?.name || 'مجهول',
           authorEmail: post.author?.email || '',
           createdAt: post.createdAt,
           itemLink: post.itemLink
@@ -148,7 +159,7 @@ export default function BlogPage() {
                           تعديل
                         </button>
                         <button
-                          onClick={() => handleDelete(post.id)}
+                          onClick={() => openDeleteModal(post.id)}
                           className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                         >
                           حذف
@@ -156,29 +167,23 @@ export default function BlogPage() {
                       </div>
                     )}
                   </div>
+                  
                   <div className="text-gray-600 mb-4">
-                    {post.authorName && (
-                      <>
-                        <span className="font-medium">{post.authorName}</span>
-                        {post.authorEmail && (
-                          <>
-                            <span className="mx-2">•</span>
-                            <span className="text-gray-400">{post.authorEmail}</span>
-                          </>
-                        )}
-                      </>
-                    )}
-                    <span className="mx-2">•</span>
-                    <span>{format(new Date(post.createdAt), 'dd MMMM yyyy', { locale: ar })}</span>
+                    <p>بواسطة: {post.authorName}</p>
+                    <p>تاريخ النشر: {format(new Date(post.createdAt), 'dd MMMM yyyy', { locale: ar })}</p>
                   </div>
-                  <p className="text-gray-700 leading-relaxed">{post.content}</p>
+                  
+                  <div className="prose max-w-none mb-4">
+                    <p>{post.content}</p>
+                  </div>
+                  
                   {post.itemLink && (
                     <div className="mt-4">
-                      <a
-                        href={post.itemLink}
-                        target="_blank"
+                      <a 
+                        href={post.itemLink} 
+                        target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-green-600 hover:text-green-800"
+                        className="text-green-600 hover:text-green-800 underline"
                       >
                         رابط المنتج
                       </a>
@@ -190,6 +195,32 @@ export default function BlogPage() {
           )}
         </div>
       </main>
+
+      {/* Delete Confirmation Modal */}
+      {deleteModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+            <h3 className="text-xl font-bold mb-4 text-center">تأكيد الحذف</h3>
+            <p className="text-gray-600 mb-6 text-center">
+              هل أنت متأكد من حذف هذا المقال؟ لا يمكن التراجع عن هذا الإجراء.
+            </p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={closeDeleteModal}
+                className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              >
+                إلغاء
+              </button>
+              <button
+                onClick={handleDelete}
+                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+              >
+                حذف
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 } 
