@@ -1,11 +1,5 @@
-import EditBlogPostClient from './EditBlogPostClient'
+import EditPage from './EditPage'
 
-interface PageProps {
-  params: {
-    id: string
-  }
-}
-
-export default function EditBlogPostPage({ params }: PageProps) {
-  return <EditBlogPostClient id={params.id} />
+export default function Page(props: any) {
+  return <EditPage {...props} />
 } 
