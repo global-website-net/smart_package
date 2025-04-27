@@ -2,25 +2,20 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
-import { v4 as uuidv4 } from 'uuid'
+import QRCode from 'qrcode'
 
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'غير مصرح لك' }, { status: 401 })
-    }
-
-    // Check if user is admin or owner
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER') {
+    if (!session?.user) {
       return NextResponse.json(
-        { error: 'غير مصرح لك - فقط المدير والمالك يمكنهم إنشاء الشحنات' },
-        { status: 403 }
+        { error: 'غير مصرح لك بالوصول' },
+        { status: 401 }
       )
     }
 
     const body = await request.json()
-    const { trackingNumber, status, shopId, currentLocation, userId, scannerCode } = body
+    const { trackingNumber, status, shopId, currentLocation, userId } = body
 
     // Validate required fields
     if (!trackingNumber || !status || !shopId || !currentLocation || !userId) {
@@ -30,46 +25,44 @@ export async function POST(request: Request) {
       )
     }
 
-    const { data: newPackage, error } = await supabase
+    // Generate QR code
+    const qrCodeData = {
+      trackingNumber,
+      status,
+      shopId,
+      currentLocation,
+      userId,
+      timestamp: new Date().toISOString()
+    }
+    const qrCode = await QRCode.toDataURL(JSON.stringify(qrCodeData))
+
+    // Create package in database
+    const { data: packageData, error: packageError } = await supabase
       .from('Package')
-      .insert({
-        id: uuidv4(),
-        trackingNumber,
-        status,
-        userId,
-        shopId,
-        currentLocation,
-        scannerCode,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      })
-      .select(`
-        *,
-        user:userId (
-          fullName,
-          email
-        ),
-        shop:shopId (
-          fullName
-        )
-      `)
+      .insert([
+        {
+          trackingNumber,
+          status,
+          shopId,
+          currentLocation,
+          userId,
+          qrCode
+        }
+      ])
+      .select()
       .single()
 
-    if (error) {
-      console.error('Error creating package:', error)
+    if (packageError) {
+      console.error('Error creating package:', packageError)
       return NextResponse.json(
         { error: 'حدث خطأ أثناء إنشاء الشحنة' },
         { status: 500 }
       )
     }
 
-    return NextResponse.json({
-      ...newPackage,
-      user: newPackage.user,
-      shop: newPackage.shop
-    })
+    return NextResponse.json(packageData)
   } catch (error) {
-    console.error('Error creating package:', error)
+    console.error('Error in create package route:', error)
     return NextResponse.json(
       { error: 'حدث خطأ أثناء إنشاء الشحنة' },
       { status: 500 }

@@ -17,7 +17,7 @@ interface Package {
     email: string
   }
   shop: {
-    name: string
+    fullName: string
   }
 }
 
@@ -27,6 +27,23 @@ export default function MyPackagesPage() {
   const [packages, setPackages] = useState<Package[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'PENDING':
+        return 'قيد الانتظار'
+      case 'PROCESSING':
+        return 'قيد المعالجة'
+      case 'SHIPPED':
+        return 'تم الشحن'
+      case 'DELIVERED':
+        return 'تم التسليم'
+      case 'CANCELLED':
+        return 'ملغي'
+      default:
+        return status
+    }
+  }
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -102,7 +119,7 @@ export default function MyPackagesPage() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">الحالة</p>
-                      <p className="font-medium">{pkg.status}</p>
+                      <p className="font-medium">{getStatusText(pkg.status)}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">الموقع الحالي</p>
@@ -110,7 +127,7 @@ export default function MyPackagesPage() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">المتجر</p>
-                      <p className="font-medium">{pkg.shop?.name}</p>
+                      <p className="font-medium">{pkg.shop?.fullName || 'غير متوفر'}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">تاريخ الإنشاء</p>

@@ -13,19 +13,26 @@ interface User {
   email: string
 }
 
+interface FormData {
+  trackingNumber: string
+  status: string
+  shopId: string
+  currentLocation: string
+  userId: string
+}
+
 export default function CreatePackageForm({ onClose }: { onClose: () => void }) {
   const [isOpen, setIsOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [shops, setShops] = useState<Shop[]>([])
   const [users, setUsers] = useState<User[]>([])
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     trackingNumber: '',
     status: 'PENDING',
     shopId: '',
     currentLocation: '',
-    userId: '',
-    scannerCode: ''
+    userId: ''
   })
 
   const fetchShops = async () => {
@@ -90,8 +97,7 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
         status: 'PENDING',
         shopId: '',
         currentLocation: '',
-        userId: '',
-        scannerCode: ''
+        userId: ''
       })
       setIsOpen(false)
       window.location.reload() // Refresh the page to show new package
@@ -144,20 +150,6 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
           </div>
 
           <div>
-            <label htmlFor="scannerCode" className="block text-sm font-medium text-gray-700 mb-1">
-              رمز الماسح الضوئي (اختياري)
-            </label>
-            <input
-              type="text"
-              id="scannerCode"
-              value={formData.scannerCode}
-              onChange={(e) => setFormData({ ...formData, scannerCode: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="أدخل رمز الماسح الضوئي"
-            />
-          </div>
-
-          <div>
             <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
               الحالة
             </label>
@@ -198,7 +190,7 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
 
           <div>
             <label htmlFor="currentLocation" className="block text-sm font-medium text-gray-700 mb-1">
-              حالة الدفع
+              الموقع الحالي
             </label>
             <input
               type="text"
@@ -235,14 +227,14 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 transition-colors"
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
             >
               إلغاء
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors disabled:opacity-50"
+              className="px-4 py-2 text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
             >
               {isSubmitting ? 'جاري الإضافة...' : 'إضافة'}
             </button>
