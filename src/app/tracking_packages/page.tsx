@@ -24,6 +24,7 @@ interface Package {
   updatedAt: string
   currentLocation: string
   scannerCode?: string
+  qrCode?: string
 }
 
 export default function TrackingPackagesPage() {
@@ -37,6 +38,7 @@ export default function TrackingPackagesPage() {
   const [selectedShop, setSelectedShop] = useState('')
   const [trackingNumber, setTrackingNumber] = useState('')
   const [editingPackage, setEditingPackage] = useState<Package | null>(null)
+  const [packageToDelete, setPackageToDelete] = useState<Package | null>(null)
   const router = useRouter()
 
   const getStatusText = (status: string) => {
@@ -147,10 +149,17 @@ export default function TrackingPackagesPage() {
   }
 
   const handleDelete = async (packageId: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذه الشحنة؟')) return
+    const packageToDelete = packages.find(pkg => pkg.id === packageId)
+    if (packageToDelete) {
+      setPackageToDelete(packageToDelete)
+    }
+  }
+
+  const confirmDelete = async () => {
+    if (!packageToDelete) return
 
     try {
-      const response = await fetch(`/api/packages/${packageId}`, {
+      const response = await fetch(`/api/packages/${packageToDelete.id}`, {
         method: 'DELETE',
       })
 
@@ -158,7 +167,8 @@ export default function TrackingPackagesPage() {
         throw new Error('Failed to delete package')
       }
 
-      setPackages(packages.filter(pkg => pkg.id !== packageId))
+      setPackages(packages.filter(pkg => pkg.id !== packageToDelete.id))
+      setPackageToDelete(null)
     } catch (error) {
       console.error('Error deleting package:', error)
       setError('حدث خطأ أثناء حذف الشحنة')
@@ -288,9 +298,6 @@ export default function TrackingPackagesPage() {
                       المتجر
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      الموقع الحالي
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       تاريخ الإنشاء
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -308,7 +315,15 @@ export default function TrackingPackagesPage() {
                         {pkg.trackingNumber}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {pkg.scannerCode || '-'}
+                        {pkg.qrCode ? (
+                          <img 
+                            src={pkg.qrCode} 
+                            alt={`QR Code for ${pkg.trackingNumber}`} 
+                            className="w-16 h-16"
+                          />
+                        ) : (
+                          '-'
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {getStatusText(pkg.status)}
@@ -317,12 +332,9 @@ export default function TrackingPackagesPage() {
                         {pkg.shop?.name || 'متجر غير معروف'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {pkg.currentLocation || 'المستودع الرئيسي'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(pkg.createdAt).toLocaleString('ar-SA', {
+                        {new Date(pkg.createdAt).toLocaleDateString('ar-SA', {
                           year: 'numeric',
-                          month: 'numeric',
+                          month: 'long',
                           day: 'numeric',
                           hour: 'numeric',
                           minute: 'numeric',
@@ -330,9 +342,9 @@ export default function TrackingPackagesPage() {
                         })}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(pkg.updatedAt).toLocaleString('ar-SA', {
+                        {new Date(pkg.updatedAt).toLocaleDateString('ar-SA', {
                           year: 'numeric',
-                          month: 'numeric',
+                          month: 'long',
                           day: 'numeric',
                           hour: 'numeric',
                           minute: 'numeric',
@@ -363,7 +375,7 @@ export default function TrackingPackagesPage() {
           </div>
 
           {editingPackage && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
               <div className="bg-white rounded-lg p-6 max-w-md w-full">
                 <h2 className="text-xl font-bold mb-4">تعديل الشحنة</h2>
                 <form onSubmit={(e) => {
@@ -397,6 +409,7 @@ export default function TrackingPackagesPage() {
                         <option value="PROCESSING">قيد المعالجة</option>
                         <option value="SHIPPED">تم الشحن</option>
                         <option value="DELIVERED">تم التسليم</option>
+                        <option value="CANCELLED">ملغي</option>
                       </select>
                     </div>
                     <div>
@@ -428,6 +441,29 @@ export default function TrackingPackagesPage() {
                     </button>
                   </div>
                 </form>
+              </div>
+            </div>
+          )}
+
+          {packageToDelete && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-lg p-6 max-w-md w-full">
+                <h2 className="text-xl font-bold mb-4">تأكيد الحذف</h2>
+                <p className="mb-6">هل أنت متأكد من حذف الشحنة برقم التتبع <span className="font-bold">{packageToDelete.trackingNumber}</span>؟</p>
+                <div className="flex justify-end space-x-3 rtl:space-x-reverse">
+                  <button
+                    onClick={() => setPackageToDelete(null)}
+                    className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                  >
+                    إلغاء
+                  </button>
+                  <button
+                    onClick={confirmDelete}
+                    className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                  >
+                    حذف
+                  </button>
+                </div>
               </div>
             </div>
           )}

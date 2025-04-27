@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { v4 as uuidv4 } from 'uuid'
+import QRCode from 'qrcode'
 
 export async function POST(request: Request) {
   try {
@@ -25,6 +26,23 @@ export async function POST(request: Request) {
       )
     }
 
+    // Generate QR code for the package
+    const qrCodeData = JSON.stringify({
+      trackingNumber,
+      status,
+      shopId,
+      userId,
+      timestamp: new Date().toISOString()
+    })
+    
+    let qrCode = ''
+    try {
+      qrCode = await QRCode.toDataURL(qrCodeData)
+    } catch (qrError) {
+      console.error('Error generating QR code:', qrError)
+      // Continue without QR code if generation fails
+    }
+
     // Create package in database with generated UUID
     const { data: packageData, error: packageError } = await supabase
       .from('Package')
@@ -35,6 +53,7 @@ export async function POST(request: Request) {
           status,
           shopId,
           userId,
+          qrCode,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         }

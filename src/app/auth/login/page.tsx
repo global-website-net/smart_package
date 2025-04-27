@@ -56,22 +56,22 @@ function LoginForm() {
           </h2>
         </div>
         <form 
+          id="login-form"
           className="mt-8 space-y-6" 
           onSubmit={handleSubmit} 
           method="post"
           autoComplete="on"
         >
-          <input type="hidden" name="remember" value="true" />
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="email-address" className="sr-only">
+              <label htmlFor="email" className="sr-only">
                 البريد الإلكتروني
               </label>
               <input
-                id="email-address"
+                id="email"
                 name="email"
                 type="email"
-                autoComplete="email"
+                autoComplete="username"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -101,7 +101,7 @@ function LoginForm() {
             <div className="flex items-center">
               <input
                 id="remember-me"
-                name="rememberMe"
+                name="remember-me"
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
