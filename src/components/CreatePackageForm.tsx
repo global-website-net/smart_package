@@ -18,6 +18,7 @@ interface FormData {
   status: string
   shopId: string
   currentLocation: string
+  userId: string
 }
 
 export default function CreatePackageForm({ onClose }: { onClose: () => void }) {
@@ -30,7 +31,8 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
     trackingNumber: '',
     status: 'PENDING',
     shopId: '',
-    currentLocation: 'المستودع الرئيسي'
+    currentLocation: 'المستودع الرئيسي',
+    userId: ''
   })
 
   const fetchShops = async () => {
@@ -95,7 +97,8 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
         trackingNumber: '',
         status: 'PENDING',
         shopId: '',
-        currentLocation: 'المستودع الرئيسي'
+        currentLocation: 'المستودع الرئيسي',
+        userId: ''
       })
       setIsOpen(false)
       window.location.reload() // Refresh the page to show new package
@@ -181,6 +184,27 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
               {shops.map((shop) => (
                 <option key={shop.id} value={shop.id}>
                   {shop.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="userId" className="block text-sm font-medium text-gray-700 mb-1">
+              حساب المستخدم
+            </label>
+            <select
+              id="userId"
+              name="userId"
+              value={formData.userId}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              required
+            >
+              <option value="">اختر المستخدم</option>
+              {users.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.name} ({user.email})
                 </option>
               ))}
             </select>

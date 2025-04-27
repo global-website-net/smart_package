@@ -37,6 +37,7 @@ export default function Header() {
 
   const isLoggedIn = !!session?.user
   const isAdmin = session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER'
+  const isRegularUser = session?.user?.role === 'REGULAR'
   const userName = session?.user?.name || 'المستخدم'
 
   return (
@@ -110,13 +111,15 @@ export default function Header() {
                       حسابي
                     </Link>
 
-                    <Link 
-                      href="/wallet" 
-                      className="block px-4 py-2 text-sm hover:bg-gray-100"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      المحفظة
-                    </Link>
+                    {isRegularUser && (
+                      <Link 
+                        href="/wallet" 
+                        className="block px-4 py-2 text-sm hover:bg-gray-100"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        المحفظة
+                      </Link>
+                    )}
                     
                     {isAdmin ? (
                       <Link 
@@ -189,13 +192,15 @@ export default function Header() {
                   >
                     حسابي
                   </Link>
-                  <Link
-                    href="/wallet"
-                    className="text-left hover:text-green-500 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    المحفظة
-                  </Link>
+                  {isRegularUser && (
+                    <Link
+                      href="/wallet"
+                      className="text-left hover:text-green-500 transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      المحفظة
+                    </Link>
+                  )}
                   {isAdmin && (
                     <Link
                       href="/tracking_packages"

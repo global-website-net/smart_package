@@ -33,6 +33,12 @@ export default function WalletPage() {
       }
 
       if (status === 'authenticated') {
+        // Check if user is a REGULAR user
+        if (session?.user?.role !== 'REGULAR') {
+          router.push('/')
+          return
+        }
+
         try {
           const response = await fetch('/api/wallet')
           if (!response.ok) {
@@ -50,7 +56,7 @@ export default function WalletPage() {
     }
 
     fetchWalletData()
-  }, [status, router])
+  }, [status, router, session?.user?.role])
 
   if (loading) {
     return (
@@ -90,49 +96,44 @@ export default function WalletPage() {
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold text-center mb-8">المحفظة</h1>
 
-          {/* Wallet Balance */}
-          <div className="flex flex-col items-center mb-12">
-            <div className="w-24 h-24 mb-6">
-              <img src="/wallet-icon.svg" alt="Wallet" className="w-full h-full" />
-            </div>
-            <div className="flex items-center gap-4 mb-4">
-              <button className="text-3xl">⟪</button>
-              <button className="text-2xl">❮</button>
-              <div className="text-4xl font-bold">{walletData.balance.toFixed(2)}₪</div>
-              <button className="text-2xl">❯</button>
-              <button className="text-3xl">⟫</button>
-            </div>
-            <button className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
-              Call To Action
-            </button>
+          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 className="text-2xl font-semibold mb-4">الرصيد الحالي</h2>
+            <p className="text-3xl font-bold text-green-600">
+              {walletData.balance.toFixed(2)} ريال
+            </p>
           </div>
 
-          {/* Transaction History */}
-          <div className="mt-12">
-            <h2 className="text-2xl font-bold text-center mb-6">تاريخ المعملات</h2>
-            <div className="space-y-4">
-              {walletData.transactions.map((transaction) => (
-                <div
-                  key={transaction.id}
-                  className="flex justify-between items-center border-b border-gray-200 py-4"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className={`text-xl ${transaction.type === 'CREDIT' ? 'text-green-500' : 'text-red-500'}`}>
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-2xl font-semibold mb-4">سجل المعاملات</h2>
+            {walletData.transactions.length === 0 ? (
+              <p className="text-gray-500 text-center">لا توجد معاملات</p>
+            ) : (
+              <div className="space-y-4">
+                {walletData.transactions.map((transaction) => (
+                  <div
+                    key={transaction.id}
+                    className="flex justify-between items-center p-4 border rounded-lg"
+                  >
+                    <div>
+                      <p className="font-medium">{transaction.reason}</p>
+                      <p className="text-sm text-gray-500">
+                        {new Date(transaction.createdAt).toLocaleDateString('ar-SA')}
+                      </p>
+                    </div>
+                    <p
+                      className={`font-bold ${
+                        transaction.type === 'CREDIT'
+                          ? 'text-green-600'
+                          : 'text-red-600'
+                      }`}
+                    >
                       {transaction.type === 'CREDIT' ? '+' : '-'}
-                      {Math.abs(transaction.amount)}
-                    </span>
-                    <span className="text-gray-600">
-                      {new Date(transaction.createdAt).toLocaleDateString('ar-SA', {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit'
-                      })}
-                    </span>
+                      {transaction.amount.toFixed(2)} ريال
+                    </p>
                   </div>
-                  <span className="text-gray-600">{transaction.reason}</span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </main>
