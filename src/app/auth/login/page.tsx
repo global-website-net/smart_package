@@ -57,6 +57,7 @@ function LoginForm() {
         </div>
         <form 
           id="login-form"
+          name="login"
           className="mt-8 space-y-6" 
           onSubmit={handleSubmit} 
           method="post"
@@ -71,7 +72,7 @@ function LoginForm() {
                 id="email"
                 name="email"
                 type="email"
-                autoComplete="username"
+                autoComplete="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -113,13 +114,12 @@ function LoginForm() {
             </div>
 
             <div className="text-sm">
-              <a
-                href="#"
-                onClick={handleResetPassword}
+              <Link
+                href="/auth/reset-password"
                 className="font-medium text-indigo-600 hover:text-indigo-500"
               >
                 نسيت كلمة المرور؟
-              </a>
+              </Link>
             </div>
           </div>
 

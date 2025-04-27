@@ -109,6 +109,14 @@ export default function Header() {
                     >
                       حسابي
                     </Link>
+
+                    <Link 
+                      href="/wallet" 
+                      className="block px-4 py-2 text-sm hover:bg-gray-100"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      المحفظة
+                    </Link>
                     
                     {isAdmin ? (
                       <Link 
