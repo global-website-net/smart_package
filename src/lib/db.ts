@@ -39,7 +39,7 @@ export const db = {
         id,
         email: userData.email,
         password: userData.password,
-        fullName: userData.fullName,
+        fullname: userData.fullName,
         role: userData.role,
         created_at: new Date(),
         updated_at: new Date()
