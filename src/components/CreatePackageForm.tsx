@@ -31,7 +31,7 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
     trackingNumber: '',
     status: 'PENDING',
     shopId: '',
-    currentLocation: '',
+    currentLocation: 'المستودع الرئيسي',
     userId: ''
   })
 
@@ -96,7 +96,7 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
         trackingNumber: '',
         status: 'PENDING',
         shopId: '',
-        currentLocation: '',
+        currentLocation: 'المستودع الرئيسي',
         userId: ''
       })
       setIsOpen(false)

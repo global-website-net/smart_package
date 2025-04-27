@@ -10,7 +10,8 @@ export default function ContactPage() {
     name: '',
     email: '',
     subject: '',
-    message: ''
+    message: '',
+    phoneNumber: ''
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<{
@@ -40,7 +41,7 @@ export default function ContactPage() {
         type: 'success',
         message: 'تم إرسال رسالتك بنجاح. سنتواصل معك قريباً.'
       })
-      setFormData({ name: '', email: '', subject: '', message: '' })
+      setFormData({ name: '', email: '', subject: '', message: '', phoneNumber: '' })
     } catch (error) {
       setSubmitStatus({
         type: 'error',
@@ -114,6 +115,20 @@ export default function ContactPage() {
                     required
                   />
                 </div>
+              </div>
+
+              <div>
+                <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                  رقم الهاتف
+                </label>
+                <input
+                  type="tel"
+                  id="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                />
               </div>
 
               <div>
