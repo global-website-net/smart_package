@@ -1,15 +1,12 @@
 import ResetPasswordForm from '@/components/ResetPasswordForm'
 
-interface PageProps {
-  params: Promise<{
+type Props = {
+  params: {
     token: string
-  }>
-  searchParams: { [key: string]: string | string[] | undefined }
+  }
 }
 
-export default async function ResetPasswordPage({ params }: PageProps) {
-  const { token } = await params
-
+export default function ResetPasswordPage({ params }: Props) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -22,7 +19,7 @@ export default async function ResetPasswordPage({ params }: PageProps) {
           </p>
         </div>
 
-        <ResetPasswordForm token={token} />
+        <ResetPasswordForm token={params.token} />
       </div>
     </div>
   )
