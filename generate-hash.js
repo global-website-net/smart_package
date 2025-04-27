@@ -1,15 +1,15 @@
 const bcrypt = require('bcryptjs');
 
-async function generateHash() {
-  const password = 'admin123';
-  const salt = await bcrypt.genSalt(10);
-  const hash = await bcrypt.hash(password, salt);
-  console.log('Password:', password);
-  console.log('Generated hash:', hash);
-  
-  // Verify the hash works
-  const isValid = await bcrypt.compare(password, hash);
-  console.log('Verification test:', isValid);
-}
+// Password to hash
+const password = 'admin123'; // Change this to your desired password
 
-generateHash(); 
+// Generate hash
+const salt = bcrypt.genSaltSync(10);
+const hash = bcrypt.hashSync(password, salt);
+
+console.log('Password:', password);
+console.log('Generated hash:', hash);
+
+// Verify the hash works
+const isValid = bcrypt.compareSync(password, hash);
+console.log('Verification test:', isValid); 

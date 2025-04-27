@@ -398,7 +398,7 @@ export default function AccountPage() {
                     <input
                       type="text"
                       name="phoneNumber"
-                      value={formData.phoneNumber}
+                      value={isEditing ? formData.phoneNumber : profile?.phoneNumber || ''}
                       onChange={handleInputChange}
                       disabled={!isEditing}
                       className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
@@ -409,7 +409,7 @@ export default function AccountPage() {
                     <label className="block text-gray-700 mb-2">رمز الهاتف</label>
                     <select
                       name="phonePrefix"
-                      value={formData.phonePrefix}
+                      value={isEditing ? formData.phonePrefix : profile?.phonePrefix || ''}
                       onChange={handleInputChange}
                       disabled={!isEditing}
                       className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}

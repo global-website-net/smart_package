@@ -26,7 +26,7 @@ export async function GET() {
         content,
         createdAt,
         authorId,
-        User:authorId (
+        User!authorId (
           id,
           fullName
         )

@@ -60,8 +60,8 @@ export async function GET() {
     const { data: transactions, error: transactionsError } = await supabase
       .from('WalletTransaction')
       .select('*')
-      .eq('walletid', wallet.id)
-      .order('created_at', { ascending: false })
+      .eq('userId', session.user.id)
+      .order('createdAt', { ascending: false })
 
     if (transactionsError) {
       throw transactionsError
