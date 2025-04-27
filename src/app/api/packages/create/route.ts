@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
-import QRCode from 'qrcode'
 
 export async function POST(request: Request) {
   try {
@@ -13,9 +12,6 @@ export async function POST(request: Request) {
         { status: 401 }
       )
     }
-
-    // First, ensure the qrCode column exists
-    await supabase.from('Package').select('qrCode').limit(1)
 
     const body = await request.json()
     const { trackingNumber, status, shopId, userId } = body
@@ -28,16 +24,6 @@ export async function POST(request: Request) {
       )
     }
 
-    // Generate QR code
-    const qrCodeData = {
-      trackingNumber,
-      status,
-      shopId,
-      userId,
-      timestamp: new Date().toISOString()
-    }
-    const qrCode = await QRCode.toDataURL(JSON.stringify(qrCodeData))
-
     // Create package in database
     const { data: packageData, error: packageError } = await supabase
       .from('Package')
@@ -46,8 +32,7 @@ export async function POST(request: Request) {
           trackingNumber,
           status,
           shopId,
-          userId,
-          qrCode
+          userId
         }
       ])
       .select()

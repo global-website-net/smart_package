@@ -26,18 +26,19 @@ function LoginForm() {
       const result = await signIn('credentials', {
         email,
         password,
+        rememberMe,
         redirect: false,
       })
 
       if (result?.error) {
-        setError('Invalid email or password')
+        setError('البريد الإلكتروني أو كلمة المرور غير صحيحة')
         return
       }
 
       const callbackUrl = searchParams?.get('callbackUrl') || '/'
       router.push(callbackUrl)
     } catch (error) {
-      setError('An error occurred. Please try again.')
+      setError('حدث خطأ. يرجى المحاولة مرة أخرى.')
     } finally {
       setLoading(false)
     }
@@ -51,7 +52,7 @@ function LoginForm() {
             تسجيل الدخول
           </h2>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit} autoComplete="on">
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email" className="sr-only">
@@ -61,7 +62,7 @@ function LoginForm() {
                 id="email"
                 name="email"
                 type="email"
-                autoComplete="email"
+                autoComplete="username"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="البريد الإلكتروني"
