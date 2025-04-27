@@ -22,14 +22,15 @@ function LoginForm() {
 
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
+    password: '',
+    rememberMe: false
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
+    const { name, value, type, checked } = e.target
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }))
   }
 
@@ -42,6 +43,7 @@ function LoginForm() {
       const result = await signIn('credentials', {
         email: formData.email,
         password: formData.password,
+        rememberMe: formData.rememberMe,
         redirect: false
       })
 
@@ -60,6 +62,10 @@ function LoginForm() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleForgotPassword = () => {
+    router.push('/auth/reset-password')
   }
 
   if (status === 'loading') {
@@ -114,6 +120,32 @@ function LoginForm() {
         />
       </div>
 
+      {/* Remember Me and Forgot Password */}
+      <div className="flex justify-between items-center">
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            id="rememberMe"
+            name="rememberMe"
+            checked={formData.rememberMe}
+            onChange={handleChange}
+            className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+            disabled={isLoading}
+          />
+          <label htmlFor="rememberMe" className="mr-2 block text-gray-700">
+            تذكرني
+          </label>
+        </div>
+        <button
+          type="button"
+          onClick={handleForgotPassword}
+          className="text-green-600 hover:text-green-700 text-sm"
+          disabled={isLoading}
+        >
+          نسيت كلمة المرور؟
+        </button>
+      </div>
+
       {/* Submit Button */}
       <div className="pt-4">
         <button
@@ -126,7 +158,7 @@ function LoginForm() {
       </div>
 
       {/* Register Link */}
-      <div className="text-center">
+      <div className="text-center mt-4">
         <button
           type="button"
           onClick={() => router.push('/auth/signup')}

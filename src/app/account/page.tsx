@@ -405,7 +405,7 @@ export default function AccountPage() {
 
                 {isEditing && (
                   <div className="flex justify-center items-center mt-6">
-                    <div className="flex space-x-16 rtl:space-x-reverse">
+                    <div className="flex space-x-40 rtl:space-x-reverse">
                       <button
                         type="button"
                         onClick={handleCancelEdit}
