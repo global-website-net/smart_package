@@ -39,7 +39,7 @@ export const db = {
         id,
         email: userData.email,
         password: userData.password,
-        full_name: userData.fullName,
+        fullName: userData.fullName,
         governorate: userData.governorate,
         town: userData.town,
         phone_prefix: userData.phonePrefix,
