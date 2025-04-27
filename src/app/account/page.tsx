@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Header from '../components/Header'
 import { useSession, signOut } from 'next-auth/react'
 import { supabase } from '@/lib/supabase'
+import { UserRole } from '@prisma/client'
 
 interface UserProfile {
   id: string
@@ -16,6 +17,21 @@ interface UserProfile {
   phonePrefix: string
   phoneNumber: string
   createdAt: string
+}
+
+// Extended session user type to include user_metadata
+interface ExtendedSessionUser {
+  id: string
+  email: string
+  name: string
+  role: UserRole
+  user_metadata?: {
+    full_name?: string
+    governorate?: string
+    town?: string
+    phone_prefix?: string
+    phone_number?: string
+  }
 }
 
 export default function AccountPage() {
@@ -73,14 +89,41 @@ export default function AccountPage() {
     if (status === 'authenticated' && session?.user?.email) {
       const fetchProfile = async () => {
         try {
+          // First try to get user data from the User table
           const { data: userData, error } = await supabase
             .from('User')
             .select('*')
             .eq('email', session.user.email)
             .single()
 
-          if (error) throw error
-          if (userData) {
+          if (error) {
+            console.error('Error fetching from User table:', error)
+            // If there's an error, try to get data from auth metadata
+            const userMetadata = (session.user as ExtendedSessionUser).user_metadata || {}
+            
+            // Create a profile object from auth metadata
+            const profileFromMetadata = {
+              id: session.user.id || '',
+              email: session.user.email || '',
+              fullName: userMetadata.full_name || '',
+              role: session.user.role || 'REGULAR',
+              governorate: userMetadata.governorate || '',
+              town: userMetadata.town || '',
+              phonePrefix: userMetadata.phone_prefix || '',
+              phoneNumber: userMetadata.phone_number || '',
+              createdAt: new Date().toISOString()
+            }
+            
+            setProfile(profileFromMetadata)
+            setFormData({
+              ...formData,
+              fullName: profileFromMetadata.fullName || '',
+              governorate: profileFromMetadata.governorate || '',
+              town: profileFromMetadata.town || '',
+              phonePrefix: profileFromMetadata.phonePrefix || '',
+              phoneNumber: profileFromMetadata.phoneNumber || '',
+            })
+          } else if (userData) {
             setProfile(userData)
             setFormData({
               ...formData,

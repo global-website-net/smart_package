@@ -38,7 +38,8 @@ export default function Header() {
   const isLoggedIn = !!session?.user
   const isAdmin = session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER'
   const isRegularUser = session?.user?.role === 'REGULAR'
-  const userName = session?.user?.name || 'المستخدم'
+  const userName = session?.user?.name || session?.user?.email?.split('@')[0] || 'User'
+  const welcomeText = isLoggedIn ? `Welcome, ${userName}` : ''
 
   return (
     <header className="bg-black text-white fixed w-full top-0 z-50">
@@ -90,7 +91,7 @@ export default function Header() {
                   className="flex items-center text-white hover:text-green-500 transition-colors"
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                 >
-                  <span className="ml-2">{userName}</span>
+                  <span className="ml-2">{welcomeText}</span>
                   <svg 
                     className={`w-4 h-4 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} 
                     fill="none" 
