@@ -11,16 +11,14 @@ function LoginForm() {
   const searchParams = useSearchParams()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError(null)
     setLoading(true)
-
-    const formData = new FormData(e.currentTarget)
-    const email = formData.get('email') as string
-    const password = formData.get('password') as string
-    const rememberMe = formData.get('rememberMe') === 'on'
 
     try {
       const result = await signIn('credentials', {
@@ -60,20 +58,23 @@ function LoginForm() {
         <form 
           className="mt-8 space-y-6" 
           onSubmit={handleSubmit} 
+          method="post"
           autoComplete="on"
-          id="login-form"
         >
+          <input type="hidden" name="remember" value="true" />
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="email" className="sr-only">
+              <label htmlFor="email-address" className="sr-only">
                 البريد الإلكتروني
               </label>
               <input
-                id="email"
+                id="email-address"
                 name="email"
                 type="email"
-                autoComplete="username"
+                autoComplete="email"
                 required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="البريد الإلكتروني"
               />
@@ -88,6 +89,8 @@ function LoginForm() {
                 type="password"
                 autoComplete="current-password"
                 required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="كلمة المرور"
               />
@@ -97,12 +100,14 @@ function LoginForm() {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <input
-                id="rememberMe"
+                id="remember-me"
                 name="rememberMe"
                 type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
                 className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
               />
-              <label htmlFor="rememberMe" className="mr-2 block text-sm text-gray-900">
+              <label htmlFor="remember-me" className="mr-2 block text-sm text-gray-900">
                 تذكرني
               </label>
             </div>

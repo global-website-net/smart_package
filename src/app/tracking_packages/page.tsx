@@ -308,13 +308,16 @@ export default function TrackingPackagesPage() {
                         {pkg.trackingNumber}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {pkg.scannerCode || '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {getStatusText(pkg.status)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {pkg.shop?.name || 'متجر غير معروف'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {pkg.currentLocation}
+                        {pkg.currentLocation || 'المستودع الرئيسي'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {new Date(pkg.createdAt).toLocaleString('ar-SA', {
