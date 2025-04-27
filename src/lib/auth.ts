@@ -45,6 +45,8 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
+          console.log('Attempting to authenticate user:', credentials.email)
+          
           // Get user from database
           const { data: user, error: userError } = await supabase
             .from('User')
@@ -52,16 +54,35 @@ export const authOptions: NextAuthOptions = {
             .eq('email', credentials.email)
             .single()
 
-          if (userError || !user) {
+          if (userError) {
+            console.error('Database error during authentication:', userError)
             throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
           }
-
+          
+          if (!user) {
+            console.error('User not found:', credentials.email)
+            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
+          }
+          
+          console.log('User found, verifying password')
+          
+          // Check if password field exists and is properly formatted
+          if (!user.password) {
+            console.error('Password field is missing or null for user:', credentials.email)
+            throw new Error('خطأ في بيانات المستخدم - يرجى إعادة تعيين كلمة المرور')
+          }
+          
           // Verify password
           const isValid = await bcrypt.compare(credentials.password, user.password)
+          console.log('Password verification result:', isValid)
+          
           if (!isValid) {
+            console.error('Invalid password for user:', credentials.email)
             throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
           }
 
+          console.log('Authentication successful for user:', credentials.email)
+          
           return {
             id: user.id,
             email: user.email,
