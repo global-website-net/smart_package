@@ -3,24 +3,14 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 
-type Props = {
-  params: {
-    id: string
-  }
-}
-
-// For Next.js App Router dynamic routes
-export async function DELETE(
-  request: NextRequest,
-  props: Props
-) {
+export async function DELETE(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = props.params
+    const id = request.url.split('/').pop()
 
     const { error } = await supabase
       .from('Package')
@@ -39,18 +29,14 @@ export async function DELETE(
   }
 }
 
-// For Next.js App Router dynamic routes
-export async function PATCH(
-  request: NextRequest,
-  props: Props
-) {
+export async function PATCH(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = props.params
+    const id = request.url.split('/').pop()
     const body = await request.json()
 
     const { data, error } = await supabase
