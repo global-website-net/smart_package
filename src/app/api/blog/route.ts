@@ -9,10 +9,10 @@ interface BlogPost {
   content: string
   createdAt: string
   authorId: string
-  author: {
+  User: {
     id: string
     fullName: string
-  }
+  } | null
 }
 
 // Get all blogs
