@@ -13,25 +13,26 @@ interface PackageData {
     fullName: string;
     email: string;
   };
-  shop: {
-    fullName: string;
-  };
   currentLocation?: string | null;
 }
 
 interface RawPackageData {
   id: string;
-  trackingNumber: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-  user: Array<{
-    fullName: string;
+  trackingnumber: string;
+  statusid: string;
+  recipientname: string;
+  recipientphone: string;
+  recipientaddress: string;
+  weight: number;
+  dimensions: string | null;
+  description: string | null;
+  price: number;
+  created_at: string;
+  updated_at: string;
+  user: {
+    fullname: string;
     email: string;
-  }>;
-  shop: Array<{
-    fullName: string;
-  }>;
+  }[];
 }
 
 export async function GET() {
@@ -78,9 +79,18 @@ export async function GET() {
 
     // Transform the data to match the expected format
     const transformedPackages = (packages as RawPackageData[]).map(pkg => ({
-      ...pkg,
-      user: pkg.user[0],
-      shop: pkg.shop[0],
+      id: pkg.id,
+      trackingNumber: pkg.trackingnumber,
+      status: pkg.statusid,
+      createdAt: pkg.created_at,
+      updatedAt: pkg.updated_at,
+      user: pkg.user[0] ? {
+        fullName: pkg.user[0].fullname,
+        email: pkg.user[0].email
+      } : {
+        fullName: 'Unknown',
+        email: 'unknown@example.com'
+      },
       currentLocation: null
     }))
 
