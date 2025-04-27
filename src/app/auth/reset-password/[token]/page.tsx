@@ -3,22 +3,14 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'إعادة تعيين كلمة المرور',
-  description: 'إعادة تعيين كلمة المرور الخاصة بك',
-}
 
 interface PageProps {
-  params: Promise<{ token: string }>
+  params: { token: string }
 }
 
 export default function ResetPasswordTokenPage({
   params,
-}: {
-  params: { token: string }
-}) {
+}: PageProps) {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
