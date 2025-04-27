@@ -189,6 +189,13 @@ export default function Header() {
                   >
                     حسابي
                   </Link>
+                  <Link
+                    href="/wallet"
+                    className="text-left hover:text-green-500 transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    المحفظة
+                  </Link>
                   {isAdmin && (
                     <Link
                       href="/tracking_packages"

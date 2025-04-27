@@ -17,7 +17,7 @@ interface FormData {
   trackingNumber: string
   status: string
   shopId: string
-  userId: string
+  currentLocation: string
 }
 
 export default function CreatePackageForm({ onClose }: { onClose: () => void }) {
@@ -26,11 +26,11 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
   const [error, setError] = useState('')
   const [shops, setShops] = useState<Shop[]>([])
   const [users, setUsers] = useState<User[]>([])
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState({
     trackingNumber: '',
     status: 'PENDING',
     shopId: '',
-    userId: ''
+    currentLocation: 'المستودع الرئيسي'
   })
 
   const fetchShops = async () => {
@@ -86,7 +86,8 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
       })
 
       if (!response.ok) {
-        throw new Error('Failed to create package')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create package')
       }
 
       // Reset form and close modal
@@ -94,12 +95,12 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
         trackingNumber: '',
         status: 'PENDING',
         shopId: '',
-        userId: ''
+        currentLocation: 'المستودع الرئيسي'
       })
       setIsOpen(false)
       window.location.reload() // Refresh the page to show new package
     } catch (error) {
-      setError('حدث خطأ أثناء إنشاء الشحنة')
+      setError(error instanceof Error ? error.message : 'حدث خطأ أثناء إنشاء الشحنة')
     } finally {
       setIsSubmitting(false)
     }
@@ -180,27 +181,6 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
               {shops.map((shop) => (
                 <option key={shop.id} value={shop.id}>
                   {shop.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="userId" className="block text-sm font-medium text-gray-700 mb-1">
-              المستخدم
-            </label>
-            <select
-              id="userId"
-              name="userId"
-              value={formData.userId}
-              onChange={handleInputChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-            >
-              <option value="">اختر المستخدم</option>
-              {users.map(user => (
-                <option key={user.id} value={user.id}>
-                  {user.name} ({user.email})
                 </option>
               ))}
             </select>

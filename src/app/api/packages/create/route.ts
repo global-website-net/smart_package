@@ -8,18 +8,32 @@ import QRCode from 'qrcode'
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user) {
+    if (!session?.user?.email) {
       return NextResponse.json(
         { error: 'غير مصرح لك بالوصول' },
         { status: 401 }
       )
     }
 
+    // Get user from database to check role
+    const { data: user, error: userError } = await supabase
+      .from('User')
+      .select('id, role')
+      .eq('email', session.user.email)
+      .single()
+
+    if (userError || !user) {
+      return NextResponse.json(
+        { error: 'لم يتم العثور على المستخدم' },
+        { status: 404 }
+      )
+    }
+
     const body = await request.json()
-    const { trackingNumber, status, shopId, userId } = body
+    const { trackingNumber, status, shopId } = body
 
     // Validate required fields
-    if (!trackingNumber || !status || !shopId || !userId) {
+    if (!trackingNumber || !status || !shopId) {
       return NextResponse.json(
         { error: 'جميع الحقول مطلوبة' },
         { status: 400 }
@@ -31,7 +45,7 @@ export async function POST(request: Request) {
       trackingNumber,
       status,
       shopId,
-      userId,
+      userId: user.id,
       timestamp: new Date().toISOString()
     })
     
@@ -52,7 +66,7 @@ export async function POST(request: Request) {
           trackingNumber,
           status,
           shopId,
-          userId,
+          userId: user.id, // Use the authenticated user's ID
           qrCode,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
@@ -73,7 +87,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Error in create package route:', error)
     return NextResponse.json(
-      { error: 'حدث خطأ أثناء إنشاء الشحنة' },
+      { error: 'حدث خطأ في الخادم' },
       { status: 500 }
     )
   }

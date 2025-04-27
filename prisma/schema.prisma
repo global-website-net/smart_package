@@ -85,22 +85,21 @@ model Package {
 }
 
 model Wallet {
-  id        String   @id @default(cuid())
-  balance   Float    @default(0)
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id])
-  transactions WalletTransaction[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model WalletTransaction {
   id          String   @id @default(cuid())
-  amount      Float
-  type        String   // "CREDIT" or "DEBIT"
-  reason      String
-  walletId    String
-  wallet      Wallet   @relation(fields: [walletId], references: [id])
+  userId      String   @unique
+  balance     Float    @default(0)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  walletId    String
+  amount      Float
+  type        String   // CREDIT or DEBIT
+  reason      String
+  wallet      Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
 }

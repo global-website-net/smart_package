@@ -114,12 +114,15 @@ function LoginForm() {
             </div>
 
             <div className="text-sm">
-              <Link
-                href="/auth/reset-password"
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  router.push('/auth/reset-password');
+                }}
                 className="font-medium text-indigo-600 hover:text-indigo-500"
               >
                 نسيت كلمة المرور؟
-              </Link>
+              </button>
             </div>
           </div>
 
