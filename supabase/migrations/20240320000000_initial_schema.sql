@@ -1,3 +1,9 @@
+-- Drop existing tables if they exist
+DROP TABLE IF EXISTS "PackageHistory" CASCADE;
+DROP TABLE IF EXISTS "Package" CASCADE;
+DROP TABLE IF EXISTS "Status" CASCADE;
+DROP TABLE IF EXISTS "User" CASCADE;
+
 -- Create tables if they don't exist
 CREATE TABLE IF NOT EXISTS "User" (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -48,4 +54,55 @@ ON CONFLICT (name) DO NOTHING;
 CREATE INDEX IF NOT EXISTS idx_package_tracking_number ON "Package"(tracking_number);
 CREATE INDEX IF NOT EXISTS idx_package_user_id ON "Package"(user_id);
 CREATE INDEX IF NOT EXISTS idx_package_history_package_id ON "PackageHistory"(package_id);
-CREATE INDEX IF NOT EXISTS idx_package_history_timestamp ON "PackageHistory"(timestamp); 
+CREATE INDEX IF NOT EXISTS idx_package_history_timestamp ON "PackageHistory"(timestamp);
+
+-- Enable Row Level Security
+ALTER TABLE "Package" ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for Package table
+CREATE POLICY "Allow authenticated users to view their own packages"
+ON "Package"
+FOR SELECT
+TO authenticated
+USING (
+    user_id = auth.uid() OR
+    EXISTS (
+        SELECT 1 FROM "User"
+        WHERE id = auth.uid() AND (role = 'ADMIN' OR role = 'OWNER')
+    )
+);
+
+CREATE POLICY "Allow authenticated users to create packages"
+ON "Package"
+FOR INSERT
+TO authenticated
+WITH CHECK (
+    EXISTS (
+        SELECT 1 FROM "User"
+        WHERE id = auth.uid() AND (role = 'ADMIN' OR role = 'OWNER')
+    )
+);
+
+CREATE POLICY "Allow authenticated users to update their own packages"
+ON "Package"
+FOR UPDATE
+TO authenticated
+USING (
+    user_id = auth.uid() OR
+    EXISTS (
+        SELECT 1 FROM "User"
+        WHERE id = auth.uid() AND (role = 'ADMIN' OR role = 'OWNER')
+    )
+);
+
+CREATE POLICY "Allow authenticated users to delete their own packages"
+ON "Package"
+FOR DELETE
+TO authenticated
+USING (
+    user_id = auth.uid() OR
+    EXISTS (
+        SELECT 1 FROM "User"
+        WHERE id = auth.uid() AND (role = 'ADMIN' OR role = 'OWNER')
+    )
+); 
