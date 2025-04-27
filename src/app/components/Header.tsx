@@ -3,8 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { signOut } from 'next-auth/react'
-import { useSession } from '@/lib/hooks/useSession'
+import { signOut, useSession } from 'next-auth/react'
 import { UserRole } from '@prisma/client'
 
 interface ExtendedSessionUser {
