@@ -45,8 +45,8 @@ export const db = {
         phonePrefix: userData.phonePrefix,
         phoneNumber: userData.phoneNumber,
         role: userData.role,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       })
       .select()
       .single()

@@ -40,6 +40,19 @@ CREATE TABLE IF NOT EXISTS "PackageHistory" (
     timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Insert or update default admin user
+INSERT INTO "User" (email, password, fullName, role)
+VALUES (
+    'admin@example.com',
+    '$2b$10$W.BOZouaNaFTpgPk.2t3ruFDNlI1vtujvWRVnWjoyufnJA/SG11Fi', -- This is a freshly generated bcrypt hash for 'admin123'
+    'Admin User',
+    'ADMIN'
+)
+ON CONFLICT (email) DO UPDATE SET
+    password = EXCLUDED.password,
+    fullName = EXCLUDED.fullName,
+    role = EXCLUDED.role;
+
 -- Insert default statuses if they don't exist
 INSERT INTO "Status" (name, description)
 VALUES 
