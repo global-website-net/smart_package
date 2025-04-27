@@ -4,7 +4,13 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-export default function ResetPasswordPage({ params }: { params: { token: string } }) {
+interface PageProps {
+  params: {
+    token: string
+  }
+}
+
+export default function ResetPasswordPage({ params }: PageProps) {
   const router = useRouter()
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
