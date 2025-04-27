@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase'
 // For Next.js App Router dynamic routes
 export async function DELETE(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -14,7 +14,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = context.params
+    const { id } = params
 
     const { error } = await supabase
       .from('Package')
@@ -36,7 +36,7 @@ export async function DELETE(
 // For Next.js App Router dynamic routes
 export async function PATCH(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -44,7 +44,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = context.params
+    const { id } = params
     const body = await request.json()
 
     const { data, error } = await supabase
