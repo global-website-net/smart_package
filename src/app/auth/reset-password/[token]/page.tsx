@@ -1,12 +1,17 @@
 import ResetPasswordForm from '@/components/ResetPasswordForm'
+import { Metadata } from 'next'
 
 type Props = {
-  params: {
-    token: string
-  }
+  params: { token: string }
+  searchParams: { [key: string]: string | string[] | undefined }
 }
 
-export default function ResetPasswordPage({ params }: Props) {
+export const metadata: Metadata = {
+  title: 'إعادة تعيين كلمة المرور',
+  description: 'إعادة تعيين كلمة المرور الخاصة بك',
+}
+
+export default async function ResetPasswordPage(props: Props) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -19,7 +24,7 @@ export default function ResetPasswordPage({ params }: Props) {
           </p>
         </div>
 
-        <ResetPasswordForm token={params.token} />
+        <ResetPasswordForm token={props.params.token} />
       </div>
     </div>
   )
