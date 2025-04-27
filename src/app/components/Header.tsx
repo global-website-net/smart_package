@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { UserRole } from '@prisma/client'
 
+// Define the extended session user type
 interface ExtendedSessionUser {
   id: string
   email: string
@@ -55,7 +56,7 @@ export default function Header() {
   const isRegularUser = session?.user?.role === 'REGULAR'
   
   // Get user's full name from metadata or fallback to email
-  const userFullName = session?.user?.user_metadata?.full_name || 
+  const userFullName = (session?.user as ExtendedSessionUser)?.user_metadata?.full_name || 
                       session?.user?.name || 
                       session?.user?.email?.split('@')[0] || 
                       'User'
