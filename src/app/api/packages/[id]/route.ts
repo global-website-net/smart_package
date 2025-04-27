@@ -68,72 +68,7 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  context: any
-) {
-  try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    })
-
-    if (!user || (user.role !== 'ADMIN' && user.role !== 'OWNER')) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
-    const { status } = await request.json()
-
-    if (!status) {
-      return NextResponse.json(
-        { error: 'Status is required' },
-        { status: 400 }
-      )
-    }
-
-    const validStatuses = ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED']
-    if (!validStatuses.includes(status)) {
-      return NextResponse.json(
-        { error: 'Invalid status' },
-        { status: 400 }
-      )
-    }
-
-    const updatedPackage = await prisma.package.update({
-      where: { id: context.params.id },
-      data: { status },
-      include: {
-        user: {
-          select: {
-            fullName: true,
-            email: true,
-          },
-        },
-        shop: {
-          select: {
-            fullName: true,
-            email: true,
-          },
-        },
-      },
-    })
-
-    return NextResponse.json(updatedPackage)
-  } catch (error) {
-    console.error('Error updating package:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
-}
-
-export async function DELETE(
-  request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -141,7 +76,44 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = context.params
+    const { id } = params
+    const body = await request.json()
+
+    const { data, error } = await supabase
+      .from('Package')
+      .update({
+        trackingNumber: body.trackingNumber,
+        status: body.status,
+        currentLocation: body.currentLocation,
+        updatedAt: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Error updating package:', error)
+      return NextResponse.json({ error: 'Failed to update package' }, { status: 500 })
+    }
+
+    return NextResponse.json(data)
+  } catch (error) {
+    console.error('Error in PATCH /api/packages/[id]:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { id } = params
 
     const { error } = await supabase
       .from('Package')
