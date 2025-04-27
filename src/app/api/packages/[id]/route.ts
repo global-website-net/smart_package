@@ -1,71 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import prisma from '@/lib/prisma'
 import { supabase } from '@/lib/supabase'
 
-// For Next.js 15.3.1, the correct type for route handlers
-export async function GET(
+// For Next.js App Router, we need to use the correct parameter types
+export async function DELETE(
   request: NextRequest,
-  context: any
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
-
-    if (!session?.user?.email) {
+    if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    })
+    const { id } = params
 
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    const { error } = await supabase
+      .from('Package')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      console.error('Error deleting package:', error)
+      return NextResponse.json({ error: 'Failed to delete package' }, { status: 500 })
     }
 
-    const packageData = await prisma.package.findUnique({
-      where: { id: context.params.id },
-      include: {
-        user: {
-          select: {
-            fullName: true,
-            email: true,
-          },
-        },
-        shop: {
-          select: {
-            fullName: true,
-            email: true,
-          },
-        },
-      },
-    })
-
-    if (!packageData) {
-      return NextResponse.json({ error: 'Package not found' }, { status: 404 })
-    }
-
-    // Check if user has permission to view this package
-    if (
-      user.role !== 'ADMIN' &&
-      user.role !== 'OWNER' &&
-      packageData.userId !== user.id &&
-      packageData.shopId !== user.id
-    ) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
-    return NextResponse.json(packageData)
+    return NextResponse.json({ message: 'Package deleted successfully' })
   } catch (error) {
-    console.error('Error fetching package:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    console.error('Error in DELETE /api/packages/[id]:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
+// Using PATCH instead of PUT for partial updates
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -99,72 +67,6 @@ export async function PATCH(
     return NextResponse.json(data)
   } catch (error) {
     console.error('Error in PATCH /api/packages/[id]:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
-}
-
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const session = await getServerSession(authOptions)
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { id } = params
-
-    const { error } = await supabase
-      .from('Package')
-      .delete()
-      .eq('id', id)
-
-    if (error) {
-      console.error('Error deleting package:', error)
-      return NextResponse.json({ error: 'Failed to delete package' }, { status: 500 })
-    }
-
-    return NextResponse.json({ message: 'Package deleted successfully' })
-  } catch (error) {
-    console.error('Error in DELETE /api/packages/[id]:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
-}
-
-export async function PUT(
-  request: NextRequest,
-  context: { params: { id: string } }
-) {
-  try {
-    const session = await getServerSession(authOptions)
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { id } = context.params
-    const body = await request.json()
-
-    const { data, error } = await supabase
-      .from('Package')
-      .update({
-        trackingNumber: body.trackingNumber,
-        status: body.status,
-        currentLocation: body.currentLocation,
-        updatedAt: new Date().toISOString()
-      })
-      .eq('id', id)
-      .select()
-      .single()
-
-    if (error) {
-      console.error('Error updating package:', error)
-      return NextResponse.json({ error: 'Failed to update package' }, { status: 500 })
-    }
-
-    return NextResponse.json(data)
-  } catch (error) {
-    console.error('Error in PUT /api/packages/[id]:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 } 
