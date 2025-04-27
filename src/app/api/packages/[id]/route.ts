@@ -131,9 +131,15 @@ export async function PATCH(
   }
 }
 
+type Props = {
+  params: {
+    id: string
+  }
+}
+
 export async function DELETE(
   request: NextRequest,
-  context: { params: { id: string } }
+  props: Props
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -141,7 +147,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = context.params
+    const { id } = props.params
 
     const { error } = await supabase
       .from('Package')
@@ -162,7 +168,7 @@ export async function DELETE(
 
 export async function PUT(
   request: NextRequest,
-  context: { params: { id: string } }
+  props: Props
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -170,7 +176,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = context.params
+    const { id } = props.params
     const body = await request.json()
 
     const { data, error } = await supabase
