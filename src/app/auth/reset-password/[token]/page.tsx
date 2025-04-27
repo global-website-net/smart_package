@@ -8,10 +8,13 @@ export const metadata: Metadata = {
 
 type PageProps = {
   params: Promise<{ token: string }>
-  searchParams: { [key: string]: string | string[] | undefined }
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 export default async function Page(props: PageProps) {
-  const { token } = await props.params
+  const [{ token }, searchParams] = await Promise.all([
+    props.params,
+    props.searchParams
+  ])
   return <ResetPasswordForm token={token} />
 } 
