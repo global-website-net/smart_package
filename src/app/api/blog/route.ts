@@ -12,7 +12,7 @@ interface BlogPost {
   User: {
     id: string
     fullName: string
-  } | null
+  }[] | null
 }
 
 // Get all blogs
@@ -47,9 +47,9 @@ export async function GET() {
       title: post.title,
       content: post.content,
       createdAt: post.createdAt,
-      author: post.User ? {
-        id: post.User.id,
-        name: post.User.fullName
+      author: post.User && post.User.length > 0 ? {
+        id: post.User[0].id,
+        name: post.User[0].fullName
       } : {
         id: 'unknown',
         name: 'مجهول'
