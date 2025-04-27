@@ -2,21 +2,40 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import Header from '../../components/Header'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
-  const [email, setEmail] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const [formData, setFormData] = useState({
+    email: '',
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  })
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
-    setSuccess('')
-    setLoading(true)
+    setIsLoading(true)
+    setError(null)
+    setSuccess(null)
+
+    // Validate passwords match
+    if (formData.newPassword !== formData.confirmPassword) {
+      setError('كلمات المرور الجديدة غير متطابقة')
+      setIsLoading(false)
+      return
+    }
 
     try {
       const response = await fetch('/api/auth/reset-password', {
@@ -24,7 +43,11 @@ export default function ResetPasswordPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, newPassword }),
+        body: JSON.stringify({
+          email: formData.email,
+          currentPassword: formData.currentPassword,
+          newPassword: formData.newPassword,
+        }),
       })
 
       const data = await response.json()
@@ -37,81 +60,118 @@ export default function ResetPasswordPage() {
       setTimeout(() => {
         router.push('/auth/login')
       }, 2000)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'حدث خطأ غير متوقع')
+    } catch (error) {
+      console.error('Reset password error:', error)
+      setError(error instanceof Error ? error.message : 'حدث خطأ أثناء إعادة تعيين كلمة المرور')
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            إعادة تعيين كلمة المرور
-          </h2>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <div className="flex justify-center items-center min-h-screen pt-20">
+        <div className="w-full max-w-md">
+          <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-8 space-y-6">
+            <h1 className="text-2xl font-bold text-center mb-6">إعادة تعيين كلمة المرور</h1>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-600 p-3 rounded-lg">
+                {error}
+              </div>
+            )}
+
+            {success && (
+              <div className="bg-green-50 border border-green-200 text-green-600 p-3 rounded-lg">
+                {success}
+              </div>
+            )}
+
+            {/* Email */}
             <div>
-              <label htmlFor="email" className="sr-only">
-                البريد الإلكتروني
+              <label htmlFor="email" className="block text-gray-700 mb-2">
+                البريد الإلكتروني <span className="text-red-500">*</span>
               </label>
               <input
+                type="email"
                 id="email"
                 name="email"
-                type="email"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                value={formData.email}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
                 placeholder="البريد الإلكتروني"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isLoading}
               />
             </div>
+
+            {/* Current Password */}
             <div>
-              <label htmlFor="new-password" className="sr-only">
-                كلمة المرور الجديدة
+              <label htmlFor="currentPassword" className="block text-gray-700 mb-2">
+                كلمة المرور الحالية <span className="text-red-500">*</span>
               </label>
               <input
-                id="new-password"
-                name="new-password"
                 type="password"
+                id="currentPassword"
+                name="currentPassword"
+                value={formData.currentPassword}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="كلمة المرور الحالية"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                placeholder="كلمة المرور الجديدة"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                disabled={isLoading}
               />
             </div>
-          </div>
 
-          {error && (
-            <div className="text-red-500 text-sm text-center">{error}</div>
-          )}
-          {success && (
-            <div className="text-green-500 text-sm text-center">{success}</div>
-          )}
+            {/* New Password */}
+            <div>
+              <label htmlFor="newPassword" className="block text-gray-700 mb-2">
+                كلمة المرور الجديدة <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="password"
+                id="newPassword"
+                name="newPassword"
+                value={formData.newPassword}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="كلمة المرور الجديدة"
+                required
+                disabled={isLoading}
+              />
+            </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-            >
-              {loading ? 'جاري المعالجة...' : 'إعادة تعيين كلمة المرور'}
-            </button>
-          </div>
+            {/* Confirm New Password */}
+            <div>
+              <label htmlFor="confirmPassword" className="block text-gray-700 mb-2">
+                تأكيد كلمة المرور الجديدة <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="تأكيد كلمة المرور الجديدة"
+                required
+                disabled={isLoading}
+              />
+            </div>
 
-          <div className="text-sm text-center">
-            <Link
-              href="/auth/login"
-              className="font-medium text-green-600 hover:text-green-500"
-            >
-              العودة إلى صفحة تسجيل الدخول
-            </Link>
-          </div>
-        </form>
+            {/* Submit Button */}
+            <div className="pt-4">
+              <button
+                type="submit"
+                className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isLoading}
+              >
+                {isLoading ? 'جاري إعادة تعيين كلمة المرور...' : 'إعادة تعيين كلمة المرور'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   )

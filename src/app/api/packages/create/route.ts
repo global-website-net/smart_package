@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { trackingNumber, status, shopId, currentLocation, userId } = body
+    const { trackingNumber, status, shopId, currentLocation, userId, scannerCode } = body
 
     // Validate required fields
     if (!trackingNumber || !status || !shopId || !currentLocation || !userId) {
@@ -39,6 +39,7 @@ export async function POST(request: Request) {
         userId,
         shopId,
         currentLocation,
+        scannerCode,
         createdAt: new Date(),
         updatedAt: new Date()
       })

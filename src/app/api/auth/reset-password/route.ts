@@ -1,50 +1,61 @@
 import { NextResponse } from 'next/server'
-import bcrypt from 'bcryptjs'
 import { supabase } from '@/lib/supabase'
+import bcrypt from 'bcryptjs'
 
 export async function POST(request: Request) {
   try {
-    const { email, newPassword } = await request.json()
+    const { email, currentPassword, newPassword } = await request.json()
 
-    // Validate input
-    if (!email || !newPassword) {
+    if (!email || !currentPassword || !newPassword) {
       return NextResponse.json(
-        { error: 'البريد الإلكتروني وكلمة المرور الجديدة مطلوبان' },
+        { error: 'جميع الحقول مطلوبة' },
         { status: 400 }
       )
     }
 
-    // Hash the new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10)
-
-    // Update the user's password in the database
-    const { data, error } = await supabase
+    // Get user from database
+    const { data: user, error: userError } = await supabase
       .from('User')
-      .update({ password: hashedPassword })
+      .select('*')
       .eq('email', email)
-      .select()
+      .single()
 
-    if (error) {
-      console.error('Error resetting password:', error)
+    if (userError || !user) {
       return NextResponse.json(
-        { error: 'حدث خطأ أثناء إعادة تعيين كلمة المرور' },
-        { status: 500 }
-      )
-    }
-
-    if (!data || data.length === 0) {
-      return NextResponse.json(
-        { error: 'لم يتم العثور على المستخدم' },
+        { error: 'البريد الإلكتروني غير موجود' },
         { status: 404 }
       )
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'تم إعادة تعيين كلمة المرور بنجاح'
-    })
+    // Verify current password
+    const isValidPassword = await bcrypt.compare(currentPassword, user.password)
+    if (!isValidPassword) {
+      return NextResponse.json(
+        { error: 'كلمة المرور الحالية غير صحيحة' },
+        { status: 401 }
+      )
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10)
+
+    // Update password in database
+    const { error: updateError } = await supabase
+      .from('User')
+      .update({ password: hashedPassword })
+      .eq('email', email)
+
+    if (updateError) {
+      console.error('Error updating password:', updateError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء تحديث كلمة المرور' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ message: 'تم تحديث كلمة المرور بنجاح' })
   } catch (error) {
-    console.error('Error in reset-password:', error)
+    console.error('Reset password error:', error)
     return NextResponse.json(
       { error: 'حدث خطأ أثناء إعادة تعيين كلمة المرور' },
       { status: 500 }

@@ -24,7 +24,8 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
     status: 'PENDING',
     shopId: '',
     currentLocation: '',
-    userId: ''
+    userId: '',
+    scannerCode: ''
   })
 
   const fetchShops = async () => {
@@ -89,7 +90,8 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
         status: 'PENDING',
         shopId: '',
         currentLocation: '',
-        userId: ''
+        userId: '',
+        scannerCode: ''
       })
       setIsOpen(false)
       window.location.reload() // Refresh the page to show new package
@@ -142,6 +144,20 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
           </div>
 
           <div>
+            <label htmlFor="scannerCode" className="block text-sm font-medium text-gray-700 mb-1">
+              رمز الماسح الضوئي (اختياري)
+            </label>
+            <input
+              type="text"
+              id="scannerCode"
+              value={formData.scannerCode}
+              onChange={(e) => setFormData({ ...formData, scannerCode: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="أدخل رمز الماسح الضوئي"
+            />
+          </div>
+
+          <div>
             <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
               الحالة
             </label>
@@ -182,7 +198,7 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
 
           <div>
             <label htmlFor="currentLocation" className="block text-sm font-medium text-gray-700 mb-1">
-              الموقع الحالي
+              حالة الدفع
             </label>
             <input
               type="text"

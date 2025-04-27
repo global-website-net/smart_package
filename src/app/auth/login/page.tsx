@@ -133,7 +133,7 @@ function LoginForm() {
             disabled={isLoading}
           />
           <label htmlFor="rememberMe" className="mr-2 block text-gray-700">
-            تذكرني
+            احفظ الدخول
           </label>
         </div>
         <button

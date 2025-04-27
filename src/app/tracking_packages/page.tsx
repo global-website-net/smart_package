@@ -18,11 +18,12 @@ interface Package {
   status: string
   shopId: string
   shop: {
-    fullName: string
+    name: string
   }
   createdAt: string
   updatedAt: string
   currentLocation: string
+  scannerCode?: string
 }
 
 export default function TrackingPackagesPage() {
@@ -36,6 +37,23 @@ export default function TrackingPackagesPage() {
   const [selectedShop, setSelectedShop] = useState('')
   const [trackingNumber, setTrackingNumber] = useState('')
   const router = useRouter()
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'PENDING':
+        return 'قيد الانتظار'
+      case 'PROCESSING':
+        return 'قيد المعالجة'
+      case 'SHIPPED':
+        return 'تم الشحن'
+      case 'DELIVERED':
+        return 'تم التسليم'
+      case 'CANCELLED':
+        return 'ملغي'
+      default:
+        return status
+    }
+  }
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -214,6 +232,9 @@ export default function TrackingPackagesPage() {
                       رقم التتبع
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      رمز الماسح الضوئي
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       الحالة
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -237,19 +258,33 @@ export default function TrackingPackagesPage() {
                         {pkg.trackingNumber}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {pkg.status}
+                        {getStatusText(pkg.status)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {pkg.shop?.fullName || 'متجر غير معروف'}
+                        {pkg.shop?.name || 'متجر غير معروف'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {pkg.currentLocation}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(pkg.createdAt).toLocaleDateString('ar-SA')}
+                        {new Date(pkg.createdAt).toLocaleString('ar-SA', {
+                          year: 'numeric',
+                          month: 'numeric',
+                          day: 'numeric',
+                          hour: 'numeric',
+                          minute: 'numeric',
+                          hour12: true
+                        })}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(pkg.updatedAt).toLocaleDateString('ar-SA')}
+                        {new Date(pkg.updatedAt).toLocaleString('ar-SA', {
+                          year: 'numeric',
+                          month: 'numeric',
+                          day: 'numeric',
+                          hour: 'numeric',
+                          minute: 'numeric',
+                          hour12: true
+                        })}
                       </td>
                     </tr>
                   ))}
