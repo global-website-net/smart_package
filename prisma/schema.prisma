@@ -60,6 +60,7 @@ model User {
   sessions      Session[]
   packages      Package[] @relation("UserPackages")
   shopPackages  Package[] @relation("ShopPackages")
+  wallet        Wallet?
 }
 
 model VerificationToken {
