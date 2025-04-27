@@ -7,11 +7,11 @@ interface BlogPost {
   id: string
   title: string
   content: string
-  createdAt: string
-  itemLink: string
-  User: {
+  created_at: string
+  item_link: string
+  author: {
     id: string
-    fullName: string
+    fullname: string
   }[]
 }
 
@@ -24,14 +24,14 @@ export async function GET() {
         id,
         title,
         content,
-        createdAt,
-        itemLink,
-        User (
+        created_at,
+        item_link,
+        author:authorid (
           id,
-          fullName
+          fullname
         )
       `)
-      .order('createdAt', { ascending: false })
+      .order('created_at', { ascending: false })
 
     if (error) {
       console.error('Error fetching blogs:', error)
@@ -46,10 +46,10 @@ export async function GET() {
       id: post.id,
       title: post.title,
       content: post.content,
-      createdAt: post.createdAt,
-      itemLink: post.itemLink,
-      author: post.User?.[0] ? {
-        name: post.User[0].fullName
+      createdAt: post.created_at,
+      itemLink: post.item_link,
+      author: post.author?.[0] ? {
+        name: post.author[0].fullname
       } : {
         name: 'مجهول'
       }
@@ -153,12 +153,12 @@ export async function PUT(request: Request) {
       .update({
         title,
         content,
-        updatedAt: new Date()
+        updated_at: new Date()
       })
       .eq('id', id)
       .select(`
         *,
-        User:authorId (
+        User:authorid (
           fullName,
           email
         )

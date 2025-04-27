@@ -49,20 +49,24 @@ export async function GET() {
       .from('Package')
       .select(`
         id,
-        trackingNumber,
-        status,
-        createdAt,
-        updatedAt,
-        user:userId (
-          fullName,
+        trackingnumber,
+        statusid,
+        recipientname,
+        recipientphone,
+        recipientaddress,
+        weight,
+        dimensions,
+        description,
+        price,
+        created_at,
+        updated_at,
+        user:userid (
+          fullname,
           email
-        ),
-        shop:shopId (
-          fullName
         )
       `)
-      .eq('userId', session.user.id)
-      .order('createdAt', { ascending: false })
+      .eq('userid', session.user.id)
+      .order('created_at', { ascending: false })
 
     if (packagesError) {
       console.error('Error fetching packages:', packagesError)

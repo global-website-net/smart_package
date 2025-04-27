@@ -3,7 +3,23 @@
 import { useState, useRef, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { signOut, useSession } from 'next-auth/react'
+import { signOut } from 'next-auth/react'
+import { useSession } from '@/lib/hooks/useSession'
+import { UserRole } from '@prisma/client'
+
+interface ExtendedSessionUser {
+  id: string
+  email: string
+  name: string
+  role: UserRole
+  user_metadata?: {
+    full_name?: string
+    governorate?: string
+    town?: string
+    phone_prefix?: string
+    phone_number?: string
+  }
+}
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -38,8 +54,14 @@ export default function Header() {
   const isLoggedIn = !!session?.user
   const isAdmin = session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER'
   const isRegularUser = session?.user?.role === 'REGULAR'
-  const userName = session?.user?.name || session?.user?.email?.split('@')[0] || 'User'
-  const welcomeText = isLoggedIn ? `Welcome, ${userName}` : ''
+  
+  // Get user's full name from metadata or fallback to email
+  const userFullName = session?.user?.user_metadata?.full_name || 
+                      session?.user?.name || 
+                      session?.user?.email?.split('@')[0] || 
+                      'User'
+  
+  const welcomeText = isLoggedIn ? `اهلا بك ${userFullName}` : ''
 
   return (
     <header className="bg-black text-white fixed w-full top-0 z-50">

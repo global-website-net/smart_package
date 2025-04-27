@@ -98,45 +98,58 @@ export default function AccountPage() {
 
           if (error) {
             console.error('Error fetching from User table:', error)
-            // If there's an error, try to get data from auth metadata
-            const userMetadata = (session.user as ExtendedSessionUser).user_metadata || {}
-            
-            // Create a profile object from auth metadata
-            const profileFromMetadata = {
-              id: session.user.id || '',
-              email: session.user.email || '',
-              fullName: userMetadata.full_name || '',
-              role: session.user.role || 'REGULAR',
-              governorate: userMetadata.governorate || '',
-              town: userMetadata.town || '',
-              phonePrefix: userMetadata.phone_prefix || '',
-              phoneNumber: userMetadata.phone_number || '',
-              createdAt: new Date().toISOString()
+            // If database fetch fails, use session metadata
+            const extendedUser = session.user as ExtendedSessionUser
+            if (extendedUser.user_metadata) {
+              setProfile({
+                id: extendedUser.id,
+                email: extendedUser.email,
+                fullName: extendedUser.user_metadata.full_name || '',
+                role: extendedUser.role,
+                governorate: extendedUser.user_metadata.governorate || '',
+                town: extendedUser.user_metadata.town || '',
+                phonePrefix: extendedUser.user_metadata.phone_prefix || '',
+                phoneNumber: extendedUser.user_metadata.phone_number || '',
+                createdAt: new Date().toISOString()
+              })
+              setFormData({
+                fullName: extendedUser.user_metadata.full_name || '',
+                governorate: extendedUser.user_metadata.governorate || '',
+                town: extendedUser.user_metadata.town || '',
+                phonePrefix: extendedUser.user_metadata.phone_prefix || '',
+                phoneNumber: extendedUser.user_metadata.phone_number || '',
+                currentPassword: '',
+                newPassword: '',
+                confirmPassword: ''
+              })
             }
-            
-            setProfile(profileFromMetadata)
-            setFormData({
-              ...formData,
-              fullName: profileFromMetadata.fullName || '',
-              governorate: profileFromMetadata.governorate || '',
-              town: profileFromMetadata.town || '',
-              phonePrefix: profileFromMetadata.phonePrefix || '',
-              phoneNumber: profileFromMetadata.phoneNumber || '',
-            })
           } else if (userData) {
-            setProfile(userData)
-            setFormData({
-              ...formData,
-              fullName: userData.fullName || '',
+            // If database fetch succeeds, use that data
+            setProfile({
+              id: userData.id,
+              email: userData.email,
+              fullName: userData.full_name || '',
+              role: userData.role,
               governorate: userData.governorate || '',
               town: userData.town || '',
-              phonePrefix: userData.phonePrefix || '',
-              phoneNumber: userData.phoneNumber || '',
+              phonePrefix: userData.phone_prefix || '',
+              phoneNumber: userData.phone_number || '',
+              createdAt: userData.created_at
+            })
+            setFormData({
+              fullName: userData.full_name || '',
+              governorate: userData.governorate || '',
+              town: userData.town || '',
+              phonePrefix: userData.phone_prefix || '',
+              phoneNumber: userData.phone_number || '',
+              currentPassword: '',
+              newPassword: '',
+              confirmPassword: ''
             })
           }
-        } catch (error) {
-          console.error('Error fetching profile:', error)
-          setError('حدث خطأ أثناء جلب بيانات الملف الشخصي')
+        } catch (err) {
+          console.error('Error in fetchProfile:', err)
+          setError('حدث خطأ أثناء تحميل بيانات الملف الشخصي')
         } finally {
           setIsLoading(false)
         }
@@ -148,7 +161,7 @@ export default function AccountPage() {
     if (session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') {
       setIsAdmin(true)
     }
-  }, [status, session])
+  }, [session, status, router])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target

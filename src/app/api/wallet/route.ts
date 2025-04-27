@@ -25,7 +25,7 @@ export async function GET() {
     const { data: wallet, error: walletError } = await supabase
       .from('Wallet')
       .select('*')
-      .eq('userId', session.user.id)
+      .eq('userid', session.user.id)
       .single()
 
     if (walletError) {
@@ -35,10 +35,10 @@ export async function GET() {
           .from('Wallet')
           .insert([
             {
-              userId: session.user.id,
+              userid: session.user.id,
               balance: 0,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
             }
           ])
           .select()
@@ -60,8 +60,8 @@ export async function GET() {
     const { data: transactions, error: transactionsError } = await supabase
       .from('WalletTransaction')
       .select('*')
-      .eq('walletId', wallet.id)
-      .order('createdAt', { ascending: false })
+      .eq('walletid', wallet.id)
+      .order('created_at', { ascending: false })
 
     if (transactionsError) {
       throw transactionsError
@@ -106,7 +106,7 @@ export async function POST(request: Request) {
     const { data: wallet, error: walletError } = await supabase
       .from('Wallet')
       .select('*')
-      .eq('userId', session.user.id)
+      .eq('userid', session.user.id)
       .single()
 
     if (walletError) {
@@ -130,11 +130,11 @@ export async function POST(request: Request) {
       .from('WalletTransaction')
       .insert([
         {
-          walletId: wallet.id,
+          walletid: wallet.id,
           amount,
           type,
           reason,
-          createdAt: new Date().toISOString()
+          created_at: new Date().toISOString()
         }
       ])
       .select()
@@ -149,7 +149,7 @@ export async function POST(request: Request) {
       .from('Wallet')
       .update({ 
         balance: newBalance,
-        updatedAt: new Date().toISOString()
+        updated_at: new Date().toISOString()
       })
       .eq('id', wallet.id)
 
