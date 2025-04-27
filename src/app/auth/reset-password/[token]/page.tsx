@@ -6,11 +6,10 @@ export const metadata: Metadata = {
   description: 'إعادة تعيين كلمة المرور الخاصة بك',
 }
 
-interface PageProps {
+export default function Page({
+  params,
+}: {
   params: { token: string }
-  searchParams?: { [key: string]: string | string[] | undefined }
-}
-
-export default async function Page({ params }: PageProps) {
+}) {
   return <ResetPasswordForm token={params.token} />
 } 
