@@ -128,20 +128,20 @@ export default function AccountPage() {
             setProfile({
               id: userData.id,
               email: userData.email,
-              fullName: userData.full_name || '',
+              fullName: userData.fullname || '',
               role: userData.role,
               governorate: userData.governorate || '',
               town: userData.town || '',
-              phonePrefix: userData.phone_prefix || '',
-              phoneNumber: userData.phone_number || '',
+              phonePrefix: userData.phoneprefix || '',
+              phoneNumber: userData.phonenumber || '',
               createdAt: userData.created_at
             })
             setFormData({
-              fullName: userData.full_name || '',
+              fullName: userData.fullname || '',
               governorate: userData.governorate || '',
               town: userData.town || '',
-              phonePrefix: userData.phone_prefix || '',
-              phoneNumber: userData.phone_number || '',
+              phonePrefix: userData.phoneprefix || '',
+              phoneNumber: userData.phonenumber || '',
               currentPassword: '',
               newPassword: '',
               confirmPassword: ''

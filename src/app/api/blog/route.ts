@@ -7,12 +7,12 @@ interface BlogPost {
   id: string
   title: string
   content: string
-  created_at: string
-  item_link: string
+  createdAt: string
+  authorId: string
   author: {
     id: string
-    fullname: string
-  }[]
+    fullName: string
+  }
 }
 
 // Get all blogs
@@ -24,14 +24,14 @@ export async function GET() {
         id,
         title,
         content,
-        created_at,
-        item_link,
-        author:authorid (
+        createdAt,
+        authorId,
+        User:authorId (
           id,
-          fullname
+          fullName
         )
       `)
-      .order('created_at', { ascending: false })
+      .order('createdAt', { ascending: false })
 
     if (error) {
       console.error('Error fetching blogs:', error)
@@ -46,11 +46,12 @@ export async function GET() {
       id: post.id,
       title: post.title,
       content: post.content,
-      createdAt: post.created_at,
-      itemLink: post.item_link,
-      author: post.author?.[0] ? {
-        name: post.author[0].fullname
+      createdAt: post.createdAt,
+      author: post.User ? {
+        id: post.User.id,
+        name: post.User.fullName
       } : {
+        id: 'unknown',
         name: 'مجهول'
       }
     }))

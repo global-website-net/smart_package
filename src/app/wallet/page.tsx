@@ -99,7 +99,7 @@ export default function WalletPage() {
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
             <h2 className="text-2xl font-semibold mb-4">الرصيد الحالي</h2>
             <p className="text-3xl font-bold text-green-600">
-              {walletData.balance.toFixed(2)} ريال
+              {walletData.balance.toFixed(2)} شيكل
             </p>
           </div>
 
@@ -128,7 +128,7 @@ export default function WalletPage() {
                       }`}
                     >
                       {transaction.type === 'CREDIT' ? '+' : '-'}
-                      {transaction.amount.toFixed(2)} ريال
+                      {transaction.amount.toFixed(2)} شيكل
                     </p>
                   </div>
                 ))}
