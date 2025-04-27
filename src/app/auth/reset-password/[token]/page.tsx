@@ -6,11 +6,13 @@ export const metadata: Metadata = {
   description: 'إعادة تعيين كلمة المرور الخاصة بك',
 }
 
-export default async function ResetPasswordPage({
-  params,
-}: {
-  params: { token: string }
-}) {
+interface PageProps {
+  params: Promise<{ token: string }>
+}
+
+export default async function ResetPasswordPage(props: PageProps) {
+  const { token } = await props.params
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -23,7 +25,7 @@ export default async function ResetPasswordPage({
           </p>
         </div>
 
-        <ResetPasswordForm token={params.token} />
+        <ResetPasswordForm token={token} />
       </div>
     </div>
   )
