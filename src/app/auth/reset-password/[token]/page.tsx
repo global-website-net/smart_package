@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: 'إعادة تعيين كلمة المرور الخاصة بك',
 }
 
-interface PageProps {
+type PageProps = {
   params: { token: string }
   searchParams: { [key: string]: string | string[] | undefined }
 }
