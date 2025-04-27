@@ -40,10 +40,6 @@ export const db = {
         email: userData.email,
         password: userData.password,
         fullName: userData.fullName,
-        governorate: userData.governorate,
-        town: userData.town,
-        phone_prefix: userData.phonePrefix,
-        phone_number: userData.phoneNumber,
         role: userData.role,
         created_at: new Date(),
         updated_at: new Date()
