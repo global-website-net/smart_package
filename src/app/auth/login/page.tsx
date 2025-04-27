@@ -44,6 +44,11 @@ function LoginForm() {
     }
   }
 
+  const handleResetPassword = (e: React.MouseEvent) => {
+    e.preventDefault()
+    router.push('/auth/reset-password')
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -52,7 +57,12 @@ function LoginForm() {
             تسجيل الدخول
           </h2>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit} autoComplete="on">
+        <form 
+          className="mt-8 space-y-6" 
+          onSubmit={handleSubmit} 
+          autoComplete="on"
+          id="login-form"
+        >
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email" className="sr-only">
@@ -98,12 +108,13 @@ function LoginForm() {
             </div>
 
             <div className="text-sm">
-              <Link
-                href="/auth/reset-password"
+              <a
+                href="#"
+                onClick={handleResetPassword}
                 className="font-medium text-indigo-600 hover:text-indigo-500"
               >
                 نسيت كلمة المرور؟
-              </Link>
+              </a>
             </div>
           </div>
 

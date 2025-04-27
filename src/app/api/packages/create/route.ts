@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
+import { v4 as uuidv4 } from 'uuid'
 
 export async function POST(request: Request) {
   try {
@@ -24,15 +25,18 @@ export async function POST(request: Request) {
       )
     }
 
-    // Create package in database
+    // Create package in database with generated UUID
     const { data: packageData, error: packageError } = await supabase
       .from('Package')
       .insert([
         {
+          id: uuidv4(),
           trackingNumber,
           status,
           shopId,
-          userId
+          userId,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         }
       ])
       .select()
