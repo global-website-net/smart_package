@@ -10,7 +10,9 @@ interface PageProps {
 
 export default function ResetPasswordTokenPage({
   params,
-}: PageProps) {
+}: {
+  params: { token: string }
+}) {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
