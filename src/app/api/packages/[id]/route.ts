@@ -131,15 +131,9 @@ export async function PATCH(
   }
 }
 
-interface RouteParams {
-  params: {
-    id: string
-  }
-}
-
 export async function DELETE(
   request: NextRequest,
-  { params }: RouteParams
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -168,7 +162,7 @@ export async function DELETE(
 
 export async function PUT(
   request: NextRequest,
-  { params }: RouteParams
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
