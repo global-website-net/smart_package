@@ -8,16 +8,16 @@ import { db } from '@/lib/db'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-const supabase = createClient(
-  supabaseUrl || '',
-  supabaseServiceKey || '',
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
+if (!supabaseUrl || !supabaseServiceKey) {
+  throw new Error('Missing required Supabase environment variables')
+}
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
   }
-)
+})
 
 export async function POST(request: Request) {
   try {
@@ -31,10 +31,25 @@ export async function POST(request: Request) {
       )
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10)
+    // Check if user exists in Supabase auth
+    const { data: existingAuthUser, error: authCheckError } = await supabase.auth.admin.listUsers()
 
-    // Check if user exists
+    if (authCheckError) {
+      console.error('Error checking auth user existence:', authCheckError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء التحقق من وجود الحساب' },
+        { status: 500 }
+      )
+    }
+
+    if (existingAuthUser?.users?.some(user => user.email === email)) {
+      return NextResponse.json(
+        { error: 'البريد الإلكتروني مستخدم بالفعل' },
+        { status: 400 }
+      )
+    }
+
+    // Check if user exists in database
     const userExists = await db.userExists(email)
     
     if (userExists) {
@@ -44,8 +59,42 @@ export async function POST(request: Request) {
       )
     }
 
-    // Create the user
-    const user = await db.createUser({
+    // Create user in Supabase auth
+    const { data: authUser, error: createAuthError } = await supabase.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: {
+        full_name: fullName,
+        role: UserRole.REGULAR,
+        governorate,
+        town,
+        phone_prefix: phonePrefix,
+        phone_number: phoneNumber
+      }
+    })
+
+    if (createAuthError) {
+      console.error('Error creating auth user:', createAuthError)
+      return NextResponse.json(
+        { error: `حدث خطأ أثناء إنشاء الحساب: ${createAuthError.message}` },
+        { status: 500 }
+      )
+    }
+
+    if (!authUser?.user) {
+      console.error('No user returned from auth creation')
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء إنشاء الحساب' },
+        { status: 500 }
+      )
+    }
+
+    // Hash password for database storage
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    // Create user in database
+    const dbUser = await db.createUser({
       email,
       password: hashedPassword,
       fullName,
@@ -56,33 +105,17 @@ export async function POST(request: Request) {
       role: UserRole.REGULAR
     })
 
-    if (!user) {
-      throw new Error('Failed to create user')
-    }
-
-    // Create user in Supabase auth
-    const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
-      email: email,
-      password: password,
-      email_confirm: true,
-      user_metadata: {
-        full_name: fullName,
-        role: UserRole.REGULAR,
-        governorate: governorate,
-        town: town,
-        phone_prefix: phonePrefix,
-        phone_number: phoneNumber
-      }
-    })
-
-    if (authError) {
-      // Delete the user from our database if Supabase auth fails
-      await db.deleteUser(user.id)
-      throw new Error('Failed to create Supabase auth user')
+    if (!dbUser) {
+      // If database user creation fails, delete the auth user
+      await supabase.auth.admin.deleteUser(authUser.user.id)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء إنشاء الحساب في قاعدة البيانات' },
+        { status: 500 }
+      )
     }
 
     // Return success response without password
-    const { password: _, ...userWithoutPassword } = user
+    const { password: _, ...userWithoutPassword } = dbUser
     return NextResponse.json({
       success: true,
       message: 'تم إنشاء الحساب بنجاح',
@@ -91,18 +124,15 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Error in signup:', error)
     
-    // Handle specific error cases
     if (error instanceof Error) {
-      if (error.message.includes('Failed to create Supabase auth user')) {
-        return NextResponse.json(
-          { error: 'حدث خطأ أثناء إنشاء الحساب في نظام المصادقة' },
-          { status: 500 }
-        )
-      }
+      return NextResponse.json(
+        { error: `حدث خطأ أثناء إنشاء الحساب: ${error.message}` },
+        { status: 500 }
+      )
     }
-
+    
     return NextResponse.json(
-      { error: 'حدث خطأ أثناء إنشاء الحساب' },
+      { error: 'حدث خطأ غير متوقع أثناء إنشاء الحساب' },
       { status: 500 }
     )
   }
