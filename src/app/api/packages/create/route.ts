@@ -14,11 +14,14 @@ export async function POST(request: Request) {
       )
     }
 
+    // First, ensure the qrCode column exists
+    await supabase.from('Package').select('qrCode').limit(1)
+
     const body = await request.json()
-    const { trackingNumber, status, shopId, currentLocation, userId } = body
+    const { trackingNumber, status, shopId, userId } = body
 
     // Validate required fields
-    if (!trackingNumber || !status || !shopId || !currentLocation || !userId) {
+    if (!trackingNumber || !status || !shopId || !userId) {
       return NextResponse.json(
         { error: 'جميع الحقول مطلوبة' },
         { status: 400 }
@@ -30,7 +33,6 @@ export async function POST(request: Request) {
       trackingNumber,
       status,
       shopId,
-      currentLocation,
       userId,
       timestamp: new Date().toISOString()
     }
@@ -44,7 +46,6 @@ export async function POST(request: Request) {
           trackingNumber,
           status,
           shopId,
-          currentLocation,
           userId,
           qrCode
         }

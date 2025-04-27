@@ -4,9 +4,10 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-export default function ResetPasswordPage() {
+export default function ResetPasswordPage({ params }: { params: { token: string } }) {
   const router = useRouter()
-  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -16,24 +17,36 @@ export default function ResetPasswordPage() {
     setLoading(true)
     setError(null)
 
+    if (password !== confirmPassword) {
+      setError('كلمات المرور غير متطابقة')
+      setLoading(false)
+      return
+    }
+
     try {
-      const response = await fetch('/api/auth/reset-password', {
+      const response = await fetch('/api/auth/reset-password/confirm', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({
+          token: params.token,
+          password,
+        }),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'حدث خطأ أثناء إرسال طلب إعادة تعيين كلمة المرور')
+        throw new Error(data.error || 'حدث خطأ أثناء إعادة تعيين كلمة المرور')
       }
 
       setSuccess(true)
+      setTimeout(() => {
+        router.push('/auth/login')
+      }, 3000)
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'حدث خطأ أثناء إرسال طلب إعادة تعيين كلمة المرور')
+      setError(error instanceof Error ? error.message : 'حدث خطأ أثناء إعادة تعيين كلمة المرور')
     } finally {
       setLoading(false)
     }
@@ -47,7 +60,7 @@ export default function ResetPasswordPage() {
             إعادة تعيين كلمة المرور
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور
+            أدخل كلمة المرور الجديدة
           </p>
         </div>
 
@@ -61,7 +74,10 @@ export default function ResetPasswordPage() {
               </div>
               <div className="mr-3">
                 <p className="text-sm font-medium text-green-800">
-                  تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني
+                  تم إعادة تعيين كلمة المرور بنجاح
+                </p>
+                <p className="text-sm text-green-700 mt-1">
+                  سيتم تحويلك إلى صفحة تسجيل الدخول...
                 </p>
               </div>
             </div>
@@ -69,19 +85,34 @@ export default function ResetPasswordPage() {
         ) : (
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="sr-only">
-                البريد الإلكتروني
+              <label htmlFor="password" className="sr-only">
+                كلمة المرور الجديدة
               </label>
               <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
+                id="password"
+                name="password"
+                type="password"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="البريد الإلكتروني"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="appearance-none rounded-t-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="كلمة المرور الجديدة"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className="sr-only">
+                تأكيد كلمة المرور
+              </label>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="appearance-none rounded-b-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="تأكيد كلمة المرور"
               />
             </div>
 
@@ -95,7 +126,7 @@ export default function ResetPasswordPage() {
                 disabled={loading}
                 className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
-                {loading ? 'جاري الإرسال...' : 'إرسال رابط إعادة التعيين'}
+                {loading ? 'جاري إعادة التعيين...' : 'إعادة تعيين كلمة المرور'}
               </button>
             </div>
 

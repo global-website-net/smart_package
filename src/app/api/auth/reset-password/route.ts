@@ -1,63 +1,92 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
-import bcrypt from 'bcryptjs'
+import { createTransport } from 'nodemailer'
+import crypto from 'crypto'
+
+const transporter = createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  secure: true,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASSWORD,
+  },
+})
 
 export async function POST(request: Request) {
   try {
-    const { email, currentPassword, newPassword } = await request.json()
+    const { email } = await request.json()
 
-    if (!email || !currentPassword || !newPassword) {
+    if (!email) {
       return NextResponse.json(
-        { error: 'جميع الحقول مطلوبة' },
+        { error: 'البريد الإلكتروني مطلوب' },
         { status: 400 }
       )
     }
 
-    // Get user from database
+    // Check if user exists
     const { data: user, error: userError } = await supabase
       .from('User')
-      .select('*')
+      .select('id, email, fullName')
       .eq('email', email)
       .single()
 
     if (userError || !user) {
       return NextResponse.json(
-        { error: 'البريد الإلكتروني غير موجود' },
+        { error: 'لم يتم العثور على حساب بهذا البريد الإلكتروني' },
         { status: 404 }
       )
     }
 
-    // Verify current password
-    const isValidPassword = await bcrypt.compare(currentPassword, user.password)
-    if (!isValidPassword) {
-      return NextResponse.json(
-        { error: 'كلمة المرور الحالية غير صحيحة' },
-        { status: 401 }
-      )
-    }
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex')
+    const resetTokenExpiry = new Date(Date.now() + 3600000) // 1 hour from now
 
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10)
-
-    // Update password in database
+    // Store reset token in database
     const { error: updateError } = await supabase
       .from('User')
-      .update({ password: hashedPassword })
-      .eq('email', email)
+      .update({
+        resetToken,
+        resetTokenExpiry,
+      })
+      .eq('id', user.id)
 
     if (updateError) {
-      console.error('Error updating password:', updateError)
+      console.error('Error storing reset token:', updateError)
       return NextResponse.json(
-        { error: 'حدث خطأ أثناء تحديث كلمة المرور' },
+        { error: 'حدث خطأ أثناء معالجة طلب إعادة تعيين كلمة المرور' },
         { status: 500 }
       )
     }
 
-    return NextResponse.json({ message: 'تم تحديث كلمة المرور بنجاح' })
+    // Send reset email
+    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password/${resetToken}`
+    const mailOptions = {
+      from: process.env.SMTP_FROM,
+      to: email,
+      subject: 'إعادة تعيين كلمة المرور',
+      html: `
+        <div dir="rtl">
+          <h2>مرحباً ${user.fullName}،</h2>
+          <p>لقد تلقينا طلباً لإعادة تعيين كلمة المرور الخاصة بك.</p>
+          <p>انقر على الرابط أدناه لإعادة تعيين كلمة المرور الخاصة بك:</p>
+          <p><a href="${resetUrl}">${resetUrl}</a></p>
+          <p>ينتهي هذا الرابط خلال ساعة واحدة.</p>
+          <p>إذا لم تطلب إعادة تعيين كلمة المرور، يمكنك تجاهل هذا البريد الإلكتروني.</p>
+          <p>مع تحياتنا،<br>فريق التطبيق</p>
+        </div>
+      `,
+    }
+
+    await transporter.sendMail(mailOptions)
+
+    return NextResponse.json({
+      message: 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني',
+    })
   } catch (error) {
-    console.error('Reset password error:', error)
+    console.error('Error in password reset request:', error)
     return NextResponse.json(
-      { error: 'حدث خطأ أثناء إعادة تعيين كلمة المرور' },
+      { error: 'حدث خطأ أثناء معالجة طلب إعادة تعيين كلمة المرور' },
       { status: 500 }
     )
   }
