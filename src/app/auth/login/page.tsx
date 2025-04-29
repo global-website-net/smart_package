@@ -41,6 +41,11 @@ function LoginForm() {
     }
   }
 
+  const handleForgotPassword = (e: React.MouseEvent) => {
+    e.preventDefault()
+    router.push('/auth/reset-password')
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
@@ -107,12 +112,12 @@ function LoginForm() {
 
             <div className="flex items-center justify-end">
               <div className="text-sm">
-                <Link
-                  href="/auth/reset-password"
-                  className="font-medium text-green-600 hover:text-green-500"
+                <button
+                  onClick={handleForgotPassword}
+                  className="font-medium text-green-600 hover:text-green-500 focus:outline-none"
                 >
                   نسيت كلمة المرور؟
-                </Link>
+                </button>
               </div>
             </div>
 

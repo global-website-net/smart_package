@@ -76,7 +76,7 @@ export const authOptions: NextAuthOptions = {
           // Now get the user data from our database
           const { data: userData, error: userError } = await supabase
             .from('User')
-            .select('id, email, fullName, role')
+            .select('id, email, fullname, role')
             .eq('id', authData.user.id)
             .single()
 
@@ -88,7 +88,7 @@ export const authOptions: NextAuthOptions = {
           return {
             id: userData.id,
             email: userData.email,
-            name: userData.fullName,
+            name: userData.fullname,
             role: userData.role
           }
         } catch (error) {

@@ -10,7 +10,8 @@ interface PackageData {
   createdAt: string;
   updatedAt: string;
   user: {
-    fullName: string;
+    id: string;
+    fullname: string;
     email: string;
   };
   currentLocation?: string | null;
@@ -29,11 +30,11 @@ interface RawPackageData {
   price: number;
   created_at: string;
   updated_at: string;
-  users: {
+  User: {
     id: string;
+    fullname: string;
     email: string;
-    fullName: string;
-  }[];
+  };
 }
 
 export async function GET() {
@@ -50,19 +51,12 @@ export async function GET() {
     const { data: packages, error: packagesError } = await supabase
       .from('Package')
       .select(`
-        id,
-        trackingnumber,
-        statusid,
-        recipientname,
-        recipientphone,
-        recipientaddress,
-        weight,
-        dimensions,
-        description,
-        price,
-        created_at,
-        updated_at,
-        users:User!inner(id, email, fullName)
+        *,
+        User (
+          id,
+          fullname,
+          email
+        )
       `)
       .eq('userid', session.user.id)
       .order('created_at', { ascending: false })
@@ -82,12 +76,10 @@ export async function GET() {
       status: pkg.statusid,
       createdAt: pkg.created_at,
       updatedAt: pkg.updated_at,
-      user: pkg.users[0] ? {
-        fullName: pkg.users[0].fullName,
-        email: pkg.users[0].email
-      } : {
-        fullName: 'Unknown',
-        email: 'unknown@example.com'
+      user: {
+        id: pkg.User.id,
+        fullname: pkg.User.fullname,
+        email: pkg.User.email
       },
       currentLocation: null
     }))

@@ -1,22 +1,35 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]/auth'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 import bcrypt from 'bcryptjs'
+
+// Initialize Supabase client with service role key for admin access
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  throw new Error('Missing required Supabase environment variables')
+}
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+})
 
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session) {
+    if (!session?.user?.email) {
       return NextResponse.json(
         { error: 'غير مصرح لك' },
         { status: 401 }
       )
     }
 
-    const userId = session.user.id
-
-    // Get user profile using Supabase
+    // Get user profile using Supabase with email
     const { data: user, error: userError } = await supabase
       .from('User')
       .select(`
@@ -31,7 +44,7 @@ export async function GET(request: Request) {
         createdAt,
         updatedAt
       `)
-      .eq('id', userId)
+      .eq('email', session.user.email)
       .single()
 
     if (userError) {
