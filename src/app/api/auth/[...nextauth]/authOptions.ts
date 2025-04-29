@@ -57,22 +57,35 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
+          console.error('Missing credentials')
           throw new Error('البريد الإلكتروني وكلمة المرور مطلوبان')
         }
 
         try {
           console.log('Attempting to authenticate user:', credentials.email)
-          
-          // Get user from database using case-insensitive email comparison
-          const { data: user, error } = await supabase
+
+          // First try exact match
+          let { data: user, error } = await supabase
             .from('User')
             .select('*')
-            .ilike('email', credentials.email)
+            .eq('email', credentials.email)
             .single()
 
-          if (error) {
-            console.error('Database error during authentication:', error)
-            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
+          // If no exact match, try case-insensitive
+          if (!user || error) {
+            console.log('No exact match found, trying case-insensitive match')
+            const { data: ilikeUser, error: ilikeError } = await supabase
+              .from('User')
+              .select('*')
+              .ilike('email', credentials.email)
+              .single()
+
+            if (ilikeError) {
+              console.error('Database error during case-insensitive search:', ilikeError)
+              throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
+            }
+
+            user = ilikeUser
           }
 
           if (!user) {
@@ -99,6 +112,8 @@ export const authOptions: NextAuthOptions = {
           }
         } catch (error) {
           console.error('Authentication error:', error)
+          // Log the full error object for debugging
+          console.error('Full error object:', JSON.stringify(error, null, 2))
           throw error
         }
       }
@@ -130,5 +145,6 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt'
   },
-  secret: process.env.NEXTAUTH_SECRET
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: true // Enable debug mode for more detailed logs
 } 
