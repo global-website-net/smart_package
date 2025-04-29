@@ -76,14 +76,28 @@ export default function TrackingPackagesPage() {
 
           if (userError) {
             console.error('Error checking user role:', userError)
-            setError('حدث خطأ أثناء التحقق من الصلاحيات')
+            if (userError.code === 'PGRST116') {
+              setError('المستخدم غير موجود في قاعدة البيانات')
+              router.push('/auth/login') // Redirect to login if user not found
+              return
+            }
+            setError('حدث خطأ في قاعدة البيانات')
             return
           }
 
-          if (!user || (user.role !== 'ADMIN' && user.role !== 'OWNER')) {
+          if (!user) {
+            setError('المستخدم غير موجود في قاعدة البيانات')
+            router.push('/auth/login')
+            return
+          }
+
+          if (user.role !== 'ADMIN' && user.role !== 'OWNER') {
+            setError('غير مصرح لك بالوصول إلى هذه الصفحة')
             router.push('/')
             return
           }
+
+          setIsAdminOrOwner(true)
 
           // Fetch shops
           const shopsResponse = await fetch('/api/shops')
@@ -105,7 +119,6 @@ export default function TrackingPackagesPage() {
           }
           const packagesData = await packagesResponse.json()
           setPackages(packagesData)
-          setIsAdminOrOwner(true)
         } catch (error) {
           console.error('Error:', error)
           setError('حدث خطأ أثناء جلب البيانات')

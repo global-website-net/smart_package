@@ -104,7 +104,8 @@ export default function AccountPage() {
               town,
               phoneprefix,
               phonenumber,
-              created_at
+              created_at,
+              updated_at
             `)
             .eq('email', session.user.email)
             .single()

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Header from '@/app/components/Header'
+import PaymentWizard from '@/components/PaymentWizard'
 
 interface WalletTransaction {
   id: string
@@ -24,6 +25,7 @@ export default function WalletPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [walletData, setWalletData] = useState<WalletData>({ balance: 0, transactions: [] })
+  const [showPaymentWizard, setShowPaymentWizard] = useState(false)
 
   useEffect(() => {
     const fetchWalletData = async () => {
@@ -57,6 +59,24 @@ export default function WalletPage() {
 
     fetchWalletData()
   }, [status, router, session?.user?.role])
+
+  const handlePaymentSuccess = (amount: number) => {
+    setWalletData(prev => ({
+      ...prev,
+      balance: prev.balance + amount,
+      transactions: [
+        {
+          id: Date.now().toString(), // Temporary ID until page refresh
+          amount,
+          type: 'CREDIT',
+          reason: 'إيداع عبر البطاقة الائتمانية',
+          createdAt: new Date().toISOString()
+        },
+        ...prev.transactions
+      ]
+    }))
+    setShowPaymentWizard(false)
+  }
 
   if (loading) {
     return (
@@ -97,46 +117,91 @@ export default function WalletPage() {
           <h1 className="text-4xl font-bold text-center mb-8">المحفظة</h1>
 
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 className="text-2xl font-semibold mb-4">الرصيد الحالي</h2>
-            <p className="text-3xl font-bold text-green-600">
-              {walletData.balance.toFixed(2)} شيكل
-            </p>
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-semibold mb-4">الرصيد الحالي</h2>
+                <p className="text-3xl font-bold text-green-600">
+                  {walletData.balance.toFixed(2)} شيكل
+                </p>
+              </div>
+              <button
+                onClick={() => setShowPaymentWizard(true)}
+                className="bg-green-500 text-white px-6 py-3 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+              >
+                إضافة رصيد
+              </button>
+            </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-semibold mb-4">سجل المعاملات</h2>
-            {walletData.transactions.length === 0 ? (
-              <p className="text-gray-500 text-center">لا توجد معاملات</p>
-            ) : (
-              <div className="space-y-4">
-                {walletData.transactions.map((transaction) => (
-                  <div
-                    key={transaction.id}
-                    className="flex justify-between items-center p-4 border rounded-lg"
-                  >
-                    <div>
-                      <p className="font-medium">{transaction.reason}</p>
-                      <p className="text-sm text-gray-500">
-                        {new Date(transaction.createdAt).toLocaleDateString('ar-SA')}
-                      </p>
-                    </div>
-                    <p
-                      className={`font-bold ${
-                        transaction.type === 'CREDIT'
-                          ? 'text-green-600'
-                          : 'text-red-600'
-                      }`}
-                    >
-                      {transaction.type === 'CREDIT' ? '+' : '-'}
-                      {transaction.amount.toFixed(2)} شيكل
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <h2 className="text-xl font-semibold p-6 border-b">سجل المعاملات</h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                      التاريخ
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                      النوع
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                      المبلغ
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                      السبب
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {walletData.transactions.map((transaction) => (
+                    <tr key={transaction.id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {new Date(transaction.createdAt).toLocaleDateString('ar-SA', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: 'numeric',
+                          minute: 'numeric'
+                        })}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <span className={`px-2 py-1 rounded-full ${
+                          transaction.type === 'CREDIT' 
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {transaction.type === 'CREDIT' ? 'إيداع' : 'سحب'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {transaction.amount.toFixed(2)} شيكل
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {transaction.reason}
+                      </td>
+                    </tr>
+                  ))}
+                  {walletData.transactions.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
+                        لا توجد معاملات حتى الآن
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </main>
+
+      {showPaymentWizard && (
+        <PaymentWizard
+          onClose={() => setShowPaymentWizard(false)}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
     </div>
   )
 } 

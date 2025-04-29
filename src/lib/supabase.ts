@@ -8,6 +8,11 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: false,
     persistSession: false,
     detectSessionInUrl: false
+  },
+  global: {
+    headers: {
+      'Accept': 'application/json'
+    }
   }
 })
 
