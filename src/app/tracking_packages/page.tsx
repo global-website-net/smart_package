@@ -60,71 +60,43 @@ export default function TrackingPackagesPage() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      if (status === 'unauthenticated') {
+      if (status === 'loading') return
+
+      if (!session) {
         router.push('/auth/login')
         return
       }
 
-      if (status === 'authenticated' && session?.user?.email) {
-        try {
-          // Check if user is admin or owner
-          const { data: user, error: userError } = await supabase
-            .from('User')
-            .select('role')
-            .eq('email', session.user.email)
-            .single()
+      // Check if user is admin or owner
+      const userRole = session.user?.role
+      if (userRole !== 'ADMIN' && userRole !== 'OWNER') {
+        router.push('/auth/login')
+        return
+      }
 
-          if (userError) {
-            console.error('Error checking user role:', userError)
-            if (userError.code === 'PGRST116') {
-              setError('المستخدم غير موجود في قاعدة البيانات')
-              router.push('/auth/login') // Redirect to login if user not found
-              return
-            }
-            setError('حدث خطأ في قاعدة البيانات')
-            return
-          }
+      setIsAdminOrOwner(true)
 
-          if (!user) {
-            setError('المستخدم غير موجود في قاعدة البيانات')
-            router.push('/auth/login')
-            return
-          }
-
-          if (user.role !== 'ADMIN' && user.role !== 'OWNER') {
-            setError('غير مصرح لك بالوصول إلى هذه الصفحة')
-            router.push('/')
-            return
-          }
-
-          setIsAdminOrOwner(true)
-
-          // Fetch shops
-          const shopsResponse = await fetch('/api/shops')
-          if (!shopsResponse.ok) {
-            const errorData = await shopsResponse.json()
-            if (errorData.error?.includes('relation "public.Shop" does not exist')) {
-              setError('جدول المتاجر غير موجود. يرجى إنشاء الجدول أولاً.')
-              return
-            }
-            throw new Error('Failed to fetch shops')
-          }
-          const shopsData = await shopsResponse.json()
-          setShops(shopsData)
-
-          // Fetch packages
-          const packagesResponse = await fetch('/api/packages/all')
-          if (!packagesResponse.ok) {
-            throw new Error('Failed to fetch packages')
-          }
-          const packagesData = await packagesResponse.json()
-          setPackages(packagesData)
-        } catch (error) {
-          console.error('Error:', error)
-          setError('حدث خطأ أثناء جلب البيانات')
-        } finally {
-          setLoading(false)
+      try {
+        // Fetch shops
+        const shopsResponse = await fetch('/api/shops')
+        if (!shopsResponse.ok) {
+          throw new Error('Failed to fetch shops')
         }
+        const shopsData = await shopsResponse.json()
+        setShops(shopsData)
+
+        // Fetch packages
+        const packagesResponse = await fetch('/api/packages/all')
+        if (!packagesResponse.ok) {
+          throw new Error('Failed to fetch packages')
+        }
+        const packagesData = await packagesResponse.json()
+        setPackages(packagesData)
+      } catch (error) {
+        console.error('Error:', error)
+        setError('حدث خطأ أثناء جلب البيانات')
+      } finally {
+        setLoading(false)
       }
     }
 

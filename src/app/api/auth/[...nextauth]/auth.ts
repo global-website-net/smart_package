@@ -16,6 +16,13 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey)
 // Define UserRole type
 type UserRole = 'REGULAR' | 'SHOP' | 'ADMIN' | 'OWNER'
 
+interface DatabaseUser {
+  id: string
+  email: string
+  fullname: string
+  role: UserRole
+}
+
 declare module "next-auth" {
   interface Session {
     user: {
@@ -69,7 +76,7 @@ export const authOptions: NextAuthOptions = {
           // Now get the user data from our database
           const { data: userData, error: userError } = await supabase
             .from('User')
-            .select('id, email, fullName, role')
+            .select('id, email, fullname, role')
             .eq('id', authData.user.id)
             .single()
 
@@ -81,7 +88,7 @@ export const authOptions: NextAuthOptions = {
           return {
             id: userData.id,
             email: userData.email,
-            name: userData.fullName,
+            name: userData.fullname,
             role: userData.role
           }
         } catch (error) {

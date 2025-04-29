@@ -22,14 +22,14 @@ export async function GET(request: Request) {
       .select(`
         id,
         email,
-        fullname,
+        fullName,
         role,
         governorate,
         town,
-        phoneprefix,
-        phonenumber,
-        created_at,
-        updated_at
+        phonePrefix,
+        phoneNumber,
+        createdAt,
+        updatedAt
       `)
       .eq('id', userId)
       .single()
@@ -53,14 +53,14 @@ export async function GET(request: Request) {
     const transformedUser = {
       id: user.id,
       email: user.email,
-      fullName: user.fullname,
+      fullName: user.fullName,
       role: user.role,
       governorate: user.governorate,
       town: user.town,
-      phonePrefix: user.phoneprefix,
-      phoneNumber: user.phonenumber,
-      createdAt: user.created_at,
-      updatedAt: user.updated_at
+      phonePrefix: user.phonePrefix,
+      phoneNumber: user.phoneNumber,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
     }
 
     return NextResponse.json(transformedUser)
@@ -111,12 +111,12 @@ export async function PUT(request: Request) {
 
     // Prepare the update data
     const updateData: any = {
-      fullname: fullName,
+      fullName,
       governorate,
       town,
-      phoneprefix: phonePrefix,
-      phonenumber: phoneNumber,
-      updated_at: new Date().toISOString()
+      phonePrefix,
+      phoneNumber,
+      updatedAt: new Date().toISOString()
     }
 
     // Only include new password if provided
@@ -133,14 +133,14 @@ export async function PUT(request: Request) {
       .select(`
         id,
         email,
-        fullname,
+        fullName,
         role,
         governorate,
         town,
-        phoneprefix,
-        phonenumber,
-        created_at,
-        updated_at
+        phonePrefix,
+        phoneNumber,
+        createdAt,
+        updatedAt
       `)
       .single()
 
@@ -153,14 +153,14 @@ export async function PUT(request: Request) {
     const transformedUser = {
       id: updatedUser.id,
       email: updatedUser.email,
-      fullName: updatedUser.fullname,
+      fullName: updatedUser.fullName,
       role: updatedUser.role,
       governorate: updatedUser.governorate,
       town: updatedUser.town,
-      phonePrefix: updatedUser.phoneprefix,
-      phoneNumber: updatedUser.phonenumber,
-      createdAt: updatedUser.created_at,
-      updatedAt: updatedUser.updated_at
+      phonePrefix: updatedUser.phonePrefix,
+      phoneNumber: updatedUser.phoneNumber,
+      createdAt: updatedUser.createdAt,
+      updatedAt: updatedUser.updatedAt
     }
 
     return NextResponse.json(transformedUser)
