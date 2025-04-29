@@ -13,7 +13,8 @@ function LoginForm() {
   const [error, setError] = useState('')
   const router = useRouter()
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams?.get('callbackUrl') || '/'
+  const callbackUrl = searchParams?.get('callbackUrl')
+  const redirectUrl = callbackUrl && !callbackUrl.includes('/auth/reset-password') ? callbackUrl : '/'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -32,7 +33,7 @@ function LoginForm() {
         return
       }
 
-      router.push(callbackUrl)
+      router.push(redirectUrl)
     } catch (err) {
       setError('حدث خطأ أثناء تسجيل الدخول')
     } finally {
