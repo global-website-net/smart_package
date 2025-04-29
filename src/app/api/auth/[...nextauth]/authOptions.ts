@@ -1,7 +1,6 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
-import bcrypt from 'bcryptjs'
 import { createClient } from '@supabase/supabase-js'
 
 // Initialize Supabase client
@@ -56,35 +55,34 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          // Call the authenticate_user function
-          const { data, error } = await supabase
-            .rpc('authenticate_user', {
-              p_email: credentials.email
-            })
+          // First, authenticate with Supabase Auth
+          const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+            email: credentials.email,
+            password: credentials.password,
+          })
 
-          if (error) {
-            console.error('Database error:', error)
+          if (authError || !authData.user) {
+            console.error('Supabase Auth error:', authError)
+            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
+          }
+
+          // Now get the user data from our database
+          const { data: userData, error: userError } = await supabase
+            .from('User')
+            .select('id, email, fullName, role')
+            .eq('id', authData.user.id)
+            .single()
+
+          if (userError || !userData) {
+            console.error('Database error:', userError)
             throw new Error('حدث خطأ أثناء محاولة تسجيل الدخول')
           }
 
-          if (!data || data.length === 0) {
-            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
-          }
-
-          const user = data[0]
-
-          // Verify password
-          const isValid = await bcrypt.compare(credentials.password, user.password)
-          if (!isValid) {
-            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
-          }
-
-          // Return user data without sensitive information
           return {
-            id: user.id,
-            email: user.email,
-            name: user.fullName,
-            role: user.role
+            id: userData.id,
+            email: userData.email,
+            name: userData.fullName,
+            role: userData.role
           }
         } catch (error) {
           console.error('Authentication error:', error)

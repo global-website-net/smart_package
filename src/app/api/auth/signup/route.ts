@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import bcrypt from 'bcryptjs'
 import { createClient } from '@supabase/supabase-js'
 import { UserRole } from '@prisma/client'
 
@@ -41,9 +40,6 @@ export async function POST(request: Request) {
       )
     }
 
-    // Hash password for database storage
-    const hashedPassword = await bcrypt.hash(password, 10)
-
     // Create user in Supabase auth first
     const { data: authUser, error: createAuthError } = await supabaseAdmin.auth.admin.createUser({
       email,
@@ -74,7 +70,6 @@ export async function POST(request: Request) {
         .insert({
           id: authUser.user.id,
           email,
-          password: hashedPassword,
           fullName,
           role: UserRole.REGULAR,
           governorate,
@@ -96,12 +91,10 @@ export async function POST(request: Request) {
         )
       }
 
-      // Return success response without password
-      const { password: _, ...userWithoutPassword } = dbUser
       return NextResponse.json({
         success: true,
         message: 'تم إنشاء الحساب بنجاح',
-        user: userWithoutPassword
+        user: dbUser
       })
     } catch (dbError) {
       // If database user creation fails, delete the auth user
