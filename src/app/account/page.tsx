@@ -144,7 +144,7 @@ export default function AccountPage() {
     if (session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') {
       setIsAdmin(true)
     }
-  }, [session, status, router])
+  }, [status, router])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target

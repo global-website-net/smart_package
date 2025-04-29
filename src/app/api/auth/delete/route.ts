@@ -1,7 +1,19 @@
+import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]/auth'
-import { supabase } from '@/lib/supabase'
+
+// Create a Supabase client with service role key for admin operations
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+)
 
 export async function DELETE() {
   try {
@@ -10,8 +22,8 @@ export async function DELETE() {
       return NextResponse.json({ error: 'غير مصرح لك' }, { status: 401 })
     }
 
-    // First, delete the user from the database
-    const { error: dbError } = await supabase
+    // First, delete the user from the database using admin client
+    const { error: dbError } = await supabaseAdmin
       .from('User')
       .delete()
       .eq('email', session.user.email)
@@ -24,8 +36,8 @@ export async function DELETE() {
       )
     }
 
-    // Then, delete the user from Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.admin.deleteUser(
+    // Delete the user's auth account using admin client
+    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(
       session.user.id
     )
 

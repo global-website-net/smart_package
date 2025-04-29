@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase'
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
-    if (!session) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'غير مصرح لك' }, { status: 401 })
     }
 
@@ -14,7 +14,7 @@ export async function GET() {
     const { data: userData, error: userError } = await supabase
       .from('User')
       .select('role')
-      .eq('id', session.user.id)
+      .eq('email', session.user.email)
       .single()
 
     if (userError) {

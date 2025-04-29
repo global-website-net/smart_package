@@ -73,12 +73,12 @@ export default function FAQPage() {
       <main className="p-4 pt-24">
         <div className="max-w-4xl mx-auto">
           {/* Title */}
-          <div className="container mx-auto px-4 py-8">
-            <div className="flex flex-col items-center justify-center mb-8">
-              <div className="relative">
-                <h1 className="text-4xl font-bold text-center mb-2">الأسئلة المتكررة</h1>
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-green-500"></div>
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-green-500 rotate-45"></div>
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold mb-6">الأسئلة المتكررة</h1>
+            <div className="flex justify-center items-center">
+              <div className="relative w-32 sm:w-48 md:w-64">
+                <div className="w-full h-0.5 bg-green-500"></div>
+                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
               </div>
             </div>
           </div>

@@ -90,7 +90,7 @@ export async function PUT(request: Request) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'غير مصرح لك' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -104,20 +104,22 @@ export async function PUT(request: Request) {
       newPassword 
     } = body
 
-    // First verify the current password if provided
+    // First get the user to verify they exist and get their current password
+    const { data: existingUser, error: userError } = await supabase
+      .from('User')
+      .select('*')
+      .eq('email', session.user.email)
+      .single()
+
+    if (userError || !existingUser) {
+      console.error('Error fetching user:', userError)
+      return NextResponse.json({ error: 'المستخدم غير موجود' }, { status: 404 })
+    }
+
+    // Verify current password
     if (currentPassword) {
-      const { data: user, error: userError } = await supabase
-        .from('User')
-        .select('password')
-        .eq('email', session.user.email)
-        .single()
-
-      if (userError || !user || !user.password) {
-        return NextResponse.json({ error: 'User not found or invalid password' }, { status: 404 })
-      }
-
       try {
-        const isValid = await bcrypt.compare(currentPassword, user.password)
+        const isValid = await bcrypt.compare(currentPassword, existingUser.password)
         if (!isValid) {
           return NextResponse.json({ error: 'كلمة المرور الحالية غير صحيحة' }, { status: 400 })
         }
@@ -130,11 +132,15 @@ export async function PUT(request: Request) {
     // Prepare the update data
     const updateData: any = {
       fullName,
-      governorate,
-      town,
       phonePrefix,
       phoneNumber,
       updatedAt: new Date().toISOString()
+    }
+
+    // Only include governorate and town for regular users
+    if (existingUser.role === 'REGULAR') {
+      updateData.governorate = governorate
+      updateData.town = town
     }
 
     // Only include new password if provided
@@ -164,7 +170,7 @@ export async function PUT(request: Request) {
 
     if (updateError) {
       console.error('Error updating user:', updateError)
-      return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 })
+      return NextResponse.json({ error: 'حدث خطأ أثناء تحديث الملف الشخصي' }, { status: 500 })
     }
 
     // Transform the response to match the frontend's expected format
@@ -185,7 +191,7 @@ export async function PUT(request: Request) {
   } catch (error) {
     console.error('Error updating user profile:', error)
     return NextResponse.json(
-      { error: 'Failed to update profile' },
+      { error: 'حدث خطأ أثناء تحديث الملف الشخصي' },
       { status: 500 }
     )
   }

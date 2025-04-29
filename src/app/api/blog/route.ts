@@ -70,38 +70,56 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session) {
+    if (!session?.user?.email) {
       return NextResponse.json(
         { error: 'غير مصرح لك' },
         { status: 401 }
       )
     }
 
-    const body = await request.json()
-    const { title, content } = body
+    // Check if user is admin or owner from database
+    const { data: userData, error: userError } = await supabase
+      .from('User')
+      .select('id, role')
+      .eq('email', session.user.email)
+      .single()
 
-    // Check if user is admin or owner
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER') {
+    if (userError) {
+      console.error('Error fetching user role:', userError)
+      return NextResponse.json(
+        { error: 'حدث خطأ في التحقق من الصلاحيات' },
+        { status: 500 }
+      )
+    }
+
+    if (userData.role !== 'ADMIN' && userData.role !== 'OWNER') {
       return NextResponse.json(
         { error: 'غير مصرح لك - فقط المدير والمالك يمكنهم إنشاء المدونات' },
         { status: 403 }
       )
     }
 
+    const body = await request.json()
+    const { title, content } = body
+
     const { data: blog, error } = await supabase
       .from('BlogPost')
       .insert({
         title,
         content,
-        user_id: session.user.id,
-        created_at: new Date(),
-        updated_at: new Date()
+        authorId: userData.id, // Use the ID from the database query
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       })
       .select(`
-        *,
-        User:user_id (
-          fullName,
-          email
+        id,
+        title,
+        content,
+        createdAt,
+        authorId,
+        User!authorId (
+          id,
+          fullName
         )
       `)
       .single()
@@ -114,10 +132,22 @@ export async function POST(request: Request) {
       )
     }
 
-    return NextResponse.json({
-      ...blog,
-      author: blog.User
-    })
+    // Transform the response to match the expected format
+    const formattedBlog = {
+      id: blog.id,
+      title: blog.title,
+      content: blog.content,
+      createdAt: blog.createdAt,
+      author: blog.User ? {
+        id: blog.User.id,
+        name: blog.User.fullName
+      } : {
+        id: 'unknown',
+        name: 'مجهول'
+      }
+    }
+
+    return NextResponse.json(formattedBlog)
   } catch (error) {
     console.error('Error creating blog:', error)
     return NextResponse.json(
