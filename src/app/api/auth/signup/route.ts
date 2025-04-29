@@ -2,9 +2,8 @@ import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { createClient } from '@supabase/supabase-js'
 import { UserRole } from '@prisma/client'
-import { db } from '@/lib/db'
 
-// Initialize Supabase client
+// Initialize Supabase admin client with service role key
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
@@ -12,7 +11,7 @@ if (!supabaseUrl || !supabaseServiceKey) {
   throw new Error('Missing required Supabase environment variables')
 }
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false
@@ -32,7 +31,7 @@ export async function POST(request: Request) {
     }
 
     // Check if user exists in Supabase auth
-    const { data: users, error: listError } = await supabase.auth.admin.listUsers()
+    const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers()
     const existingAuthUser = users?.users?.find(user => user.email === email)
 
     if (existingAuthUser) {
@@ -46,7 +45,7 @@ export async function POST(request: Request) {
     const hashedPassword = await bcrypt.hash(password, 10)
 
     // Create user in Supabase auth first
-    const { data: authUser, error: createAuthError } = await supabase.auth.admin.createUser({
+    const { data: authUser, error: createAuthError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
@@ -69,17 +68,32 @@ export async function POST(request: Request) {
     }
 
     try {
-      // Create user in database
-      const dbUser = await db.createUser({
-        email,
-        password: hashedPassword,
-        fullName,
-        governorate,
-        town,
-        phonePrefix,
-        phoneNumber,
-        role: UserRole.REGULAR
-      })
+      // Create user in database using the admin client
+      const { data: dbUser, error: dbError } = await supabaseAdmin
+        .from('User')
+        .insert({
+          id: authUser.user.id,
+          email,
+          password: hashedPassword,
+          fullName,
+          role: UserRole.REGULAR,
+          governorate,
+          town,
+          phonePrefix,
+          phoneNumber
+        })
+        .select()
+        .single()
+
+      if (dbError) {
+        // If database user creation fails, delete the auth user
+        await supabaseAdmin.auth.admin.deleteUser(authUser.user.id)
+        console.error('Error creating database user:', dbError)
+        return NextResponse.json(
+          { error: 'حدث خطأ أثناء إنشاء الحساب في قاعدة البيانات' },
+          { status: 500 }
+        )
+      }
 
       // Return success response without password
       const { password: _, ...userWithoutPassword } = dbUser
@@ -90,7 +104,7 @@ export async function POST(request: Request) {
       })
     } catch (dbError) {
       // If database user creation fails, delete the auth user
-      await supabase.auth.admin.deleteUser(authUser.user.id)
+      await supabaseAdmin.auth.admin.deleteUser(authUser.user.id)
       console.error('Error creating database user:', dbError)
       return NextResponse.json(
         { error: 'حدث خطأ أثناء إنشاء الحساب في قاعدة البيانات' },
