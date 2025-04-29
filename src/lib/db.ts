@@ -13,8 +13,11 @@ export const db = {
       .single()
     
     if (error) {
+      if (error.code === 'PGRST116') {
+        return false
+      }
       console.error('Error checking user existence:', error)
-      return false
+      throw error
     }
     
     return !!data
@@ -44,9 +47,7 @@ export const db = {
         governorate: userData.governorate,
         town: userData.town,
         phoneprefix: userData.phonePrefix,
-        phonenumber: userData.phoneNumber,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        phonenumber: userData.phoneNumber
       })
       .select()
       .single()
