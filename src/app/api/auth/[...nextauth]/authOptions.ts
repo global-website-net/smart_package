@@ -4,11 +4,20 @@ import GoogleProvider from 'next-auth/providers/google'
 import bcrypt from 'bcryptjs'
 import { createClient } from '@supabase/supabase-js'
 
-// Initialize Supabase client
+// Initialize Supabase client with service role for authentication
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey)
+if (!supabaseUrl || !supabaseServiceKey) {
+  throw new Error('Missing required Supabase environment variables')
+}
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+})
 
 // Define UserRole type
 type UserRole = 'REGULAR' | 'SHOP' | 'ADMIN' | 'OWNER'
@@ -52,22 +61,35 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          // Get user from database
+          console.log('Attempting to authenticate user:', credentials.email)
+          
+          // Get user from database using case-insensitive email comparison
           const { data: user, error } = await supabase
             .from('User')
             .select('*')
-            .eq('email', credentials.email)
+            .ilike('email', credentials.email)
             .single()
 
-          if (error || !user) {
+          if (error) {
+            console.error('Database error during authentication:', error)
             throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
           }
+
+          if (!user) {
+            console.error('No user found with email:', credentials.email)
+            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
+          }
+
+          console.log('User found, verifying password')
 
           // Verify password
           const isValid = await bcrypt.compare(credentials.password, user.password)
           if (!isValid) {
+            console.error('Invalid password for user:', credentials.email)
             throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
           }
+
+          console.log('Password verified, authentication successful')
 
           return {
             id: user.id,
