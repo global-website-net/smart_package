@@ -89,42 +89,34 @@ export default function AccountPage() {
     if (status === 'authenticated' && session?.user?.email) {
       const fetchProfile = async () => {
         try {
-          // First try to get user data from the User table
-          const { data: userData, error } = await supabase
+          setIsLoading(true)
+          setError('')
+
+          // Get user data from the User table
+          const { data: userData, error: userError } = await supabase
             .from('User')
-            .select('*')
+            .select(`
+              id,
+              email,
+              fullname,
+              role,
+              governorate,
+              town,
+              phoneprefix,
+              phonenumber,
+              created_at
+            `)
             .eq('email', session.user.email)
             .single()
 
-          if (error) {
-            console.error('Error fetching from User table:', error)
-            // If database fetch fails, use session metadata
-            const extendedUser = session.user as ExtendedSessionUser
-            if (extendedUser.user_metadata) {
-              setProfile({
-                id: extendedUser.id,
-                email: extendedUser.email,
-                fullName: extendedUser.user_metadata.full_name || '',
-                role: extendedUser.role,
-                governorate: extendedUser.user_metadata.governorate || '',
-                town: extendedUser.user_metadata.town || '',
-                phonePrefix: extendedUser.user_metadata.phone_prefix || '',
-                phoneNumber: extendedUser.user_metadata.phone_number || '',
-                createdAt: new Date().toISOString()
-              })
-              setFormData({
-                fullName: extendedUser.user_metadata.full_name || '',
-                governorate: extendedUser.user_metadata.governorate || '',
-                town: extendedUser.user_metadata.town || '',
-                phonePrefix: extendedUser.user_metadata.phone_prefix || '',
-                phoneNumber: extendedUser.user_metadata.phone_number || '',
-                currentPassword: '',
-                newPassword: '',
-                confirmPassword: ''
-              })
-            }
-          } else if (userData) {
-            // If database fetch succeeds, use that data
+          if (userError) {
+            console.error('Error fetching user data:', userError)
+            setError('حدث خطأ أثناء تحميل بيانات الملف الشخصي')
+            return
+          }
+
+          if (userData) {
+            // Update profile state
             setProfile({
               id: userData.id,
               email: userData.email,
@@ -136,7 +128,10 @@ export default function AccountPage() {
               phoneNumber: userData.phonenumber || '',
               createdAt: userData.created_at
             })
-            setFormData({
+
+            // Update form data
+            setFormData(prev => ({
+              ...prev,
               fullName: userData.fullname || '',
               governorate: userData.governorate || '',
               town: userData.town || '',
@@ -145,7 +140,9 @@ export default function AccountPage() {
               currentPassword: '',
               newPassword: '',
               confirmPassword: ''
-            })
+            }))
+          } else {
+            setError('لم يتم العثور على بيانات المستخدم')
           }
         } catch (err) {
           console.error('Error in fetchProfile:', err)

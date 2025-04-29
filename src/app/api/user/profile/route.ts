@@ -19,7 +19,18 @@ export async function GET(request: Request) {
     // Get user profile using Supabase
     const { data: user, error: userError } = await supabase
       .from('User')
-      .select('*')
+      .select(`
+        id,
+        email,
+        fullname,
+        role,
+        governorate,
+        town,
+        phoneprefix,
+        phonenumber,
+        created_at,
+        updated_at
+      `)
       .eq('id', userId)
       .single()
 
@@ -38,10 +49,21 @@ export async function GET(request: Request) {
       )
     }
 
-    // Remove sensitive data
-    const { password, ...userWithoutPassword } = user
+    // Transform the response to match the frontend's expected format
+    const transformedUser = {
+      id: user.id,
+      email: user.email,
+      fullName: user.fullname,
+      role: user.role,
+      governorate: user.governorate,
+      town: user.town,
+      phonePrefix: user.phoneprefix,
+      phoneNumber: user.phonenumber,
+      createdAt: user.created_at,
+      updatedAt: user.updated_at
+    }
 
-    return NextResponse.json(userWithoutPassword)
+    return NextResponse.json(transformedUser)
   } catch (error) {
     console.error('Error fetching user profile:', error)
     return NextResponse.json(
@@ -89,11 +111,12 @@ export async function PUT(request: Request) {
 
     // Prepare the update data
     const updateData: any = {
-      fullName,
+      fullname: fullName,
       governorate,
       town,
-      phonePrefix,
-      phoneNumber,
+      phoneprefix: phonePrefix,
+      phonenumber: phoneNumber,
+      updated_at: new Date().toISOString()
     }
 
     // Only include new password if provided
@@ -107,7 +130,18 @@ export async function PUT(request: Request) {
       .from('User')
       .update(updateData)
       .eq('email', session.user.email)
-      .select()
+      .select(`
+        id,
+        email,
+        fullname,
+        role,
+        governorate,
+        town,
+        phoneprefix,
+        phonenumber,
+        created_at,
+        updated_at
+      `)
       .single()
 
     if (updateError) {
@@ -115,7 +149,21 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 })
     }
 
-    return NextResponse.json(updatedUser)
+    // Transform the response to match the frontend's expected format
+    const transformedUser = {
+      id: updatedUser.id,
+      email: updatedUser.email,
+      fullName: updatedUser.fullname,
+      role: updatedUser.role,
+      governorate: updatedUser.governorate,
+      town: updatedUser.town,
+      phonePrefix: updatedUser.phoneprefix,
+      phoneNumber: updatedUser.phonenumber,
+      createdAt: updatedUser.created_at,
+      updatedAt: updatedUser.updated_at
+    }
+
+    return NextResponse.json(transformedUser)
   } catch (error) {
     console.error('Error updating user profile:', error)
     return NextResponse.json(

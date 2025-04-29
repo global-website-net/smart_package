@@ -5,13 +5,18 @@ import { createClient } from '@supabase/supabase-js'
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
-if (!supabaseUrl || !supabaseAnonKey) {
+if (!supabaseUrl || !supabaseServiceKey) {
   throw new Error('Missing required Supabase environment variables')
 }
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey)
+const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+})
 
 // Define UserRole type
 type UserRole = 'REGULAR' | 'SHOP' | 'ADMIN' | 'OWNER'
@@ -51,20 +56,34 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
+          console.log('Missing credentials')
           throw new Error('البريد الإلكتروني وكلمة المرور مطلوبان')
         }
 
         try {
+          console.log('Attempting to authenticate:', credentials.email)
+          
           // First, authenticate with Supabase Auth
           const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
             email: credentials.email,
             password: credentials.password,
           })
 
-          if (authError || !authData.user) {
-            console.error('Supabase Auth error:', authError)
+          if (authError) {
+            console.error('Detailed Supabase Auth error:', {
+              message: authError.message,
+              status: authError.status,
+              name: authError.name
+            })
             throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
           }
+
+          if (!authData.user) {
+            console.error('No user data returned from Supabase Auth')
+            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
+          }
+
+          console.log('Supabase Auth successful, user ID:', authData.user.id)
 
           // Now get the user data from our database
           const { data: userData, error: userError } = await supabase
@@ -73,10 +92,26 @@ export const authOptions: NextAuthOptions = {
             .eq('id', authData.user.id)
             .single()
 
-          if (userError || !userData) {
-            console.error('Database error:', userError)
+          if (userError) {
+            console.error('Database error details:', {
+              message: userError.message,
+              code: userError.code,
+              details: userError.details,
+              hint: userError.hint
+            })
             throw new Error('حدث خطأ أثناء محاولة تسجيل الدخول')
           }
+
+          if (!userData) {
+            console.error('No matching user found in database for ID:', authData.user.id)
+            throw new Error('حدث خطأ أثناء محاولة تسجيل الدخول')
+          }
+
+          console.log('Successfully found user in database:', {
+            id: userData.id,
+            email: userData.email,
+            role: userData.role
+          })
 
           return {
             id: userData.id,

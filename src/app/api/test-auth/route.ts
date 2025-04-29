@@ -24,40 +24,35 @@ export async function GET(request: Request) {
 
     console.log('Testing auth for email:', email)
 
-    // Try both exact and case-insensitive matches
-    const { data: exactMatch, error: exactError } = await supabase
+    // Check auth user
+    const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers()
+    const authUser = authUsers?.users?.find(u => u.email === email)
+
+    // Check database user
+    const { data: dbUser, error: dbError } = await supabase
       .from('User')
-      .select('id, email, fullName, role')
+      .select('*')
       .eq('email', email)
       .single()
 
-    const { data: ilikeMatch, error: ilikeError } = await supabase
-      .from('User')
-      .select('id, email, fullName, role')
-      .ilike('email', email)
-      .single()
-
-    // Get all RLS policies
-    const { data: policies, error: policyError } = await supabase
-      .from('pg_policies')
-      .select('*')
-      .eq('tablename', 'User')
-
     return NextResponse.json({
-      exactMatch: {
-        found: !!exactMatch,
-        error: exactError?.message,
-        data: exactMatch
+      auth: {
+        exists: !!authUser,
+        user: authUser ? {
+          id: authUser.id,
+          email: authUser.email,
+          emailConfirmed: authUser.email_confirmed_at,
+          lastSignIn: authUser.last_sign_in_at,
+          metadata: authUser.user_metadata
+        } : null,
+        error: authError?.message
       },
-      ilikeMatch: {
-        found: !!ilikeMatch,
-        error: ilikeError?.message,
-        data: ilikeMatch
+      database: {
+        exists: !!dbUser,
+        user: dbUser,
+        error: dbError?.message
       },
-      policies: {
-        error: policyError?.message,
-        data: policies
-      }
+      ids_match: authUser && dbUser ? authUser.id === dbUser.id : false
     })
   } catch (error) {
     console.error('Test auth error:', error)
