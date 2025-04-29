@@ -4,20 +4,15 @@ import GoogleProvider from 'next-auth/providers/google'
 import bcrypt from 'bcryptjs'
 import { createClient } from '@supabase/supabase-js'
 
-// Initialize Supabase client with service role for authentication
+// Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-if (!supabaseUrl || !supabaseServiceKey) {
+if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing required Supabase environment variables')
 }
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-})
+const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Define UserRole type
 type UserRole = 'REGULAR' | 'SHOP' | 'ADMIN' | 'OWNER'
@@ -57,53 +52,44 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          console.error('Missing credentials')
           throw new Error('البريد الإلكتروني وكلمة المرور مطلوبان')
         }
 
         try {
-          console.log('Attempting to authenticate user:', credentials.email)
-
-          // First try exact match
-          let { data: user, error } = await supabase
+          // Try to find the user with a case-insensitive email match
+          const { data: users, error: queryError } = await supabase
             .from('User')
-            .select('*')
-            .eq('email', credentials.email)
-            .single()
+            .select('id, email, password, fullName, role')
+            .ilike('email', credentials.email)
 
-          // If no exact match, try case-insensitive
-          if (!user || error) {
-            console.log('No exact match found, trying case-insensitive match')
-            const { data: ilikeUser, error: ilikeError } = await supabase
-              .from('User')
-              .select('*')
-              .ilike('email', credentials.email)
-              .single()
-
-            if (ilikeError) {
-              console.error('Database error during case-insensitive search:', ilikeError)
-              throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
-            }
-
-            user = ilikeUser
+          if (queryError) {
+            console.error('Database query error:', queryError)
+            throw new Error('حدث خطأ أثناء محاولة تسجيل الدخول')
           }
 
-          if (!user) {
-            console.error('No user found with email:', credentials.email)
+          // No user found
+          if (!users || users.length === 0) {
+            console.log('No user found with email:', credentials.email)
             throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
           }
 
-          console.log('User found, verifying password')
+          // Find exact email match (case-insensitive)
+          const user = users.find(u => u.email.toLowerCase() === credentials.email.toLowerCase())
+          if (!user) {
+            console.log('No exact email match found')
+            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
+          }
 
           // Verify password
           const isValid = await bcrypt.compare(credentials.password, user.password)
           if (!isValid) {
-            console.error('Invalid password for user:', credentials.email)
+            console.log('Invalid password for user:', credentials.email)
             throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
           }
 
-          console.log('Password verified, authentication successful')
+          console.log('Authentication successful for user:', credentials.email)
 
+          // Return user data without sensitive information
           return {
             id: user.id,
             email: user.email,
@@ -112,8 +98,6 @@ export const authOptions: NextAuthOptions = {
           }
         } catch (error) {
           console.error('Authentication error:', error)
-          // Log the full error object for debugging
-          console.error('Full error object:', JSON.stringify(error, null, 2))
           throw error
         }
       }
@@ -146,5 +130,5 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt'
   },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: true // Enable debug mode for more detailed logs
+  debug: true
 } 
