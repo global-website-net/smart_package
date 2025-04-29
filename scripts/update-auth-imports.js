@@ -1,6 +1,16 @@
 const fs = require('fs').promises
 const path = require('path')
 
+function calculateRelativePath(fromFile) {
+  // Count the number of directories up from the current file to src/app/api
+  const segments = fromFile.split('/')
+  const apiIndex = segments.indexOf('api')
+  const depth = segments.length - apiIndex - 2 // -2 for 'api' and the file itself
+  
+  // Create the relative path
+  return '../'.repeat(depth) + 'auth/[...nextauth]/auth'
+}
+
 async function updateImports() {
   const files = [
     'src/app/api/user/profile/route.ts',
@@ -23,12 +33,18 @@ async function updateImports() {
   for (const file of files) {
     try {
       const content = await fs.readFile(file, 'utf8')
+      const relativePath = calculateRelativePath(file)
+      
       const updatedContent = content.replace(
+        /import\s*{\s*authOptions\s*}\s*from\s*['"](\.\.\/)*auth\/\[\.\.\.nextauth\]\/auth['"]/g,
+        `import { authOptions } from '${relativePath}'`
+      ).replace(
         /import\s*{\s*authOptions\s*}\s*from\s*['"]@\/lib\/auth['"]/g,
-        `import { authOptions } from '../auth/[...nextauth]/auth'`
+        `import { authOptions } from '${relativePath}'`
       )
+      
       await fs.writeFile(file, updatedContent, 'utf8')
-      console.log(`Updated ${file}`)
+      console.log(`Updated ${file} with relative path ${relativePath}`)
     } catch (error) {
       console.error(`Error updating ${file}:`, error)
     }
