@@ -150,11 +150,14 @@ export default function BlogPage() {
       <main className="p-4 pt-24">
         <div className="max-w-4xl mx-auto">
           <div className="flex flex-col items-center mb-8">
-            <h1 className="text-3xl font-bold mb-4">المدونة</h1>
+            <div className="relative">
+              <h1 className="text-3xl font-bold mb-4">المدونة</h1>
+              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1/2 h-1 bg-green-500"></div>
+            </div>
             {session?.user?.role === 'ADMIN' && (
               <Link
                 href="/blog/create"
-                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                className="mt-6 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
               >
                 إضافة مقال جديد
               </Link>

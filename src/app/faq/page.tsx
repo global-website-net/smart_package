@@ -11,7 +11,7 @@ interface FAQItem {
 }
 
 export default function FAQPage() {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null)
+  const [activeIndices, setActiveIndices] = useState<number[]>([])
 
   const faqs: FAQItem[] = [
     {
@@ -57,7 +57,13 @@ export default function FAQPage() {
   ]
 
   const toggleFAQ = (index: number) => {
-    setActiveIndex(activeIndex === index ? null : index)
+    setActiveIndices(prevIndices => {
+      if (prevIndices.includes(index)) {
+        return prevIndices.filter(i => i !== index)
+      } else {
+        return [...prevIndices, index]
+      }
+    })
   }
 
   return (
@@ -86,7 +92,7 @@ export default function FAQPage() {
                 >
                   <span className="text-lg font-medium">{faq.question}</span>
                   <svg
-                    className={`w-5 h-5 transform transition-transform ${activeIndex === index ? 'rotate-180' : ''}`}
+                    className={`w-5 h-5 transform transition-transform ${activeIndices.includes(index) ? 'rotate-180' : ''}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -94,7 +100,7 @@ export default function FAQPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
-                {activeIndex === index && (
+                {activeIndices.includes(index) && (
                   <div className="px-6 py-4 bg-gray-50">
                     <p className="text-gray-700">{faq.answer}</p>
                   </div>

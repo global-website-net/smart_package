@@ -112,13 +112,18 @@ export async function PUT(request: Request) {
         .eq('email', session.user.email)
         .single()
 
-      if (userError || !user) {
-        return NextResponse.json({ error: 'User not found' }, { status: 404 })
+      if (userError || !user || !user.password) {
+        return NextResponse.json({ error: 'User not found or invalid password' }, { status: 404 })
       }
 
-      const isValid = await bcrypt.compare(currentPassword, user.password)
-      if (!isValid) {
-        return NextResponse.json({ error: 'كلمة المرور الحالية غير صحيحة' }, { status: 400 })
+      try {
+        const isValid = await bcrypt.compare(currentPassword, user.password)
+        if (!isValid) {
+          return NextResponse.json({ error: 'كلمة المرور الحالية غير صحيحة' }, { status: 400 })
+        }
+      } catch (error) {
+        console.error('Password comparison error:', error)
+        return NextResponse.json({ error: 'حدث خطأ في التحقق من كلمة المرور' }, { status: 500 })
       }
     }
 

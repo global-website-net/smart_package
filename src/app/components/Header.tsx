@@ -68,13 +68,17 @@ export default function Header() {
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex justify-between items-center h-20">
           {/* Left Side - Logo */}
-          <div className="flex items-center space-x-16 rtl:space-x-reverse">
+          <div className="flex items-center">
             <Link href="/" className="text-xl font-bold">
               SMART PACKAGE
             </Link>
+          </div>
+
+          {/* Center - Pricing Button */}
+          <div className="hidden md:flex items-center justify-center flex-1">
             <Link 
               href="/packages" 
-              className="text-white hover:text-green-500 transition-colors text-sm mr-10"
+              className="text-white hover:text-green-500 transition-colors text-lg font-semibold mx-4 border-b-2 border-transparent hover:border-green-500"
             >
               أسعارنا
             </Link>

@@ -44,8 +44,15 @@ export async function GET() {
       )
     }
 
-    // Check if user is admin
-    if (session.user.role !== 'ADMIN') {
+    // Check if user is admin or owner
+    if (!session.user.role) {
+      return NextResponse.json(
+        { error: 'لم يتم العثور على صلاحيات المستخدم' },
+        { status: 403 }
+      )
+    }
+
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER') {
       return NextResponse.json(
         { error: 'غير مصرح لك بالوصول' },
         { status: 403 }

@@ -19,18 +19,11 @@ interface PackageData {
 
 interface RawPackageData {
   id: string;
-  trackingnumber: string;
-  statusid: string;
-  recipientname: string;
-  recipientphone: string;
-  recipientaddress: string;
-  weight: number;
-  dimensions: string | null;
-  description: string | null;
-  price: number;
-  created_at: string;
-  updated_at: string;
-  User: {
+  trackingNumber: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  user: {
     id: string;
     fullname: string;
     email: string;
@@ -52,14 +45,14 @@ export async function GET() {
       .from('Package')
       .select(`
         *,
-        User (
+        user:userId (
           id,
-          fullname,
+          fullName,
           email
         )
       `)
-      .eq('userid', session.user.id)
-      .order('created_at', { ascending: false })
+      .eq('userId', session.user.id)
+      .order('createdAt', { ascending: false })
 
     if (packagesError) {
       console.error('Error fetching packages:', packagesError)
@@ -72,15 +65,11 @@ export async function GET() {
     // Transform the data to match the expected format
     const transformedPackages = (packages as RawPackageData[]).map(pkg => ({
       id: pkg.id,
-      trackingNumber: pkg.trackingnumber,
-      status: pkg.statusid,
-      createdAt: pkg.created_at,
-      updatedAt: pkg.updated_at,
-      user: {
-        id: pkg.User.id,
-        fullname: pkg.User.fullname,
-        email: pkg.User.email
-      },
+      trackingNumber: pkg.trackingNumber,
+      status: pkg.status,
+      createdAt: pkg.createdAt,
+      updatedAt: pkg.updatedAt,
+      user: pkg.user,
       currentLocation: null
     }))
 

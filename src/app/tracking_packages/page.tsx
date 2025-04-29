@@ -67,16 +67,20 @@ export default function TrackingPackagesPage() {
         return
       }
 
-      // Check if user is admin or owner
-      const userRole = session.user?.role
-      if (userRole !== 'ADMIN' && userRole !== 'OWNER') {
-        router.push('/auth/login')
-        return
-      }
-
-      setIsAdminOrOwner(true)
-
       try {
+        // Check if user is admin or owner
+        const userRole = session.user?.role
+        if (!userRole) {
+          throw new Error('User role not found')
+        }
+
+        if (userRole !== 'ADMIN' && userRole !== 'OWNER') {
+          router.push('/')
+          return
+        }
+
+        setIsAdminOrOwner(true)
+
         // Fetch shops
         const shopsResponse = await fetch('/api/shops')
         if (!shopsResponse.ok) {
@@ -88,13 +92,14 @@ export default function TrackingPackagesPage() {
         // Fetch packages
         const packagesResponse = await fetch('/api/packages/all')
         if (!packagesResponse.ok) {
-          throw new Error('Failed to fetch packages')
+          const errorData = await packagesResponse.json()
+          throw new Error(errorData.error || 'Failed to fetch packages')
         }
         const packagesData = await packagesResponse.json()
         setPackages(packagesData)
       } catch (error) {
         console.error('Error:', error)
-        setError('حدث خطأ أثناء جلب البيانات')
+        setError(error instanceof Error ? error.message : 'حدث خطأ أثناء جلب البيانات')
       } finally {
         setLoading(false)
       }

@@ -6,6 +6,7 @@ import Header from '../components/Header'
 import { useSession, signOut } from 'next-auth/react'
 import { supabase } from '@/lib/supabase'
 import { UserRole } from '@prisma/client'
+import { toast } from 'react-hot-toast'
 
 interface UserProfile {
   id: string
@@ -249,31 +250,22 @@ export default function AccountPage() {
   }
 
   const handleDeleteAccount = async () => {
-    setIsDeleting(true)
     try {
-      // First, delete from authentication
-      const authResponse = await fetch('/api/auth/delete', {
+      setIsDeleting(true)
+      const response = await fetch('/api/auth/delete', {
         method: 'DELETE',
       })
 
-      if (!authResponse.ok) {
-        throw new Error('Failed to delete authentication account')
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'حدث خطأ أثناء حذف الحساب')
       }
 
-      // Then delete from database
-      const dbResponse = await fetch('/api/user/delete', {
-        method: 'DELETE',
-      })
-
-      if (!dbResponse.ok) {
-        throw new Error('Failed to delete database account')
-      }
-
-      // Sign out the user
+      // Sign out after successful deletion
       await signOut({ callbackUrl: '/' })
     } catch (error) {
       console.error('Error deleting account:', error)
-      setError('حدث خطأ أثناء حذف الحساب')
+      toast.error(error instanceof Error ? error.message : 'حدث خطأ أثناء حذف الحساب')
     } finally {
       setIsDeleting(false)
     }

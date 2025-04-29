@@ -29,10 +29,11 @@ export async function POST(request: Request) {
           id: uuidv4(),
           title,
           content,
-          authorid: session.user.id,
+          authorId: session.user.id,
           published: true,
-          created_at: currentTime,
-          updated_at: currentTime
+          createdAt: currentTime,
+          updatedAt: currentTime,
+          itemLink
         }
       ])
       .select()

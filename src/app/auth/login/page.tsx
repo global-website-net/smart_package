@@ -14,7 +14,7 @@ function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams?.get('callbackUrl')
-  const redirectUrl = callbackUrl && !callbackUrl.includes('/auth/reset-password') ? callbackUrl : '/'
+  const redirectUrl = callbackUrl || '/'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -112,12 +112,12 @@ function LoginForm() {
 
             <div className="flex items-center justify-end">
               <div className="text-sm">
-                <Link
-                  href="/auth/reset-password"
+                <button
+                  onClick={handleForgotPassword}
                   className="font-medium text-green-600 hover:text-green-500 focus:outline-none"
                 >
                   نسيت كلمة المرور؟
-                </Link>
+                </button>
               </div>
             </div>
 
