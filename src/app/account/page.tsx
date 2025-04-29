@@ -92,52 +92,35 @@ export default function AccountPage() {
           setIsLoading(true)
           setError('')
 
-          // Get user data from the User table
-          const { data: userData, error: userError } = await supabase
-            .from('User')
-            .select(`
-              id,
-              email,
-              fullname,
-              role,
-              governorate,
-              town,
-              phoneprefix,
-              phonenumber,
-              created_at,
-              updated_at
-            `)
-            .eq('email', session.user.email)
-            .single()
-
-          if (userError) {
-            console.error('Error fetching user data:', userError)
-            setError('حدث خطأ أثناء تحميل بيانات الملف الشخصي')
-            return
+          const response = await fetch('/api/user/profile')
+          if (!response.ok) {
+            throw new Error('Failed to fetch profile')
           }
+
+          const userData = await response.json()
 
           if (userData) {
             // Update profile state
             setProfile({
               id: userData.id,
               email: userData.email,
-              fullName: userData.fullname || '',
+              fullName: userData.fullName || '',
               role: userData.role,
               governorate: userData.governorate || '',
               town: userData.town || '',
-              phonePrefix: userData.phoneprefix || '',
-              phoneNumber: userData.phonenumber || '',
-              createdAt: userData.created_at
+              phonePrefix: userData.phonePrefix || '',
+              phoneNumber: userData.phoneNumber || '',
+              createdAt: userData.createdAt
             })
 
             // Update form data
             setFormData(prev => ({
               ...prev,
-              fullName: userData.fullname || '',
+              fullName: userData.fullName || '',
               governorate: userData.governorate || '',
               town: userData.town || '',
-              phonePrefix: userData.phoneprefix || '',
-              phoneNumber: userData.phonenumber || '',
+              phonePrefix: userData.phonePrefix || '',
+              phoneNumber: userData.phoneNumber || '',
               currentPassword: '',
               newPassword: '',
               confirmPassword: ''

@@ -118,7 +118,7 @@ export default function PaymentWizard({ onClose, onSuccess }: PaymentWizardProps
           <form onSubmit={handleAmountSubmit}>
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                المبلغ (بالريال السعودي)
+                المبلغ (شيكل)
               </label>
               <input
                 type="number"

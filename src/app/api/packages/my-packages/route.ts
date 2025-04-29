@@ -29,7 +29,7 @@ interface RawPackageData {
   price: number;
   created_at: string;
   updated_at: string;
-  user: {
+  User: {
     fullname: string;
     email: string;
   }[];
@@ -61,7 +61,7 @@ export async function GET() {
         price,
         created_at,
         updated_at,
-        user:userid (
+        User!Package_userid_fkey (
           fullname,
           email
         )
@@ -84,9 +84,9 @@ export async function GET() {
       status: pkg.statusid,
       createdAt: pkg.created_at,
       updatedAt: pkg.updated_at,
-      user: pkg.user[0] ? {
-        fullName: pkg.user[0].fullname,
-        email: pkg.user[0].email
+      user: pkg.User[0] ? {
+        fullName: pkg.User[0].fullname,
+        email: pkg.User[0].email
       } : {
         fullName: 'Unknown',
         email: 'unknown@example.com'
