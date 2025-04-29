@@ -7,6 +7,7 @@ import { useSession, signOut } from 'next-auth/react'
 import { supabase } from '@/lib/supabase'
 import { UserRole } from '@prisma/client'
 import { toast } from 'react-hot-toast'
+import { Toaster } from 'react-hot-toast'
 
 interface UserProfile {
   id: string
@@ -274,6 +275,7 @@ export default function AccountPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
+      <Toaster position="top-center" />
       
       <main className="p-4 pt-24">
         <div className="max-w-4xl mx-auto">
