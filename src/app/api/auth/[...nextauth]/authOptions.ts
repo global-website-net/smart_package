@@ -89,7 +89,7 @@ export const authOptions: NextAuthOptions = {
           const { data: userData, error: userError } = await supabase
             .from('User')
             .select('id, email, fullName, role')
-            .eq('id', authData.user.id)
+            .or(`id.eq.${authData.user.id},email.eq.${credentials.email}`)
             .single()
 
           if (userError) {
