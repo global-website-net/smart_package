@@ -42,12 +42,12 @@ export const db = {
         id,
         email: userData.email,
         password: userData.password,
-        fullname: userData.fullName,
+        fullName: userData.fullName,
         role: userData.role,
         governorate: userData.governorate,
         town: userData.town,
-        phoneprefix: userData.phonePrefix,
-        phonenumber: userData.phoneNumber
+        phonePrefix: userData.phonePrefix,
+        phoneNumber: userData.phoneNumber
       })
       .select()
       .single()
