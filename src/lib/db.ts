@@ -39,14 +39,14 @@ export const db = {
         id,
         email: userData.email,
         password: userData.password,
-        fullname: userData.fullName,
+        full_name: userData.fullName,
         role: userData.role,
         governorate: userData.governorate,
         town: userData.town,
-        phoneprefix: userData.phonePrefix,
-        phonenumber: userData.phoneNumber,
-        created_at: new Date(),
-        updated_at: new Date()
+        phone_prefix: userData.phonePrefix,
+        phone_number: userData.phoneNumber,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       })
       .select()
       .single()
