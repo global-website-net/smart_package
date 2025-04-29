@@ -1,6 +1,6 @@
 import { UserRole } from '@prisma/client'
-import { v4 as uuidv4 } from 'uuid'
 import { supabase } from './supabase'
+import { v4 as uuidv4 } from 'uuid'
 
 // Database operations using Supabase
 export const db = {
