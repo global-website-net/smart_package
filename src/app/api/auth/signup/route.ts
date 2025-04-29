@@ -80,7 +80,8 @@ export async function POST(request: Request) {
           governorate,
           town,
           phonePrefix,
-          phoneNumber
+          phoneNumber,
+          updatedAt: new Date().toISOString()
         })
         .select()
         .single()
