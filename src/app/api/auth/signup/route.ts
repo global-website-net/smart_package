@@ -76,7 +76,8 @@ export async function POST(request: Request) {
           town,
           phonePrefix,
           phoneNumber,
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
+          password: null  // Explicitly set password to null
         })
         .select()
         .single()
