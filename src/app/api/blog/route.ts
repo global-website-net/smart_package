@@ -8,11 +8,11 @@ interface BlogPost {
   title: string
   content: string
   createdAt: string
-  authorId: string
+  authorid: string
   User: {
     id: string
     fullName: string
-  }[] | null
+  }
 }
 
 // Get all blogs
@@ -24,14 +24,14 @@ export async function GET() {
         id,
         title,
         content,
-        createdAt,
-        authorId,
-        User!authorId (
+        created_at,
+        authorid,
+        User:authorid (
           id,
           fullName
         )
       `)
-      .order('createdAt', { ascending: false })
+      .order('created_at', { ascending: false })
 
     if (error) {
       console.error('Error fetching blogs:', error)
@@ -46,10 +46,10 @@ export async function GET() {
       id: post.id,
       title: post.title,
       content: post.content,
-      createdAt: post.createdAt,
-      author: post.User && post.User.length > 0 ? {
-        id: post.User[0].id,
-        name: post.User[0].fullName
+      createdAt: post.created_at,
+      author: post.User ? {
+        id: post.User.id,
+        name: post.User.fullName
       } : {
         id: 'unknown',
         name: 'مجهول'
@@ -107,17 +107,17 @@ export async function POST(request: Request) {
       .insert({
         title,
         content,
-        authorId: userData.id, // Use the ID from the database query
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        authorid: userData.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       })
       .select(`
         id,
         title,
         content,
-        createdAt,
-        authorId,
-        User!authorId (
+        created_at,
+        authorid,
+        User:authorid (
           id,
           fullName
         )
@@ -137,7 +137,7 @@ export async function POST(request: Request) {
       id: blog.id,
       title: blog.title,
       content: blog.content,
-      createdAt: blog.createdAt,
+      createdAt: blog.created_at,
       author: blog.User ? {
         id: blog.User.id,
         name: blog.User.fullName
@@ -188,10 +188,14 @@ export async function PUT(request: Request) {
       })
       .eq('id', id)
       .select(`
-        *,
+        id,
+        title,
+        content,
+        created_at,
+        authorid,
         User:authorid (
-          fullName,
-          email
+          id,
+          fullName
         )
       `)
       .single()
@@ -204,14 +208,78 @@ export async function PUT(request: Request) {
       )
     }
 
-    return NextResponse.json({
-      ...blog,
-      author: blog.User
-    })
+    // Transform the response to match the expected format
+    const formattedBlog = {
+      id: blog.id,
+      title: blog.title,
+      content: blog.content,
+      createdAt: blog.created_at,
+      author: blog.User ? {
+        id: blog.User.id,
+        name: blog.User.fullName
+      } : {
+        id: 'unknown',
+        name: 'مجهول'
+      }
+    }
+
+    return NextResponse.json(formattedBlog)
   } catch (error) {
     console.error('Error updating blog:', error)
     return NextResponse.json(
       { error: 'حدث خطأ أثناء تحديث المدونة' },
+      { status: 500 }
+    )
+  }
+}
+
+// Delete blog - only for admin/owner
+export async function DELETE(request: Request) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session) {
+      return NextResponse.json(
+        { error: 'غير مصرح لك' },
+        { status: 401 }
+      )
+    }
+
+    // Check if user is admin or owner
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER') {
+      return NextResponse.json(
+        { error: 'غير مصرح لك - فقط المدير والمالك يمكنهم حذف المدونات' },
+        { status: 403 }
+      )
+    }
+
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'معرف المدونة مطلوب' },
+        { status: 400 }
+      )
+    }
+
+    const { error } = await supabase
+      .from('BlogPost')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      console.error('Error deleting blog:', error)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء حذف المدونة' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ message: 'تم حذف المدونة بنجاح' })
+  } catch (error) {
+    console.error('Error deleting blog:', error)
+    return NextResponse.json(
+      { error: 'حدث خطأ أثناء حذف المدونة' },
       { status: 500 }
     )
   }
