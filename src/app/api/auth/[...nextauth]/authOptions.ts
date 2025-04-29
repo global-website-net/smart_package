@@ -56,38 +56,28 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          // Try to find the user with a case-insensitive email match
-          const { data: users, error: queryError } = await supabase
-            .from('User')
-            .select('id, email, password, fullName, role')
-            .ilike('email', credentials.email)
+          // Call the authenticate_user function
+          const { data, error } = await supabase
+            .rpc('authenticate_user', {
+              p_email: credentials.email
+            })
 
-          if (queryError) {
-            console.error('Database query error:', queryError)
+          if (error) {
+            console.error('Database error:', error)
             throw new Error('حدث خطأ أثناء محاولة تسجيل الدخول')
           }
 
-          // No user found
-          if (!users || users.length === 0) {
-            console.log('No user found with email:', credentials.email)
+          if (!data || data.length === 0) {
             throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
           }
 
-          // Find exact email match (case-insensitive)
-          const user = users.find(u => u.email.toLowerCase() === credentials.email.toLowerCase())
-          if (!user) {
-            console.log('No exact email match found')
-            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
-          }
+          const user = data[0]
 
           // Verify password
           const isValid = await bcrypt.compare(credentials.password, user.password)
           if (!isValid) {
-            console.log('Invalid password for user:', credentials.email)
             throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
           }
-
-          console.log('Authentication successful for user:', credentials.email)
 
           // Return user data without sensitive information
           return {
