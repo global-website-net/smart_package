@@ -68,13 +68,13 @@ export default function Header() {
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex justify-between items-center h-20">
           {/* Left Side - Logo */}
-          <div className="flex items-center space-x-8 rtl:space-x-reverse">
+          <div className="flex items-center space-x-16 rtl:space-x-reverse">
             <Link href="/" className="text-xl font-bold">
               SMART PACKAGE
             </Link>
             <Link 
               href="/packages" 
-              className="text-white hover:text-green-500 transition-colors text-sm mr-4"
+              className="text-white hover:text-green-500 transition-colors text-sm mr-10"
             >
               أسعارنا
             </Link>

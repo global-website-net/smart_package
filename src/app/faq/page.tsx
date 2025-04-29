@@ -17,98 +17,91 @@ export default function FAQPage() {
     {
       id: '1',
       question: 'ما هي طبيعة خدماتكم؟',
-      answer: 'نحن نقدم خدمات لوجستية لطلب المنتجات من مواقع التسوق عبر الإنترنت ونقوم بتوصيلها مباشرة إلى العميل، حتى في المناطق التي يصعب الوصول إليها عبر البريد العادي.'
+      answer: 'نحن نقدم خدمات لويتية لطلب المنتات من مواقع التوق عبر الإنترنت ونقوم بتوصيلها مباشرة إلى العميل، حتى في المناطق التي يصعب الوصول إليها عبر البريد العادي.'
     },
     {
       id: '2',
       question: 'كيف يمكنني تقديم طلب؟',
-      answer: 'يمكنك تعبئة نموذج الطلب في موقعنا الإلكتروني، وإرفاق رابط المنتج الذي ترغب بشرائه مع تفاصيل إضافية إن لزم.'
+      answer: 'يمكنك تعبئة نموذ الطلب في موقعنا الإلكتروني، وإرفاق رابط المنت الذي ترغب بشرائه مع تفاصيل إضافية إن لزم.'
     },
     {
       id: '3',
-      question: 'هل أحتاج إلى إنشاء حساب؟',
-      answer: 'نعم، يجب التسجيل في الموقع حتى تتمكن من متابعة طلباتك وتلقي التحديثات الخاصة بها.'
+      question: 'هل أحتاج إلى إنشاء حاب؟',
+      answer: 'نعم، يب التيل في الموقع حتى تتمكن من متابعة طلباتك وتلقي التحديثات الخاصة بها.'
     },
     {
       id: '4',
-      question: 'كيف يتم احتساب تكلفة الخدمة؟',
-      answer: 'تكلفة الخدمة تُحدد بناءً على وزن المنتج، حجمه، وقيمة الشحن. يتم إدخال السعر يدوياً من قبل فريقنا بعد استلام الطلب.'
+      question: 'كيف يتم احتاب تكلفة الخدمة؟',
+      answer: 'تكلفة الخدمة تُحدد بناءً على وزن المنت، حمه، وقيمة الشحن. يتم إدخال العر يدوياً من قبل فريقنا بعد اتلام الطلب.'
     },
     {
       id: '5',
-      question: 'ما هي وسائل الدفع المتاحة؟',
+      question: 'ما هي وائل الدفع المتاحة؟',
       answer: 'نقبل الدفع عبر بطاقة الائتمان وPayPal حالياً.'
     },
     {
       id: '6',
-      question: 'كم من الوقت يستغرق توصيل الطلب؟',
-      answer: 'يختلف وقت التوصيل حسب مصدر الشراء، لكنه يتراوح عادة بين 7 إلى 21 يوماً. سنقوم بتحديثك بكل مرحلة من مراحل الشحن.'
+      question: 'كم من الوقت يتغرق توصيل الطلب؟',
+      answer: 'يختلف وقت التوصيل حب مصدر الشراء، لكنه يتراوح عادة بين 7 إلى 21 يوماً. نقوم بتحديثك بكل مرحلة من مراحل الشحن.'
     },
     {
       id: '7',
       question: 'كيف يمكنني تتبع طلبي؟',
-      answer: 'بعد معالجة الطلب، سنرسل لك رقم تتبع يمكنك استخدامه لمتابعة حالة الشحنة في أي وقت.'
+      answer: 'بعد معالة الطلب، نرل لك رقم تتبع يمكنك اتخدامه لمتابعة حالة الشحنة في أي وقت.'
     },
     {
       id: '8',
-      question: 'ماذا يحدث إذا وصل المنتج تالفًا؟',
-      answer: 'يرجى التواصل معنا فورًا مع صورة للمنتج وسنقوم بمراجعة الحالة وتعويضك إذا لزم الأمر.'
+      question: 'ماذا يحدث إذا وصل المنتج تالفاً؟',
+      answer: 'يرى التواصل معنا فوراً مع صورة للمنت ونقوم بمراعة الحالة وتعويضك إذا لزم الأمر.'
     }
   ]
 
   const toggleFAQ = (index: number) => {
-    setActiveIndex(index === activeIndex ? null : index)
+    setActiveIndex(activeIndex === index ? null : index)
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50">
       <Header />
       
-      <main className="max-w-2xl mx-auto px-4 pt-24 pb-12">
-        {/* Title */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-6 text-text">الأسئلة المتكررة</h1>
-          <div className="page-title-decorator">
-            <span></span>
-          </div>
-        </div>
-
-        {/* FAQ Icon */}
-        <div className="flex justify-center mb-12">
-          <div className="hexagon bg-[#7AB496] w-24 h-24 flex items-center justify-center">
-            <span className="text-4xl text-white">❓</span>
-          </div>
-        </div>
-
-        {/* FAQ List */}
-        <div className="space-y-4">
-          {faqs.map((faq, index) => (
-            <div key={faq.id} className="card hover:border-primary transition-colors overflow-hidden">
-              <button
-                className="w-full flex items-center justify-between p-4 text-right"
-                onClick={() => toggleFAQ(index)}
-              >
-                <div className="flex items-center gap-4">
-                  <div className={`hexagon w-8 h-8 flex items-center justify-center transition-colors ${
-                    index === activeIndex ? 'bg-red-500' : 'bg-[#7AB496]'
-                  }`}>
-                    <span className="text-white text-xl">{index === activeIndex ? '−' : '+'}</span>
-                  </div>
-                  <span className="text-lg text-text">{faq.question}</span>
-                </div>
-                <span className="text-[#7AB496] text-2xl font-bold">س</span>
-              </button>
-              
-              {index === activeIndex && (
-                <div className="px-16 pb-4">
-                  <div className="flex items-center gap-4">
-                    <span className="text-[#7AB496] text-2xl font-bold">ج</span>
-                    <p className="text-text/80">{faq.answer}</p>
-                  </div>
-                </div>
-              )}
+      <main className="p-4 pt-24">
+        <div className="max-w-4xl mx-auto">
+          {/* Title */}
+          <div className="container mx-auto px-4 py-8">
+            <div className="flex flex-col items-center justify-center mb-8">
+              <div className="relative">
+                <h1 className="text-4xl font-bold text-center mb-2">الأسئلة المتكررة</h1>
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-green-500"></div>
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-green-500 rotate-45"></div>
+              </div>
             </div>
-          ))}
+          </div>
+          
+          <div className="space-y-4">
+            {faqs.map((faq, index) => (
+              <div key={faq.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                <button
+                  onClick={() => toggleFAQ(index)}
+                  className="w-full px-6 py-4 text-right flex justify-between items-center hover:bg-gray-50 focus:outline-none"
+                >
+                  <span className="text-lg font-medium">{faq.question}</span>
+                  <svg
+                    className={`w-5 h-5 transform transition-transform ${activeIndex === index ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {activeIndex === index && (
+                  <div className="px-6 py-4 bg-gray-50">
+                    <p className="text-gray-700">{faq.answer}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </main>
 

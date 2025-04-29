@@ -112,12 +112,12 @@ function LoginForm() {
 
             <div className="flex items-center justify-end">
               <div className="text-sm">
-                <button
-                  onClick={handleForgotPassword}
+                <Link
+                  href="/auth/reset-password"
                   className="font-medium text-green-600 hover:text-green-500 focus:outline-none"
                 >
                   نسيت كلمة المرور؟
-                </button>
+                </Link>
               </div>
             </div>
 
