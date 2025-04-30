@@ -126,12 +126,12 @@ export default function NewOrder() {
               <label htmlFor="notes" className="block text-gray-700 text-right mb-2">
                 ملاحظات
               </label>
-              <textarea
+              <input
+                type="text"
                 id="notes"
                 name="notes"
                 value={formData.notes}
                 onChange={handleInputChange}
-                rows={3}
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                 dir="rtl"
               />

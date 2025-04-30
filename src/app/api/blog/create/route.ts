@@ -14,25 +14,26 @@ export async function POST(request: Request) {
       )
     }
 
-    // Check if user is admin or owner from database
+    // Check if user is admin or owner using session role
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER') {
+      return NextResponse.json(
+        { error: 'غير مصرح لك - فقط المدير والمالك يمكنهم إنشاء المدونات' },
+        { status: 403 }
+      )
+    }
+
+    // Get user ID from database
     const { data: userData, error: userError } = await supabase
       .from('User')
-      .select('id, role')
+      .select('id')
       .eq('email', session.user.email)
       .single()
 
     if (userError) {
-      console.error('Error fetching user role:', userError)
+      console.error('Error fetching user ID:', userError)
       return NextResponse.json(
-        { error: 'حدث خطأ في التحقق من الصلاحيات' },
+        { error: 'حدث خطأ في التحقق من المستخدم' },
         { status: 500 }
-      )
-    }
-
-    if (!userData || (userData.role !== 'ADMIN' && userData.role !== 'OWNER')) {
-      return NextResponse.json(
-        { error: 'غير مصرح لك - فقط المدير والمالك يمكنهم إنشاء المدونات' },
-        { status: 403 }
       )
     }
 
@@ -66,16 +67,16 @@ export async function POST(request: Request) {
     if (error) {
       console.error('Error creating blog post:', error)
       return NextResponse.json(
-        { error: 'حدث خطأ أثناء إنشاء المقال' },
+        { error: 'حدث خطأ أثناء إنشاء المدونة' },
         { status: 500 }
       )
     }
 
     return NextResponse.json(data[0])
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Error in blog creation:', error)
     return NextResponse.json(
-      { error: 'حدث خطأ داخلي في الخادم' },
+      { error: 'حدث خطأ أثناء إنشاء المدونة' },
       { status: 500 }
     )
   }
