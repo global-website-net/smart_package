@@ -14,16 +14,25 @@ export async function POST(request: Request) {
       )
     }
 
-    // Get user from database
+    // Get user from database with case-insensitive email match
     const { data: user, error: userError } = await supabase
       .from('User')
       .select('id')
-      .eq('email', session.user.email)
+      .ilike('email', session.user.email)
       .single()
 
-    if (userError || !user) {
+    if (userError) {
+      console.error('Error fetching user:', userError)
       return NextResponse.json(
-        { error: 'لم يتم العثور على المستخدم' },
+        { error: 'حدث خطأ أثناء البحث عن المستخدم' },
+        { status: 500 }
+      )
+    }
+
+    if (!user) {
+      console.error('User not found for email:', session.user.email)
+      return NextResponse.json(
+        { error: 'لم يتم العثور على المستخدم. يرجى تسجيل الخروج وإعادة تسجيل الدخول' },
         { status: 404 }
       )
     }

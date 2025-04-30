@@ -165,7 +165,7 @@ export async function PUT(request: Request) {
       }
     }
 
-    // Update the user profile
+    // Update the user profile in the database
     const { data: updatedUser, error: updateError } = await supabase
       .from('User')
       .update(updateData)
@@ -189,12 +189,12 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'حدث خطأ أثناء تحديث الملف الشخصي' }, { status: 500 })
     }
 
-    // Update user metadata in Supabase Auth if we have a valid session
+    // Update user metadata in Supabase Auth
     try {
-      // First get the current session
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      // Create a new Supabase client with the user's access token
+      const { data: { session: authSession }, error: sessionError } = await supabase.auth.getSession()
       
-      if (sessionError || !session) {
+      if (sessionError || !authSession) {
         console.error('No valid session found:', sessionError)
         // Don't return error here, just log it since the database update was successful
         return NextResponse.json(updatedUser)
@@ -214,11 +214,16 @@ export async function PUT(request: Request) {
       if (authUpdateError) {
         console.error('Error updating auth user metadata:', authUpdateError)
         // Don't return error here, just log it since the database update was successful
-      } else if (user) {
-        // Refresh the session to get the updated metadata
-        const { error: refreshError } = await supabase.auth.refreshSession()
-        if (refreshError) {
-          console.error('Error refreshing session:', refreshError)
+      }
+
+      // If password was changed, update it in auth as well
+      if (newPassword) {
+        const { error: passwordUpdateError } = await supabase.auth.updateUser({
+          password: newPassword
+        })
+
+        if (passwordUpdateError) {
+          console.error('Error updating auth password:', passwordUpdateError)
         }
       }
     } catch (error) {
