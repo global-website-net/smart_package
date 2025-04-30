@@ -191,6 +191,16 @@ export async function PUT(request: Request) {
 
     // Update user metadata in Supabase Auth if we have a valid session
     try {
+      // First get the current session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      
+      if (sessionError || !session) {
+        console.error('No valid session found:', sessionError)
+        // Don't return error here, just log it since the database update was successful
+        return NextResponse.json(updatedUser)
+      }
+
+      // Update user metadata
       const { data: { user }, error: authUpdateError } = await supabase.auth.updateUser({
         data: {
           full_name: updateData.fullName,
@@ -205,19 +215,10 @@ export async function PUT(request: Request) {
         console.error('Error updating auth user metadata:', authUpdateError)
         // Don't return error here, just log it since the database update was successful
       } else if (user) {
-        // Update the session with the new metadata
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-        if (sessionError) {
-          console.error('Error getting session:', sessionError)
-        } else if (session) {
-          // Update the session with the new user data
-          const { error: setSessionError } = await supabase.auth.setSession({
-            access_token: session.access_token,
-            refresh_token: session.refresh_token
-          })
-          if (setSessionError) {
-            console.error('Error setting session:', setSessionError)
-          }
+        // Refresh the session to get the updated metadata
+        const { error: refreshError } = await supabase.auth.refreshSession()
+        if (refreshError) {
+          console.error('Error refreshing session:', refreshError)
         }
       }
     } catch (error) {

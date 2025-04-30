@@ -7,11 +7,11 @@ import Link from 'next/link'
 import Header from '../../components/Header'
 
 function LoginForm() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams?.get('callbackUrl')
   const redirectUrl = callbackUrl || '/'
@@ -39,6 +39,10 @@ function LoginForm() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleForgotPassword = () => {
+    router.push('/auth/reset-password')
   }
 
   return (
@@ -109,7 +113,7 @@ function LoginForm() {
               <div className="text-sm">
                 <button
                   type="button"
-                  onClick={() => router.push('/auth/reset-password')}
+                  onClick={handleForgotPassword}
                   className="font-medium text-green-600 hover:text-green-500"
                 >
                   نسيت كلمة المرور؟

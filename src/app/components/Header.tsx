@@ -217,13 +217,22 @@ export default function Header() {
                     )}
                     
                     {isAdmin ? (
-                      <Link 
-                        href="/tracking" 
-                        className="block px-4 py-2 text-sm hover:bg-gray-100"
-                        onClick={() => setIsUserMenuOpen(false)}
-                      >
-                        ادارة الطلبات
-                      </Link>
+                      <>
+                        <Link 
+                          href="/tracking" 
+                          className="block px-4 py-2 text-sm hover:bg-gray-100"
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          ادارة الطلبات
+                        </Link>
+                        <Link 
+                          href="/tracking_packages" 
+                          className="block px-4 py-2 text-sm hover:bg-gray-100"
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          ادارة الطرود
+                        </Link>
+                      </>
                     ) : isRegularUser && (
                       <>
                         <Link 
