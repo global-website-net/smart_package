@@ -114,6 +114,10 @@ function LoginForm() {
               <div className="text-sm">
                 <Link
                   href="/auth/reset-password"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    router.push('/auth/reset-password')
+                  }}
                   className="font-medium text-green-600 hover:text-green-500 focus:outline-none"
                 >
                   نسيت كلمة المرور؟

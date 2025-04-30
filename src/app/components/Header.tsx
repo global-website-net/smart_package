@@ -67,24 +67,7 @@ export default function Header() {
     <header className="bg-black text-white fixed w-full top-0 z-50">
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex justify-between items-center h-20">
-          {/* Left Side - Logo */}
-          <div className="flex items-center">
-            <Link href="/" className="text-xl font-bold">
-              SMART PACKAGE
-            </Link>
-          </div>
-
-          {/* Center - Pricing Button */}
-          <div className="hidden md:flex items-center justify-center flex-1">
-            <Link 
-              href="/packages" 
-              className="text-white hover:text-green-500 transition-colors text-lg font-semibold mx-4 border-b-2 border-transparent hover:border-green-500"
-            >
-              أسعارنا
-            </Link>
-          </div>
-
-          {/* Center - Mobile Menu Button */}
+          {/* Mobile Menu Button - Right Side */}
           <div className="md:hidden">
             <button
               className="p-2"
@@ -115,8 +98,87 @@ export default function Header() {
             </button>
           </div>
 
+          {/* Logo - Center */}
+          <div className="flex-1 flex justify-center md:justify-start">
+            <Link href="/" className="text-xl font-bold">
+              SMART PACKAGE
+            </Link>
+          </div>
+
+          {/* Mobile Icons - Left Side */}
+          {isLoggedIn && (
+            <div className="md:hidden flex items-center space-x-4 rtl:space-x-reverse">
+              <Link 
+                href="/account"
+                className="text-white hover:text-green-500 transition-colors"
+              >
+                <svg 
+                  className="w-6 h-6" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" 
+                  />
+                </svg>
+              </Link>
+
+              <Link 
+                href="/new-order"
+                className="text-white hover:text-green-500 transition-colors"
+              >
+                <svg 
+                  className="w-6 h-6" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6" 
+                  />
+                </svg>
+              </Link>
+
+              <Link 
+                href="/wallet"
+                className="text-white hover:text-green-500 transition-colors"
+              >
+                <svg 
+                  className="w-6 h-6" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" 
+                  />
+                </svg>
+              </Link>
+            </div>
+          )}
+
+          {/* Center - Pricing Button (Desktop) */}
+          <div className="hidden md:flex items-center justify-center flex-1">
+            <Link 
+              href="/packages" 
+              className="text-white hover:text-green-500 transition-colors text-lg font-semibold mx-4 border-b-2 border-transparent hover:border-green-500"
+            >
+              أسعارنا
+            </Link>
+          </div>
+
           {/* Right Side - Login Button or User Name with Dropdown */}
-          <div>
+          <div className="hidden md:block">
             {isLoggedIn ? (
               <div className="relative" ref={userMenuRef}>
                 <button 
@@ -178,6 +240,14 @@ export default function Header() {
                       onClick={() => setIsUserMenuOpen(false)}
                     >
                       بلوج
+                    </Link>
+
+                    <Link 
+                      href="/tracking" 
+                      className="block px-4 py-2 text-sm hover:bg-gray-100"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      تتبع الطلبات
                     </Link>
                     
                     <button
@@ -258,6 +328,13 @@ export default function Header() {
                     onClick={() => setIsMenuOpen(false)}
                   >
                     المدونة
+                  </Link>
+                  <Link
+                    href="/tracking"
+                    className="text-left hover:text-green-500 transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    تتبع الطلبات
                   </Link>
                   <button
                     onClick={() => {

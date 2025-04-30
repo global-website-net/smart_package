@@ -279,6 +279,16 @@ export default function AccountPage() {
       
       <main className="p-4 pt-24">
         <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold mb-6">الحساب الشخصي</h1>
+            <div className="flex justify-center items-center">
+              <div className="relative w-32 sm:w-48 md:w-64">
+                <div className="w-full h-0.5 bg-green-500"></div>
+                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
+              </div>
+            </div>
+          </div>
+
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-2xl font-bold">الملف الشخصي</h1>

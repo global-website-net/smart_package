@@ -104,8 +104,9 @@ export default function WalletPage() {
       
       <main className="p-4 pt-24">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold text-center mb-8">المحفظة</h1>
-
+        <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-lg shadow-lg mb-8">
+          <h1 className="text-2xl font-bold text-center">المحفظة</h1>
+        </div>
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
             <div className="flex justify-between items-center">
               <div>

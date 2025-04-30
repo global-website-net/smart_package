@@ -12,6 +12,7 @@ export default function CreateBlogPost() {
   const [content, setContent] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [itemLink, setItemLink] = useState('')
 
   if (status === 'loading') {
     return (
@@ -46,7 +47,8 @@ export default function CreateBlogPost() {
         },
         body: JSON.stringify({
           title,
-          content
+          content,
+          itemLink
         }),
       })
 
@@ -111,6 +113,20 @@ export default function CreateBlogPost() {
                 onChange={(e) => setContent(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 h-64"
                 required
+              />
+            </div>
+
+            <div className="mb-6">
+              <label htmlFor="itemLink" className="block text-sm font-medium text-gray-700 mb-1">
+                رابط المنتج
+              </label>
+              <input
+                type="url"
+                id="itemLink"
+                value={itemLink}
+                onChange={(e) => setItemLink(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="أدخل رابط المنتج (اختياري)"
               />
             </div>
 

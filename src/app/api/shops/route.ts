@@ -18,9 +18,9 @@ export async function GET() {
     // Fetch SHOP accounts from User table
     const { data, error } = await supabase
       .from('User')
-      .select('id, fullname')
+      .select('id, fullName')
       .eq('role', 'SHOP')
-      .order('fullname', { ascending: true })
+      .order('fullName', { ascending: true })
 
     if (error) {
       console.error('Error fetching shops:', error)
@@ -30,7 +30,7 @@ export async function GET() {
     // Transform the data to match the expected format
     const shops = data.map(user => ({
       id: user.id,
-      name: user.fullname
+      name: user.fullName
     }))
 
     return NextResponse.json(shops || [])

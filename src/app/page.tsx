@@ -66,6 +66,13 @@ export default function Home() {
         {/* Hero Section */}
         <section className="text-center px-4 py-16 bg-white">
           <div className="max-w-4xl mx-auto">
+            {session?.user && (
+              <div className="mb-6">
+                <h2 className="text-2xl font-semibold text-gray-800">
+                  اهلا بك {session.user.name || session.user.email?.split('@')[0]}
+                </h2>
+              </div>
+            )}
             <h1 className="text-5xl font-bold mb-6 text-gray-900">تسوق من جميع أنحاء العالم</h1>
             
             {/* Decorative Line with Diamond */}
