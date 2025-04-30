@@ -9,7 +9,7 @@ interface Package {
   id: string
   trackingNumber: string
   status: string
-  location: string
+  location?: string
   createdAt: string
   updatedAt: string
   user: {
@@ -19,6 +19,22 @@ interface Package {
   shop: {
     fullName: string
   }
+}
+
+interface SupabasePackage {
+  id: string
+  trackingNumber: string
+  status: string
+  location?: string
+  createdAt: string
+  updatedAt: string
+  user: {
+    fullName: string
+    email: string
+  }[]
+  shop: {
+    fullName: string
+  }[]
 }
 
 export default function TrackingPackagesRegularAccounts() {
@@ -47,7 +63,7 @@ export default function TrackingPackagesRegularAccounts() {
   const fetchPackages = async () => {
     try {
       setLoading(true)
-      setError(null)
+      setError('')
 
       const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -74,18 +90,19 @@ export default function TrackingPackagesRegularAccounts() {
         .eq('userId', session?.user?.id)
         .order('createdAt', { ascending: false })
 
-      if (error) {
-        console.error('Error fetching packages:', error)
-        setError('حدث خطأ أثناء جلب الطرود')
-        return
-      }
+      if (error) throw error
 
-      if (data) {
-        setPackages(data as Package[])
-      }
+      // Transform the data to match the Package interface
+      const transformedData: Package[] = (data || []).map(pkg => ({
+        ...pkg,
+        user: pkg.user?.[0] || { fullName: '', email: '' },
+        shop: pkg.shop?.[0] || { fullName: '' }
+      }))
+
+      setPackages(transformedData)
     } catch (err) {
-      console.error('Error:', err)
-      setError('حدث خطأ أثناء جلب الطرود')
+      console.error('Error fetching packages:', err)
+      setError('حدث خطأ أثناء جلب الطلبات')
     } finally {
       setLoading(false)
     }
