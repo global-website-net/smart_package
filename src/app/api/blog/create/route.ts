@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid'
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.email) {
+    if (!session?.user?.email || !session?.user?.id) {
       return NextResponse.json(
         { error: 'غير مصرح لك' },
         { status: 401 }
@@ -19,21 +19,6 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: 'غير مصرح لك - فقط المدير والمالك يمكنهم إنشاء المدونات' },
         { status: 403 }
-      )
-    }
-
-    // Get user ID from database
-    const { data: userData, error: userError } = await supabase
-      .from('User')
-      .select('id')
-      .eq('email', session.user.email)
-      .single()
-
-    if (userError) {
-      console.error('Error fetching user ID:', userError)
-      return NextResponse.json(
-        { error: 'حدث خطأ في التحقق من المستخدم' },
-        { status: 500 }
       )
     }
 
@@ -55,7 +40,7 @@ export async function POST(request: Request) {
           id: uuidv4(),
           title,
           content,
-          authorId: userData.id,
+          authorId: session.user.id,
           published: true,
           createdAt: currentTime,
           updatedAt: currentTime,

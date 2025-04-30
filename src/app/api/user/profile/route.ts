@@ -191,7 +191,7 @@ export async function PUT(request: Request) {
 
     // Update user metadata in Supabase Auth if we have a valid session
     try {
-      const { error: authUpdateError } = await supabase.auth.updateUser({
+      const { data: { user }, error: authUpdateError } = await supabase.auth.updateUser({
         data: {
           full_name: updateData.fullName,
           governorate: updateData.governorate,
@@ -204,6 +204,21 @@ export async function PUT(request: Request) {
       if (authUpdateError) {
         console.error('Error updating auth user metadata:', authUpdateError)
         // Don't return error here, just log it since the database update was successful
+      } else if (user) {
+        // Update the session with the new metadata
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        if (sessionError) {
+          console.error('Error getting session:', sessionError)
+        } else if (session) {
+          // Update the session with the new user data
+          const { error: setSessionError } = await supabase.auth.setSession({
+            access_token: session.access_token,
+            refresh_token: session.refresh_token
+          })
+          if (setSessionError) {
+            console.error('Error setting session:', setSessionError)
+          }
+        }
       }
     } catch (error) {
       console.error('Error updating auth metadata:', error)

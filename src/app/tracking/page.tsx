@@ -5,12 +5,13 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Header from '../components/Header'
 import { supabase } from '@/lib/supabase'
+import Link from 'next/link'
 
 interface Package {
   id: string
   trackingNumber: string
   status: string
-  currentLocation?: string
+  location?: string
   createdAt: string
   updatedAt: string
   user: {
@@ -67,7 +68,7 @@ export default function TrackingPage() {
           id,
           trackingNumber,
           status,
-          currentLocation,
+          location,
           createdAt,
           updatedAt,
           user:userId (
@@ -84,7 +85,7 @@ export default function TrackingPage() {
       if (error) throw error
 
       // Transform the data to match the Package interface
-      const transformedData: Package[] = (data as SupabasePackage[] || []).map(pkg => ({
+      const transformedData: Package[] = (data || []).map(pkg => ({
         ...pkg,
         user: pkg.user?.[0] || { fullName: '', email: '' },
         shop: pkg.shop?.[0] || { fullName: '' }
@@ -138,13 +139,27 @@ export default function TrackingPage() {
       <main className="p-4 pt-24">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-6">تتبع الطلبات</h1>
+            <h1 className="text-4xl font-bold mb-6">
+              {session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER' 
+                ? 'ادارة الطلبات' 
+                : 'تتبع الطلبات'}
+            </h1>
             <div className="flex justify-center items-center">
               <div className="relative w-32 sm:w-48 md:w-64">
                 <div className="w-full h-0.5 bg-green-500"></div>
                 <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
               </div>
             </div>
+            {session?.user?.role === 'REGULAR' && (
+              <div className="mt-6">
+                <Link
+                  href="/new-order"
+                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                >
+                  طلب جديد
+                </Link>
+              </div>
+            )}
           </div>
 
           {error && (
@@ -172,7 +187,7 @@ export default function TrackingPage() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">الموقع الحالي</p>
-                      <p className="font-medium">{pkg.currentLocation || 'غير متوفر'}</p>
+                      <p className="font-medium">{pkg.location || 'غير متوفر'}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">المتجر</p>

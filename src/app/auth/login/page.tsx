@@ -107,12 +107,13 @@ function LoginForm() {
 
             <div className="flex items-center justify-between">
               <div className="text-sm">
-                <Link
-                  href="/auth/reset-password"
+                <button
+                  type="button"
+                  onClick={() => router.push('/auth/reset-password')}
                   className="font-medium text-green-600 hover:text-green-500"
                 >
                   نسيت كلمة المرور؟
-                </Link>
+                </button>
               </div>
             </div>
 

@@ -225,23 +225,24 @@ export default function Header() {
                         ادارة الطلبات
                       </Link>
                     ) : isRegularUser && (
-                      <Link 
-                        href="/tracking" 
-                        className="block px-4 py-2 text-sm hover:bg-gray-100"
-                        onClick={() => setIsUserMenuOpen(false)}
-                      >
-                        تتبع الطلبات
-                      </Link>
+                      <>
+                        <Link 
+                          href="/tracking" 
+                          className="block px-4 py-2 text-sm hover:bg-gray-100"
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          تتبع الطلبات
+                        </Link>
+                        <Link 
+                          href="/tracking_packages" 
+                          className="block px-4 py-2 text-sm hover:bg-gray-100"
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          ادارة الطرود
+                        </Link>
+                      </>
                     )}
 
-                    <Link 
-                      href="/tracking_packages" 
-                      className="block px-4 py-2 text-sm hover:bg-gray-100"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      تتبع الباقات
-                    </Link>
-                    
                     <Link 
                       href="/blog" 
                       className="block px-4 py-2 text-sm hover:bg-gray-100"
@@ -313,21 +314,23 @@ export default function Header() {
                       ادارة الطلبات
                     </Link>
                   ) : !isAdmin && (
-                    <Link
-                      href="/tracking"
-                      className="text-left hover:text-green-500 transition-colors"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      تتبع الطلبات
-                    </Link>
+                    <>
+                      <Link
+                        href="/tracking"
+                        className="text-left hover:text-green-500 transition-colors"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        تتبع الطلبات
+                      </Link>
+                      <Link
+                        href="/tracking_packages"
+                        className="text-left hover:text-green-500 transition-colors"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        ادارة الطرود
+                      </Link>
+                    </>
                   )}
-                  <Link
-                    href="/tracking_packages"
-                    className="text-left hover:text-green-500 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    تتبع الباقات
-                  </Link>
                   <Link
                     href="/blog"
                     className="text-left hover:text-green-500 transition-colors"
