@@ -69,33 +69,42 @@ export default function Header() {
         <div className="flex justify-between items-center h-20">
           {/* Mobile Menu Button - Right Side */}
           <div className="md:hidden">
-            <button
-              className="p-2"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            {isLoggedIn ? (
+              <button
+                className="p-2"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
-                {isMenuOpen ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                )}
-              </svg>
-            </button>
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  {isMenuOpen ? (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  ) : (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  )}
+                </svg>
+              </button>
+            ) : (
+              <Link
+                href="/auth/login"
+                className="text-white hover:text-green-500 transition-colors px-4 py-2"
+              >
+                تسجيل الدخول
+              </Link>
+            )}
           </div>
 
           {/* Logo - Center */}
@@ -108,6 +117,25 @@ export default function Header() {
           {/* Mobile Icons - Left Side */}
           {isLoggedIn && (
             <div className="md:hidden flex items-center space-x-4 rtl:space-x-reverse">
+              <Link 
+                href="/wallet"
+                className="text-white hover:text-green-500 transition-colors"
+              >
+                <svg 
+                  className="w-6 h-6" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" 
+                  />
+                </svg>
+              </Link>
+
               <Link 
                 href="/account"
                 className="text-white hover:text-green-500 transition-colors"
@@ -129,10 +157,10 @@ export default function Header() {
 
               <Link 
                 href="/new-order"
-                className="text-white hover:text-green-500 transition-colors"
+                className="text-white hover:text-green-500 transition-colors bg-green-500 rounded-full p-2 flex items-center justify-center"
               >
                 <svg 
-                  className="w-6 h-6" 
+                  className="w-5 h-5" 
                   fill="none" 
                   stroke="currentColor" 
                   viewBox="0 0 24 24"
@@ -142,25 +170,6 @@ export default function Header() {
                     strokeLinejoin="round" 
                     strokeWidth={2} 
                     d="M12 6v6m0 0v6m0-6h6m-6 0H6" 
-                  />
-                </svg>
-              </Link>
-
-              <Link 
-                href="/wallet"
-                className="text-white hover:text-green-500 transition-colors"
-              >
-                <svg 
-                  className="w-6 h-6" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" 
                   />
                 </svg>
               </Link>
@@ -285,7 +294,7 @@ export default function Header() {
                 className="hover:text-green-500 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                الباقات
+                أسعارنا
               </Link>
               {isLoggedIn ? (
                 <>

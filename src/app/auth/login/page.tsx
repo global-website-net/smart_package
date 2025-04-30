@@ -105,15 +105,13 @@ function LoginForm() {
               </div>
             )}
 
-            <div className="flex items-center justify-between">
-              <div className="text-sm">
-                <a
-                  href="/auth/reset-password"
-                  className="font-medium text-green-600 hover:text-green-500"
-                >
-                  نسيت كلمة المرور؟
-                </a>
-              </div>
+            <div className="flex justify-end">
+              <Link
+                href="/auth/reset-password"
+                className="text-sm text-blue-600 hover:text-blue-800"
+              >
+                نسيت كلمة المرور؟
+              </Link>
             </div>
 
             <div>

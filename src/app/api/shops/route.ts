@@ -16,7 +16,7 @@ export async function GET() {
     // Fetch all users with role SHOP
     const { data: shops, error } = await supabase
       .from('User')
-      .select('id, "fullName" as name')
+      .select('id, fullName')
       .eq('role', 'SHOP')
       .order('fullName', { ascending: true })
 
@@ -28,7 +28,13 @@ export async function GET() {
       )
     }
 
-    return NextResponse.json(shops)
+    // Transform the data to match the expected format
+    const transformedShops = shops.map(shop => ({
+      id: shop.id,
+      name: shop.fullName
+    }))
+
+    return NextResponse.json(transformedShops)
   } catch (error) {
     console.error('Error in shops route:', error)
     return NextResponse.json(

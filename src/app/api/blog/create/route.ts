@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabase, supabaseAdmin } from '@/lib/supabase'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]/auth'
 import { v4 as uuidv4 } from 'uuid'
@@ -33,13 +33,14 @@ export async function POST(request: Request) {
 
     const currentTime = new Date().toISOString()
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('BlogPost')
       .insert([
         {
           id: uuidv4(),
           title,
           content,
+          itemLink,
           authorId: session.user.id,
           createdAt: currentTime,
           updatedAt: currentTime

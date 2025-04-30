@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Header from '@/app/components/Header'
+import Toast from '@/app/components/Toast'
 
 export default function NewOrder() {
   const { data: session } = useSession()
@@ -16,6 +17,10 @@ export default function NewOrder() {
     notes: '',
     additionalInfo: ''
   })
+
+  const [showToast, setShowToast] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
+  const [toastType, setToastType] = useState<'success' | 'error'>('success')
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -44,7 +49,9 @@ export default function NewOrder() {
       }
 
       // Show success message and reset form
-      alert('تم إرسال الطلب بنجاح')
+      setToastMessage('تم إرسال الطلب بنجاح')
+      setToastType('success')
+      setShowToast(true)
       setFormData({
         purchaseSite: '',
         purchaseLink: '',
@@ -54,7 +61,9 @@ export default function NewOrder() {
       })
     } catch (error) {
       console.error('Error submitting order:', error)
-      alert(error instanceof Error ? error.message : 'حدث خطأ أثناء إرسال الطلب')
+      setToastMessage(error instanceof Error ? error.message : 'حدث خطأ أثناء إرسال الطلب')
+      setToastType('error')
+      setShowToast(true)
     }
   }
 
@@ -70,8 +79,13 @@ export default function NewOrder() {
       <div className="pt-20 pb-10">
         <div className="max-w-4xl mx-auto px-4">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-center mb-2">طلبية جديدة</h1>
-            <div className="h-1 w-32 bg-green-500 mx-auto"></div>
+            <h1 className="text-4xl font-bold text-center mb-6">طلبية جديدة</h1>
+            <div className="flex justify-center items-center">
+              <div className="relative w-32 sm:w-48 md:w-64">
+                <div className="w-full h-0.5 bg-green-500"></div>
+                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
+              </div>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6">
@@ -169,6 +183,14 @@ export default function NewOrder() {
           </form>
         </div>
       </div>
+
+      {showToast && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onClose={() => setShowToast(false)}
+        />
+      )}
     </div>
   )
 } 
