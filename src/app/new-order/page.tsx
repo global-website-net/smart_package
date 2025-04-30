@@ -81,7 +81,7 @@ export default function NewOrder() {
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-center mb-6">طلبية جديدة</h1>
             <div className="flex justify-center items-center">
-              <div className="relative w-32 sm:w-48 md:w-64">
+              <div className="relative w-48 sm:w-64 md:w-80">
                 <div className="w-full h-0.5 bg-green-500"></div>
                 <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
               </div>
@@ -185,11 +185,35 @@ export default function NewOrder() {
       </div>
 
       {showToast && (
-        <Toast
-          message={toastMessage}
-          type={toastType}
-          onClose={() => setShowToast(false)}
-        />
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4 text-center">
+            <div className="mb-4">
+              {toastType === 'success' ? (
+                <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              ) : (
+                <div className="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
+              )}
+            </div>
+            <h3 className="text-lg font-semibold mb-2">
+              {toastType === 'success' ? 'تم بنجاح!' : 'حدث خطأ!'}
+            </h3>
+            <p className="text-gray-600 mb-4">{toastMessage}</p>
+            <button
+              onClick={() => setShowToast(false)}
+              className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors w-full"
+            >
+              حسناً
+            </button>
+          </div>
+        </div>
       )}
     </div>
   )

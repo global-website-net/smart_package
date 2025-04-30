@@ -105,7 +105,7 @@ function LoginForm() {
               </div>
             )}
 
-            <div className="flex justify-end">
+            <div className="text-right">
               <Link
                 href="/auth/reset-password"
                 className="text-sm text-blue-600 hover:text-blue-800"

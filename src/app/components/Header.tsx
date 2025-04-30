@@ -69,7 +69,7 @@ export default function Header() {
         <div className="flex justify-between items-center h-20">
           {/* Mobile Menu Button - Right Side */}
           <div className="md:hidden">
-            {isLoggedIn ? (
+            {isLoggedIn && (
               <button
                 className="p-2"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -97,7 +97,8 @@ export default function Header() {
                   )}
                 </svg>
               </button>
-            ) : (
+            )}
+            {!isLoggedIn && (
               <Link
                 href="/auth/login"
                 className="text-white hover:text-green-500 transition-colors px-4 py-2"
@@ -107,10 +108,29 @@ export default function Header() {
             )}
           </div>
 
-          {/* Logo - Center */}
-          <div className="flex-1 flex justify-center md:justify-start">
-            <Link href="/" className="text-xl font-bold">
-              SMART PACKAGE
+          {/* Logo with Location Icon - Center */}
+          <div className="flex-1 flex justify-center items-center">
+            <Link href="/" className="flex items-center space-x-2 rtl:space-x-reverse text-xl font-bold">
+              <svg 
+                className="w-6 h-6" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                />
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+              <span>SMART PACKAGE</span>
             </Link>
           </div>
 
@@ -212,7 +232,7 @@ export default function Header() {
                       className="block px-4 py-2 text-sm hover:bg-gray-100"
                       onClick={() => setIsUserMenuOpen(false)}
                     >
-                      حسابي
+                      الحساب الشخصي
                     </Link>
 
                     {isRegularUser && (
@@ -303,7 +323,7 @@ export default function Header() {
                     className="text-left hover:text-green-500 transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    حسابي
+                    الحساب الشخصي
                   </Link>
                   {isRegularUser && (
                     <Link
