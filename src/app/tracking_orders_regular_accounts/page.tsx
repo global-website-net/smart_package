@@ -5,6 +5,22 @@ import { useSession } from 'next-auth/react'
 import { createClient } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
 
+interface SupabasePackage {
+  id: string
+  trackingNumber: string
+  status: string
+  location: string
+  createdAt: string
+  updatedAt: string
+  user: {
+    fullName: string
+    email: string
+  }[]
+  shop: {
+    fullName: string
+  }[]
+}
+
 interface Package {
   id: string
   trackingNumber: string
@@ -81,7 +97,13 @@ export default function TrackingOrdersRegularAccounts() {
       }
 
       if (data) {
-        setPackages(data as Package[])
+        // Transform the data to match our Package interface
+        const transformedData: Package[] = (data as SupabasePackage[]).map(pkg => ({
+          ...pkg,
+          user: pkg.user[0] || { fullName: '', email: '' },
+          shop: pkg.shop[0] || { fullName: '' }
+        }))
+        setPackages(transformedData)
       }
     } catch (err) {
       console.error('Error:', err)
