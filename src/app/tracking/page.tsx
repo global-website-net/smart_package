@@ -22,6 +22,22 @@ interface Package {
   }
 }
 
+interface SupabasePackage {
+  id: string
+  trackingNumber: string
+  status: string
+  currentLocation?: string
+  createdAt: string
+  updatedAt: string
+  user: {
+    fullName: string
+    email: string
+  }[]
+  shop: {
+    fullName: string
+  }[]
+}
+
 export default function TrackingPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
@@ -67,7 +83,14 @@ export default function TrackingPage() {
 
       if (error) throw error
 
-      setPackages(data || [])
+      // Transform the data to match the Package interface
+      const transformedData: Package[] = (data as SupabasePackage[] || []).map(pkg => ({
+        ...pkg,
+        user: pkg.user?.[0] || { fullName: '', email: '' },
+        shop: pkg.shop?.[0] || { fullName: '' }
+      }))
+
+      setPackages(transformedData)
     } catch (err) {
       console.error('Error fetching packages:', err)
       setError('حدث خطأ أثناء جلب الطلبات')
