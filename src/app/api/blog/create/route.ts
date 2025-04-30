@@ -41,7 +41,6 @@ export async function POST(request: Request) {
           title,
           content,
           authorId: session.user.id,
-          published: true,
           createdAt: currentTime,
           updatedAt: currentTime
         }

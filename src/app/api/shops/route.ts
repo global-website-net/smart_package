@@ -16,7 +16,7 @@ export async function GET() {
     // Fetch all users with role SHOP
     const { data: shops, error } = await supabase
       .from('User')
-      .select('id, fullName as name')
+      .select('id, "fullName" as name')
       .eq('role', 'SHOP')
       .order('fullName', { ascending: true })
 

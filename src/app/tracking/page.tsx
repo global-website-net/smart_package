@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Header from '../components/Header'
-import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 
 interface Package {
@@ -23,22 +22,6 @@ interface Package {
   }
 }
 
-interface SupabasePackage {
-  id: string
-  trackingNumber: string
-  status: string
-  currentLocation?: string
-  createdAt: string
-  updatedAt: string
-  user: {
-    fullName: string
-    email: string
-  }[]
-  shop: {
-    fullName: string
-  }[]
-}
-
 export default function TrackingPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
@@ -52,46 +35,23 @@ export default function TrackingPage() {
       return
     }
 
-    if (status === 'authenticated' && session?.user?.email) {
+    if (status === 'authenticated') {
       fetchPackages()
     }
-  }, [status, session])
+  }, [status])
 
   const fetchPackages = async () => {
     try {
       setLoading(true)
       setError('')
 
-      const { data, error } = await supabase
-        .from('Package')
-        .select(`
-          id,
-          trackingNumber,
-          status,
-          currentLocation,
-          createdAt,
-          updatedAt,
-          user:userId (
-            fullName,
-            email
-          ),
-          shop:shopId (
-            fullName
-          )
-        `)
-        .eq('userId', session?.user?.id)
-        .order('createdAt', { ascending: false })
+      const response = await fetch('/api/packages/my-packages')
+      if (!response.ok) {
+        throw new Error('Failed to fetch packages')
+      }
 
-      if (error) throw error
-
-      // Transform the data to match the Package interface
-      const transformedData: Package[] = (data || []).map(pkg => ({
-        ...pkg,
-        user: pkg.user?.[0] || { fullName: '', email: '' },
-        shop: pkg.shop?.[0] || { fullName: '' }
-      }))
-
-      setPackages(transformedData)
+      const data = await response.json()
+      setPackages(data)
     } catch (err) {
       console.error('Error fetching packages:', err)
       setError('حدث خطأ أثناء جلب الطلبات')

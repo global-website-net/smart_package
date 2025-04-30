@@ -1,8 +1,19 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/auth'
-import { supabase } from '@/lib/supabase'
-import { v4 as uuidv4 } from 'uuid'
+import { createClient } from '@supabase/supabase-js'
+
+// Initialize Supabase admin client with service role key
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+)
 
 export async function POST(request: Request) {
   try {
@@ -14,11 +25,11 @@ export async function POST(request: Request) {
       )
     }
 
-    // Get user from database with case-insensitive email match
-    const { data: user, error: userError } = await supabase
+    // Get user from database with case-insensitive email match using admin client
+    const { data: user, error: userError } = await supabaseAdmin
       .from('User')
       .select('id')
-      .eq('email', session.user.email)
+      .ilike('email', session.user.email)
       .single()
 
     if (userError) {
@@ -48,12 +59,11 @@ export async function POST(request: Request) {
       )
     }
 
-    // Create order in database
-    const { data: orderData, error: orderError } = await supabase
+    // Create order in database using admin client
+    const { data: orderData, error: orderError } = await supabaseAdmin
       .from('Order')
       .insert([
         {
-          id: uuidv4(),
           userId: user.id,
           purchaseSite,
           purchaseLink,
