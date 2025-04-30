@@ -34,13 +34,19 @@ export default function CreateBlogPost() {
     return null
   }
 
+  // Check if user is not admin or owner
+  if (status === 'authenticated' && session?.user?.role !== 'ADMIN' && session?.user?.role !== 'OWNER') {
+    router.push('/blog')
+    return null
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
 
     try {
-      const response = await fetch('/api/blog', {
+      const response = await fetch('/api/blog/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -88,9 +94,9 @@ export default function CreateBlogPost() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
-            <div className="mb-6">
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="title" className="block text-sm font-medium text-gray-700">
                 عنوان المقال
               </label>
               <input
@@ -98,26 +104,13 @@ export default function CreateBlogPost() {
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
                 required
               />
             </div>
 
-            <div className="mb-6">
-              <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">
-                محتوى المقال
-              </label>
-              <textarea
-                id="content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 h-64"
-                required
-              />
-            </div>
-
-            <div className="mb-6">
-              <label htmlFor="itemLink" className="block text-sm font-medium text-gray-700 mb-1">
+            <div>
+              <label htmlFor="itemLink" className="block text-sm font-medium text-gray-700">
                 رابط المنتج
               </label>
               <input
@@ -125,8 +118,21 @@ export default function CreateBlogPost() {
                 id="itemLink"
                 value={itemLink}
                 onChange={(e) => setItemLink(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="أدخل رابط المنتج (اختياري)"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="content" className="block text-sm font-medium text-gray-700">
+                محتوى المقال
+              </label>
+              <textarea
+                id="content"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                rows={10}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                required
               />
             </div>
 

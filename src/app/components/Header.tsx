@@ -218,19 +218,19 @@ export default function Header() {
                     
                     {isAdmin ? (
                       <Link 
-                        href="/tracking_packages" 
+                        href="/tracking" 
                         className="block px-4 py-2 text-sm hover:bg-gray-100"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
-                        ادارة الطرود
+                        ادارة الطلبات
                       </Link>
-                    ) : (
+                    ) : isRegularUser && (
                       <Link 
-                        href="/my-packages" 
+                        href="/tracking" 
                         className="block px-4 py-2 text-sm hover:bg-gray-100"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
-                        طرودي
+                        تتبع الطلبات
                       </Link>
                     )}
                     
@@ -242,14 +242,6 @@ export default function Header() {
                       بلوج
                     </Link>
 
-                    <Link 
-                      href="/tracking" 
-                      className="block px-4 py-2 text-sm hover:bg-gray-100"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      تتبع الطلبات
-                    </Link>
-                    
                     <button
                       onClick={() => {
                         setIsUserMenuOpen(false)
@@ -306,20 +298,20 @@ export default function Header() {
                   )}
                   {isAdmin && (
                     <Link
-                      href="/tracking_packages"
+                      href="/tracking"
                       className="text-left hover:text-green-500 transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      ادارة الطرود
+                      ادارة الطلبات
                     </Link>
                   )}
                   {!isAdmin && (
                     <Link
-                      href="/my-packages"
+                      href="/tracking"
                       className="text-left hover:text-green-500 transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      طرودي
+                      تتبع الطلبات
                     </Link>
                   )}
                   <Link
@@ -328,13 +320,6 @@ export default function Header() {
                     onClick={() => setIsMenuOpen(false)}
                   >
                     المدونة
-                  </Link>
-                  <Link
-                    href="/tracking"
-                    className="text-left hover:text-green-500 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    تتبع الطلبات
                   </Link>
                   <button
                     onClick={() => {

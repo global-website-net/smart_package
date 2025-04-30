@@ -116,28 +116,6 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'المستخدم غير موجود' }, { status: 404 })
     }
 
-    // Verify current password
-    if (currentPassword) {
-      try {
-        // Check if user has a password set
-        if (!existingUser.password) {
-          return NextResponse.json({ error: 'كلمة المرور غير موجودة في قاعدة البيانات' }, { status: 400 })
-        }
-
-        if (typeof currentPassword !== 'string' || typeof existingUser.password !== 'string') {
-          return NextResponse.json({ error: 'بيانات غير صالحة' }, { status: 400 })
-        }
-
-        const isValid = await bcrypt.compare(currentPassword, existingUser.password)
-        if (!isValid) {
-          return NextResponse.json({ error: 'كلمة المرور الحالية غير صحيحة' }, { status: 400 })
-        }
-      } catch (error) {
-        console.error('Password comparison error:', error)
-        return NextResponse.json({ error: 'حدث خطأ في التحقق من كلمة المرور' }, { status: 500 })
-      }
-    }
-
     // Prepare the update data
     const updateData: any = {
       fullName,
@@ -152,10 +130,39 @@ export async function PUT(request: Request) {
       updateData.town = town
     }
 
-    // Only include new password if provided
-    if (newPassword) {
-      const hashedPassword = await bcrypt.hash(newPassword, 10)
-      updateData.password = hashedPassword
+    // Verify current password
+    if (currentPassword) {
+      try {
+        // Check if user has a password set
+        if (!existingUser.password) {
+          // If user doesn't have a password set, allow the update without password verification
+          // This handles cases where users signed up with social auth
+          if (newPassword) {
+            // If they're setting a new password, hash and save it
+            const hashedPassword = await bcrypt.hash(newPassword, 10)
+            updateData.password = hashedPassword
+          }
+        } else {
+          // If user has a password set, verify it
+          if (typeof currentPassword !== 'string' || typeof existingUser.password !== 'string') {
+            return NextResponse.json({ error: 'بيانات غير صالحة' }, { status: 400 })
+          }
+
+          const isValid = await bcrypt.compare(currentPassword, existingUser.password)
+          if (!isValid) {
+            return NextResponse.json({ error: 'كلمة المرور الحالية غير صحيحة' }, { status: 400 })
+          }
+
+          // If password is valid and new password is provided, update it
+          if (newPassword) {
+            const hashedPassword = await bcrypt.hash(newPassword, 10)
+            updateData.password = hashedPassword
+          }
+        }
+      } catch (error) {
+        console.error('Password comparison error:', error)
+        return NextResponse.json({ error: 'حدث خطأ في التحقق من كلمة المرور' }, { status: 500 })
+      }
     }
 
     // Update the user profile

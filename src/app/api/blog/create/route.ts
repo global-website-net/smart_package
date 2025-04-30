@@ -7,15 +7,40 @@ import { v4 as uuidv4 } from 'uuid'
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: 'غير مصرح لك' },
+        { status: 401 }
+      )
+    }
+
+    // Check if user is admin or owner from database
+    const { data: userData, error: userError } = await supabase
+      .from('User')
+      .select('id, role')
+      .eq('email', session.user.email)
+      .single()
+
+    if (userError) {
+      console.error('Error fetching user role:', userError)
+      return NextResponse.json(
+        { error: 'حدث خطأ في التحقق من الصلاحيات' },
+        { status: 500 }
+      )
+    }
+
+    if (!userData || (userData.role !== 'ADMIN' && userData.role !== 'OWNER')) {
+      return NextResponse.json(
+        { error: 'غير مصرح لك - فقط المدير والمالك يمكنهم إنشاء المدونات' },
+        { status: 403 }
+      )
     }
 
     const { title, content, itemLink } = await request.json()
 
-    if (!title || !content || !session.user.id) {
+    if (!title || !content) {
       return NextResponse.json(
-        { error: 'Title, content, and authorId are required' },
+        { error: 'العنوان والمحتوى مطلوبان' },
         { status: 400 }
       )
     }
@@ -29,7 +54,7 @@ export async function POST(request: Request) {
           id: uuidv4(),
           title,
           content,
-          authorId: session.user.id,
+          authorId: userData.id,
           published: true,
           createdAt: currentTime,
           updatedAt: currentTime,
@@ -41,7 +66,7 @@ export async function POST(request: Request) {
     if (error) {
       console.error('Error creating blog post:', error)
       return NextResponse.json(
-        { error: 'Failed to create blog post' },
+        { error: 'حدث خطأ أثناء إنشاء المقال' },
         { status: 500 }
       )
     }
@@ -50,7 +75,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'حدث خطأ داخلي في الخادم' },
       { status: 500 }
     )
   }

@@ -6,36 +6,31 @@ import { supabase } from '@/lib/supabase'
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'غير مصرح لك' }, { status: 401 })
     }
 
-    // Check if user is admin or owner using the session role
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER') {
-      return NextResponse.json({ error: 'غير مصرح لك' }, { status: 403 })
-    }
-
-    // Fetch SHOP accounts from User table
-    const { data, error } = await supabase
+    // Fetch shop accounts from the database
+    const { data: shops, error } = await supabase
       .from('User')
-      .select('id, fullName')
+      .select('id, fullName, email')
       .eq('role', 'SHOP')
       .order('fullName', { ascending: true })
 
     if (error) {
       console.error('Error fetching shops:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ error: 'حدث خطأ أثناء جلب المتاجر' }, { status: 500 })
     }
 
-    // Transform the data to match the expected format
-    const shops = data.map(user => ({
-      id: user.id,
-      name: user.fullName
+    // Format the response to match the expected structure
+    const formattedShops = shops.map(shop => ({
+      id: shop.id,
+      name: shop.fullName || shop.email?.split('@')[0] || 'متجر'
     }))
 
-    return NextResponse.json(shops || [])
+    return NextResponse.json(formattedShops)
   } catch (error) {
-    console.error('Error fetching shops:', error)
+    console.error('Error in shops route:', error)
     return NextResponse.json(
       { error: 'حدث خطأ أثناء جلب المتاجر' },
       { status: 500 }

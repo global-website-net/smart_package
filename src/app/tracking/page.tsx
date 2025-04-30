@@ -8,14 +8,15 @@ import { supabase } from '@/lib/supabase'
 
 interface Order {
   id: string
-  created_at: string
-  status: string
-  total_amount: number
-  items: {
-    name: string
-    quantity: number
-    price: number
-  }[]
+  userId: string
+  purchaseSite: string
+  purchaseLink: string
+  phoneNumber: string
+  notes: string | null
+  additionalInfo: string | null
+  status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'CANCELLED'
+  createdAt: string
+  updatedAt: string
 }
 
 export default function TrackingPage() {
@@ -42,10 +43,10 @@ export default function TrackingPage() {
       setError('')
 
       const { data, error } = await supabase
-        .from('orders')
+        .from('Order')
         .select('*')
-        .eq('user_id', session?.user?.id)
-        .order('created_at', { ascending: false })
+        .eq('userId', session?.user?.id)
+        .order('createdAt', { ascending: false })
 
       if (error) throw error
 
@@ -105,42 +106,53 @@ export default function TrackingPage() {
                 <div key={order.id} className="bg-white rounded-lg shadow-md p-6">
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <h3 className="text-lg font-semibold">طلب رقم #{order.id}</h3>
-                      <p className="text-gray-500 text-sm">
-                        {new Date(order.created_at).toLocaleDateString('ar-SA')}
+                      <h3 className="text-lg font-semibold text-gray-800">طلب #{order.id.slice(0, 8)}</h3>
+                      <p className="text-sm text-gray-500">
+                        {new Date(order.createdAt).toLocaleDateString('ar-SA', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
                       </p>
                     </div>
-                    <div className="text-right">
-                      <span className="inline-block px-3 py-1 rounded-full text-sm font-medium
-                        ${order.status === 'completed' ? 'bg-green-100 text-green-800' :
-                          order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'}">
-                        {order.status === 'completed' ? 'مكتمل' :
-                         order.status === 'pending' ? 'قيد الانتظار' :
-                         'ملغي'}
-                      </span>
-                    </div>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                      order.status === 'PROCESSING' ? 'bg-blue-100 text-blue-800' :
+                      order.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {order.status === 'PENDING' ? 'قيد الانتظار' :
+                       order.status === 'PROCESSING' ? 'قيد المعالجة' :
+                       order.status === 'COMPLETED' ? 'مكتمل' :
+                       'ملغي'}
+                    </span>
                   </div>
 
-                  <div className="border-t border-gray-200 pt-4">
-                    <h4 className="font-medium mb-2">المنتجات:</h4>
-                    <ul className="space-y-2">
-                      {order.items.map((item, index) => (
-                        <li key={index} className="flex justify-between">
-                          <span>{item.name}</span>
-                          <span className="text-gray-600">
-                            {item.quantity} × {item.price} ₪
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="border-t border-gray-200 pt-4 mt-4">
-                    <div className="flex justify-between font-semibold">
-                      <span>المجموع:</span>
-                      <span>{order.total_amount} ₪</span>
-                    </div>
+                  <div className="space-y-2">
+                    <p className="text-gray-600">
+                      <span className="font-medium">موقع الشراء:</span> {order.purchaseSite}
+                    </p>
+                    <p className="text-gray-600">
+                      <span className="font-medium">رابط الشراء:</span>{' '}
+                      <a href={order.purchaseLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                        اضغط هنا
+                      </a>
+                    </p>
+                    <p className="text-gray-600">
+                      <span className="font-medium">رقم الهاتف:</span> {order.phoneNumber}
+                    </p>
+                    {order.notes && (
+                      <p className="text-gray-600">
+                        <span className="font-medium">ملاحظات:</span> {order.notes}
+                      </p>
+                    )}
+                    {order.additionalInfo && (
+                      <p className="text-gray-600">
+                        <span className="font-medium">معلومات إضافية:</span> {order.additionalInfo}
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}

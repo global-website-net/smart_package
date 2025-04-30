@@ -25,7 +25,7 @@ export async function GET() {
     // Format the response to match the expected structure
     const formattedUsers = users.map(user => ({
       id: user.id,
-      name: user.fullName,
+      name: user.fullName || user.email?.split('@')[0] || 'مستخدم',
       email: user.email
     }))
 
