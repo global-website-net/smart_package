@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import Header from '@/app/components/Header'
 
 export default function NewOrder() {
   const { data: session } = useSession()
@@ -64,106 +65,109 @@ export default function NewOrder() {
   }
 
   return (
-    <div className="min-h-screen pt-20 pb-10">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-center mb-2">طلبية جديدة</h1>
-          <div className="h-1 w-32 bg-green-500 mx-auto"></div>
-        </div>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <div className="pt-20 pb-10">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-center mb-2">طلبية جديدة</h1>
+            <div className="h-1 w-32 bg-green-500 mx-auto"></div>
+          </div>
 
-        <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6">
-          <div className="space-y-6">
-            {/* Purchase Site */}
-            <div>
-              <label htmlFor="purchaseSite" className="block text-gray-700 text-right mb-2">
-                موقع الشراء
-              </label>
-              <input
-                type="text"
-                id="purchaseSite"
-                name="purchaseSite"
-                value={formData.purchaseSite}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                dir="rtl"
-              />
-            </div>
-
-            {/* Purchase Link */}
-            <div>
-              <label htmlFor="purchaseLink" className="block text-gray-700 text-right mb-2">
-                لينك الشراء
-              </label>
-              <input
-                type="text"
-                id="purchaseLink"
-                name="purchaseLink"
-                value={formData.purchaseLink}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                dir="rtl"
-              />
-            </div>
-
-            {/* Phone Number */}
-            <div>
-              <label htmlFor="phoneNumber" className="block text-gray-700 text-right mb-2">
-                رقم الهاتف
-              </label>
-              <input
-                type="text"
-                id="phoneNumber"
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                dir="rtl"
-              />
-            </div>
-
-            {/* Notes */}
-            <div>
-              <label htmlFor="notes" className="block text-gray-700 text-right mb-2">
-                ملاحظات
-              </label>
-              <input
-                type="text"
-                id="notes"
-                name="notes"
-                value={formData.notes}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                dir="rtl"
-              />
-            </div>
-
-            {/* Additional Information Box */}
-            <div>
-              <div className="border-2 border-gray-200 rounded-md p-4">
-                <textarea
-                  id="additionalInfo"
-                  name="additionalInfo"
-                  value={formData.additionalInfo}
+          <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6">
+            <div className="space-y-6">
+              {/* Purchase Site */}
+              <div>
+                <label htmlFor="purchaseSite" className="block text-gray-700 text-right mb-2">
+                  موقع الشراء
+                </label>
+                <input
+                  type="text"
+                  id="purchaseSite"
+                  name="purchaseSite"
+                  value={formData.purchaseSite}
                   onChange={handleInputChange}
-                  rows={3}
-                  placeholder="معلومات إضافية..."
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                   dir="rtl"
                 />
               </div>
-            </div>
 
-            {/* Submit Button */}
-            <div className="flex justify-center">
-              <button
-                type="submit"
-                className="bg-green-500 text-white px-8 py-3 rounded-md hover:bg-green-600 transition-colors"
-              >
-                إرسال الطلب
-              </button>
+              {/* Purchase Link */}
+              <div>
+                <label htmlFor="purchaseLink" className="block text-gray-700 text-right mb-2">
+                  لينك الشراء
+                </label>
+                <input
+                  type="text"
+                  id="purchaseLink"
+                  name="purchaseLink"
+                  value={formData.purchaseLink}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  dir="rtl"
+                />
+              </div>
+
+              {/* Phone Number */}
+              <div>
+                <label htmlFor="phoneNumber" className="block text-gray-700 text-right mb-2">
+                  رقم الهاتف
+                </label>
+                <input
+                  type="text"
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  dir="rtl"
+                />
+              </div>
+
+              {/* Notes */}
+              <div>
+                <label htmlFor="notes" className="block text-gray-700 text-right mb-2">
+                  ملاحظات
+                </label>
+                <input
+                  type="text"
+                  id="notes"
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  dir="rtl"
+                />
+              </div>
+
+              {/* Additional Information Box */}
+              <div>
+                <div className="border-2 border-gray-200 rounded-md p-4">
+                  <textarea
+                    id="additionalInfo"
+                    name="additionalInfo"
+                    value={formData.additionalInfo}
+                    onChange={handleInputChange}
+                    rows={3}
+                    placeholder="معلومات إضافية..."
+                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    dir="rtl"
+                  />
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <div className="flex justify-center">
+                <button
+                  type="submit"
+                  className="bg-green-500 text-white px-8 py-3 rounded-md hover:bg-green-600 transition-colors"
+                >
+                  إرسال الطلب
+                </button>
+              </div>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   )

@@ -11,7 +11,7 @@ interface Package {
   id: string
   trackingNumber: string
   status: string
-  location?: string
+  currentLocation?: string
   createdAt: string
   updatedAt: string
   user: {
@@ -68,7 +68,7 @@ export default function TrackingPage() {
           id,
           trackingNumber,
           status,
-          location,
+          currentLocation,
           createdAt,
           updatedAt,
           user:userId (
@@ -187,7 +187,7 @@ export default function TrackingPage() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">الموقع الحالي</p>
-                      <p className="font-medium">{pkg.location || 'غير متوفر'}</p>
+                      <p className="font-medium">{pkg.currentLocation || 'غير متوفر'}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">المتجر</p>

@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     const { data: user, error: userError } = await supabase
       .from('User')
       .select('id')
-      .ilike('email', session.user.email)
+      .eq('email', session.user.email)
       .single()
 
     if (userError) {

@@ -41,10 +41,6 @@ function LoginForm() {
     }
   }
 
-  const handleForgotPassword = () => {
-    router.push('/auth/reset-password')
-  }
-
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />

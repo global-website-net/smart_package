@@ -43,8 +43,7 @@ export async function POST(request: Request) {
           authorId: session.user.id,
           published: true,
           createdAt: currentTime,
-          updatedAt: currentTime,
-          itemLink
+          updatedAt: currentTime
         }
       ])
       .select()
