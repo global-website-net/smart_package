@@ -98,11 +98,21 @@ export default function TrackingOrdersRegularAccounts() {
 
       if (data) {
         // Transform the data to match our Package interface
-        const transformedData: Package[] = (data as SupabasePackage[]).map(pkg => ({
-          ...pkg,
-          user: pkg.user[0] || { fullName: '', email: '' },
-          shop: pkg.shop[0] || { fullName: '' }
-        }))
+        const transformedData = data.map((pkg: any) => ({
+          id: pkg.id,
+          trackingNumber: pkg.trackingNumber,
+          status: pkg.status,
+          location: pkg.location,
+          createdAt: pkg.createdAt,
+          updatedAt: pkg.updatedAt,
+          user: {
+            fullName: pkg.user?.[0]?.fullName || '',
+            email: pkg.user?.[0]?.email || ''
+          },
+          shop: {
+            fullName: pkg.shop?.[0]?.fullName || ''
+          }
+        })) as Package[]
         setPackages(transformedData)
       }
     } catch (err) {
