@@ -8,7 +8,7 @@ interface BlogPost {
   title: string
   content: string
   createdAt: string
-  authorid: string
+  authorId: string
   User: {
     id: string
     fullName: string
@@ -18,51 +18,37 @@ interface BlogPost {
 // Get all blogs
 export async function GET() {
   try {
-    const { data: posts, error } = await supabase
+    const { data: blogs, error } = await supabase
       .from('BlogPost')
       .select(`
-        id,
-        title,
-        content,
-        created_at,
-        authorid,
-        User:authorid (
+        *,
+        User:authorId (
           id,
           fullName
         )
       `)
-      .order('created_at', { ascending: false })
+      .order('createdAt', { ascending: false })
 
-    if (error) {
-      console.error('Error fetching blogs:', error)
-      return NextResponse.json(
-        { error: 'حدث خطأ أثناء جلب المقالات' },
-        { status: 500 }
-      )
-    }
+    if (error) throw error
 
-    // Transform the data to match the expected format
-    const formattedPosts = posts.map(post => ({
-      id: post.id,
-      title: post.title,
-      content: post.content,
-      createdAt: post.created_at,
-      author: post.User ? {
-        id: post.User.id,
-        name: post.User.fullName
+    const formattedBlogs = blogs.map(blog => ({
+      id: blog.id,
+      title: blog.title,
+      content: blog.content,
+      createdAt: blog.createdAt,
+      author: blog.User ? {
+        id: blog.User.id,
+        name: blog.User.fullName
       } : {
         id: 'unknown',
         name: 'مجهول'
       }
     }))
 
-    return NextResponse.json(formattedPosts)
+    return NextResponse.json(formattedBlogs)
   } catch (error) {
-    console.error('Error in blog route:', error)
-    return NextResponse.json(
-      { error: 'حدث خطأ أثناء جلب المقالات' },
-      { status: 500 }
-    )
+    console.error('Error fetching blog posts:', error)
+    return NextResponse.json({ error: 'حدث خطأ أثناء جلب المقالات' }, { status: 500 })
   }
 }
 
@@ -107,17 +93,13 @@ export async function POST(request: Request) {
       .insert({
         title,
         content,
-        authorid: userData.id,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        authorId: userData.id,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       })
       .select(`
-        id,
-        title,
-        content,
-        created_at,
-        authorid,
-        User:authorid (
+        *,
+        User:authorId (
           id,
           fullName
         )
@@ -132,22 +114,10 @@ export async function POST(request: Request) {
       )
     }
 
-    // Transform the response to match the expected format
-    const formattedBlog = {
-      id: blog.id,
-      title: blog.title,
-      content: blog.content,
-      createdAt: blog.created_at,
-      author: blog.User ? {
-        id: blog.User.id,
-        name: blog.User.fullName
-      } : {
-        id: 'unknown',
-        name: 'مجهول'
-      }
-    }
-
-    return NextResponse.json(formattedBlog)
+    return NextResponse.json({
+      ...blog,
+      author: blog.User
+    })
   } catch (error) {
     console.error('Error creating blog:', error)
     return NextResponse.json(
@@ -184,16 +154,12 @@ export async function PUT(request: Request) {
       .update({
         title,
         content,
-        updated_at: new Date()
+        updatedAt: new Date().toISOString()
       })
       .eq('id', id)
       .select(`
-        id,
-        title,
-        content,
-        created_at,
-        authorid,
-        User:authorid (
+        *,
+        User:authorId (
           id,
           fullName
         )
@@ -208,22 +174,10 @@ export async function PUT(request: Request) {
       )
     }
 
-    // Transform the response to match the expected format
-    const formattedBlog = {
-      id: blog.id,
-      title: blog.title,
-      content: blog.content,
-      createdAt: blog.created_at,
-      author: blog.User ? {
-        id: blog.User.id,
-        name: blog.User.fullName
-      } : {
-        id: 'unknown',
-        name: 'مجهول'
-      }
-    }
-
-    return NextResponse.json(formattedBlog)
+    return NextResponse.json({
+      ...blog,
+      author: blog.User
+    })
   } catch (error) {
     console.error('Error updating blog:', error)
     return NextResponse.json(
