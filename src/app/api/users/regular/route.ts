@@ -16,7 +16,7 @@ export async function GET() {
     // Fetch all users with role REGULAR
     const { data: users, error } = await supabase
       .from('User')
-      .select('id, fullName as name, email')
+      .select('id, fullName, email')
       .eq('role', 'REGULAR')
       .order('fullName', { ascending: true })
 
@@ -28,11 +28,6 @@ export async function GET() {
       )
     }
 
-    return NextResponse.json({ users })
-  } catch (error) {
-    console.error('Error in regular users route:', error)
-    return NextResponse.json(
-      { error: 'حدث خطأ في الخادم' },
     // Format the response to match the expected structure
     const formattedUsers = users.map(user => ({
       id: user.id,
@@ -42,9 +37,9 @@ export async function GET() {
 
     return NextResponse.json({ users: formattedUsers })
   } catch (error) {
-    console.error('Error in users route:', error)
+    console.error('Error in regular users route:', error)
     return NextResponse.json(
-      { error: 'حدث خطأ أثناء جلب المستخدمين' },
+      { error: 'حدث خطأ في الخادم' },
       { status: 500 }
     )
   }
