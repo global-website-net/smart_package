@@ -57,7 +57,7 @@ export default function ContactPage() {
       <Header />
       <div className="pt-24 pb-12">
         <div className="max-w-6xl mx-auto px-4">
-          <h1 className="text-3xl font-bold text-center mb-8">اتصل بنا</h1>
+          <h1 className="text-3xl font-bold text-center mb-8">التواصل</h1>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             <div className="bg-white p-6 rounded-lg shadow-md text-center">

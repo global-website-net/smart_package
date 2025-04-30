@@ -119,6 +119,9 @@ export async function PUT(request: Request) {
     // Verify current password
     if (currentPassword) {
       try {
+        if (typeof currentPassword !== 'string' || typeof existingUser.password !== 'string') {
+          return NextResponse.json({ error: 'بيانات غير صالحة' }, { status: 400 })
+        }
         const isValid = await bcrypt.compare(currentPassword, existingUser.password)
         if (!isValid) {
           return NextResponse.json({ error: 'كلمة المرور الحالية غير صحيحة' }, { status: 400 })

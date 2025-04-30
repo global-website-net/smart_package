@@ -96,7 +96,15 @@ export default function MyPackagesPage() {
       
       <main className="p-4 pt-24">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold text-center mb-8">تتبع الطرود</h1>
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold mb-6">تتبع الطرود</h1>
+            <div className="flex justify-center items-center">
+              <div className="relative w-32 sm:w-48 md:w-64">
+                <div className="w-full h-0.5 bg-green-500"></div>
+                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
+              </div>
+            </div>
+          </div>
 
           {error && (
             <div className="bg-red-50 text-red-800 p-4 rounded-md mb-8">

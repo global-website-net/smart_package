@@ -63,17 +63,7 @@ export default function WalletPage() {
   const handlePaymentSuccess = (amount: number) => {
     setWalletData(prev => ({
       ...prev,
-      balance: prev.balance + amount,
-      transactions: [
-        {
-          id: Date.now().toString(), // Temporary ID until page refresh
-          amount,
-          type: 'CREDIT',
-          reason: 'إيداع عبر البطاقة الائتمانية',
-          createdAt: new Date().toISOString()
-        },
-        ...prev.transactions
-      ]
+      balance: prev.balance + amount
     }))
     setShowPaymentWizard(false)
   }

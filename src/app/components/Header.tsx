@@ -177,7 +177,7 @@ export default function Header() {
                       className="block px-4 py-2 text-sm hover:bg-gray-100"
                       onClick={() => setIsUserMenuOpen(false)}
                     >
-                      المدونة
+                      بلوج
                     </Link>
                     
                     <button

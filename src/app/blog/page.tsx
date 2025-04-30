@@ -150,7 +150,7 @@ export default function BlogPage() {
       <main className="p-4 pt-24">
         <div className="max-w-4xl mx-auto">
           <div className="flex flex-col items-center mb-8">
-            <h1 className="text-4xl font-bold mb-6">المدونة</h1>
+            <h1 className="text-4xl font-bold mb-6">بلوج</h1>
             <div className="flex justify-center items-center">
               <div className="relative w-32 sm:w-48 md:w-64">
                 <div className="w-full h-0.5 bg-green-500"></div>

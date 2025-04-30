@@ -10,7 +10,6 @@ export default function CreateBlogPost() {
   const { data: session, status } = useSession()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
-  const [itemLink, setItemLink] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -40,16 +39,14 @@ export default function CreateBlogPost() {
     setLoading(true)
 
     try {
-      const response = await fetch('/api/blog/create', {
+      const response = await fetch('/api/blog', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           title,
-          content,
-          itemLink,
-          authorId: session?.user?.id
+          content
         }),
       })
 
@@ -73,7 +70,15 @@ export default function CreateBlogPost() {
       
       <main className="p-4 pt-24">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8">إنشاء مقال جديد</h1>
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold mb-6">إنشاء مقال جديد</h1>
+            <div className="flex justify-center items-center">
+              <div className="relative w-32 sm:w-48 md:w-64">
+                <div className="w-full h-0.5 bg-green-500"></div>
+                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
+              </div>
+            </div>
+          </div>
 
           {error && (
             <div className="bg-red-50 text-red-800 p-4 rounded-md mb-6">
@@ -93,20 +98,6 @@ export default function CreateBlogPost() {
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                 required
-              />
-            </div>
-
-            <div className="mb-6">
-              <label htmlFor="itemLink" className="block text-sm font-medium text-gray-700 mb-1">
-                رابط المنتج
-              </label>
-              <input
-                type="url"
-                id="itemLink"
-                value={itemLink}
-                onChange={(e) => setItemLink(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="https://"
               />
             </div>
 
@@ -139,7 +130,6 @@ export default function CreateBlogPost() {
                 إلغاء
               </button>
             </div>
-
           </form>
         </div>
       </main>

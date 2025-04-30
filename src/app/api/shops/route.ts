@@ -10,28 +10,17 @@ export async function GET() {
       return NextResponse.json({ error: 'غير مصرح لك' }, { status: 401 })
     }
 
-    // Check if user is admin or owner
-    const { data: userData, error: userError } = await supabase
-      .from('User')
-      .select('role')
-      .eq('email', session.user.email)
-      .single()
-
-    if (userError) {
-      console.error('Error fetching user role:', userError)
-      return NextResponse.json({ error: 'حدث خطأ في التحقق من الصلاحيات' }, { status: 500 })
-    }
-
-    if (userData.role !== 'ADMIN' && userData.role !== 'OWNER') {
+    // Check if user is admin or owner using the session role
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER') {
       return NextResponse.json({ error: 'غير مصرح لك' }, { status: 403 })
     }
 
     // Fetch SHOP accounts from User table
     const { data, error } = await supabase
       .from('User')
-      .select('id, fullName')
+      .select('id, fullname')
       .eq('role', 'SHOP')
-      .order('fullName', { ascending: true })
+      .order('fullname', { ascending: true })
 
     if (error) {
       console.error('Error fetching shops:', error)
@@ -41,14 +30,14 @@ export async function GET() {
     // Transform the data to match the expected format
     const shops = data.map(user => ({
       id: user.id,
-      name: user.fullName
+      name: user.fullname
     }))
 
     return NextResponse.json(shops || [])
   } catch (error) {
     console.error('Error fetching shops:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'حدث خطأ أثناء جلب المتاجر' },
       { status: 500 }
     )
   }
