@@ -185,25 +185,27 @@ export async function PUT(request: Request) {
       .single()
 
     if (updateError) {
-      console.error('Error updating user:', updateError)
+      console.error('Error updating user profile:', updateError)
       return NextResponse.json({ error: 'حدث خطأ أثناء تحديث الملف الشخصي' }, { status: 500 })
     }
 
-    // Transform the response to match the frontend's expected format
-    const transformedUser = {
-      id: updatedUser.id,
-      email: updatedUser.email,
-      fullName: updatedUser.fullName,
-      role: updatedUser.role,
-      governorate: updatedUser.governorate,
-      town: updatedUser.town,
-      phonePrefix: updatedUser.phonePrefix,
-      phoneNumber: updatedUser.phoneNumber,
-      createdAt: updatedUser.createdAt,
-      updatedAt: updatedUser.updatedAt
+    // Update user metadata in Supabase Auth
+    const { error: authUpdateError } = await supabase.auth.updateUser({
+      data: {
+        fullName: updateData.fullName,
+        governorate: updateData.governorate,
+        town: updateData.town,
+        phonePrefix: updateData.phonePrefix,
+        phoneNumber: updateData.phoneNumber
+      }
+    })
+
+    if (authUpdateError) {
+      console.error('Error updating auth user metadata:', authUpdateError)
+      return NextResponse.json({ error: 'حدث خطأ أثناء تحديث بيانات المصادقة' }, { status: 500 })
     }
 
-    return NextResponse.json(transformedUser)
+    return NextResponse.json(updatedUser)
   } catch (error) {
     console.error('Error updating user profile:', error)
     return NextResponse.json(

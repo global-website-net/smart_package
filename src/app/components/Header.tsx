@@ -216,15 +216,7 @@ export default function Header() {
                       </Link>
                     )}
                     
-                    {isAdmin ? (
-                      <Link 
-                        href="/tracking" 
-                        className="block px-4 py-2 text-sm hover:bg-gray-100"
-                        onClick={() => setIsUserMenuOpen(false)}
-                      >
-                        ادارة الطلبات
-                      </Link>
-                    ) : isRegularUser && (
+                    {!isAdmin && isRegularUser && (
                       <Link 
                         href="/tracking" 
                         className="block px-4 py-2 text-sm hover:bg-gray-100"
@@ -296,16 +288,7 @@ export default function Header() {
                       المحفظة
                     </Link>
                   )}
-                  {isAdmin && (
-                    <Link
-                      href="/tracking"
-                      className="text-left hover:text-green-500 transition-colors"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      ادارة الطلبات
-                    </Link>
-                  )}
-                  {!isAdmin && (
+                  {!isAdmin && isRegularUser && (
                     <Link
                       href="/tracking"
                       className="text-left hover:text-green-500 transition-colors"
