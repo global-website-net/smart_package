@@ -64,7 +64,7 @@ model User {
   packages      Package[]  @relation("UserPackages")
   shopPackages  Package[]  @relation("ShopPackages")
   wallet        Wallet?
-  blogs         Blog[]
+  blogPosts     BlogPost[]
 }
 
 model VerificationToken {
@@ -108,13 +108,15 @@ model Transaction {
   createdAt   DateTime @default(now())
 }
 
-model Blog {
+model BlogPost {
   id        String   @id @default(cuid())
   title     String
   content   String   @db.Text
-  itemLink  String?
+  itemlink  String?
   authorId  String
   author    User     @relation(fields: [authorId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("BlogPost")
 }

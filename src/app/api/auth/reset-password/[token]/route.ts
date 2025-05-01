@@ -2,16 +2,18 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 
-type Props = {
-  params: { token: string }
+type RouteHandlerContext = {
+  params: {
+    token: string
+  }
 }
 
 export async function GET(
   request: NextRequest,
-  { params }: Props
-): Promise<NextResponse> {
+  context: RouteHandlerContext
+) {
   try {
-    const { token } = params
+    const { token } = context.params
 
     // Find user with this reset token
     const user = await prisma.user.findFirst({
@@ -42,10 +44,10 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: Props
-): Promise<NextResponse> {
+  context: RouteHandlerContext
+) {
   try {
-    const { token } = params
+    const { token } = context.params
     const { password } = await request.json()
 
     if (!password) {
