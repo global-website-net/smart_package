@@ -8,12 +8,17 @@ type UserWithResetToken = {
   resetTokenExpiry: Date | null;
 }
 
+interface RouteSegmentProps {
+  params: { token: string }
+  searchParams: { [key: string]: string | string[] | undefined }
+}
+
 export async function GET(
   request: NextRequest,
-  context: { params: { token: string } }
+  props: RouteSegmentProps
 ): Promise<NextResponse> {
   try {
-    const { token } = context.params
+    const { token } = props.params
 
     // Find user with this reset token using raw query
     const users = await prisma.$queryRaw<UserWithResetToken[]>`
@@ -43,10 +48,10 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  context: { params: { token: string } }
+  props: RouteSegmentProps
 ): Promise<NextResponse> {
   try {
-    const { token } = context.params
+    const { token } = props.params
     const { password } = await request.json()
 
     if (!password) {
