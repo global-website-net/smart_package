@@ -44,23 +44,6 @@ export async function POST(request: Request) {
       )
     }
 
-    // Generate QR code for the package
-    const qrCodeData = JSON.stringify({
-      trackingNumber,
-      status,
-      shopId,
-      userId,
-      timestamp: new Date().toISOString()
-    })
-    
-    let qrCode = ''
-    try {
-      qrCode = await QRCode.toDataURL(qrCodeData)
-    } catch (qrError) {
-      console.error('Error generating QR code:', qrError)
-      // Continue without QR code if generation fails
-    }
-
     // Create the package
     const newPackage = await prisma.package.create({
       data: {
@@ -68,7 +51,6 @@ export async function POST(request: Request) {
         status,
         userId,
         shopId,
-        qrCode,
       },
     })
 
