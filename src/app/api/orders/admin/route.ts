@@ -14,9 +14,15 @@ export async function GET() {
       )
     }
 
-    const orders = await prisma.order.findMany({
+    const packages = await prisma.package.findMany({
       include: {
         user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+        shop: {
           select: {
             name: true,
             email: true,
@@ -28,9 +34,9 @@ export async function GET() {
       },
     })
 
-    return NextResponse.json({ orders })
+    return NextResponse.json({ packages })
   } catch (error) {
-    console.error('Error fetching orders:', error)
+    console.error('Error fetching packages:', error)
     return NextResponse.json(
       { message: 'حدث خطأ أثناء جلب الطلبات' },
       { status: 500 }
