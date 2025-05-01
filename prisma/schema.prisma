@@ -64,7 +64,7 @@ model User {
   packages      Package[]  @relation("UserPackages")
   shopPackages  Package[]  @relation("ShopPackages")
   wallet        Wallet?
-  blogPosts     Blog[]
+  blogs         Blog[]
   orders        Order[]
 }
 

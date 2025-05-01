@@ -5,12 +5,13 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { signOut, useSession } from 'next-auth/react'
 import { UserRole } from '@prisma/client'
+import MobileHeaderIcons from './MobileHeaderIcons'
 
 // Define the extended session user type
 interface ExtendedSessionUser {
   id: string
   email: string
-  name: string
+  fullName: string
   role: UserRole
   user_metadata?: {
     full_name?: string
@@ -57,7 +58,7 @@ export default function Header() {
   
   // Get user's full name from metadata or fallback to email
   const userFullName = (session?.user as ExtendedSessionUser)?.user_metadata?.full_name || 
-                      session?.user?.name || 
+                      session?.user?.fullName || 
                       session?.user?.email?.split('@')[0] || 
                       'User'
   
@@ -67,119 +68,68 @@ export default function Header() {
     <header className="bg-black text-white fixed w-full top-0 z-50">
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex justify-between items-center h-20">
-          {/* Mobile Menu Button - Right Side */}
+          {/* Mobile Menu Button - Left Side */}
           <div className="md:hidden order-1">
-            {isLoggedIn ? (
-              <button
-                className="p-2"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
+            <button
+              className="p-2"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="white"
+                viewBox="0 0 24 24"
               >
-                <svg
-                  className="w-6 h-6"
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            </button>
+          </div>
+
+          {/* Center Logo */}
+          <div className="flex items-center justify-center order-2">
+            <Link href="/" className="flex items-center space-x-2 rtl:space-x-reverse">
+              <span className="text-sm md:text-xl">SMART PACKAGE</span>
+              <svg 
+                className="w-6 h-6 text-green-500" 
+                viewBox="0 0 24 24"
+              >
+                <path 
                   fill="none"
-                  stroke="white"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              </button>
-            ) : !isLoginPage && (
+                  stroke="currentColor" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M12 21s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 7.2c0 7.3-8 11.8-8 11.8z"
+                />
+                <circle 
+                  cx="12" 
+                  cy="10" 
+                  r="3" 
+                  fill="white" 
+                  stroke="currentColor"
+                  strokeWidth={2}
+                />
+              </svg>
+            </Link>
+          </div>
+
+          {/* Mobile Icons - Right Side */}
+          {isLoggedIn ? (
+            <div className="md:hidden order-3">
+              <MobileHeaderIcons isRegularUser={isRegularUser} />
+            </div>
+          ) : !isLoginPage && (
+            <div className="md:hidden order-3">
               <Link
                 href="/auth/login"
                 className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
               >
                 تسجيل الدخول
-              </Link>
-            )}
-          </div>
-
-          {/* Center Logo */}
-          <Link href="/" className="flex items-center space-x-2 rtl:space-x-reverse text-base md:text-xl font-bold order-2">
-            <span className="text-sm md:text-xl">SMART PACKAGE</span>
-            <svg 
-              className="w-6 h-6 text-green-500" 
-              viewBox="0 0 24 24"
-            >
-              <path 
-                fill="none"
-                stroke="currentColor" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M12 21s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 7.2c0 7.3-8 11.8-8 11.8z"
-              />
-              <circle 
-                cx="12" 
-                cy="10" 
-                r="3" 
-                fill="white" 
-                stroke="currentColor"
-                strokeWidth={2}
-              />
-            </svg>
-          </Link>
-
-          {/* Mobile Icons - Left Side */}
-          {isLoggedIn && (
-            <div className="md:hidden flex items-center space-x-4 rtl:space-x-reverse order-3">
-              <Link 
-                href="/wallet"
-                className="text-white hover:text-green-500 transition-colors"
-              >
-                <svg 
-                  className="w-6 h-6" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-                  />
-                </svg>
-              </Link>
-
-              <Link 
-                href="/account"
-                className="text-white hover:text-green-500 transition-colors"
-              >
-                <svg 
-                  className="w-6 h-6" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" 
-                  />
-                </svg>
-              </Link>
-
-              <Link 
-                href="/new-order"
-                className="text-white hover:text-green-500 transition-colors bg-green-500 rounded-full p-2 flex items-center justify-center"
-              >
-                <svg 
-                  className="w-5 h-5" 
-                  fill="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path 
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M12 4a1 1 0 011 1v6h6a1 1 0 110 2h-6v6a1 1 0 11-2 0v-6H5a1 1 0 110-2h6V5a1 1 0 011-1z"
-                  />
-                </svg>
               </Link>
             </div>
           )}

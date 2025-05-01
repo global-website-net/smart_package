@@ -44,7 +44,7 @@ export default function BlogPage() {
     if (!postToDelete) return
 
     try {
-      const response = await fetch(`/api/blog?id=${postToDelete}`, {
+      const response = await fetch(`/api/blog/${postToDelete}`, {
         method: 'DELETE',
       })
 

@@ -16,13 +16,13 @@ export async function GET(request: Request) {
 
     // Create a new PrismaClient instance for this request
     const post = await prisma.$transaction(async (tx) => {
-      return tx.blog.findUnique({
+      return tx.blogPost.findUnique({
         where: { id },
         include: {
           author: {
             select: {
               id: true,
-              name: true,
+              fullName: true,
               email: true,
             },
           },
@@ -71,7 +71,7 @@ export async function PUT(request: Request) {
 
     // Use transaction for the update operation
     const updatedPost = await prisma.$transaction(async (tx) => {
-      return tx.blog.update({
+      return tx.blogPost.update({
         where: { id },
         data: {
           title,
@@ -83,7 +83,7 @@ export async function PUT(request: Request) {
           author: {
             select: {
               id: true,
-              name: true,
+              fullName: true,
               email: true,
             },
           },
@@ -96,6 +96,42 @@ export async function PUT(request: Request) {
     console.error('Error in PUT /api/blog/[id]:', error)
     return NextResponse.json(
       { error: 'حدث خطأ أثناء تحديث المقال' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const id = request.url.split('/').pop();
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER')) {
+      return NextResponse.json(
+        { error: 'غير مصرح لك بحذف المقال' },
+        { status: 401 }
+      )
+    }
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'معرف المقال مطلوب' },
+        { status: 400 }
+      )
+    }
+
+    // Use transaction for the delete operation
+    await prisma.$transaction(async (tx) => {
+      return tx.blogPost.delete({
+        where: { id }
+      })
+    })
+
+    return NextResponse.json({ message: 'تم حذف المقال بنجاح' })
+  } catch (error) {
+    console.error('Error in DELETE /api/blog/[id]:', error)
+    return NextResponse.json(
+      { error: 'حدث خطأ أثناء حذف المقال' },
       { status: 500 }
     )
   }

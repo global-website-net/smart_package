@@ -26,7 +26,7 @@ declare module "next-auth" {
     user: {
       id: string
       email: string
-      name: string
+      fullName: string
       role: UserRole
     }
   }
@@ -34,7 +34,7 @@ declare module "next-auth" {
   interface User {
     id: string
     email: string
-    name: string
+    fullName: string
     role: UserRole
   }
 }
@@ -116,7 +116,7 @@ export const authOptions: NextAuthOptions = {
           return {
             id: userData.id,
             email: userData.email,
-            name: userData.fullName,
+            fullName: userData.fullName,
             role: userData.role
           }
         } catch (error) {

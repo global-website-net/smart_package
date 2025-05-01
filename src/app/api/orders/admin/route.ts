@@ -14,24 +14,20 @@ export async function GET() {
       )
     }
 
-    const packages = await prisma.package.findMany({
+    const orders = await prisma.order.findMany({
       select: {
         id: true,
-        trackingNumber: true,
+        purchaseSite: true,
+        purchaseLink: true,
+        phoneNumber: true,
+        notes: true,
+        additionalInfo: true,
         status: true,
         createdAt: true,
         updatedAt: true,
-        userId: true,
-        shopId: true,
         user: {
           select: {
-            name: true,
-            email: true,
-          },
-        },
-        shop: {
-          select: {
-            name: true,
+            fullName: true,
             email: true,
           },
         },
@@ -41,9 +37,9 @@ export async function GET() {
       },
     })
 
-    return NextResponse.json({ packages })
+    return NextResponse.json(orders)
   } catch (error) {
-    console.error('Error fetching packages:', error)
+    console.error('Error fetching orders:', error)
     return NextResponse.json(
       { message: 'حدث خطأ أثناء جلب الطلبات' },
       { status: 500 }
