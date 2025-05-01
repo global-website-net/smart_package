@@ -64,7 +64,7 @@ model User {
   packages      Package[]  @relation("UserPackages")
   shopPackages  Package[]  @relation("ShopPackages")
   wallet        Wallet?
-  blogs         Blog[]
+  blogPosts blogPost[]
   orders        Order[]
 }
 
@@ -109,7 +109,7 @@ model Transaction {
   createdAt   DateTime @default(now())
 }
 
-model Blog {
+model blogPost {
   id        String   @id @default(cuid())
   title     String
   content   String   @db.Text
