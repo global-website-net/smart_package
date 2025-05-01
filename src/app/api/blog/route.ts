@@ -3,20 +3,6 @@ import { supabase } from '@/lib/supabase'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../auth/[...nextauth]/auth'
 
-interface UserData {
-  id: string
-  fullName: string
-}
-
-interface BlogPostData {
-  id: string
-  title: string
-  content: string
-  createdAt: string
-  itemlink?: string
-  User: UserData | null
-}
-
 // Get all blogs
 export async function GET() {
   try {
@@ -37,7 +23,7 @@ export async function GET() {
 
     if (error) throw error
 
-    const formattedBlogs = (blogs as BlogPostData[]).map(blog => ({
+    const formattedBlogs = (blogs || []).map((blog: any) => ({
       id: blog.id,
       title: blog.title,
       content: blog.content,
@@ -116,8 +102,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({
-      ...blog,
-      author: blog.User
+      ...blog[0],
+      author: userData
     })
   } catch (error) {
     console.error('Error creating blog:', error)
