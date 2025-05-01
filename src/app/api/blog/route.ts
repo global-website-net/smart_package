@@ -3,17 +3,18 @@ import { supabase } from '@/lib/supabase'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../auth/[...nextauth]/auth'
 
-interface BlogPost {
+interface UserData {
+  id: string
+  fullName: string
+}
+
+interface BlogPostData {
   id: string
   title: string
   content: string
   createdAt: string
-  authorId: string
   itemlink?: string
-  User: {
-    id: string
-    fullName: string
-  }
+  User: UserData | null
 }
 
 // Get all blogs
@@ -36,7 +37,7 @@ export async function GET() {
 
     if (error) throw error
 
-    const formattedBlogs = blogs.map(blog => ({
+    const formattedBlogs = (blogs as BlogPostData[]).map(blog => ({
       id: blog.id,
       title: blog.title,
       content: blog.content,
@@ -139,7 +140,7 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json()
-    const { id, title, content } = body
+    const { id, title, content, itemLink } = body
 
     // Check if user is admin or owner
     if (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER') {
@@ -154,6 +155,7 @@ export async function PUT(request: Request) {
       .update({
         title,
         content,
+        itemlink: itemLink,
         updatedAt: new Date().toISOString()
       })
       .eq('id', id)
