@@ -10,9 +10,10 @@ interface User {
 
 interface CreatePackageFormProps {
   onClose: () => void
+  onSuccess: (newPackage: any) => void
 }
 
-export default function CreatePackageForm({ onClose }: CreatePackageFormProps) {
+export default function CreatePackageForm({ onClose, onSuccess }: CreatePackageFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [shops, setShops] = useState<User[]>([])
@@ -71,7 +72,8 @@ export default function CreatePackageForm({ onClose }: CreatePackageFormProps) {
         throw new Error(errorData.error || 'Failed to create package')
       }
 
-      onClose()
+      const newPackage = await response.json()
+      onSuccess(newPackage)
     } catch (error) {
       console.error('Error creating package:', error)
       setError('حدث خطأ أثناء إنشاء الطرد')
