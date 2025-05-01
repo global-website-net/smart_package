@@ -2,22 +2,25 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 
+type RouteHandlerParams = {
+  params: {
+    token: string
+  }
+}
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { token: string } }
-) {
+  { params }: RouteHandlerParams
+): Promise<NextResponse> {
   try {
     const { token } = params
 
-    // Find user with this reset token
-    const user = await prisma.user.findFirst({
-      where: {
-        resetToken: token,
-        resetTokenExpiry: {
-          gt: new Date(), // Token hasn't expired
-        },
-      },
-    })
+    // Find user with this reset token using raw query
+    const user = await prisma.$queryRaw`
+      SELECT * FROM "User"
+      WHERE "resetToken" = ${token}
+      AND "resetTokenExpiry" > NOW()
+    `
 
     if (!user) {
       return NextResponse.json(
@@ -38,8 +41,8 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { token: string } }
-) {
+  { params }: RouteHandlerParams
+): Promise<NextResponse> {
   try {
     const { token } = params
     const { password } = await request.json()
@@ -51,15 +54,12 @@ export async function POST(
       )
     }
 
-    // Find user with this reset token
-    const user = await prisma.user.findFirst({
-      where: {
-        resetToken: token,
-        resetTokenExpiry: {
-          gt: new Date(), // Token hasn't expired
-        },
-      },
-    })
+    // Find user with this reset token using raw query
+    const user = await prisma.$queryRaw`
+      SELECT * FROM "User"
+      WHERE "resetToken" = ${token}
+      AND "resetTokenExpiry" > NOW()
+    `
 
     if (!user) {
       return NextResponse.json(
@@ -71,15 +71,14 @@ export async function POST(
     // Hash the new password
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // Update user's password and clear reset token
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        password: hashedPassword,
-        resetToken: null,
-        resetTokenExpiry: null,
-      },
-    })
+    // Update user's password and clear reset token using raw query
+    await prisma.$executeRaw`
+      UPDATE "User"
+      SET "password" = ${hashedPassword},
+          "resetToken" = NULL,
+          "resetTokenExpiry" = NULL
+      WHERE "id" = ${user.id}
+    `
 
     return NextResponse.json(
       { message: 'تم إعادة تعيين كلمة المرور بنجاح' },
