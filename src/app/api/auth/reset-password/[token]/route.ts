@@ -4,10 +4,10 @@ import bcrypt from 'bcryptjs'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { token: string } }
+  context: { params: { token: string } }
 ) {
   try {
-    const { token } = params
+    const { token } = context.params
 
     // Find user with this reset token
     const user = await prisma.user.findFirst({
@@ -38,10 +38,10 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { token: string } }
+  context: { params: { token: string } }
 ) {
   try {
-    const { token } = params
+    const { token } = context.params
     const { password } = await request.json()
 
     if (!password) {
