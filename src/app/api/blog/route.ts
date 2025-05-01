@@ -3,6 +3,25 @@ import { supabase } from '@/lib/supabase'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../auth/[...nextauth]/auth'
 
+// Define the database table structure
+interface BlogPost {
+  id: string
+  title: string
+  content: string
+  authorId: string
+  createdAt: string
+  updatedAt: string
+  itemlink?: string
+}
+
+// Define the joined response type
+interface BlogPostWithUser extends BlogPost {
+  User: {
+    id: string
+    fullName: string
+  }
+}
+
 // Get all blogs
 export async function GET() {
   try {
@@ -91,7 +110,14 @@ export async function POST(request: Request) {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       })
-      .select()
+      .select(`
+        *,
+        User:authorId (
+          id,
+          fullName
+        )
+      `)
+      .single()
 
     if (error) {
       console.error('Error creating blog:', error)
@@ -102,8 +128,18 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({
-      ...blog[0],
-      author: userData
+      id: blog.id,
+      title: blog.title,
+      content: blog.content,
+      createdAt: blog.createdAt,
+      itemLink: blog.itemlink,
+      author: blog.User ? {
+        id: blog.User.id,
+        name: blog.User.fullName
+      } : {
+        id: 'unknown',
+        name: 'مجهول'
+      }
     })
   } catch (error) {
     console.error('Error creating blog:', error)
@@ -163,8 +199,18 @@ export async function PUT(request: Request) {
     }
 
     return NextResponse.json({
-      ...blog,
-      author: blog.User
+      id: blog.id,
+      title: blog.title,
+      content: blog.content,
+      createdAt: blog.createdAt,
+      itemLink: blog.itemlink,
+      author: blog.User ? {
+        id: blog.User.id,
+        name: blog.User.fullName
+      } : {
+        id: 'unknown',
+        name: 'مجهول'
+      }
     })
   } catch (error) {
     console.error('Error updating blog:', error)

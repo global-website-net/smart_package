@@ -49,18 +49,19 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String     @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?    @unique
   emailVerified DateTime?
   image         String?
   fullName      String
-  role          String    @default("USER")
+  role          String     @default("USER")
   accounts      Account[]
   sessions      Session[]
-  packages      Package[] @relation("UserPackages")
-  shopPackages  Package[] @relation("ShopPackages")
+  packages      Package[]  @relation("UserPackages")
+  shopPackages  Package[]  @relation("ShopPackages")
   wallet        Wallet?
+  blogPosts     BlogPost[]
 }
 
 model VerificationToken {
@@ -102,4 +103,17 @@ model Transaction {
   reason      String
   wallet      Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
+}
+
+model BlogPost {
+  id        String   @id @default(cuid())
+  title     String
+  content   String   @db.Text
+  itemlink  String?
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("BlogPost")
 }

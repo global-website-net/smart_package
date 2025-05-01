@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
+import prisma from '@/lib/prisma'
 
 export async function GET(request: Request) {
   try {
@@ -64,8 +64,17 @@ export async function PUT(request: Request) {
       data: {
         title,
         content,
-        itemLink,
+        itemlink: itemLink,
         updatedAt: new Date(),
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
     })
 
