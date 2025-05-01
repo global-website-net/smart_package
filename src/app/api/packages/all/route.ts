@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]/auth'
-import { supabase } from '@/lib/supabase'
+import prisma from '@/lib/prisma'
 
 interface PackageData {
   id: string
@@ -45,13 +45,6 @@ export async function GET() {
     }
 
     // Check if user is admin or owner
-    if (!session.user.role) {
-      return NextResponse.json(
-        { error: 'لم يتم العثور على صلاحيات المستخدم' },
-        { status: 403 }
-      )
-    }
-
     if (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER') {
       return NextResponse.json(
         { error: 'غير مصرح لك بالوصول' },
@@ -59,46 +52,36 @@ export async function GET() {
       )
     }
 
-    // First, fetch the packages
-    const { data: packages, error: packagesError } = await supabase
-      .from('Package')
-      .select(`
-        id,
-        trackingNumber,
-        status,
-        createdAt,
-        updatedAt,
-        user:userId (
-          fullName,
-          email
-        ),
-        shop:shopId (
-          fullName
-        )
-      `)
-      .order('createdAt', { ascending: false })
+    // Fetch packages using Prisma
+    const packages = await prisma.package.findMany({
+      select: {
+        id: true,
+        trackingNumber: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        user: {
+          select: {
+            fullName: true,
+            email: true,
+          },
+        },
+        shop: {
+          select: {
+            fullName: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    })
 
-    if (packagesError) {
-      console.error('Error fetching packages:', packagesError)
-      return NextResponse.json(
-        { error: 'حدث خطأ أثناء جلب الشحنات' },
-        { status: 500 }
-      )
-    }
-
-    // Transform the data to match the expected format
-    const transformedPackages = (packages as RawPackageData[]).map(pkg => ({
-      ...pkg,
-      user: pkg.user[0],
-      shop: pkg.shop[0],
-      currentLocation: null
-    }))
-
-    return NextResponse.json(transformedPackages)
+    return NextResponse.json(packages)
   } catch (error) {
-    console.error('Error in packages/all route:', error)
+    console.error('Error fetching packages:', error)
     return NextResponse.json(
-      { error: 'حدث خطأ أثناء جلب الشحنات' },
+      { error: 'حدث خطأ أثناء جلب الطلبات' },
       { status: 500 }
     )
   }

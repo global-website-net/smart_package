@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]/auth'
-import { supabase } from '@/lib/supabase'
+import prisma from '@/lib/prisma'
 import { v4 as uuidv4 } from 'uuid'
 import QRCode from 'qrcode'
 
@@ -16,13 +16,17 @@ export async function POST(request: Request) {
     }
 
     // Get user from database to check role
-    const { data: user, error: userError } = await supabase
-      .from('User')
-      .select('id, role')
-      .eq('email', session.user.email)
-      .single()
+    const user = await prisma.user.findUnique({
+      where: {
+        email: session.user.email,
+      },
+      select: {
+        id: true,
+        role: true,
+      },
+    })
 
-    if (userError || !user) {
+    if (!user) {
       return NextResponse.json(
         { error: 'لم يتم العثور على المستخدم' },
         { status: 404 }
@@ -30,10 +34,10 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { trackingNumber, status, shopId } = body
+    const { trackingNumber, status, shopId, userId } = body
 
     // Validate required fields
-    if (!trackingNumber || !status || !shopId) {
+    if (!trackingNumber || !status || !shopId || !userId) {
       return NextResponse.json(
         { error: 'جميع الحقول مطلوبة' },
         { status: 400 }
@@ -45,7 +49,7 @@ export async function POST(request: Request) {
       trackingNumber,
       status,
       shopId,
-      userId: user.id,
+      userId,
       timestamp: new Date().toISOString()
     })
     
@@ -57,37 +61,22 @@ export async function POST(request: Request) {
       // Continue without QR code if generation fails
     }
 
-    // Create package in database with generated UUID
-    const { data: packageData, error: packageError } = await supabase
-      .from('Package')
-      .insert([
-        {
-          id: uuidv4(),
-          trackingNumber,
-          status,
-          shopId,
-          userId: user.id, // Use the authenticated user's ID
-          qrCode,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
-      ])
-      .select()
-      .single()
+    // Create the package
+    const newPackage = await prisma.package.create({
+      data: {
+        trackingNumber,
+        status,
+        userId,
+        shopId,
+        qrCode,
+      },
+    })
 
-    if (packageError) {
-      console.error('Error creating package:', packageError)
-      return NextResponse.json(
-        { error: 'حدث خطأ أثناء إنشاء الشحنة' },
-        { status: 500 }
-      )
-    }
-
-    return NextResponse.json(packageData)
+    return NextResponse.json(newPackage)
   } catch (error) {
-    console.error('Error in create package route:', error)
+    console.error('Error creating package:', error)
     return NextResponse.json(
-      { error: 'حدث خطأ في الخادم' },
+      { error: 'حدث خطأ أثناء إنشاء الطرد' },
       { status: 500 }
     )
   }

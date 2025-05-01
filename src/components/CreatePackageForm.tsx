@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
 
 interface User {
   id: string
@@ -30,25 +29,23 @@ export default function CreatePackageForm({ onClose }: CreatePackageFormProps) {
     const fetchUsers = async () => {
       try {
         // Fetch shops (users with SHOP role)
-        const { data: shopData, error: shopError } = await supabase
-          .from('User')
-          .select('id, fullName, role')
-          .eq('role', 'SHOP')
-
-        if (shopError) throw shopError
-        setShops(shopData as User[] || [])
+        const shopsResponse = await fetch('/api/shops')
+        if (!shopsResponse.ok) {
+          throw new Error('Failed to fetch shops')
+        }
+        const shopsData = await shopsResponse.json()
+        setShops(shopsData)
 
         // Fetch regular users
-        const { data: userData, error: userError } = await supabase
-          .from('User')
-          .select('id, fullName, role')
-          .eq('role', 'REGULAR')
-
-        if (userError) throw userError
-        setUsers(userData as User[] || [])
+        const usersResponse = await fetch('/api/users/regular')
+        if (!usersResponse.ok) {
+          throw new Error('Failed to fetch users')
+        }
+        const usersData = await usersResponse.json()
+        setUsers(usersData)
       } catch (error) {
         console.error('Error fetching users:', error)
-        setError('حدث خطأ أثناء تحميل قائمة المستخدمين')
+        setError('حدث خطأ أثناء جلب البيانات')
       }
     }
 
@@ -74,17 +71,10 @@ export default function CreatePackageForm({ onClose }: CreatePackageFormProps) {
         throw new Error(errorData.error || 'Failed to create package')
       }
 
-      // Reset form and close modal
-      setFormData({
-        trackingNumber: '',
-        status: 'PENDING',
-        shopId: '',
-        userId: ''
-      })
       onClose()
-      window.location.reload() // Refresh the page to show new package
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'حدث خطأ أثناء إنشاء الشحنة')
+      console.error('Error creating package:', error)
+      setError('حدث خطأ أثناء إنشاء الطرد')
     } finally {
       setIsSubmitting(false)
     }
@@ -92,23 +82,16 @@ export default function CreatePackageForm({ onClose }: CreatePackageFormProps) {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
     const { name, value } = e.target
-    setFormData({ ...formData, [name]: value })
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">إضافة شحنة جديدة</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+        <h2 className="text-2xl font-bold mb-4">إنشاء طرد جديد</h2>
         
         {error && (
           <div className="bg-red-50 text-red-800 p-4 rounded-md mb-4">
@@ -116,33 +99,27 @@ export default function CreatePackageForm({ onClose }: CreatePackageFormProps) {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="trackingNumber" className="block text-sm font-medium text-gray-700 mb-1">
-              رقم التتبع
-            </label>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-2">رقم التتبع</label>
             <input
               type="text"
-              id="trackingNumber"
               name="trackingNumber"
               value={formData.trackingNumber}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
               required
+              className="w-full px-3 py-2 border rounded-md"
             />
           </div>
 
-          <div>
-            <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-              الحالة
-            </label>
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-2">الحالة</label>
             <select
-              id="status"
               name="status"
               value={formData.status}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
               required
+              className="w-full px-3 py-2 border rounded-md"
             >
               <option value="PENDING">قيد الانتظار</option>
               <option value="PROCESSING">قيد المعالجة</option>
@@ -152,20 +129,17 @@ export default function CreatePackageForm({ onClose }: CreatePackageFormProps) {
             </select>
           </div>
 
-          <div>
-            <label htmlFor="shopId" className="block text-sm font-medium text-gray-700 mb-1">
-              المتجر
-            </label>
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-2">المتجر</label>
             <select
-              id="shopId"
               name="shopId"
               value={formData.shopId}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
               required
+              className="w-full px-3 py-2 border rounded-md"
             >
               <option value="">اختر المتجر</option>
-              {shops.map((shop) => (
+              {shops.map(shop => (
                 <option key={shop.id} value={shop.id}>
                   {shop.fullName}
                 </option>
@@ -173,20 +147,17 @@ export default function CreatePackageForm({ onClose }: CreatePackageFormProps) {
             </select>
           </div>
 
-          <div>
-            <label htmlFor="userId" className="block text-sm font-medium text-gray-700 mb-1">
-              المستخدم
-            </label>
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-2">المستخدم</label>
             <select
-              id="userId"
               name="userId"
               value={formData.userId}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
               required
+              className="w-full px-3 py-2 border rounded-md"
             >
               <option value="">اختر المستخدم</option>
-              {users.map((user) => (
+              {users.map(user => (
                 <option key={user.id} value={user.id}>
                   {user.fullName}
                 </option>
@@ -198,14 +169,14 @@ export default function CreatePackageForm({ onClose }: CreatePackageFormProps) {
             <button
               type="button"
               onClick={onClose}
-              className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              className="px-4 py-2 text-gray-700 border rounded-md hover:bg-gray-100"
             >
               إلغاء
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
+              className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:opacity-50"
             >
               {isSubmitting ? 'جاري الحفظ...' : 'حفظ'}
             </button>

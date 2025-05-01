@@ -102,10 +102,10 @@ export default function Header() {
             ) : (
               <div className="flex items-center space-x-4 rtl:space-x-reverse">
                 <Link
-                  href="/auth/login"
+                  href="/prices"
                   className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 text-sm font-medium"
                 >
-                  تسجيل دخول
+                  أسعارنا
                 </Link>
                 <Link
                   href="/auth/signup"
@@ -255,11 +255,11 @@ export default function Header() {
           ) : (
             <>
               <Link
-                href="/auth/login"
+                href="/prices"
                 className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-green-600"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                تسجيل دخول
+                أسعارنا
               </Link>
               <Link
                 href="/auth/signup"

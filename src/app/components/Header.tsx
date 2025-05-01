@@ -67,9 +67,28 @@ export default function Header() {
     <header className="bg-black text-white fixed w-full top-0 z-50">
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex justify-between items-center h-20">
-          {/* Mobile Menu Button - Left Side */}
-          <div className="md:hidden order-3">
-            {!isLoggedIn && !isLoginPage && (
+          {/* Mobile Menu Button - Right Side */}
+          <div className="md:hidden order-1">
+            {isLoggedIn ? (
+              <button
+                className="p-2"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="white"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </button>
+            ) : !isLoginPage && (
               <Link
                 href="/auth/login"
                 className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
@@ -79,47 +98,35 @@ export default function Header() {
             )}
           </div>
 
-          {/* Logo with Location Icon - Center */}
-          <div className="hidden md:flex items-center order-3">
-            <Link 
-              href="/packages" 
-              className="text-white hover:text-green-500 transition-colors text-lg font-semibold border-b-2 border-transparent hover:border-green-500"
-            >
-              أسعارنا
-            </Link>
-          </div>
-
           {/* Center Logo */}
-          <div className="flex-1 flex justify-center order-2">
-            <Link href="/" className="flex items-center space-x-2 rtl:space-x-reverse text-base md:text-xl font-bold">
-              <span className="text-sm md:text-xl">SMART PACKAGE</span>
-              <svg 
-                className="w-6 h-6 text-green-500" 
-                viewBox="0 0 24 24"
-              >
-                <path 
-                  fill="none"
-                  stroke="currentColor" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M12 21s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 7.2c0 7.3-8 11.8-8 11.8z"
-                />
-                <circle 
-                  cx="12" 
-                  cy="10" 
-                  r="3" 
-                  fill="white" 
-                  stroke="currentColor"
-                  strokeWidth={2}
-                />
-              </svg>
-            </Link>
-          </div>
+          <Link href="/" className="flex items-center space-x-2 rtl:space-x-reverse text-base md:text-xl font-bold order-2">
+            <span className="text-sm md:text-xl">SMART PACKAGE</span>
+            <svg 
+              className="w-6 h-6 text-green-500" 
+              viewBox="0 0 24 24"
+            >
+              <path 
+                fill="none"
+                stroke="currentColor" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M12 21s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 7.2c0 7.3-8 11.8-8 11.8z"
+              />
+              <circle 
+                cx="12" 
+                cy="10" 
+                r="3" 
+                fill="white" 
+                stroke="currentColor"
+                strokeWidth={2}
+              />
+            </svg>
+          </Link>
 
-          {/* Mobile Icons - Right Side */}
-          {isLoggedIn ? (
-            <div className="md:hidden flex items-center space-x-4 rtl:space-x-reverse order-1">
+          {/* Mobile Icons - Left Side */}
+          {isLoggedIn && (
+            <div className="md:hidden flex items-center space-x-4 rtl:space-x-reverse order-3">
               <Link 
                 href="/wallet"
                 className="text-white hover:text-green-500 transition-colors"
@@ -175,28 +182,17 @@ export default function Header() {
                 </svg>
               </Link>
             </div>
-          ) : (
-            <div className="md:hidden order-1">
-              <button
-                className="p-2"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="white"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              </button>
-            </div>
           )}
+
+          {/* Logo with Location Icon - Center */}
+          <div className="hidden md:flex items-center order-3">
+            <Link 
+              href="/packages" 
+              className="text-white hover:text-green-500 transition-colors text-lg font-semibold border-b-2 border-transparent hover:border-green-500"
+            >
+              أسعارنا
+            </Link>
+          </div>
 
           {/* Right Side - Login Button or User Name with Dropdown */}
           <div className="hidden md:block order-1">
@@ -299,20 +295,21 @@ export default function Header() {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 absolute left-0 top-20 w-64 bg-black shadow-lg">
-            <nav className="flex flex-col space-y-4 text-right">
+          <div className="md:hidden py-4 absolute right-0 top-20 w-64 bg-black shadow-lg">
+            <nav className="flex flex-col space-y-4 text-right px-4">
               <Link
                 href="/packages"
-                className="hover:text-green-500 transition-colors px-4"
+                className="hover:text-green-500 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 أسعارنا
               </Link>
-              {isLoggedIn ? (
+              
+              {isLoggedIn && (
                 <>
                   <Link
                     href="/account"
-                    className="hover:text-green-500 transition-colors px-4"
+                    className="hover:text-green-500 transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     الحساب الشخصي
@@ -320,24 +317,33 @@ export default function Header() {
                   {isRegularUser && (
                     <Link
                       href="/wallet"
-                      className="hover:text-green-500 transition-colors px-4"
+                      className="hover:text-green-500 transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       المحفظة
                     </Link>
                   )}
                   {isAdmin ? (
-                    <Link
-                      href="/tracking_orders"
-                      className="hover:text-green-500 transition-colors px-4"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      ادارة الطلبات
-                    </Link>
-                  ) : !isAdmin && (
+                    <>
+                      <Link
+                        href="/tracking_orders"
+                        className="hover:text-green-500 transition-colors"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        ادارة الطلبات
+                      </Link>
+                      <Link
+                        href="/tracking_packages"
+                        className="hover:text-green-500 transition-colors"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        ادارة الطرود
+                      </Link>
+                    </>
+                  ) : (
                     <Link
                       href="/tracking"
-                      className="hover:text-green-500 transition-colors px-4"
+                      className="hover:text-green-500 transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       تتبع الطلبات
@@ -345,7 +351,7 @@ export default function Header() {
                   )}
                   <Link
                     href="/blog"
-                    className="hover:text-green-500 transition-colors px-4"
+                    className="hover:text-green-500 transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     المدونة
@@ -355,21 +361,11 @@ export default function Header() {
                       setIsMenuOpen(false)
                       handleSignOut()
                     }}
-                    className="hover:text-green-500 transition-colors text-right px-4 w-full"
+                    className="hover:text-green-500 transition-colors text-right w-full"
                   >
                     تسجيل الخروج
                   </button>
                 </>
-              ) : (
-                !isLoginPage && (
-                  <Link
-                    href="/auth/login"
-                    className="hover:text-green-500 transition-colors px-4"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    تسجيل الدخول
-                  </Link>
-                )
               )}
             </nav>
           </div>

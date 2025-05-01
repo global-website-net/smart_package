@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]/auth'
-import { supabase } from '@/lib/supabase'
+import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   try {
@@ -14,29 +14,25 @@ export async function GET() {
     }
 
     // Fetch orders for the user using the session user ID
-    const { data: orders, error: ordersError } = await supabase
-      .from('Order')
-      .select(`
-        id,
-        purchaseSite,
-        purchaseLink,
-        phoneNumber,
-        notes,
-        additionalInfo,
-        status,
-        createdAt,
-        updatedAt
-      `)
-      .eq('userId', session.user.id)
-      .order('createdAt', { ascending: false })
-
-    if (ordersError) {
-      console.error('Error fetching orders:', ordersError)
-      return NextResponse.json(
-        { error: 'حدث خطأ أثناء جلب الطلبات' },
-        { status: 500 }
-      )
-    }
+    const orders = await prisma.order.findMany({
+      where: {
+        userId: session.user.id,
+      },
+      select: {
+        id: true,
+        purchaseSite: true,
+        purchaseLink: true,
+        phoneNumber: true,
+        notes: true,
+        additionalInfo: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    })
 
     return NextResponse.json(orders || [])
   } catch (error) {

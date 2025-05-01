@@ -7,22 +7,32 @@ export async function GET(request: Request) {
   try {
     const id = request.url.split('/').pop();
     
-    const post = await prisma.blogPost.findUnique({
-      where: { id },
-      include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
+    if (!id) {
+      return NextResponse.json(
+        { error: 'معرف المقال مطلوب' },
+        { status: 400 }
+      )
+    }
+
+    // Create a new PrismaClient instance for this request
+    const post = await prisma.$transaction(async (tx) => {
+      return tx.blog.findUnique({
+        where: { id },
+        include: {
+          author: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
           },
         },
-      },
+      })
     })
 
     if (!post) {
       return NextResponse.json(
-        { error: 'Blog post not found' },
+        { error: 'لم يتم العثور على المقال' },
         { status: 404 }
       )
     }
@@ -31,7 +41,7 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Error in GET /api/blog/[id]:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'حدث خطأ أثناء جلب المقال' },
       { status: 500 }
     )
   }
@@ -59,23 +69,26 @@ export async function PUT(request: Request) {
       )
     }
 
-    const updatedPost = await prisma.blogPost.update({
-      where: { id },
-      data: {
-        title,
-        content,
-        itemlink: itemLink,
-        updatedAt: new Date(),
-      },
-      include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
+    // Use transaction for the update operation
+    const updatedPost = await prisma.$transaction(async (tx) => {
+      return tx.blog.update({
+        where: { id },
+        data: {
+          title,
+          content,
+          itemLink,
+          updatedAt: new Date(),
+        },
+        include: {
+          author: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
           },
         },
-      },
+      })
     })
 
     return NextResponse.json(updatedPost)
