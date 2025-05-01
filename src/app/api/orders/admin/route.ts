@@ -8,6 +8,23 @@ interface OrderUser {
   email: string
 }
 
+interface RawSupabaseOrder {
+  id: string
+  userId: string
+  purchaseSite: string
+  purchaseLink: string
+  phoneNumber: string
+  notes: string | null
+  additionalInfo: string | null
+  status: string
+  createdAt: string
+  updatedAt: string
+  user: {
+    fullName: string
+    email: string
+  } | null
+}
+
 interface OrderData {
   id: string
   userId: string
@@ -34,7 +51,7 @@ export async function GET() {
     }
 
     const { data: orders, error } = await supabase
-      .from('Order')
+      .from('order')
       .select(`
         id,
         userId,
@@ -62,13 +79,13 @@ export async function GET() {
     }
 
     // Transform the data to match the expected format
-    const formattedOrders = (orders as OrderData[]).map(order => ({
+    const formattedOrders = (orders as unknown as RawSupabaseOrder[]).map(order => ({
       ...order,
-      user: {
-        fullName: order.user?.fullName || 'غير معروف',
-        email: order.user?.email || ''
-      }
-    }))
+      user: order.user ? {
+        fullName: order.user.fullName || 'غير معروف',
+        email: order.user.email || ''
+      } : null
+    })) as OrderData[]
 
     return NextResponse.json(formattedOrders)
   } catch (error) {
