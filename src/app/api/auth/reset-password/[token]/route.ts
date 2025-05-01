@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server'
+import type { NextRequest } from 'next/server'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 
@@ -8,14 +8,12 @@ type UserWithResetToken = {
   resetTokenExpiry: Date | null;
 }
 
-type Params = { token: string }
-
 export async function GET(
   request: NextRequest,
-  context: { params: Params }
+  { params }: { params: Record<string, string> }
 ) {
   try {
-    const token = context.params.token
+    const token = params.token
 
     // Find user with this reset token using raw query
     const users = await prisma.$queryRaw<UserWithResetToken[]>`
@@ -61,10 +59,10 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  context: { params: Params }
+  { params }: { params: Record<string, string> }
 ) {
   try {
-    const token = context.params.token
+    const token = params.token
     const { password } = await request.json()
 
     if (!password) {
