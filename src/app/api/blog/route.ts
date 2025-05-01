@@ -1,27 +1,44 @@
 import { NextResponse } from 'next/server'
+import { supabase } from '@/lib/supabase'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
-import prisma from '@/lib/prisma'
+import { authOptions } from '../auth/[...nextauth]/auth'
 
 // Get all blogs
 export async function GET() {
   try {
-    const blogs = await prisma.blogPost.findMany({
-      include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    })
+    const { data: blogs, error } = await supabase
+      .from('BlogPost')
+      .select(`
+        id,
+        title,
+        content,
+        createdAt,
+        itemlink,
+        User:authorId (
+          id,
+          fullName
+        )
+      `)
+      .order('createdAt', { ascending: false })
 
-    return NextResponse.json(blogs)
+    if (error) throw error
+
+    const formattedBlogs = (blogs || []).map((blog: any) => ({
+      id: blog.id,
+      title: blog.title,
+      content: blog.content,
+      createdAt: blog.createdAt,
+      itemLink: blog.itemlink,
+      author: blog.User ? {
+        id: blog.User.id,
+        name: blog.User.fullName
+      } : {
+        id: 'unknown',
+        name: 'مجهول'
+      }
+    }))
+
+    return NextResponse.json(formattedBlogs)
   } catch (error) {
     console.error('Error fetching blog posts:', error)
     return NextResponse.json({ error: 'حدث خطأ أثناء جلب المقالات' }, { status: 500 })
@@ -39,13 +56,22 @@ export async function POST(request: Request) {
       )
     }
 
-    // Check if user is admin or owner
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: { id: true, role: true },
-    })
+    // Check if user is admin or owner from database
+    const { data: userData, error: userError } = await supabase
+      .from('User')
+      .select('id, role')
+      .eq('email', session.user.email)
+      .single()
 
-    if (!user || (user.role !== 'ADMIN' && user.role !== 'OWNER')) {
+    if (userError) {
+      console.error('Error fetching user role:', userError)
+      return NextResponse.json(
+        { error: 'حدث خطأ في التحقق من الصلاحيات' },
+        { status: 500 }
+      )
+    }
+
+    if (userData.role !== 'ADMIN' && userData.role !== 'OWNER') {
       return NextResponse.json(
         { error: 'غير مصرح لك - فقط المدير والمالك يمكنهم إنشاء المدونات' },
         { status: 403 }
@@ -55,25 +81,30 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { title, content, itemLink } = body
 
-    const blog = await prisma.blogPost.create({
-      data: {
+    const { data: blog, error } = await supabase
+      .from('BlogPost')
+      .insert({
         title,
         content,
         itemlink: itemLink,
-        authorId: user.id,
-      },
-      include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-    })
+        authorId: userData.id,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      })
+      .select()
 
-    return NextResponse.json(blog)
+    if (error) {
+      console.error('Error creating blog:', error)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء إنشاء المدونة' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      ...blog[0],
+      author: userData
+    })
   } catch (error) {
     console.error('Error creating blog:', error)
     return NextResponse.json(
@@ -87,7 +118,7 @@ export async function POST(request: Request) {
 export async function DELETE(request: Request) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.email) {
+    if (!session) {
       return NextResponse.json(
         { error: 'غير مصرح لك' },
         { status: 401 }
@@ -95,12 +126,7 @@ export async function DELETE(request: Request) {
     }
 
     // Check if user is admin or owner
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: { role: true },
-    })
-
-    if (!user || (user.role !== 'ADMIN' && user.role !== 'OWNER')) {
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER') {
       return NextResponse.json(
         { error: 'غير مصرح لك - فقط المدير والمالك يمكنهم حذف المدونات' },
         { status: 403 }
@@ -112,16 +138,25 @@ export async function DELETE(request: Request) {
 
     if (!id) {
       return NextResponse.json(
-        { error: 'معرف المقال مطلوب' },
+        { error: 'معرف المدونة مطلوب' },
         { status: 400 }
       )
     }
 
-    await prisma.blogPost.delete({
-      where: { id },
-    })
+    const { error } = await supabase
+      .from('BlogPost')
+      .delete()
+      .eq('id', id)
 
-    return NextResponse.json({ success: true })
+    if (error) {
+      console.error('Error deleting blog:', error)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء حذف المدونة' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ message: 'تم حذف المدونة بنجاح' })
   } catch (error) {
     console.error('Error deleting blog:', error)
     return NextResponse.json(
