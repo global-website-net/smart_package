@@ -22,11 +22,8 @@ interface FormData {
 }
 
 export default function CreatePackageForm({ onClose }: { onClose: () => void }) {
-  const [isOpen, setIsOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
-  const [shops, setShops] = useState<Shop[]>([])
-  const [users, setUsers] = useState<User[]>([])
   const [formData, setFormData] = useState({
     trackingNumber: '',
     status: 'PENDING',
@@ -34,44 +31,6 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
     currentLocation: 'المستودع الرئيسي',
     userId: ''
   })
-
-  const fetchShops = async () => {
-    try {
-      const response = await fetch('/api/shops')
-      if (!response.ok) {
-        throw new Error('Failed to fetch shops')
-      }
-      const data = await response.json()
-      setShops(data)
-    } catch (error) {
-      console.error('Error fetching shops:', error)
-      setError('حدث خطأ في جلب المتاجر')
-    }
-  }
-
-  useEffect(() => {
-    fetchShops()
-  }, [])
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch users
-        const usersResponse = await fetch('/api/users/regular')
-        if (!usersResponse.ok) {
-          const errorData = await usersResponse.json()
-          throw new Error(errorData.error || 'Failed to fetch users')
-        }
-        const usersData = await usersResponse.json()
-        setUsers(usersData.users || [])
-      } catch (error) {
-        console.error('Error fetching data:', error)
-        setError(error instanceof Error ? error.message : 'حدث خطأ أثناء جلب البيانات')
-      }
-    }
-
-    fetchData()
-  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -100,7 +59,7 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
         currentLocation: 'المستودع الرئيسي',
         userId: ''
       })
-      setIsOpen(false)
+      onClose()
       window.location.reload() // Refresh the page to show new package
     } catch (error) {
       setError(error instanceof Error ? error.message : 'حدث خطأ أثناء إنشاء الشحنة')
@@ -115,137 +74,95 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
   }
 
   return (
-    <>
-      <button
-        onClick={() => setIsOpen(true)}
-        className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 mb-4"
-      >
-        إضافة شحنة جديدة
-      </button>
-
-      {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4">إضافة شحنة جديدة</h2>
-            
-            {error && (
-              <div className="bg-red-50 text-red-800 p-4 rounded-md mb-4">
-                {error}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="trackingNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                  رقم التتبع
-                </label>
-                <input
-                  type="text"
-                  id="trackingNumber"
-                  name="trackingNumber"
-                  value={formData.trackingNumber}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                  الحالة
-                </label>
-                <select
-                  id="status"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                >
-                  <option value="PENDING">قيد الانتظار</option>
-                  <option value="PROCESSING">قيد المعالجة</option>
-                  <option value="SHIPPED">تم الشحن</option>
-                  <option value="DELIVERED">تم التسليم</option>
-                  <option value="CANCELLED">ملغي</option>
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="shopId" className="block text-sm font-medium text-gray-700 mb-1">
-                  المتجر
-                </label>
-                <select
-                  id="shopId"
-                  name="shopId"
-                  value={formData.shopId}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  required
-                >
-                  <option value="">اختر المتجر</option>
-                  {shops.map((shop) => (
-                    <option key={shop.id} value={shop.id}>
-                      {shop.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="userId" className="block text-sm font-medium text-gray-700 mb-1">
-                  حساب المستخدم
-                </label>
-                <select
-                  id="userId"
-                  name="userId"
-                  value={formData.userId}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  required
-                >
-                  <option value="">اختر المستخدم</option>
-                  {users.map((user) => (
-                    <option key={user.id} value={user.id}>
-                      {user.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="currentLocation" className="block text-sm font-medium text-gray-700 mb-1">
-                  الموقع الحالي
-                </label>
-                <input
-                  type="text"
-                  id="currentLocation"
-                  name="currentLocation"
-                  value={formData.currentLocation}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  required
-                />
-              </div>
-
-              <div className="flex justify-end space-x-4 rtl:space-x-reverse">
-                <button
-                  type="button"
-                  onClick={() => setIsOpen(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                >
-                  إلغاء
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
-                >
-                  {isSubmitting ? 'جاري الحفظ...' : 'حفظ'}
-                </button>
-              </div>
-            </form>
-          </div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">إضافة شحنة جديدة</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-      )}
-    </>
+        
+        {error && (
+          <div className="bg-red-50 text-red-800 p-4 rounded-md mb-4">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="trackingNumber" className="block text-sm font-medium text-gray-700 mb-1">
+              رقم التتبع
+            </label>
+            <input
+              type="text"
+              id="trackingNumber"
+              name="trackingNumber"
+              value={formData.trackingNumber}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
+              الحالة
+            </label>
+            <select
+              id="status"
+              name="status"
+              value={formData.status}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              required
+            >
+              <option value="PENDING">قيد الانتظار</option>
+              <option value="PROCESSING">قيد المعالجة</option>
+              <option value="SHIPPED">تم الشحن</option>
+              <option value="DELIVERED">تم التسليم</option>
+              <option value="CANCELLED">ملغي</option>
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="currentLocation" className="block text-sm font-medium text-gray-700 mb-1">
+              الموقع الحالي
+            </label>
+            <input
+              type="text"
+              id="currentLocation"
+              name="currentLocation"
+              value={formData.currentLocation}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              required
+            />
+          </div>
+
+          <div className="flex justify-end space-x-4 rtl:space-x-reverse">
+            <button
+              type="button"
+              onClick={onClose}
+              className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+            >
+              إلغاء
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
+            >
+              {isSubmitting ? 'جاري الحفظ...' : 'حفظ'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   )
 } 

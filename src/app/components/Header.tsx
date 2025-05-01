@@ -67,37 +67,8 @@ export default function Header() {
     <header className="bg-black text-white fixed w-full top-0 z-50">
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex justify-between items-center h-20">
-          {/* Mobile Menu Button - Right Side */}
-          <div className="md:hidden">
-            {isLoggedIn && (
-              <button
-                className="p-2"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  {isMenuOpen ? (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  ) : (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  )}
-                </svg>
-              </button>
-            )}
+          {/* Mobile Menu Button - Left Side */}
+          <div className="md:hidden order-1">
             {!isLoggedIn && !isLoginPage && (
               <Link
                 href="/auth/login"
@@ -109,7 +80,17 @@ export default function Header() {
           </div>
 
           {/* Logo with Location Icon - Center */}
-          <div className="flex-1 flex justify-center">
+          <div className="hidden md:flex items-center order-2">
+            <Link 
+              href="/packages" 
+              className="text-white hover:text-green-500 transition-colors text-lg font-semibold border-b-2 border-transparent hover:border-green-500"
+            >
+              أسعارنا
+            </Link>
+          </div>
+
+          {/* Center Logo */}
+          <div className="flex-1 flex justify-center items-center order-2">
             <Link href="/" className="flex items-center space-x-2 rtl:space-x-reverse text-base md:text-xl font-bold">
               <svg 
                 className="w-6 h-6" 
@@ -121,22 +102,22 @@ export default function Header() {
                   strokeLinecap="round" 
                   strokeLinejoin="round" 
                   strokeWidth={2} 
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  d="M12 21s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 7.2c0 7.3-8 11.8-8 11.8z"
                 />
                 <path 
                   strokeLinecap="round" 
                   strokeLinejoin="round" 
                   strokeWidth={2} 
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  d="M12 13a3 3 0 100-6 3 3 0 000 6z"
                 />
               </svg>
               <span className="text-sm md:text-xl">SMART PACKAGE</span>
             </Link>
           </div>
 
-          {/* Mobile Icons - Left Side */}
+          {/* Mobile Icons - Right Side */}
           {isLoggedIn ? (
-            <div className="md:hidden flex items-center space-x-4 rtl:space-x-reverse">
+            <div className="md:hidden flex items-center space-x-4 rtl:space-x-reverse order-3">
               <Link 
                 href="/wallet"
                 className="text-white hover:text-green-500 transition-colors"
@@ -151,7 +132,7 @@ export default function Header() {
                     strokeLinecap="round" 
                     strokeLinejoin="round" 
                     strokeWidth={2} 
-                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" 
+                    d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
                   />
                 </svg>
               </Link>
@@ -181,21 +162,19 @@ export default function Header() {
               >
                 <svg 
                   className="w-5 h-5" 
-                  fill="none" 
-                  stroke="currentColor" 
+                  fill="currentColor" 
                   viewBox="0 0 24 24"
                 >
                   <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6" 
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M12 4a1 1 0 011 1v6h6a1 1 0 110 2h-6v6a1 1 0 11-2 0v-6H5a1 1 0 110-2h6V5a1 1 0 011-1z"
                   />
                 </svg>
               </Link>
             </div>
           ) : (
-            <div className="md:hidden">
+            <div className="md:hidden order-3">
               <button
                 className="p-2"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -203,29 +182,19 @@ export default function Header() {
                 <svg
                   className="w-6 h-6"
                   fill="none"
-                  stroke="currentColor"
+                  stroke="white"
                   viewBox="0 0 24 24"
                 >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                    d="M4 6h16M4 12h16M4 18h16"
                   />
                 </svg>
               </button>
             </div>
           )}
-
-          {/* Center - Pricing Button (Desktop) */}
-          <div className="hidden md:flex items-center justify-center flex-1">
-            <Link 
-              href="/packages" 
-              className="text-white hover:text-green-500 transition-colors text-lg font-semibold mx-4 border-b-2 border-transparent hover:border-green-500"
-            >
-              أسعارنا
-            </Link>
-          </div>
 
           {/* Right Side - Login Button or User Name with Dropdown */}
           <div className="hidden md:block">
@@ -328,8 +297,8 @@ export default function Header() {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden py-4">
-            <nav className="flex flex-col space-y-4 text-left">
+          <div className="md:hidden py-4 absolute left-0 top-20 w-64 bg-black shadow-lg">
+            <nav className="flex flex-col space-y-4 text-right">
               <Link
                 href="/packages"
                 className="hover:text-green-500 transition-colors px-4"
@@ -384,7 +353,7 @@ export default function Header() {
                       setIsMenuOpen(false)
                       handleSignOut()
                     }}
-                    className="hover:text-green-500 transition-colors text-left px-4 w-full"
+                    className="hover:text-green-500 transition-colors text-right px-4 w-full"
                   >
                     تسجيل الخروج
                   </button>

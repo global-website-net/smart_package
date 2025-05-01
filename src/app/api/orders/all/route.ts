@@ -35,7 +35,7 @@ export async function GET() {
         status,
         createdAt,
         updatedAt,
-        user:userId (
+        User!Order_userId_fkey (
           fullName,
           email
         )
@@ -50,7 +50,13 @@ export async function GET() {
       )
     }
 
-    return NextResponse.json(orders || [])
+    // Transform the data to match the expected format
+    const transformedOrders = orders?.map(order => ({
+      ...order,
+      user: order.User?.[0] || null
+    })) || []
+
+    return NextResponse.json(transformedOrders)
   } catch (error) {
     console.error('Error in all-orders route:', error)
     return NextResponse.json(

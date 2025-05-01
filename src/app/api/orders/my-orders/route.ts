@@ -13,12 +13,11 @@ export async function GET() {
       )
     }
 
-    // Get user from database with exact email match
-    const { data: user, error: userError } = await supabase
+    // Get user from database with case-insensitive email match
+    const { data: users, error: userError } = await supabase
       .from('User')
       .select('id')
       .ilike('email', session.user.email)
-      .single()
 
     if (userError) {
       console.error('Error fetching user:', userError)
@@ -28,12 +27,15 @@ export async function GET() {
       )
     }
 
-    if (!user) {
+    if (!users || users.length === 0) {
       return NextResponse.json(
         { error: 'لم يتم العثور على المستخدم' },
         { status: 404 }
       )
     }
+
+    // Use the first matching user
+    const user = users[0]
 
     // Fetch orders for the user
     const { data: orders, error: ordersError } = await supabase
