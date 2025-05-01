@@ -1,63 +1,70 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '../../auth/[...nextauth]/auth'
+import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import { supabase } from '@/lib/supabase'
 
-interface PackageData {
+interface PackageUser {
+  fullName: string
+  email: string
+}
+
+interface PackageShop {
+  name: string
+  address: string
+}
+
+interface RawSupabasePackage {
   id: string
   trackingNumber: string
+  description: string
   status: string
+  userId: string
+  shopId: string
   createdAt: string
   updatedAt: string
   user: {
     fullName: string
     email: string
-  }
+  } | null
   shop: {
-    fullName: string
-  }
-  currentLocation?: string | null
+    name: string
+    address: string
+  } | null
 }
 
-interface RawPackageData {
+interface PackageData {
   id: string
   trackingNumber: string
+  description: string
   status: string
+  userId: string
+  shopId: string
   createdAt: string
   updatedAt: string
-  user: Array<{
-    fullName: string
-    email: string
-  }>
-  shop: Array<{
-    fullName: string
-  }>
+  user: PackageUser | null
+  shop: PackageShop | null
 }
 
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'غير مصرح لك بالوصول' },
-        { status: 401 }
-      )
-    }
 
-    // Check if user is admin or owner
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER') {
+    if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER')) {
       return NextResponse.json(
-        { error: 'غير مصرح لك بالوصول' },
+        { error: 'غير مصرح لك بالوصول إلى هذه الصفحة' },
         { status: 403 }
       )
     }
 
     const { data: packages, error } = await supabase
-      .from('Package')
+      .from('package')
       .select(`
         id,
         trackingNumber,
+        description,
         status,
+        userId,
+        shopId,
         createdAt,
         updatedAt,
         user:userId (
@@ -65,7 +72,8 @@ export async function GET() {
           email
         ),
         shop:shopId (
-          fullName
+          name,
+          address
         )
       `)
       .order('createdAt', { ascending: false })
@@ -73,32 +81,32 @@ export async function GET() {
     if (error) {
       console.error('Error fetching packages:', error)
       return NextResponse.json(
-        { error: 'حدث خطأ أثناء جلب الطلبات' },
+        { error: 'حدث خطأ أثناء جلب الطرود' },
         { status: 500 }
       )
     }
 
     // Transform the data to match the expected format
-    const formattedPackages = packages.map(pkg => ({
-      id: pkg.id,
-      trackingNumber: pkg.trackingNumber,
-      status: pkg.status,
-      createdAt: pkg.createdAt,
-      updatedAt: pkg.updatedAt,
-      user: {
-        fullName: pkg.user?.fullName || 'غير معروف',
-        email: pkg.user?.email || ''
-      },
-      shop: {
-        fullName: pkg.shop?.fullName || 'غير معروف'
-      }
-    }))
+    const formattedPackages = packages.map(pkg => {
+      const rawPkg = pkg as unknown as RawSupabasePackage
+      return {
+        ...rawPkg,
+        user: rawPkg.user ? {
+          fullName: rawPkg.user.fullName || 'غير معروف',
+          email: rawPkg.user.email || ''
+        } : null,
+        shop: rawPkg.shop ? {
+          name: rawPkg.shop.name || 'غير معروف',
+          address: rawPkg.shop.address || ''
+        } : null
+      } as PackageData
+    })
 
     return NextResponse.json(formattedPackages)
   } catch (error) {
     console.error('Error fetching packages:', error)
     return NextResponse.json(
-      { error: 'حدث خطأ أثناء جلب الطلبات' },
+      { error: 'حدث خطأ أثناء جلب الطرود' },
       { status: 500 }
     )
   }
