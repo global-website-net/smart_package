@@ -16,7 +16,7 @@ export async function GET(request: Request) {
 
     // Create a new PrismaClient instance for this request
     const post = await prisma.$transaction(async (tx) => {
-      return tx.Blog.findUnique({
+      return tx.blogPost.findUnique({
         where: { id },
         include: {
           author: {
@@ -71,7 +71,7 @@ export async function PUT(request: Request) {
 
     // Use transaction for the update operation
     const updatedPost = await prisma.$transaction(async (tx) => {
-      return tx.Blog.update({
+      return tx.blogPost.update({
         where: { id },
         data: {
           title,
@@ -122,7 +122,7 @@ export async function DELETE(request: Request) {
 
     // Use transaction for the delete operation
     await prisma.$transaction(async (tx) => {
-      return tx.Blog.delete({
+      return tx.blogPost.delete({
         where: { id }
       })
     })
