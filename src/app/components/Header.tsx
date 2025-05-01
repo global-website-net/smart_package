@@ -98,10 +98,10 @@ export default function Header() {
                 </svg>
               </button>
             )}
-            {!isLoggedIn && (
+            {!isLoggedIn && !isLoginPage && (
               <Link
                 href="/auth/login"
-                className="text-white hover:text-green-500 transition-colors px-4 py-2"
+                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
               >
                 تسجيل الدخول
               </Link>
@@ -109,8 +109,8 @@ export default function Header() {
           </div>
 
           {/* Logo with Location Icon - Center */}
-          <div className="flex-1 flex justify-center items-center">
-            <Link href="/" className="flex items-center space-x-2 rtl:space-x-reverse text-xl font-bold">
+          <div className="flex-1 flex justify-center">
+            <Link href="/" className="flex items-center space-x-2 rtl:space-x-reverse text-base md:text-xl font-bold">
               <svg 
                 className="w-6 h-6" 
                 fill="none" 
@@ -130,12 +130,12 @@ export default function Header() {
                   d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                 />
               </svg>
-              <span>SMART PACKAGE</span>
+              <span className="text-sm md:text-xl">SMART PACKAGE</span>
             </Link>
           </div>
 
           {/* Mobile Icons - Left Side */}
-          {isLoggedIn && (
+          {isLoggedIn ? (
             <div className="md:hidden flex items-center space-x-4 rtl:space-x-reverse">
               <Link 
                 href="/wallet"
@@ -193,6 +193,27 @@ export default function Header() {
                   />
                 </svg>
               </Link>
+            </div>
+          ) : (
+            <div className="md:hidden">
+              <button
+                className="p-2"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                  />
+                </svg>
+              </button>
             </div>
           )}
 
@@ -308,10 +329,10 @@ export default function Header() {
         {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden py-4">
-            <nav className="flex flex-col space-y-4">
+            <nav className="flex flex-col space-y-4 text-left">
               <Link
                 href="/packages"
-                className="hover:text-green-500 transition-colors"
+                className="hover:text-green-500 transition-colors px-4"
                 onClick={() => setIsMenuOpen(false)}
               >
                 أسعارنا
@@ -320,7 +341,7 @@ export default function Header() {
                 <>
                   <Link
                     href="/account"
-                    className="text-left hover:text-green-500 transition-colors"
+                    className="hover:text-green-500 transition-colors px-4"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     الحساب الشخصي
@@ -328,7 +349,7 @@ export default function Header() {
                   {isRegularUser && (
                     <Link
                       href="/wallet"
-                      className="text-left hover:text-green-500 transition-colors"
+                      className="hover:text-green-500 transition-colors px-4"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       المحفظة
@@ -337,7 +358,7 @@ export default function Header() {
                   {isAdmin ? (
                     <Link
                       href="/tracking"
-                      className="text-left hover:text-green-500 transition-colors"
+                      className="hover:text-green-500 transition-colors px-4"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       ادارة الطلبات
@@ -345,7 +366,7 @@ export default function Header() {
                   ) : !isAdmin && (
                     <Link
                       href="/tracking"
-                      className="text-left hover:text-green-500 transition-colors"
+                      className="hover:text-green-500 transition-colors px-4"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       تتبع الطلبات
@@ -353,7 +374,7 @@ export default function Header() {
                   )}
                   <Link
                     href="/blog"
-                    className="text-left hover:text-green-500 transition-colors"
+                    className="hover:text-green-500 transition-colors px-4"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     المدونة
@@ -363,7 +384,7 @@ export default function Header() {
                       setIsMenuOpen(false)
                       handleSignOut()
                     }}
-                    className="text-left hover:text-green-500 transition-colors"
+                    className="hover:text-green-500 transition-colors text-left px-4 w-full"
                   >
                     تسجيل الخروج
                   </button>
@@ -372,7 +393,7 @@ export default function Header() {
                 !isLoginPage && (
                   <Link
                     href="/auth/login"
-                    className="text-left hover:text-green-500 transition-colors"
+                    className="hover:text-green-500 transition-colors px-4"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     تسجيل الدخول

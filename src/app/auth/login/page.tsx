@@ -105,10 +105,10 @@ function LoginForm() {
               </div>
             )}
 
-            <div className="text-right">
+            <div className="text-sm text-center">
               <Link
                 href="/auth/reset-password"
-                className="text-sm text-blue-600 hover:text-blue-800"
+                className="font-medium text-blue-600 hover:text-blue-800"
               >
                 نسيت كلمة المرور؟
               </Link>

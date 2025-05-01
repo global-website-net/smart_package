@@ -13,33 +13,20 @@ export async function GET() {
       )
     }
 
-    // Get user from database with exact email match
-    const { data: user, error: userError } = await supabase
-      .from('User')
-      .select('id')
-      .ilike('email', session.user.email)
-      .single()
-
-    if (userError) {
-      console.error('Error fetching user:', userError)
+    // Check if user is admin or owner
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER') {
       return NextResponse.json(
-        { error: 'حدث خطأ أثناء البحث عن المستخدم' },
-        { status: 500 }
+        { error: 'غير مصرح لك بالوصول' },
+        { status: 403 }
       )
     }
 
-    if (!user) {
-      return NextResponse.json(
-        { error: 'لم يتم العثور على المستخدم' },
-        { status: 404 }
-      )
-    }
-
-    // Fetch orders for the user
+    // Fetch all orders with user information
     const { data: orders, error: ordersError } = await supabase
       .from('Order')
       .select(`
         id,
+        userId,
         purchaseSite,
         purchaseLink,
         phoneNumber,
@@ -47,9 +34,12 @@ export async function GET() {
         additionalInfo,
         status,
         createdAt,
-        updatedAt
+        updatedAt,
+        user:userId (
+          fullName,
+          email
+        )
       `)
-      .eq('userId', user.id)
       .order('createdAt', { ascending: false })
 
     if (ordersError) {
@@ -62,7 +52,7 @@ export async function GET() {
 
     return NextResponse.json(orders || [])
   } catch (error) {
-    console.error('Error in my-orders route:', error)
+    console.error('Error in all-orders route:', error)
     return NextResponse.json(
       { error: 'حدث خطأ في الخادم' },
       { status: 500 }
