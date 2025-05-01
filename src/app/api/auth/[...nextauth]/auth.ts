@@ -88,7 +88,7 @@ export const authOptions: NextAuthOptions = {
           return {
             id: userData.id,
             email: userData.email,
-            name: userData.fullName,
+            fullName: userData.fullName,
             role: userData.role
           }
         } catch (error) {
