@@ -68,7 +68,7 @@ export default function Header() {
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex justify-between items-center h-20">
           {/* Mobile Menu Button - Left Side */}
-          <div className="md:hidden order-1">
+          <div className="md:hidden order-3">
             {!isLoggedIn && !isLoginPage && (
               <Link
                 href="/auth/login"
@@ -92,6 +92,7 @@ export default function Header() {
           {/* Center Logo */}
           <div className="flex-1 flex justify-center order-2">
             <Link href="/" className="flex items-center space-x-2 rtl:space-x-reverse text-base md:text-xl font-bold">
+              <span className="text-sm md:text-xl">SMART PACKAGE</span>
               <svg 
                 className="w-6 h-6 text-green-500" 
                 viewBox="0 0 24 24"
@@ -113,13 +114,12 @@ export default function Header() {
                   strokeWidth={2}
                 />
               </svg>
-              <span className="text-sm md:text-xl">SMART PACKAGE</span>
             </Link>
           </div>
 
           {/* Mobile Icons - Right Side */}
           {isLoggedIn ? (
-            <div className="md:hidden flex items-center space-x-4 rtl:space-x-reverse order-3">
+            <div className="md:hidden flex items-center space-x-4 rtl:space-x-reverse order-1">
               <Link 
                 href="/wallet"
                 className="text-white hover:text-green-500 transition-colors"
@@ -176,7 +176,7 @@ export default function Header() {
               </Link>
             </div>
           ) : (
-            <div className="md:hidden order-3">
+            <div className="md:hidden order-1">
               <button
                 className="p-2"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -240,7 +240,7 @@ export default function Header() {
                     {isAdmin ? (
                       <>
                         <Link 
-                          href="/tracking" 
+                          href="/tracking_orders" 
                           className="block px-4 py-2 text-sm hover:bg-gray-100"
                           onClick={() => setIsUserMenuOpen(false)}
                         >
@@ -328,7 +328,7 @@ export default function Header() {
                   )}
                   {isAdmin ? (
                     <Link
-                      href="/tracking"
+                      href="/tracking_orders"
                       className="hover:text-green-500 transition-colors px-4"
                       onClick={() => setIsMenuOpen(false)}
                     >

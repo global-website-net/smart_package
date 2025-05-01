@@ -1,45 +1,33 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '../../auth/[...nextauth]/auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 
 export async function GET(request: Request) {
   try {
     const id = request.url.split('/').pop();
     
-    const { data, error } = await supabase
-      .from('BlogPost')
-      .select(`
-        id,
-        title,
-        content,
-        createdAt,
-        updatedAt,
-        itemlink,
-        User:authorId (
-          id,
-          fullName
-        )
-      `)
-      .eq('id', id)
-      .single()
+    const post = await prisma.blogPost.findUnique({
+      where: { id },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    })
 
-    if (error) {
-      console.error('Error fetching blog post:', error)
+    if (!post) {
       return NextResponse.json(
-        { error: 'Failed to fetch blog post' },
-        { status: 500 }
+        { error: 'Blog post not found' },
+        { status: 404 }
       )
     }
 
-    // Transform the response to match the frontend expectations
-    const transformedData = {
-      ...data,
-      itemLink: data.itemlink,
-      author: data.User
-    }
-
-    return NextResponse.json(transformedData)
+    return NextResponse.json(post)
   } catch (error) {
     console.error('Error in GET /api/blog/[id]:', error)
     return NextResponse.json(
@@ -54,9 +42,9 @@ export async function PUT(request: Request) {
     const id = request.url.split('/').pop();
     const session = await getServerSession(authOptions)
 
-    if (!session || session.user.role !== 'ADMIN') {
+    if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER')) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'غير مصرح لك بتعديل المقال' },
         { status: 401 }
       )
     }
@@ -66,34 +54,26 @@ export async function PUT(request: Request) {
 
     if (!title || !content) {
       return NextResponse.json(
-        { error: 'Title and content are required' },
+        { error: 'عنوان المقال والمحتوى مطلوبان' },
         { status: 400 }
       )
     }
 
-    const { error } = await supabase
-      .from('BlogPost')
-      .update({
+    const updatedPost = await prisma.blogPost.update({
+      where: { id },
+      data: {
         title,
         content,
-        itemlink: itemLink,
-        updatedAt: new Date().toISOString(),
-      })
-      .eq('id', id)
+        itemLink,
+        updatedAt: new Date(),
+      },
+    })
 
-    if (error) {
-      console.error('Error updating blog post:', error)
-      return NextResponse.json(
-        { error: 'Failed to update blog post' },
-        { status: 500 }
-      )
-    }
-
-    return NextResponse.json({ success: true })
+    return NextResponse.json(updatedPost)
   } catch (error) {
     console.error('Error in PUT /api/blog/[id]:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'حدث خطأ أثناء تحديث المقال' },
       { status: 500 }
     )
   }

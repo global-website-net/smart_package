@@ -78,13 +78,17 @@ export default function EditBlogPostClient({ id }: EditBlogPostClientProps) {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to update blog post')
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to update blog post')
       }
 
+      // Force a cache revalidation and refresh
+      router.refresh()
+      // Navigate back to blog page
       router.push('/blog')
     } catch (err) {
       console.error('Error updating blog post:', err)
-      setError('حدث خطأ أثناء تحديث المقال')
+      setError(err instanceof Error ? err.message : 'حدث خطأ أثناء تحديث المقال')
     }
   }
 

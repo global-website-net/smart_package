@@ -96,7 +96,12 @@ export default function BlogPage() {
 
     const fetchPosts = async () => {
       try {
-        const response = await fetch('/api/blog')
+        const response = await fetch('/api/blog', {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        })
         if (!response.ok) {
           throw new Error('Failed to fetch blog posts')
         }
@@ -200,16 +205,12 @@ export default function BlogPage() {
                       )}
                     </div>
                     
-                    <div className="text-gray-600 mb-4">
-                      <p>تاريخ النشر: {format(new Date(post.createdAt), 'dd MMMM yyyy', { locale: ar })}</p>
-                    </div>
-                    
                     <div className="prose max-w-none mb-4">
                       <p>{post.content}</p>
                     </div>
                     
                     {post.itemLink && (
-                      <div className="mt-4">
+                      <div className="mb-4">
                         <a 
                           href={post.itemLink} 
                           target="_blank" 
@@ -220,6 +221,10 @@ export default function BlogPage() {
                         </a>
                       </div>
                     )}
+
+                    <div className="text-gray-600 text-sm mt-4 pt-4 border-t border-gray-200">
+                      <p>تاريخ النشر: {format(new Date(post.createdAt), 'dd MMMM yyyy', { locale: ar })}</p>
+                    </div>
                   </article>
                 ))}
               </div>

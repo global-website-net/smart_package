@@ -207,7 +207,12 @@ export default function NewOrder() {
             </h3>
             <p className="text-gray-600 mb-4">{toastMessage}</p>
             <button
-              onClick={() => setShowToast(false)}
+              onClick={() => {
+                setShowToast(false)
+                if (toastType === 'success') {
+                  router.push('/tracking')
+                }
+              }}
               className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors w-full"
             >
               حسناً

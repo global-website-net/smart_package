@@ -1,17 +1,8 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
-import { createTransport } from 'nodemailer'
-import crypto from 'crypto'
+import { prisma } from '@/lib/prisma'
+import { Resend } from 'resend'
 
-const transporter = createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: true,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-})
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 // Handle OPTIONS request for CORS
 export async function OPTIONS() {
@@ -30,74 +21,65 @@ export async function POST(request: Request) {
 
     if (!email) {
       return NextResponse.json(
-        { error: 'البريد الإلكتروني مطلوب' },
+        { message: 'البريد الإلكتروني مطلوب' },
         { status: 400 }
       )
     }
 
     // Check if user exists
-    const { data: user, error: userError } = await supabase
-      .from('User')
-      .select('id, email, fullName')
-      .eq('email', email)
-      .single()
+    const user = await prisma.user.findUnique({
+      where: { email },
+    })
 
-    if (userError || !user) {
+    if (!user) {
       return NextResponse.json(
-        { error: 'لم يتم العثور على حساب بهذا البريد الإلكتروني' },
+        { message: 'لم يتم العثور على حساب بهذا البريد الإلكتروني' },
         { status: 404 }
       )
     }
 
     // Generate reset token
-    const resetToken = crypto.randomBytes(32).toString('hex')
+    const resetToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
     const resetTokenExpiry = new Date(Date.now() + 3600000) // 1 hour from now
 
-    // Store reset token in database
-    const { error: updateError } = await supabase
-      .from('User')
-      .update({
+    // Update user with reset token
+    await prisma.user.update({
+      where: { email },
+      data: {
         resetToken,
         resetTokenExpiry,
-      })
-      .eq('id', user.id)
+      },
+    })
 
-    if (updateError) {
-      console.error('Error storing reset token:', updateError)
-      return NextResponse.json(
-        { error: 'حدث خطأ أثناء معالجة طلب إعادة تعيين كلمة المرور' },
-        { status: 500 }
-      )
-    }
-
-    // Send reset email
+    // Send reset password email
     const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password/${resetToken}`
-    const mailOptions = {
-      from: process.env.SMTP_FROM,
+    
+    await resend.emails.send({
+      from: 'Package Smart <noreply@packagesmart.com>',
       to: email,
       subject: 'إعادة تعيين كلمة المرور',
       html: `
         <div dir="rtl">
-          <h2>مرحباً ${user.fullName}،</h2>
-          <p>لقد تلقينا طلباً لإعادة تعيين كلمة المرور الخاصة بك.</p>
-          <p>انقر على الرابط أدناه لإعادة تعيين كلمة المرور الخاصة بك:</p>
+          <h2>إعادة تعيين كلمة المرور</h2>
+          <p>مرحباً ${user.name || 'عزيزي المستخدم'},</p>
+          <p>لقد تلقيت هذا البريد الإلكتروني لأنك طلبت إعادة تعيين كلمة المرور لحسابك.</p>
+          <p>انقر على الرابط أدناه لإعادة تعيين كلمة المرور:</p>
           <p><a href="${resetUrl}">${resetUrl}</a></p>
-          <p>ينتهي هذا الرابط خلال ساعة واحدة.</p>
           <p>إذا لم تطلب إعادة تعيين كلمة المرور، يمكنك تجاهل هذا البريد الإلكتروني.</p>
-          <p>مع تحياتنا،<br>فريق التطبيق</p>
+          <p>ينتهي صلاحية هذا الرابط بعد ساعة واحدة.</p>
+          <p>مع أطيب التحيات،<br>فريق Package Smart</p>
         </div>
       `,
-    }
-
-    await transporter.sendMail(mailOptions)
-
-    return NextResponse.json({
-      message: 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني',
     })
-  } catch (error) {
-    console.error('Error in password reset request:', error)
+
     return NextResponse.json(
-      { error: 'حدث خطأ أثناء معالجة طلب إعادة تعيين كلمة المرور' },
+      { message: 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني' },
+      { status: 200 }
+    )
+  } catch (error) {
+    console.error('Password reset error:', error)
+    return NextResponse.json(
+      { message: 'حدث خطأ أثناء معالجة طلبك' },
       { status: 500 }
     )
   }
