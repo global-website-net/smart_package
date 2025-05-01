@@ -2,26 +2,28 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 
-type RouteHandlerParams = {
-  params: {
-    token: string
-  }
+type UserWithResetToken = {
+  id: string;
+  resetToken: string | null;
+  resetTokenExpiry: Date | null;
 }
 
 export async function GET(
   request: NextRequest,
-  { params }: RouteHandlerParams
+  context: { params: { token: string } }
 ): Promise<NextResponse> {
   try {
-    const { token } = params
+    const { token } = context.params
 
     // Find user with this reset token using raw query
-    const user = await prisma.$queryRaw`
-      SELECT * FROM "User"
+    const users = await prisma.$queryRaw<UserWithResetToken[]>`
+      SELECT id, "resetToken", "resetTokenExpiry"
+      FROM "User"
       WHERE "resetToken" = ${token}
       AND "resetTokenExpiry" > NOW()
     `
 
+    const user = users[0]
     if (!user) {
       return NextResponse.json(
         { message: 'رابط إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية' },
@@ -41,10 +43,10 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: RouteHandlerParams
+  context: { params: { token: string } }
 ): Promise<NextResponse> {
   try {
-    const { token } = params
+    const { token } = context.params
     const { password } = await request.json()
 
     if (!password) {
@@ -55,12 +57,14 @@ export async function POST(
     }
 
     // Find user with this reset token using raw query
-    const user = await prisma.$queryRaw`
-      SELECT * FROM "User"
+    const users = await prisma.$queryRaw<UserWithResetToken[]>`
+      SELECT id, "resetToken", "resetTokenExpiry"
+      FROM "User"
       WHERE "resetToken" = ${token}
       AND "resetTokenExpiry" > NOW()
     `
 
+    const user = users[0]
     if (!user) {
       return NextResponse.json(
         { message: 'رابط إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية' },
