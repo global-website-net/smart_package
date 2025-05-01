@@ -2,9 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 
+type RouteContext = {
+  params: {
+    token: string
+  }
+}
+
 export async function GET(
   request: NextRequest,
-  context: { params: { token: string } }
+  context: RouteContext
 ) {
   try {
     const { token } = context.params
@@ -38,7 +44,7 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  context: { params: { token: string } }
+  context: RouteContext
 ) {
   try {
     const { token } = context.params
