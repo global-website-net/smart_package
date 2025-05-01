@@ -6,11 +6,13 @@ export const metadata: Metadata = {
   description: 'Reset your password',
 }
 
-type PageProps = {
+export default function ResetPasswordPage({
+  params,
+  searchParams,
+}: {
   params: { token: string }
-}
-
-export default function ResetPasswordPage({ params }: PageProps) {
+  searchParams: Record<string, string | string[] | undefined>
+}) {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-md mx-auto">
