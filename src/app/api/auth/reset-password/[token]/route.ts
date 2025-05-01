@@ -1,5 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
-import type { NextApiRequest } from 'next/types'
+import { NextRequest } from 'next/server'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 
@@ -10,9 +9,9 @@ type UserWithResetToken = {
 }
 
 export async function GET(
-  request: Request,
+  req: NextRequest,
   { params }: { params: { token: string } }
-): Promise<Response> {
+) {
   try {
     const { token } = params
 
@@ -26,34 +25,55 @@ export async function GET(
 
     const user = users[0]
     if (!user) {
-      return Response.json(
-        { message: 'رابط إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية' },
-        { status: 400 }
+      return new Response(
+        JSON.stringify({ 
+          message: 'رابط إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية' 
+        }),
+        { 
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        }
       )
     }
 
-    return Response.json({ valid: true })
+    return new Response(
+      JSON.stringify({ valid: true }),
+      { 
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    )
   } catch (error) {
     console.error('Token validation error:', error)
-    return Response.json(
-      { message: 'حدث خطأ أثناء التحقق من الرابط' },
-      { status: 500 }
+    return new Response(
+      JSON.stringify({ 
+        message: 'حدث خطأ أثناء التحقق من الرابط' 
+      }),
+      { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      }
     )
   }
 }
 
 export async function POST(
-  request: Request,
+  req: NextRequest,
   { params }: { params: { token: string } }
-): Promise<Response> {
+) {
   try {
     const { token } = params
-    const { password } = await request.json()
+    const { password } = await req.json()
 
     if (!password) {
-      return Response.json(
-        { message: 'كلمة المرور مطلوبة' },
-        { status: 400 }
+      return new Response(
+        JSON.stringify({ 
+          message: 'كلمة المرور مطلوبة' 
+        }),
+        { 
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        }
       )
     }
 
@@ -67,9 +87,14 @@ export async function POST(
 
     const user = users[0]
     if (!user) {
-      return Response.json(
-        { message: 'رابط إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية' },
-        { status: 400 }
+      return new Response(
+        JSON.stringify({ 
+          message: 'رابط إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية' 
+        }),
+        { 
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        }
       )
     }
 
@@ -85,15 +110,25 @@ export async function POST(
       WHERE "id" = ${user.id}
     `
 
-    return Response.json(
-      { message: 'تم إعادة تعيين كلمة المرور بنجاح' },
-      { status: 200 }
+    return new Response(
+      JSON.stringify({ 
+        message: 'تم إعادة تعيين كلمة المرور بنجاح' 
+      }),
+      { 
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      }
     )
   } catch (error) {
     console.error('Password reset error:', error)
-    return Response.json(
-      { message: 'حدث خطأ أثناء إعادة تعيين كلمة المرور' },
-      { status: 500 }
+    return new Response(
+      JSON.stringify({ 
+        message: 'حدث خطأ أثناء إعادة تعيين كلمة المرور' 
+      }),
+      { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      }
     )
   }
 } 
