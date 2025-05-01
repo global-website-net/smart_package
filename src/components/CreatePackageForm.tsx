@@ -1,36 +1,59 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-
-interface Shop {
-  id: string
-  name: string
-}
+import { supabase } from '@/lib/supabase'
 
 interface User {
   id: string
-  name: string
-  email: string
+  fullName: string
+  role: string
 }
 
-interface FormData {
-  trackingNumber: string
-  status: string
-  shopId: string
-  currentLocation: string
-  userId: string
+interface CreatePackageFormProps {
+  onClose: () => void
 }
 
-export default function CreatePackageForm({ onClose }: { onClose: () => void }) {
+export default function CreatePackageForm({ onClose }: CreatePackageFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [shops, setShops] = useState<User[]>([])
+  const [users, setUsers] = useState<User[]>([])
   const [formData, setFormData] = useState({
     trackingNumber: '',
     status: 'PENDING',
     shopId: '',
-    currentLocation: 'المستودع الرئيسي',
     userId: ''
   })
+
+  useEffect(() => {
+    // Fetch shops and users when component mounts
+    const fetchUsers = async () => {
+      try {
+        // Fetch shops (users with SHOP role)
+        const { data: shopData, error: shopError } = await supabase
+          .from('User')
+          .select('id, fullName, role')
+          .eq('role', 'SHOP')
+
+        if (shopError) throw shopError
+        setShops(shopData as User[] || [])
+
+        // Fetch regular users
+        const { data: userData, error: userError } = await supabase
+          .from('User')
+          .select('id, fullName, role')
+          .eq('role', 'REGULAR')
+
+        if (userError) throw userError
+        setUsers(userData as User[] || [])
+      } catch (error) {
+        console.error('Error fetching users:', error)
+        setError('حدث خطأ أثناء تحميل قائمة المستخدمين')
+      }
+    }
+
+    fetchUsers()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -56,7 +79,6 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
         trackingNumber: '',
         status: 'PENDING',
         shopId: '',
-        currentLocation: 'المستودع الرئيسي',
         userId: ''
       })
       onClose()
@@ -131,18 +153,45 @@ export default function CreatePackageForm({ onClose }: { onClose: () => void }) 
           </div>
 
           <div>
-            <label htmlFor="currentLocation" className="block text-sm font-medium text-gray-700 mb-1">
-              الموقع الحالي
+            <label htmlFor="shopId" className="block text-sm font-medium text-gray-700 mb-1">
+              المتجر
             </label>
-            <input
-              type="text"
-              id="currentLocation"
-              name="currentLocation"
-              value={formData.currentLocation}
+            <select
+              id="shopId"
+              name="shopId"
+              value={formData.shopId}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
               required
-            />
+            >
+              <option value="">اختر المتجر</option>
+              {shops.map((shop) => (
+                <option key={shop.id} value={shop.id}>
+                  {shop.fullName}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="userId" className="block text-sm font-medium text-gray-700 mb-1">
+              المستخدم
+            </label>
+            <select
+              id="userId"
+              name="userId"
+              value={formData.userId}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              required
+            >
+              <option value="">اختر المستخدم</option>
+              {users.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.fullName}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="flex justify-end space-x-4 rtl:space-x-reverse">

@@ -40,7 +40,7 @@ export async function POST(request: Request) {
           id: uuidv4(),
           title,
           content,
-          itemlink: itemLink,
+          itemLink: itemLink,
           authorId: session.user.id,
           createdAt: currentTime,
           updatedAt: currentTime

@@ -80,7 +80,7 @@ export default function Header() {
           </div>
 
           {/* Logo with Location Icon - Center */}
-          <div className="hidden md:flex items-center order-2">
+          <div className="hidden md:flex items-center order-3">
             <Link 
               href="/packages" 
               className="text-white hover:text-green-500 transition-colors text-lg font-semibold border-b-2 border-transparent hover:border-green-500"
@@ -90,25 +90,27 @@ export default function Header() {
           </div>
 
           {/* Center Logo */}
-          <div className="flex-1 flex justify-center items-center order-2">
+          <div className="flex-1 flex justify-center order-2">
             <Link href="/" className="flex items-center space-x-2 rtl:space-x-reverse text-base md:text-xl font-bold">
               <svg 
-                className="w-6 h-6" 
-                fill="none" 
-                stroke="currentColor" 
+                className="w-6 h-6 text-green-500" 
                 viewBox="0 0 24 24"
               >
                 <path 
+                  fill="none"
+                  stroke="currentColor" 
                   strokeLinecap="round" 
                   strokeLinejoin="round" 
                   strokeWidth={2} 
                   d="M12 21s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 7.2c0 7.3-8 11.8-8 11.8z"
                 />
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M12 13a3 3 0 100-6 3 3 0 000 6z"
+                <circle 
+                  cx="12" 
+                  cy="10" 
+                  r="3" 
+                  fill="white" 
+                  stroke="currentColor"
+                  strokeWidth={2}
                 />
               </svg>
               <span className="text-sm md:text-xl">SMART PACKAGE</span>
@@ -197,7 +199,7 @@ export default function Header() {
           )}
 
           {/* Right Side - Login Button or User Name with Dropdown */}
-          <div className="hidden md:block">
+          <div className="hidden md:block order-1">
             {isLoggedIn ? (
               <div className="relative" ref={userMenuRef}>
                 <button 

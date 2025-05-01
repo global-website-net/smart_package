@@ -9,6 +9,7 @@ interface BlogPost {
   content: string
   createdAt: string
   authorId: string
+  itemlink?: string
   User: {
     id: string
     fullName: string
@@ -21,7 +22,11 @@ export async function GET() {
     const { data: blogs, error } = await supabase
       .from('BlogPost')
       .select(`
-        *,
+        id,
+        title,
+        content,
+        createdAt,
+        itemlink,
         User:authorId (
           id,
           fullName
@@ -36,6 +41,7 @@ export async function GET() {
       title: blog.title,
       content: blog.content,
       createdAt: blog.createdAt,
+      itemLink: blog.itemlink,
       author: blog.User ? {
         id: blog.User.id,
         name: blog.User.fullName
@@ -86,25 +92,19 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { title, content } = body
+    const { title, content, itemLink } = body
 
     const { data: blog, error } = await supabase
       .from('BlogPost')
       .insert({
         title,
         content,
+        itemlink: itemLink,
         authorId: userData.id,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       })
-      .select(`
-        *,
-        User:authorId (
-          id,
-          fullName
-        )
-      `)
-      .single()
+      .select()
 
     if (error) {
       console.error('Error creating blog:', error)

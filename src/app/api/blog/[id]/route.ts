@@ -9,7 +9,18 @@ export async function GET(request: Request) {
     
     const { data, error } = await supabase
       .from('BlogPost')
-      .select('*')
+      .select(`
+        id,
+        title,
+        content,
+        createdAt,
+        updatedAt,
+        itemlink,
+        User:authorId (
+          id,
+          fullName
+        )
+      `)
       .eq('id', id)
       .single()
 
@@ -21,7 +32,14 @@ export async function GET(request: Request) {
       )
     }
 
-    return NextResponse.json(data)
+    // Transform the response to match the frontend expectations
+    const transformedData = {
+      ...data,
+      itemLink: data.itemlink,
+      author: data.User
+    }
+
+    return NextResponse.json(transformedData)
   } catch (error) {
     console.error('Error in GET /api/blog/[id]:', error)
     return NextResponse.json(
@@ -74,41 +92,6 @@ export async function PUT(request: Request) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error in PUT /api/blog/[id]:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
-}
-
-export async function DELETE(request: Request) {
-  try {
-    const id = request.url.split('/').pop();
-    const session = await getServerSession(authOptions)
-
-    if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    const { error } = await supabase
-      .from('BlogPost')
-      .delete()
-      .eq('id', id)
-
-    if (error) {
-      console.error('Error deleting blog post:', error)
-      return NextResponse.json(
-        { error: 'Failed to delete blog post' },
-        { status: 500 }
-      )
-    }
-
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error('Error in DELETE /api/blog/[id]:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

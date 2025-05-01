@@ -44,7 +44,7 @@ export default function BlogPage() {
     if (!postToDelete) return
 
     try {
-      const response = await fetch(`/api/blog/${postToDelete}`, {
+      const response = await fetch(`/api/blog?id=${postToDelete}`, {
         method: 'DELETE',
       })
 
@@ -157,7 +157,7 @@ export default function BlogPage() {
                 <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
               </div>
             </div>
-            {session?.user?.role === 'ADMIN' && (
+            {(session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') && (
               <Link
                 href="/blog/create"
                 className="mt-6 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
@@ -182,7 +182,7 @@ export default function BlogPage() {
                   <article key={post.id} className="bg-white rounded-lg shadow-md p-6">
                     <div className="flex justify-between items-start mb-4">
                       <h2 className="text-2xl font-semibold">{post.title}</h2>
-                      {session?.user?.role === 'ADMIN' && (
+                      {(session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') && (
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleEdit(post.id)}
