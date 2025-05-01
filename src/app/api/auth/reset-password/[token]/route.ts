@@ -8,12 +8,14 @@ type UserWithResetToken = {
   resetTokenExpiry: Date | null;
 }
 
+type Params = { token: string }
+
 export async function GET(
-  req: NextRequest,
-  { params }: { params: { token: string } }
+  request: NextRequest,
+  context: { params: Params }
 ) {
   try {
-    const { token } = params
+    const token = context.params.token
 
     // Find user with this reset token using raw query
     const users = await prisma.$queryRaw<UserWithResetToken[]>`
@@ -58,12 +60,12 @@ export async function GET(
 }
 
 export async function POST(
-  req: NextRequest,
-  { params }: { params: { token: string } }
+  request: NextRequest,
+  context: { params: Params }
 ) {
   try {
-    const { token } = params
-    const { password } = await req.json()
+    const token = context.params.token
+    const { password } = await request.json()
 
     if (!password) {
       return new Response(
