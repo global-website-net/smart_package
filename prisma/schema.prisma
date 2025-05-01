@@ -56,12 +56,15 @@ model User {
   image         String?
   fullName      String
   role          String     @default("USER")
+  password      String?
+  resetToken    String?    @unique
+  resetTokenExpiry DateTime?
   accounts      Account[]
   sessions      Session[]
   packages      Package[]  @relation("UserPackages")
   shopPackages  Package[]  @relation("ShopPackages")
   wallet        Wallet?
-  blogPosts     BlogPost[]
+  blogs         Blog[]
 }
 
 model VerificationToken {
@@ -105,15 +108,13 @@ model Transaction {
   createdAt   DateTime @default(now())
 }
 
-model BlogPost {
+model Blog {
   id        String   @id @default(cuid())
   title     String
   content   String   @db.Text
-  itemlink  String?
+  itemLink  String?
   authorId  String
   author    User     @relation(fields: [authorId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@map("BlogPost")
 }

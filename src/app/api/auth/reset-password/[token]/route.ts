@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { token: string } }
 ) {
   try {
@@ -37,7 +37,7 @@ export async function GET(
 }
 
 export async function POST(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { token: string } }
 ) {
   try {
