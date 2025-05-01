@@ -6,12 +6,14 @@ export const metadata: Metadata = {
   description: 'Reset your password',
 }
 
+// This is a dynamic route, so we need to tell Next.js that params will be handled at runtime
+export const dynamic = 'force-dynamic'
+export const dynamicParams = true
+
 export default function ResetPasswordPage({
   params,
-  searchParams,
 }: {
   params: { token: string }
-  searchParams: Record<string, string | string[] | undefined>
 }) {
   return (
     <div className="container mx-auto px-4 py-8">
