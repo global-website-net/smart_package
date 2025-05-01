@@ -17,8 +17,17 @@ export async function GET() {
     const { data: orders, error } = await supabase
       .from('Order')
       .select(`
-        *,
-        User:userId (
+        id,
+        userId,
+        purchaseSite,
+        purchaseLink,
+        phoneNumber,
+        notes,
+        additionalInfo,
+        status,
+        createdAt,
+        updatedAt,
+        user:userId (
           fullName,
           email
         )
@@ -36,7 +45,10 @@ export async function GET() {
     // Transform the data to match the expected format
     const formattedOrders = orders.map(order => ({
       ...order,
-      user: order.User
+      user: {
+        fullName: order.user?.fullName || 'غير معروف',
+        email: order.user?.email || ''
+      }
     }))
 
     return NextResponse.json(formattedOrders)

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]/auth'
-import prisma from '@/lib/prisma'
+import { supabase } from '@/lib/supabase'
 
 export async function GET() {
   try {
@@ -13,39 +13,39 @@ export async function GET() {
       )
     }
 
-    // Get user's orders
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: {
-        id: true,
-        fullName: true,
-        email: true
-      }
-    })
+    // Get user's orders using Supabase
+    const { data: user, error: userError } = await supabase
+      .from('User')
+      .select('id')
+      .eq('email', session.user.email)
+      .single()
 
-    if (!user) {
+    if (userError || !user) {
       return NextResponse.json(
         { error: 'لم يتم العثور على المستخدم' },
         { status: 404 }
       )
     }
 
-    const orders = await prisma.order.findMany({
-      where: {
-        userId: user.id
-      },
-      include: {
-        user: {
-          select: {
-            fullName: true,
-            email: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    })
+    const { data: orders, error: ordersError } = await supabase
+      .from('Order')
+      .select(`
+        *,
+        user:userId (
+          fullName,
+          email
+        )
+      `)
+      .eq('userId', user.id)
+      .order('createdAt', { ascending: false })
+
+    if (ordersError) {
+      console.error('Error fetching orders:', ordersError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء جلب الطلبات' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json(orders)
   } catch (error) {

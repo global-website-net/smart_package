@@ -7,7 +7,7 @@ import { authOptions } from '../auth/[...nextauth]/auth'
 export async function GET() {
   try {
     const { data: blogs, error } = await supabase
-      .from('BlogPost')
+      .from('blogPost')
       .select(`
         id,
         title,
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
     const { title, content, itemLink } = body
 
     const { data: blog, error } = await supabase
-      .from('BlogPost')
+      .from('blogPost')
       .insert({
         title,
         content,
@@ -144,7 +144,7 @@ export async function DELETE(request: Request) {
     }
 
     const { error } = await supabase
-      .from('BlogPost')
+      .from('blogPost')
       .delete()
       .eq('id', id)
 

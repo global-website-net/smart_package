@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
-import prisma from '@/lib/prisma'
+import { supabase } from '@/lib/supabase'
 
 export async function GET(request: Request) {
   try {
-    const id = request.url.split('/').pop();
+    const id = request.url.split('/').pop()
     
     if (!id) {
       return NextResponse.json(
@@ -14,23 +14,21 @@ export async function GET(request: Request) {
       )
     }
 
-    // Create a new PrismaClient instance for this request
-    const post = await prisma.$transaction(async (tx) => {
-      return tx.blogPost.findUnique({
-        where: { id },
-        include: {
-          author: {
-            select: {
-              id: true,
-              fullName: true,
-              email: true,
-            },
-          },
-        },
-      })
-    })
+    const { data: post, error } = await supabase
+      .from('blogPost')
+      .select(`
+        *,
+        author:authorId (
+          id,
+          fullName,
+          email
+        )
+      `)
+      .eq('id', id)
+      .single()
 
-    if (!post) {
+    if (error) {
+      console.error('Error fetching blog post:', error)
       return NextResponse.json(
         { error: 'لم يتم العثور على المقال' },
         { status: 404 }
@@ -47,15 +45,64 @@ export async function GET(request: Request) {
   }
 }
 
+export async function DELETE(request: Request) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.email || (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER')) {
+      return NextResponse.json(
+        { error: 'غير مصرح لك بحذف المقالات' },
+        { status: 403 }
+      )
+    }
+
+    const id = request.url.split('/').pop()
+    
+    if (!id) {
+      return NextResponse.json(
+        { error: 'معرف المقال مطلوب' },
+        { status: 400 }
+      )
+    }
+
+    const { error } = await supabase
+      .from('blogPost')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      console.error('Error deleting blog post:', error)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء حذف المقال' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ message: 'تم حذف المقال بنجاح' })
+  } catch (error) {
+    console.error('Error in DELETE /api/blog/[id]:', error)
+    return NextResponse.json(
+      { error: 'حدث خطأ أثناء حذف المقال' },
+      { status: 500 }
+    )
+  }
+}
+
 export async function PUT(request: Request) {
   try {
-    const id = request.url.split('/').pop();
     const session = await getServerSession(authOptions)
-
-    if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER')) {
+    if (!session?.user?.email || (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER')) {
       return NextResponse.json(
-        { error: 'غير مصرح لك بتعديل المقال' },
-        { status: 401 }
+        { error: 'غير مصرح لك بتعديل المقالات' },
+        { status: 403 }
+      )
+    }
+
+    const id = request.url.split('/').pop()
+    
+    if (!id) {
+      return NextResponse.json(
+        { error: 'معرف المقال مطلوب' },
+        { status: 400 }
       )
     }
 
@@ -64,74 +111,35 @@ export async function PUT(request: Request) {
 
     if (!title || !content) {
       return NextResponse.json(
-        { error: 'عنوان المقال والمحتوى مطلوبان' },
+        { error: 'العنوان والمحتوى مطلوبان' },
         { status: 400 }
       )
     }
 
-    // Use transaction for the update operation
-    const updatedPost = await prisma.$transaction(async (tx) => {
-      return tx.blogPost.update({
-        where: { id },
-        data: {
-          title,
-          content,
-          itemLink,
-          updatedAt: new Date(),
-        },
-        include: {
-          author: {
-            select: {
-              id: true,
-              fullName: true,
-              email: true,
-            },
-          },
-        },
+    const { data: post, error } = await supabase
+      .from('blogPost')
+      .update({
+        title,
+        content,
+        itemlink: itemLink,
+        updatedAt: new Date().toISOString()
       })
-    })
+      .eq('id', id)
+      .select()
 
-    return NextResponse.json(updatedPost)
+    if (error) {
+      console.error('Error updating blog post:', error)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء تحديث المقال' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json(post[0])
   } catch (error) {
     console.error('Error in PUT /api/blog/[id]:', error)
     return NextResponse.json(
       { error: 'حدث خطأ أثناء تحديث المقال' },
-      { status: 500 }
-    )
-  }
-}
-
-export async function DELETE(request: Request) {
-  try {
-    const id = request.url.split('/').pop();
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER')) {
-      return NextResponse.json(
-        { error: 'غير مصرح لك بحذف المقال' },
-        { status: 401 }
-      )
-    }
-
-    if (!id) {
-      return NextResponse.json(
-        { error: 'معرف المقال مطلوب' },
-        { status: 400 }
-      )
-    }
-
-    // Use transaction for the delete operation
-    await prisma.$transaction(async (tx) => {
-      return tx.blogPost.delete({
-        where: { id }
-      })
-    })
-
-    return NextResponse.json({ message: 'تم حذف المقال بنجاح' })
-  } catch (error) {
-    console.error('Error in DELETE /api/blog/[id]:', error)
-    return NextResponse.json(
-      { error: 'حدث خطأ أثناء حذف المقال' },
       { status: 500 }
     )
   }

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]/auth'
-import prisma from '@/lib/prisma'
+import { supabase } from '@/lib/supabase'
 
 interface PackageData {
   id: string
@@ -52,27 +52,49 @@ export async function GET() {
       )
     }
 
-    // Fetch packages with a simpler query structure
-    const packages = await prisma.package.findMany({
-      include: {
-        user: {
-          select: {
-            fullName: true,
-            email: true,
-          },
-        },
-        shop: {
-          select: {
-            fullName: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    })
+    const { data: packages, error } = await supabase
+      .from('Package')
+      .select(`
+        id,
+        trackingNumber,
+        status,
+        createdAt,
+        updatedAt,
+        user:userId (
+          fullName,
+          email
+        ),
+        shop:shopId (
+          fullName
+        )
+      `)
+      .order('createdAt', { ascending: false })
 
-    return NextResponse.json(packages)
+    if (error) {
+      console.error('Error fetching packages:', error)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء جلب الطلبات' },
+        { status: 500 }
+      )
+    }
+
+    // Transform the data to match the expected format
+    const formattedPackages = packages.map(pkg => ({
+      id: pkg.id,
+      trackingNumber: pkg.trackingNumber,
+      status: pkg.status,
+      createdAt: pkg.createdAt,
+      updatedAt: pkg.updatedAt,
+      user: {
+        fullName: pkg.user?.fullName || 'غير معروف',
+        email: pkg.user?.email || ''
+      },
+      shop: {
+        fullName: pkg.shop?.fullName || 'غير معروف'
+      }
+    }))
+
+    return NextResponse.json(formattedPackages)
   } catch (error) {
     console.error('Error fetching packages:', error)
     return NextResponse.json(

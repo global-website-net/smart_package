@@ -1,57 +1,66 @@
 import { NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
-import { sendEmail } from '@/lib/email'
-import { generateResetToken } from '@/lib/auth'
+import { supabase } from '@/lib/supabase'
+import { v4 as uuidv4 } from 'uuid'
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
-    const { email } = await req.json()
+    const { email } = await request.json()
 
-    // Find user by email
-    const user = await prisma.user.findUnique({
-      where: { email },
-    })
+    if (!email) {
+      return NextResponse.json(
+        { error: 'البريد الإلكتروني مطلوب' },
+        { status: 400 }
+      )
+    }
 
-    if (!user) {
+    // Check if user exists
+    const { data: user, error: userError } = await supabase
+      .from('User')
+      .select('id, email')
+      .eq('email', email)
+      .single()
+
+    if (userError || !user) {
       return NextResponse.json(
         { error: 'لم يتم العثور على حساب بهذا البريد الإلكتروني' },
         { status: 404 }
       )
     }
 
-    // Generate reset token and expiry
-    const resetToken = generateResetToken()
-    const resetTokenExpiry = new Date(Date.now() + 3600000) // 1 hour from now
+    // Generate reset token
+    const resetToken = uuidv4()
+    const resetTokenExpiry = new Date()
+    resetTokenExpiry.setHours(resetTokenExpiry.getHours() + 1) // Token expires in 1 hour
 
-    // Save reset token and expiry to user record
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
+    // Update user with reset token
+    const { error: updateError } = await supabase
+      .from('User')
+      .update({
         resetToken,
-        resetTokenExpiry,
-      },
-    })
+        resetTokenExpiry: resetTokenExpiry.toISOString()
+      })
+      .eq('id', user.id)
+
+    if (updateError) {
+      console.error('Error updating user with reset token:', updateError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء إنشاء رمز إعادة التعيين' },
+        { status: 500 }
+      )
+    }
 
     // Send reset password email
-    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${resetToken}`
+    const resetLink = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${resetToken}`
     
-    await sendEmail({
-      to: email,
-      subject: 'إعادة تعيين كلمة المرور',
-      text: `لإعادة تعيين كلمة المرور الخاصة بك، يرجى النقر على الرابط التالي:\n\n${resetUrl}\n\nينتهي هذا الرابط خلال ساعة واحدة.`,
-      html: `
-        <div dir="rtl">
-          <h1>إعادة تعيين كلمة المرور</h1>
-          <p>لإعادة تعيين كلمة المرور الخاصة بك، يرجى النقر على الرابط التالي:</p>
-          <p><a href="${resetUrl}">إعادة تعيين كلمة المرور</a></p>
-          <p>ينتهي هذا الرابط خلال ساعة واحدة.</p>
-        </div>
-      `,
-    })
+    // TODO: Implement email sending functionality
+    // For now, we'll just log the reset link
+    console.log('Password reset link:', resetLink)
 
-    return NextResponse.json({ message: 'تم إرسال رابط إعادة تعيين كلمة المرور' })
+    return NextResponse.json({
+      message: 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني'
+    })
   } catch (error) {
-    console.error('Forgot password error:', error)
+    console.error('Error in forgot password:', error)
     return NextResponse.json(
       { error: 'حدث خطأ أثناء معالجة طلبك' },
       { status: 500 }

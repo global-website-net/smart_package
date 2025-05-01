@@ -1,22 +1,56 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import Header from '../../../components/Header'
+import Header from '@/app/components/Header'
 
-export default function ResetPasswordPage() {
-  const router = useRouter()
-  const [email, setEmail] = useState('')
-  const [loading, setLoading] = useState(false)
+export default function ResetPassword() {
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
+  const [success, setSuccess] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [isValidToken, setIsValidToken] = useState(false)
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const token = searchParams?.get('token')
+
+  useEffect(() => {
+    const validateToken = async () => {
+      if (!token) {
+        setError('رابط إعادة تعيين كلمة المرور غير صالح')
+        return
+      }
+
+      try {
+        const response = await fetch(`/api/auth/validate-reset-token?token=${token}`)
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.error || 'رابط إعادة تعيين كلمة المرور غير صالح')
+        }
+
+        setIsValidToken(true)
+      } catch (error) {
+        setError(error instanceof Error ? error.message : 'رابط إعادة تعيين كلمة المرور غير صالح')
+      }
+    }
+
+    validateToken()
+  }, [token])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
     setError('')
-    setSuccess(false)
+    setSuccess('')
+    setIsLoading(true)
+
+    if (password !== confirmPassword) {
+      setError('كلمات المرور غير متطابقة')
+      setIsLoading(false)
+      return
+    }
 
     try {
       const response = await fetch('/api/auth/reset-password', {
@@ -24,44 +58,54 @@ export default function ResetPasswordPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ token, password }),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.message || 'حدث خطأ أثناء إرسال رابط إعادة تعيين كلمة المرور')
+        throw new Error(data.error || 'حدث خطأ أثناء إعادة تعيين كلمة المرور')
       }
 
-      setSuccess(true)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'حدث خطأ أثناء إرسال رابط إعادة تعيين كلمة المرور')
+      setSuccess('تم إعادة تعيين كلمة المرور بنجاح')
+      setTimeout(() => {
+        router.push('/auth/login')
+      }, 3000)
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'حدث خطأ غير متوقع')
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }
 
-  return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <Header />
-      
-      <div className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 mt-20">
-        <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
-          <div>
-            <h2 className="mt-2 text-center text-3xl font-extrabold text-gray-900">
-              إعادة تعيين كلمة المرور
-            </h2>
-            <p className="mt-2 text-center text-sm text-gray-600">
-              أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور
-            </p>
+  if (!isValidToken && !error) {
+    return (
+      <>
+        <Header />
+        <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="text-lg text-gray-600">جاري التحقق من الرابط...</div>
           </div>
+        </div>
+      </>
+    )
+  }
 
-          {success ? (
-            <div className="rounded-md bg-green-50 p-4">
-              <div className="text-sm text-green-700 text-center">
-                تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني
-              </div>
-              <div className="mt-4 text-center">
+  return (
+    <>
+      <Header />
+      <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div className="sm:mx-auto sm:w-full sm:max-w-md">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            إعادة تعيين كلمة المرور
+          </h2>
+        </div>
+
+        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+          <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            {error ? (
+              <div className="text-center">
+                <div className="text-red-600 text-sm mb-4">{error}</div>
                 <Link
                   href="/auth/login"
                   className="font-medium text-green-600 hover:text-green-500"
@@ -69,58 +113,60 @@ export default function ResetPasswordPage() {
                   العودة إلى صفحة تسجيل الدخول
                 </Link>
               </div>
-            </div>
-          ) : (
-            <form 
-              className="mt-8 space-y-6" 
-              onSubmit={handleSubmit}
-              method="post"
-            >
-              <div>
-                <label htmlFor="email" className="sr-only">
-                  البريد الإلكتروني
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                  placeholder="البريد الإلكتروني"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-
-              {error && (
-                <div className="rounded-md bg-red-50 p-4">
-                  <div className="text-sm text-red-700">{error}</div>
+            ) : (
+              <form className="space-y-6" onSubmit={handleSubmit}>
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                    كلمة المرور الجديدة
+                  </label>
+                  <div className="mt-1">
+                    <input
+                      id="password"
+                      name="password"
+                      type="password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                    />
+                  </div>
                 </div>
-              )}
 
-              <div>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                >
-                  {loading ? 'جاري الإرسال...' : 'إرسال رابط إعادة التعيين'}
-                </button>
-              </div>
+                <div>
+                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                    تأكيد كلمة المرور
+                  </label>
+                  <div className="mt-1">
+                    <input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type="password"
+                      required
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                    />
+                  </div>
+                </div>
 
-              <div className="text-sm text-center">
-                <Link
-                  href="/auth/login"
-                  className="font-medium text-green-600 hover:text-green-500"
-                >
-                  العودة إلى صفحة تسجيل الدخول
-                </Link>
-              </div>
-            </form>
-          )}
+                {success && (
+                  <div className="text-green-600 text-sm text-center">{success}</div>
+                )}
+
+                <div>
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+                  >
+                    {isLoading ? 'جاري إعادة التعيين...' : 'إعادة تعيين كلمة المرور'}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 } 
