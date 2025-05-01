@@ -52,14 +52,9 @@ export async function GET() {
       )
     }
 
-    // Fetch packages using Prisma with a simpler query first
+    // Fetch packages with a simpler query structure
     const packages = await prisma.package.findMany({
-      select: {
-        id: true,
-        trackingNumber: true,
-        status: true,
-        createdAt: true,
-        updatedAt: true,
+      include: {
         user: {
           select: {
             fullName: true,
@@ -77,19 +72,7 @@ export async function GET() {
       },
     })
 
-    // Transform the data to match the expected format
-    const transformedPackages = packages.map(pkg => ({
-      id: pkg.id,
-      trackingNumber: pkg.trackingNumber,
-      status: pkg.status,
-      createdAt: pkg.createdAt,
-      updatedAt: pkg.updatedAt,
-      user: pkg.user,
-      shop: pkg.shop,
-      currentLocation: null
-    }))
-
-    return NextResponse.json(transformedPackages)
+    return NextResponse.json(packages)
   } catch (error) {
     console.error('Error fetching packages:', error)
     return NextResponse.json(

@@ -1,76 +1,65 @@
 import { NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
-import { Resend } from 'resend'
-import { randomBytes } from 'crypto'
+import { prisma } from '@/lib/prisma'
+import { sendEmail } from '@/lib/email'
+import { generateResetToken } from '@/lib/auth'
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
   try {
-    const body = await request.json()
-    const { email } = body
+    const { email } = await req.json()
 
-    if (!email) {
-      return NextResponse.json(
-        { error: 'البريد الإلكتروني مطلوب' },
-        { status: 400 }
-      )
-    }
-
-    // Check if user exists
+    // Find user by email
     const user = await prisma.user.findUnique({
       where: { email },
     })
 
     if (!user) {
       return NextResponse.json(
-        { error: 'لم يتم العثور على المستخدم' },
+        { error: 'لم يتم العثور على حساب بهذا البريد الإلكتروني' },
         { status: 404 }
       )
     }
 
-    // Generate reset token
-    const resetToken = randomBytes(32).toString('hex')
-    const resetTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+    // Generate reset token and expiry
+    const resetToken = generateResetToken()
+    const resetTokenExpiry = new Date(Date.now() + 3600000) // 1 hour from now
 
-    // Save reset token to user
+    // Save reset token and expiry to user record
     await prisma.user.update({
-      where: { email },
+      where: { id: user.id },
       data: {
         resetToken,
         resetTokenExpiry,
       },
     })
 
-    // Send email with reset link
-    const resend = new Resend(process.env.RESEND_API_KEY)
-    const resetLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/reset-password/${resetToken}`
+    // Send reset password email
+    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${resetToken}`
+    
+    await sendEmail({
+      to: email,
+      subject: 'إعادة تعيين كلمة المرور',
+      text: `لإعادة تعيين كلمة المرور الخاصة بك، يرجى النقر على الرابط التالي:\n\n${resetUrl}\n\nينتهي هذا الرابط خلال ساعة واحدة.`,
+      html: `
+        <div dir="rtl">
+          <h1>إعادة تعيين كلمة المرور</h1>
+          <p>لإعادة تعيين كلمة المرور الخاصة بك، يرجى النقر على الرابط التالي:</p>
+          <p><a href="${resetUrl}">إعادة تعيين كلمة المرور</a></p>
+          <p>ينتهي هذا الرابط خلال ساعة واحدة.</p>
+        </div>
+      `,
+    })
 
-    if (process.env.RESEND_API_KEY) {
-      await resend.emails.send({
-        from: 'Smart Package <noreply@smartpackage.com>',
-        to: email,
-        subject: 'إعادة تعيين كلمة المرور',
-        html: `
-          <div dir="rtl">
-            <h1>إعادة تعيين كلمة المرور</h1>
-            <p>لقد تلقينا طلبًا لإعادة تعيين كلمة المرور الخاصة بحسابك.</p>
-            <p>إذا لم تطلب إعادة تعيين كلمة المرور، يمكنك تجاهل هذا البريد الإلكتروني.</p>
-            <p>لإعادة تعيين كلمة المرور، انقر على الرابط أدناه:</p>
-            <a href="${resetLink}">${resetLink}</a>
-            <p>ينتهي هذا الرابط خلال 24 ساعة.</p>
-          </div>
-        `,
-      })
-    } else {
-      console.log('Resend API key not found, skipping email send')
-      console.log('Reset link:', resetLink)
-    }
-
-    return NextResponse.json({ message: 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني' })
+    return NextResponse.json({ message: 'تم إرسال رابط إعادة تعيين كلمة المرور' })
   } catch (error) {
-    console.error('Error in forgot password:', error)
+    console.error('Forgot password error:', error)
     return NextResponse.json(
       { error: 'حدث خطأ أثناء معالجة طلبك' },
       { status: 500 }
     )
   }
+}
+
+// Add GET method to handle redirect
+export async function GET() {
+  return NextResponse.redirect(new URL('/auth/forgot-password', process.env.NEXT_PUBLIC_APP_URL))
 } 

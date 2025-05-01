@@ -118,6 +118,28 @@ export default function Header() {
             </Link>
           </div>
 
+          {/* Left Side - Login Button for non-logged-in users */}
+          <div className="hidden md:block order-1">
+            {!isLoggedIn && !isLoginPage && (
+              <Link
+                href="/auth/login"
+                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
+              >
+                تسجيل الدخول
+              </Link>
+            )}
+          </div>
+
+          {/* Right Side - "أسعارنا" Link */}
+          <div className="hidden md:flex items-center order-3">
+            <Link 
+              href="/packages" 
+              className="text-white hover:text-green-500 transition-colors text-lg font-semibold border-b-2 border-transparent hover:border-green-500"
+            >
+              أسعارنا
+            </Link>
+          </div>
+
           {/* Mobile Icons - Right Side */}
           {isLoggedIn ? (
             <div className="md:hidden order-3">
@@ -133,16 +155,6 @@ export default function Header() {
               </Link>
             </div>
           )}
-
-          {/* Logo with Location Icon - Center */}
-          <div className="hidden md:flex items-center order-3">
-            <Link 
-              href="/packages" 
-              className="text-white hover:text-green-500 transition-colors text-lg font-semibold border-b-2 border-transparent hover:border-green-500"
-            >
-              أسعارنا
-            </Link>
-          </div>
 
           {/* Right Side - Login Button or User Name with Dropdown */}
           <div className="hidden md:block order-1">

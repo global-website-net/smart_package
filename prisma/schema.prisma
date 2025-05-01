@@ -64,7 +64,7 @@ model User {
   packages      Package[]  @relation("UserPackages")
   shopPackages  Package[]  @relation("ShopPackages")
   wallet        Wallet?
-  blogPosts blogPost[]
+  blogPosts     blogPost[]
   orders        Order[]
 }
 
@@ -80,7 +80,6 @@ model Package {
   id             String   @id @default(cuid())
   trackingNumber String   @unique
   status         String   @default("PENDING")
-  qrCode         String?  // QR code for the package
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   userId         String

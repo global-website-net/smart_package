@@ -9,22 +9,13 @@ export async function GET() {
 
     if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER')) {
       return NextResponse.json(
-        { message: 'غير مصرح لك بالوصول إلى هذه الصفحة' },
+        { error: 'غير مصرح لك بالوصول إلى هذه الصفحة' },
         { status: 403 }
       )
     }
 
-    const orders = await prisma.order.findMany({
-      select: {
-        id: true,
-        purchaseSite: true,
-        purchaseLink: true,
-        phoneNumber: true,
-        notes: true,
-        additionalInfo: true,
-        status: true,
-        createdAt: true,
-        updatedAt: true,
+    const orders = await prisma.Order.findMany({
+      include: {
         user: {
           select: {
             fullName: true,
@@ -41,7 +32,7 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching orders:', error)
     return NextResponse.json(
-      { message: 'حدث خطأ أثناء جلب الطلبات' },
+      { error: 'حدث خطأ أثناء جلب الطلبات' },
       { status: 500 }
     )
   }

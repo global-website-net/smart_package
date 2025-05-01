@@ -11,12 +11,12 @@ interface Order {
   purchaseSite: string
   purchaseLink: string
   phoneNumber: string
-  notes: string
-  additionalInfo: string
+  notes: string | null
+  additionalInfo: string | null
   status: string
   createdAt: string
   user: {
-    name: string
+    fullName: string
     email: string
   }
 }
@@ -32,22 +32,25 @@ export default function TrackingOrders() {
     const fetchOrders = async () => {
       try {
         const response = await fetch('/api/orders/admin')
-        const data = await response.json()
-
         if (!response.ok) {
-          throw new Error(data.message || 'حدث خطأ أثناء جلب الطلبات')
+          const data = await response.json()
+          throw new Error(data.error || 'حدث خطأ أثناء جلب الطلبات')
         }
 
-        setOrders(data.orders)
+        const data = await response.json()
+        setOrders(data)
       } catch (err) {
+        console.error('Error fetching orders:', err)
         setError(err instanceof Error ? err.message : 'حدث خطأ أثناء جلب الطلبات')
       } finally {
         setLoading(false)
       }
     }
 
-    fetchOrders()
-  }, [])
+    if (session?.user && (session.user.role === 'ADMIN' || session.user.role === 'OWNER')) {
+      fetchOrders()
+    }
+  }, [session])
 
   // Redirect if not admin/owner
   if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER')) {
@@ -77,6 +80,10 @@ export default function TrackingOrders() {
           ) : error ? (
             <div className="text-center py-8">
               <div className="text-lg text-red-600">{error}</div>
+            </div>
+          ) : orders.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="text-lg text-gray-600">لا توجد طلبات حالياً</div>
             </div>
           ) : (
             <div className="bg-white shadow-md rounded-lg overflow-hidden">
@@ -108,7 +115,7 @@ export default function TrackingOrders() {
                     {orders.map((order) => (
                       <tr key={order.id}>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{order.user.name}</div>
+                          <div className="text-sm text-gray-900">{order.user.fullName}</div>
                           <div className="text-sm text-gray-500">{order.user.email}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">

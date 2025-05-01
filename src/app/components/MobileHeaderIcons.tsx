@@ -17,9 +17,15 @@ export default function MobileHeaderIcons({ isRegularUser }: MobileHeaderIconsPr
       )}
 
       {/* New Order - Middle */}
-      <Link href="/orders/create" className="text-white">
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+      <Link href="/new-order" className="relative">
+        <div className="w-7 h-7 rounded-full border-2 border-green-500"></div>
+        <svg 
+          className="w-6 h-6 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" 
+          fill="none" 
+          stroke="#22C55E" 
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
         </svg>
       </Link>
 
