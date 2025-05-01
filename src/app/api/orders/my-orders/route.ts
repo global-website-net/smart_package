@@ -15,7 +15,12 @@ export async function GET() {
 
     // Get user's orders
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
+      where: { email: session.user.email },
+      select: {
+        id: true,
+        fullName: true,
+        email: true
+      }
     })
 
     if (!user) {

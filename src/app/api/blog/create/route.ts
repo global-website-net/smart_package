@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     const currentTime = new Date().toISOString()
 
     const { data, error } = await supabaseAdmin
-      .from('BlogPost')
+      .from('blogPost')
       .insert([
         {
           id: uuidv4(),
