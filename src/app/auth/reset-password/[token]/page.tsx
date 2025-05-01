@@ -1,4 +1,4 @@
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
 import ResetPasswordForm from '@/components/auth/ResetPasswordForm'
 
 export const metadata: Metadata = {
@@ -6,14 +6,11 @@ export const metadata: Metadata = {
   description: 'Reset your password',
 }
 
-interface Props {
-  params: {
-    token: string
-  }
-  searchParams: { [key: string]: string | string[] | undefined }
+type PageProps = {
+  params: { token: string }
 }
 
-export default async function ResetPasswordPage({ params }: Props) {
+export default function ResetPasswordPage({ params }: PageProps) {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-md mx-auto">
