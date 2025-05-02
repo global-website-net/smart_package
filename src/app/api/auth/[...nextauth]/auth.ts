@@ -44,6 +44,8 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     id: string
+    email: string
+    fullName: string
     role: UserRole
   }
 }
@@ -76,7 +78,7 @@ export const authOptions: NextAuthOptions = {
           // Now get the user data from our database
           const { data: userData, error: userError } = await supabase
             .from('User')
-            .select('id, email, fullName, role')
+            .select('id, email, fullname, role')
             .eq('id', authData.user.id)
             .single()
 
@@ -88,7 +90,7 @@ export const authOptions: NextAuthOptions = {
           return {
             id: userData.id,
             email: userData.email,
-            fullName: userData.fullName,
+            fullName: userData.fullname,
             role: userData.role
           }
         } catch (error) {
@@ -106,6 +108,8 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
+        token.email = user.email
+        token.fullName = user.fullName
         token.role = user.role
       }
       return token
@@ -113,6 +117,8 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session?.user) {
         session.user.id = token.id
+        session.user.email = token.email
+        session.user.fullName = token.fullName
         session.user.role = token.role
       }
       return session

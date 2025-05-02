@@ -41,13 +41,13 @@ function LoginForm() {
     }
   }
 
-  const handleForgotPassword = () => {
+  const handleForgotPassword = (e: React.MouseEvent) => {
+    e.preventDefault()
     try {
-      router.push('/auth/forgot-password')
+      // Force a hard navigation to ensure page refresh
+      window.location.href = '/auth/forgot-password'
     } catch (err) {
       console.error('Navigation error:', err)
-      // Fallback to window.location if router fails
-      window.location.href = '/auth/forgot-password'
     }
   }
 

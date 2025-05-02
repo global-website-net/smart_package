@@ -22,10 +22,9 @@ export default function Header() {
   const getMenuItems = () => {
     if (isRegularUser) {
       return [
-        { href: '/tracking/packages', label: 'تتبع الطرود' },
-        { href: '/tracking/orders', label: 'تتبع الطلبات' },
+        { href: '/tracking_orders', label: 'تتبع الطلبات' },
         { href: '/wallet', label: 'المحفظة' },
-        { href: '/profile', label: 'الملف الشخصي' },
+        { href: '/account', label: 'الملف الشخصي' },
       ]
     } else if (session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') {
       return [
