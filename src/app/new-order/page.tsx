@@ -171,12 +171,19 @@ export default function NewOrder() {
               </div>
 
               {/* Submit Button */}
-              <div className="flex justify-center">
+              <div className="flex justify-center gap-4">
                 <button
                   type="submit"
                   className="bg-green-500 text-white px-8 py-3 rounded-md hover:bg-green-600 transition-colors"
                 >
                   إرسال الطلب
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push('/tracking')}
+                  className="bg-gray-500 text-white px-8 py-3 rounded-md hover:bg-gray-600 transition-colors"
+                >
+                  إلغاء
                 </button>
               </div>
             </div>

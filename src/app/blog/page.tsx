@@ -21,7 +21,7 @@ interface BlogPost {
   content: string
   createdAt: string
   updatedAt: string
-  itemlink: string
+  itemLink: string
   author: {
     fullName: string
     email: string
@@ -58,7 +58,7 @@ export default function BlogPage() {
           content,
           createdAt,
           updatedAt,
-          itemlink,
+          itemLink,
           author:User (
             fullName,
             email

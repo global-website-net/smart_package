@@ -32,7 +32,8 @@ export async function GET() {
     // Transform the data to match the expected format
     const transformedShops = shops.map(shop => ({
       id: shop.id,
-      name: shop.fullName
+      fullName: shop.fullName,
+      role: 'SHOP'
     }))
 
     return NextResponse.json(transformedShops)

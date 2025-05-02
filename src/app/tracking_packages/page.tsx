@@ -154,7 +154,10 @@ export default function TrackingPackagesPage() {
               </div>
             </div>
             <div className="mt-6 text-center">
-              <Button onClick={() => setShowCreateForm(true)}>
+              <Button 
+                onClick={() => setShowCreateForm(true)}
+                className="bg-green-500 text-white px-8 py-3 rounded-md hover:bg-green-600 transition-colors"
+              >
                 إضافة طرد جديد
               </Button>
             </div>

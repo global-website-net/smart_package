@@ -1,7 +1,19 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/auth.config'
-import prisma from '@/lib/prisma'
+import { createClient } from '@supabase/supabase-js'
+
+// Initialize Supabase admin client with service role key
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+)
 
 export async function GET() {
   try {
@@ -21,38 +33,36 @@ export async function GET() {
       )
     }
 
-    // Fetch all orders with user information
-    const orders = await prisma.order.findMany({
-      select: {
-        id: true,
-        userId: true,
-        purchaseSite: true,
-        purchaseLink: true,
-        phoneNumber: true,
-        notes: true,
-        additionalInfo: true,
-        status: true,
-        createdAt: true,
-        updatedAt: true,
-        user: {
-          select: {
-            fullName: true,
-            email: true
-          }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    })
+    // Fetch all orders with user information using Supabase
+    const { data: orders, error } = await supabaseAdmin
+      .from('order')
+      .select(`
+        id,
+        userId,
+        purchaseSite,
+        purchaseLink,
+        phoneNumber,
+        notes,
+        additionalInfo,
+        status,
+        createdAt,
+        updatedAt,
+        user:User (
+          fullName,
+          email
+        )
+      `)
+      .order('createdAt', { ascending: false })
 
-    // Transform the data to match the expected format
-    const transformedOrders = orders.map(order => ({
-      ...order,
-      user: order.user || null
-    }))
+    if (error) {
+      console.error('Error fetching orders:', error)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء جلب الطلبات' },
+        { status: 500 }
+      )
+    }
 
-    return NextResponse.json(transformedOrders)
+    return NextResponse.json(orders)
   } catch (error) {
     console.error('Error in all-orders route:', error)
     return NextResponse.json(

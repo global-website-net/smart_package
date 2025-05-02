@@ -233,11 +233,11 @@ export default function TrackingPage() {
                     )}
                     <div>
                       <p className="text-sm text-gray-500">تاريخ الإنشاء</p>
-                      <p className="font-medium">{new Date(order.createdAt).toLocaleDateString('ar-SA')}</p>
+                      <p className="font-medium">{new Date(order.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">آخر تحديث</p>
-                      <p className="font-medium">{new Date(order.updatedAt).toLocaleDateString('ar-SA')}</p>
+                      <p className="font-medium">{new Date(order.updatedAt).toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
                     </div>
                   </div>
                 </div>

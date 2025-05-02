@@ -32,11 +32,12 @@ export async function GET() {
     // Format the response to match the expected structure
     const formattedUsers = users.map(user => ({
       id: user.id,
-      name: user.fullName || user.email?.split('@')[0] || 'مستخدم',
-      email: user.email
+      fullName: user.fullName || user.email?.split('@')[0] || 'مستخدم',
+      email: user.email,
+      role: 'REGULAR'
     }))
 
-    return NextResponse.json({ users: formattedUsers })
+    return NextResponse.json(formattedUsers)
   } catch (error) {
     console.error('Error in regular users route:', error)
     return NextResponse.json(
