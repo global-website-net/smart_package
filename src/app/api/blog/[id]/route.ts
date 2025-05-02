@@ -15,15 +15,9 @@ const supabaseAdmin = createClient(
   }
 )
 
-type RouteContext = {
-  params: {
-    id: string
-  }
-}
-
 export async function GET(
   request: NextRequest,
-  context: RouteContext
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -73,7 +67,7 @@ export async function GET(
           email
         )
       `)
-      .eq('id', context.params.id)
+      .eq('id', params.id)
       .single()
 
     if (blogError) {
@@ -103,7 +97,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  context: RouteContext
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -141,7 +135,7 @@ export async function PUT(
     const { data: blogPost, error: blogError } = await supabaseAdmin
       .from('blogPost')
       .select('authorId')
-      .eq('id', context.params.id)
+      .eq('id', params.id)
       .single()
 
     if (blogError) {
@@ -179,7 +173,7 @@ export async function PUT(
         itemLink,
         updatedAt: new Date().toISOString()
       })
-      .eq('id', context.params.id)
+      .eq('id', params.id)
       .select()
       .single()
 
@@ -203,7 +197,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  context: RouteContext
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -241,7 +235,7 @@ export async function DELETE(
     const { data: blogPost, error: blogError } = await supabaseAdmin
       .from('blogPost')
       .select('authorId')
-      .eq('id', context.params.id)
+      .eq('id', params.id)
       .single()
 
     if (blogError) {
@@ -271,7 +265,7 @@ export async function DELETE(
     const { error: deleteError } = await supabaseAdmin
       .from('blogPost')
       .delete()
-      .eq('id', context.params.id)
+      .eq('id', params.id)
 
     if (deleteError) {
       console.error('Error deleting blog post:', deleteError)
