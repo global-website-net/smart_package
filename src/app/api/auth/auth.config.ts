@@ -7,9 +7,10 @@ import prisma from '@/lib/prisma'
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const nextAuthSecret = process.env.NEXTAUTH_SECRET!
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing required Supabase environment variables')
+if (!supabaseUrl || !supabaseAnonKey || !nextAuthSecret) {
+  throw new Error('Missing required environment variables')
 }
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -58,38 +59,48 @@ export const authOptions: AuthOptions = {
         password: { label: 'Password', type: 'password' }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error('البريد الإلكتروني وكلمة المرور مطلوبان')
-        }
-
-        // Sign in with Supabase Auth
-        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-          email: credentials.email,
-          password: credentials.password
-        })
-
-        if (authError || !authData.user) {
-          throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
-        }
-
-        // Get user data from Prisma
-        const user = await prisma.user.findUnique({
-          where: {
-            id: authData.user.id
+        try {
+          if (!credentials?.email || !credentials?.password) {
+            throw new Error('البريد الإلكتروني وكلمة المرور مطلوبان')
           }
-        })
 
-        if (!user) {
-          throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
-        }
+          // Sign in with Supabase Auth
+          const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+            email: credentials.email,
+            password: credentials.password
+          })
 
-        return {
-          id: user.id,
-          email: user.email!,
-          name: user.fullName,
-          fullName: user.fullName,
-          role: user.role as UserRole,
-          image: null
+          if (authError) {
+            console.error('Supabase auth error:', authError)
+            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
+          }
+
+          if (!authData.user) {
+            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
+          }
+
+          // Get user data from Prisma
+          const user = await prisma.user.findUnique({
+            where: {
+              id: authData.user.id
+            }
+          })
+
+          if (!user) {
+            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
+          }
+
+          return {
+            id: user.id,
+            email: user.email!,
+            name: user.fullName,
+            fullName: user.fullName,
+            role: user.role as UserRole,
+            image: null
+          }
+        } catch (error) {
+          console.error('Auth error:', error)
+          throw error
         }
       },
     }),
@@ -128,6 +139,6 @@ export const authOptions: AuthOptions = {
   session: {
     strategy: 'jwt',
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: nextAuthSecret,
   debug: true
 } 
