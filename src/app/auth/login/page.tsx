@@ -106,16 +106,13 @@ function LoginForm() {
             )}
 
             <div className="text-sm text-center">
-              <Link
-                href="/auth/forgot-password"
+              <button
+                type="button"
+                onClick={() => router.push('/auth/forgot-password')}
                 className="font-medium text-green-600 hover:text-green-500"
-                onClick={(e) => {
-                  e.preventDefault()
-                  router.push('/auth/forgot-password')
-                }}
               >
                 نسيت كلمة المرور؟
-              </Link>
+              </button>
             </div>
 
             <div>
