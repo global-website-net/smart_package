@@ -67,12 +67,12 @@ export async function GET() {
         shopId,
         createdAt,
         updatedAt,
-        user:userId (
+        User:User (
           fullName,
           email
         ),
-        shop:shopId (
-          name,
+        Shop:Shop (
+          fullName,
           address
         )
       `)
@@ -87,20 +87,24 @@ export async function GET() {
     }
 
     // Transform the data to match the expected format
-    const formattedPackages = packages.map(pkg => {
-      const rawPkg = pkg as unknown as RawSupabasePackage
-      return {
-        ...rawPkg,
-        user: rawPkg.user ? {
-          fullName: rawPkg.user.fullName || 'غير معروف',
-          email: rawPkg.user.email || ''
-        } : null,
-        shop: rawPkg.shop ? {
-          name: rawPkg.shop.name || 'غير معروف',
-          address: rawPkg.shop.address || ''
-        } : null
-      } as PackageData
-    })
+    const formattedPackages = packages.map(pkg => ({
+      id: pkg.id,
+      trackingNumber: pkg.trackingNumber,
+      description: pkg.description,
+      status: pkg.status,
+      userId: pkg.userId,
+      shopId: pkg.shopId,
+      createdAt: pkg.createdAt,
+      updatedAt: pkg.updatedAt,
+      user: pkg.User?.[0] ? {
+        fullName: pkg.User[0].fullName || 'غير معروف',
+        email: pkg.User[0].email || ''
+      } : null,
+      shop: pkg.Shop?.[0] ? {
+        fullName: pkg.Shop[0].fullName || 'غير معروف',
+        address: pkg.Shop[0].address || ''
+      } : null
+    }))
 
     return NextResponse.json(formattedPackages)
   } catch (error) {

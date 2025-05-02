@@ -27,6 +27,20 @@ interface BlogPost {
   }
 }
 
+interface SupabaseBlogPost {
+  id: string
+  title: string
+  content: string
+  createdAt: string
+  updatedAt: string
+  itemLink: string
+  authorId: string
+  User: {
+    fullName: string
+    email: string
+  }[]
+}
+
 export default function BlogPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
@@ -58,7 +72,8 @@ export default function BlogPage() {
           createdAt,
           updatedAt,
           itemLink,
-          author:User (
+          authorId,
+          User:authorId (
             fullName,
             email
           )
@@ -68,9 +83,17 @@ export default function BlogPage() {
       if (error) throw error
 
       // Transform the data to match the BlogPost interface
-      const transformedPosts = (blogPosts || []).map(post => ({
-        ...post,
-        author: post.author[0] // Take the first author since it's an array
+      const transformedPosts = (blogPosts as SupabaseBlogPost[] || []).map(post => ({
+        id: post.id,
+        title: post.title,
+        content: post.content,
+        createdAt: post.createdAt,
+        updatedAt: post.updatedAt,
+        itemLink: post.itemLink,
+        author: {
+          fullName: post.User?.[0]?.fullName || 'مجهول',
+          email: post.User?.[0]?.email || ''
+        }
       }))
 
       setPosts(transformedPosts)
@@ -130,38 +153,56 @@ export default function BlogPage() {
             )}
           </div>
 
-          <div className="space-y-6">
-            {posts.map((post) => (
-              <div key={post.id} className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">{post.title}</h2>
-                <div className="prose max-w-none mb-4" dangerouslySetInnerHTML={{ __html: post.content }} />
-                <div className="flex justify-between items-center border-t pt-4">
-                  <div className="text-sm text-gray-500">
-                    كتب بواسطة: {post.author.fullName}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {new Date(post.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' })}
-                  </div>
-                  {isAdminOrOwner && (
-                    <div className="space-x-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => router.push(`/blog/${post.id}/edit`)}
+          {posts.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-600 text-lg">لا توجد مقالات حتى الآن</p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {posts.map((post) => (
+                <div key={post.id} className="bg-white rounded-lg shadow-md p-6">
+                  <h2 className="text-2xl font-bold mb-4">{post.title}</h2>
+                  <div className="prose max-w-none mb-4" dangerouslySetInnerHTML={{ __html: post.content }} />
+                  {post.itemLink && (
+                    <div className="mb-4">
+                      <a 
+                        href={post.itemLink} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-green-600 hover:text-green-700"
                       >
-                        تعديل
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        onClick={() => handleDelete(post.id)}
-                      >
-                        حذف
-                      </Button>
+                        رابط المقال
+                      </a>
                     </div>
                   )}
+                  <div className="flex justify-between items-center border-t pt-4">
+                    <div className="text-sm text-gray-500">
+                      كتب بواسطة: {post.author.fullName}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {new Date(post.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' })}
+                    </div>
+                    {isAdminOrOwner && (
+                      <div className="space-x-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => router.push(`/blog/${post.id}/edit`)}
+                        >
+                          تعديل
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          onClick={() => handleDelete(post.id)}
+                        >
+                          حذف
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

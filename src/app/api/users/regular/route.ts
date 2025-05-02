@@ -24,7 +24,7 @@ export async function GET() {
     // Fetch all users with role REGULAR
     const { data: users, error } = await supabase
       .from('User')
-      .select('id, fullName, email')
+      .select('id, fullName, email, role')
       .eq('role', 'REGULAR')
       .order('fullName', { ascending: true })
 
@@ -36,13 +36,17 @@ export async function GET() {
       )
     }
 
+    console.log('Fetched regular users:', users)
+
     // Format the response to match the expected structure
     const formattedUsers = users.map(user => ({
       id: user.id,
       fullName: user.fullName || user.email?.split('@')[0] || 'مستخدم',
       email: user.email,
-      role: 'REGULAR'
+      role: user.role
     }))
+
+    console.log('Formatted users:', formattedUsers)
 
     return NextResponse.json(formattedUsers)
   } catch (error) {

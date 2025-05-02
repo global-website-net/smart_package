@@ -47,6 +47,7 @@ export async function GET() {
         status,
         createdAt,
         updatedAt,
+        orderNumber,
         user:User (
           fullName,
           email

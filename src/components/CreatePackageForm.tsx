@@ -30,11 +30,12 @@ export default function CreatePackageForm({ onClose, onSuccess }: CreatePackageF
     const fetchUsers = async () => {
       try {
         // Fetch shops (users with SHOP role)
-        const shopsResponse = await fetch('/api/shops')
+        const shopsResponse = await fetch('/api/users/shops')
         if (!shopsResponse.ok) {
           throw new Error('Failed to fetch shops')
         }
         const shopsData = await shopsResponse.json()
+        console.log('Fetched shops:', shopsData)
         setShops(shopsData)
 
         // Fetch regular users
@@ -43,6 +44,7 @@ export default function CreatePackageForm({ onClose, onSuccess }: CreatePackageF
           throw new Error('Failed to fetch users')
         }
         const usersData = await usersResponse.json()
+        console.log('Fetched regular users:', usersData)
         setUsers(usersData)
       } catch (error) {
         console.error('Error fetching users:', error)
@@ -167,18 +169,18 @@ export default function CreatePackageForm({ onClose, onSuccess }: CreatePackageF
             </select>
           </div>
 
-          <div className="flex justify-end space-x-4 rtl:space-x-reverse">
+          <div className="flex justify-center space-x-4 rtl:space-x-reverse mt-6">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 border rounded-md hover:bg-gray-100"
+              className="px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors"
             >
               إلغاء
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:opacity-50"
+              className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:opacity-50 transition-colors"
             >
               {isSubmitting ? 'جاري الحفظ...' : 'حفظ'}
             </button>
