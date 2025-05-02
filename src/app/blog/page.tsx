@@ -60,7 +60,7 @@ export default function BlogPage() {
 
       // Get blog posts with author information
       const { data: blogPosts, error } = await supabase
-        .from('BlogPost')
+        .from('blogPost')
         .select(`
           id,
           title,
@@ -77,7 +77,13 @@ export default function BlogPage() {
 
       if (error) throw error
 
-      setPosts(blogPosts || [])
+      // Transform the data to match the BlogPost interface
+      const transformedPosts = (blogPosts || []).map(post => ({
+        ...post,
+        author: post.author[0] // Take the first author since it's an array
+      }))
+
+      setPosts(transformedPosts)
     } catch (error) {
       console.error('Error fetching blog posts:', error)
       toast.error('حدث خطأ أثناء جلب المقالات')
