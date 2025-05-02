@@ -19,6 +19,31 @@ export default function Header() {
     await signOut({ redirect: true, callbackUrl: '/auth/login' })
   }
 
+  const getMenuItems = () => {
+    if (isRegularUser) {
+      return [
+        { href: '/tracking/packages', label: 'تتبع الطرود' },
+        { href: '/tracking/orders', label: 'تتبع الطلبات' },
+        { href: '/wallet', label: 'المحفظة' },
+        { href: '/profile', label: 'الملف الشخصي' },
+      ]
+    } else if (session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') {
+      return [
+        { href: '/admin/dashboard', label: 'لوحة التحكم' },
+        { href: '/admin/orders', label: 'الطلبات' },
+        { href: '/admin/packages', label: 'الطرود' },
+        { href: '/admin/users', label: 'المستخدمين' },
+      ]
+    } else if (session?.user?.role === 'SHOP') {
+      return [
+        { href: '/shop/dashboard', label: 'لوحة التحكم' },
+        { href: '/shop/orders', label: 'الطلبات' },
+        { href: '/shop/packages', label: 'الطرود' },
+      ]
+    }
+    return []
+  }
+
   return (
     <header className="bg-black text-white fixed w-full top-0 z-50">
       <div className="max-w-6xl mx-auto px-4">
@@ -95,7 +120,7 @@ export default function Header() {
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                     className="flex items-center space-x-2 rtl:space-x-reverse text-white hover:text-green-500 transition-colors"
                   >
-                    <span>{session.user?.fullName || 'المستخدم'}</span>
+                    <span>{session.user?.fullName || session.user?.email || 'المستخدم'}</span>
                     <svg
                       className={`w-4 h-4 transform transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`}
                       fill="none"
@@ -115,32 +140,16 @@ export default function Header() {
                   {isUserMenuOpen && (
                     <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                       <div className="py-1" role="menu" aria-orientation="vertical">
-                        {isRegularUser ? (
-                          <>
-                            <Link
-                              href="/profile"
-                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                              onClick={() => setIsUserMenuOpen(false)}
-                            >
-                              الملف الشخصي
-                            </Link>
-                            <Link
-                              href="/orders"
-                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                              onClick={() => setIsUserMenuOpen(false)}
-                            >
-                              طلباتي
-                            </Link>
-                          </>
-                        ) : (
+                        {getMenuItems().map((item, index) => (
                           <Link
-                            href="/admin/dashboard"
+                            key={index}
+                            href={item.href}
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                             onClick={() => setIsUserMenuOpen(false)}
                           >
-                            لوحة التحكم
+                            {item.label}
                           </Link>
-                        )}
+                        ))}
                         <button
                           onClick={handleSignOut}
                           className="block w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -190,6 +199,24 @@ export default function Header() {
               >
                 أسعارنا
               </Link>
+              {isLoggedIn && getMenuItems().map((item, index) => (
+                <Link
+                  key={index}
+                  href={item.href}
+                  className="hover:text-green-500 transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {item.label}
+                </Link>
+              ))}
+              {isLoggedIn && (
+                <button
+                  onClick={handleSignOut}
+                  className="text-right text-red-500 hover:text-red-600 transition-colors"
+                >
+                  تسجيل الخروج
+                </button>
+              )}
             </nav>
           </div>
         )}

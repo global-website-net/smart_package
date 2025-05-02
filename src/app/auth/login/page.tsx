@@ -41,6 +41,16 @@ function LoginForm() {
     }
   }
 
+  const handleForgotPassword = () => {
+    try {
+      router.push('/auth/forgot-password')
+    } catch (err) {
+      console.error('Navigation error:', err)
+      // Fallback to window.location if router fails
+      window.location.href = '/auth/forgot-password'
+    }
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
@@ -108,9 +118,7 @@ function LoginForm() {
             <div className="text-sm text-center">
               <button
                 type="button"
-                onClick={() => {
-                  window.location.href = '/auth/forgot-password'
-                }}
+                onClick={handleForgotPassword}
                 className="font-medium text-green-600 hover:text-green-500"
               >
                 نسيت كلمة المرور؟
