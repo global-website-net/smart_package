@@ -28,10 +28,12 @@ declare module 'next-auth' {
   interface User {
     id: string
     email: string
-    name: string | null
     fullName: string
     role: UserRole
-    image?: string | null
+    governorate: string
+    town: string
+    phonePrefix: string
+    phoneNumber: string
   }
 
   interface Session extends DefaultSession {
@@ -43,10 +45,12 @@ declare module 'next-auth/jwt' {
   interface JWT {
     id: string
     email: string
-    name: string | null
     fullName: string
     role: UserRole
-    image?: string | null
+    governorate: string
+    town: string
+    phonePrefix: string
+    phoneNumber: string
   }
 }
 
@@ -79,24 +83,27 @@ export const authOptions: AuthOptions = {
             throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
           }
 
-          // Get user data from Prisma
-          const user = await prisma.user.findUnique({
-            where: {
-              id: authData.user.id
-            }
-          })
+          // Get user data from Supabase
+          const { data: user, error: userError } = await supabase
+            .from('User')
+            .select('*')
+            .eq('id', authData.user.id)
+            .single()
 
-          if (!user) {
+          if (userError || !user) {
+            console.error('Error fetching user:', userError)
             throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
           }
 
           return {
             id: user.id,
-            email: user.email!,
-            name: user.fullName,
+            email: user.email,
             fullName: user.fullName,
             role: user.role as UserRole,
-            image: null
+            governorate: user.governorate,
+            town: user.town,
+            phonePrefix: user.phonePrefix,
+            phoneNumber: user.phoneNumber
           }
         } catch (error) {
           console.error('Auth error:', error)
@@ -114,10 +121,12 @@ export const authOptions: AuthOptions = {
       if (user) {
         token.role = user.role
         token.id = user.id
-        token.name = user.name
         token.fullName = user.fullName
         token.email = user.email
-        token.image = user.image
+        token.governorate = user.governorate
+        token.town = user.town
+        token.phonePrefix = user.phonePrefix
+        token.phoneNumber = user.phoneNumber
       }
       return token
     },
@@ -125,10 +134,12 @@ export const authOptions: AuthOptions = {
       if (session?.user) {
         session.user.role = token.role
         session.user.id = token.id
-        session.user.name = token.name
         session.user.fullName = token.fullName
         session.user.email = token.email
-        session.user.image = token.image
+        session.user.governorate = token.governorate
+        session.user.town = token.town
+        session.user.phonePrefix = token.phonePrefix
+        session.user.phoneNumber = token.phoneNumber
       }
       return session
     },
