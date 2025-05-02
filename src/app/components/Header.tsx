@@ -22,20 +22,19 @@ export default function Header() {
   const getMenuItems = () => {
     if (isRegularUser) {
       return [
-        { href: '/tracking_orders', label: 'تتبع الطلبات' },
+        { href: '/tracking_orders_regular', label: 'تتبع الطلبات' },
         { href: '/wallet', label: 'المحفظة' },
         { href: '/account', label: 'الملف الشخصي' },
+        { href: '/blog', label: 'المدونة' },
       ]
     } else if (session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') {
       return [
-        { href: '/admin/dashboard', label: 'لوحة التحكم' },
-        { href: '/admin/orders', label: 'الطلبات' },
-        { href: '/admin/packages', label: 'الطرود' },
-        { href: '/admin/users', label: 'المستخدمين' },
+        { href: '/tracking_orders', label: 'ادارة الطلبات' },
+        { href: '/tracking_packages', label: 'ادارة الطرود' },
+        { href: '/blog', label: 'المدونة' },
       ]
     } else if (session?.user?.role === 'SHOP') {
       return [
-        { href: '/shop/dashboard', label: 'لوحة التحكم' },
         { href: '/shop/orders', label: 'الطلبات' },
         { href: '/shop/packages', label: 'الطرود' },
       ]
