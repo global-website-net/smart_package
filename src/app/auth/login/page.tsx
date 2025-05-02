@@ -108,7 +108,9 @@ function LoginForm() {
             <div className="text-sm text-center">
               <button
                 type="button"
-                onClick={() => router.push('/auth/forgot-password')}
+                onClick={() => {
+                  window.location.href = '/auth/forgot-password'
+                }}
                 className="font-medium text-green-600 hover:text-green-500"
               >
                 نسيت كلمة المرور؟

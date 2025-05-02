@@ -2,17 +2,22 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
 import MobileHeaderIcons from './MobileHeaderIcons'
 
 export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const { data: session } = useSession()
   const pathname = usePathname()
   const isLoggedIn = !!session
   const isLoginPage = pathname === '/auth/login'
   const isRegularUser = session?.user?.role === 'REGULAR'
+
+  const handleSignOut = async () => {
+    await signOut({ redirect: true, callbackUrl: '/auth/login' })
+  }
 
   return (
     <header className="bg-black text-white fixed w-full top-0 z-50">
@@ -22,7 +27,7 @@ export default function Header() {
           <div className={`md:hidden order-1 ${isLoginPage ? 'invisible' : ''}`}>
             <button
               className="p-2"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               <svg
                 className="w-6 h-6"
@@ -87,12 +92,12 @@ export default function Header() {
               {isLoggedIn ? (
                 <div className="relative">
                   <button
-                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                     className="flex items-center space-x-2 rtl:space-x-reverse text-white hover:text-green-500 transition-colors"
                   >
                     <span>{session.user?.fullName || 'المستخدم'}</span>
                     <svg
-                      className="w-4 h-4"
+                      className={`w-4 h-4 transform transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -105,6 +110,46 @@ export default function Header() {
                       />
                     </svg>
                   </button>
+
+                  {/* User Dropdown Menu */}
+                  {isUserMenuOpen && (
+                    <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                      <div className="py-1" role="menu" aria-orientation="vertical">
+                        {isRegularUser ? (
+                          <>
+                            <Link
+                              href="/profile"
+                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              onClick={() => setIsUserMenuOpen(false)}
+                            >
+                              الملف الشخصي
+                            </Link>
+                            <Link
+                              href="/orders"
+                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              onClick={() => setIsUserMenuOpen(false)}
+                            >
+                              طلباتي
+                            </Link>
+                          </>
+                        ) : (
+                          <Link
+                            href="/admin/dashboard"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            لوحة التحكم
+                          </Link>
+                        )}
+                        <button
+                          onClick={handleSignOut}
+                          className="block w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          تسجيل الخروج
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : !isLoginPage && (
                 <Link
@@ -135,13 +180,13 @@ export default function Header() {
         </div>
 
         {/* Mobile Menu */}
-        {isMenuOpen && !isLoginPage && (
+        {isMobileMenuOpen && !isLoginPage && (
           <div className="md:hidden py-4">
             <nav className="flex flex-col space-y-4 text-right px-4">
               <Link
                 href="/packages"
                 className="hover:text-green-500 transition-colors"
-                onClick={() => setIsMenuOpen(false)}
+                onClick={() => setIsMobileMenuOpen(false)}
               >
                 أسعارنا
               </Link>
