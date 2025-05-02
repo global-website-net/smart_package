@@ -15,9 +15,15 @@ const supabaseAdmin = createClient(
   }
 )
 
+type Props = {
+  params: {
+    id: string
+  }
+}
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: Props
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -67,7 +73,7 @@ export async function GET(
           email
         )
       `)
-      .eq('id', params.id)
+      .eq('id', props.params.id)
       .single()
 
     if (blogError) {
@@ -105,7 +111,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: Props
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -143,7 +149,7 @@ export async function PUT(
     const { data: blogPost, error: blogError } = await supabaseAdmin
       .from('BlogPost')
       .select('authorId')
-      .eq('id', params.id)
+      .eq('id', props.params.id)
       .single()
 
     if (blogError) {
@@ -181,7 +187,7 @@ export async function PUT(
         published,
         updatedAt: new Date().toISOString()
       })
-      .eq('id', params.id)
+      .eq('id', props.params.id)
       .select()
       .single()
 
@@ -205,7 +211,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: Props
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -243,7 +249,7 @@ export async function DELETE(
     const { data: blogPost, error: blogError } = await supabaseAdmin
       .from('BlogPost')
       .select('authorId')
-      .eq('id', params.id)
+      .eq('id', props.params.id)
       .single()
 
     if (blogError) {
@@ -273,7 +279,7 @@ export async function DELETE(
     const { error: deleteError } = await supabaseAdmin
       .from('BlogPost')
       .delete()
-      .eq('id', params.id)
+      .eq('id', props.params.id)
 
     if (deleteError) {
       console.error('Error deleting blog post:', deleteError)
