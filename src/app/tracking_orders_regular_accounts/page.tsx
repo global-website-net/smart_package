@@ -34,6 +34,7 @@ interface Package {
   }
   shop: {
     name: string
+    link: string
   }
 }
 
@@ -76,7 +77,8 @@ export default function TrackingOrdersRegularAccounts() {
             email
           ),
           shop:Shop (
-            name
+            name,
+            link
           )
         `)
         .eq('userId', session?.user?.id)
@@ -98,7 +100,8 @@ export default function TrackingOrdersRegularAccounts() {
             email: pkg.user?.[0]?.email || ''
           },
           shop: {
-            name: pkg.shop?.[0]?.name || ''
+            name: pkg.shop?.[0]?.name || '',
+            link: pkg.shop?.[0]?.link || ''
           }
         })) as Package[]
         setPackages(transformedData)
@@ -124,6 +127,17 @@ export default function TrackingOrdersRegularAccounts() {
       default:
         return status
     }
+  }
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('ar-SA', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
   }
 
   if (status === 'loading' || loading) {
@@ -166,7 +180,10 @@ export default function TrackingOrdersRegularAccounts() {
                       رقم التتبع
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      المتجر
+                      موقع الشراء
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      لينك الشراء
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       الحالة
@@ -188,6 +205,16 @@ export default function TrackingOrdersRegularAccounts() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {pkg.shop.name}
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <a 
+                          href={pkg.shop.link} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          {pkg.shop.link}
+                        </a>
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <span className={`px-2 py-1 rounded-full ${
                           pkg.status === 'DELIVERED' 
@@ -203,11 +230,7 @@ export default function TrackingOrdersRegularAccounts() {
                         {pkg.description}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(pkg.createdAt).toLocaleDateString('ar-SA', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}
+                        {formatDate(pkg.createdAt)}
                       </td>
                     </tr>
                   ))}

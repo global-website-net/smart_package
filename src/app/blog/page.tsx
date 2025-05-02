@@ -31,6 +31,7 @@ export default function BlogPage() {
   const router = useRouter()
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
+  const [userRole, setUserRole] = useState<string | null>(null)
 
   useEffect(() => {
     fetchPosts()
@@ -42,7 +43,7 @@ export default function BlogPage() {
       const { data: { session } } = await supabase.auth.getSession()
       
       if (!session) {
-        router.push('/login')
+        router.push('/auth/login')
         return
       }
 
@@ -53,10 +54,12 @@ export default function BlogPage() {
         .eq('email', session.user.email)
         .single()
 
-      if (!user || (user.role !== 'ADMIN' && user.role !== 'OWNER')) {
+      if (!user) {
         router.push('/')
         return
       }
+
+      setUserRole(user.role)
 
       // Get blog posts with author information
       const { data: blogPosts, error } = await supabase
@@ -117,9 +120,11 @@ export default function BlogPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">المدونة</h1>
-        <Button onClick={() => router.push('/blog/create')}>
-          إنشاء مقال جديد
-        </Button>
+        {userRole === 'ADMIN' || userRole === 'OWNER' ? (
+          <Button onClick={() => router.push('/blog/create')}>
+            إنشاء مقال جديد
+          </Button>
+        ) : null}
       </div>
 
       <div className="grid gap-6">
@@ -135,20 +140,22 @@ export default function BlogPage() {
                   <div className="text-sm text-gray-500">
                     كتب بواسطة: {post.author.fullName}
                   </div>
-                  <div className="space-x-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => router.push(`/blog/${post.id}/edit`)}
-                    >
-                      تعديل
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      onClick={() => handleDelete(post.id)}
-                    >
-                      حذف
-                    </Button>
-                  </div>
+                  {(userRole === 'ADMIN' || userRole === 'OWNER') && (
+                    <div className="space-x-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => router.push(`/blog/${post.id}/edit`)}
+                      >
+                        تعديل
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={() => handleDelete(post.id)}
+                      >
+                        حذف
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>

@@ -62,7 +62,7 @@ export async function POST(request: Request) {
 
     // Create order in database using admin client
     const { data: orderData, error: orderError } = await supabaseAdmin
-      .from('Order')
+      .from('order')
       .insert([
         {
           userId: user.id,
