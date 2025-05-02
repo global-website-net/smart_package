@@ -15,11 +15,16 @@ const supabaseAdmin = createClient(
   }
 )
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
+    const id = request.url.split('/').pop()
+    if (!id) {
+      return NextResponse.json(
+        { error: 'معرف المقال مطلوب' },
+        { status: 400 }
+      )
+    }
+
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
       return NextResponse.json(
@@ -67,7 +72,7 @@ export async function GET(
           email
         )
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (blogError) {
@@ -95,11 +100,16 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest) {
   try {
+    const id = request.url.split('/').pop()
+    if (!id) {
+      return NextResponse.json(
+        { error: 'معرف المقال مطلوب' },
+        { status: 400 }
+      )
+    }
+
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
       return NextResponse.json(
@@ -135,7 +145,7 @@ export async function PUT(
     const { data: blogPost, error: blogError } = await supabaseAdmin
       .from('blogPost')
       .select('authorId')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (blogError) {
@@ -173,7 +183,7 @@ export async function PUT(
         itemLink,
         updatedAt: new Date().toISOString()
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
 
@@ -195,11 +205,16 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest) {
   try {
+    const id = request.url.split('/').pop()
+    if (!id) {
+      return NextResponse.json(
+        { error: 'معرف المقال مطلوب' },
+        { status: 400 }
+      )
+    }
+
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
       return NextResponse.json(
@@ -235,7 +250,7 @@ export async function DELETE(
     const { data: blogPost, error: blogError } = await supabaseAdmin
       .from('blogPost')
       .select('authorId')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (blogError) {
@@ -265,7 +280,7 @@ export async function DELETE(
     const { error: deleteError } = await supabaseAdmin
       .from('blogPost')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
 
     if (deleteError) {
       console.error('Error deleting blog post:', deleteError)
