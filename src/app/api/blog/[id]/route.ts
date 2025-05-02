@@ -1,135 +1,293 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/auth.config'
-import prisma from '@/lib/prisma'
+import { createClient } from '@supabase/supabase-js'
 
-export async function GET(request: Request) {
+// Initialize Supabase admin client with service role key
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+)
+
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
-    const id = request.url.split('/').pop()
-    
-    if (!id) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'معرف المقال مطلوب' },
-        { status: 400 }
+        { error: 'غير مصرح لك بالوصول' },
+        { status: 401 }
       )
     }
 
-    const post = await prisma.blogPost.findUnique({
-      where: { id },
-      include: {
-        author: {
-          select: {
-            id: true,
-            fullName: true,
-            email: true,
-          },
-        },
-      },
-    })
+    // Get user from database with case-insensitive email match using admin client
+    const { data: user, error: userError } = await supabaseAdmin
+      .from('User')
+      .select('id, role')
+      .ilike('email', session.user.email)
+      .single()
 
-    if (!post) {
+    if (userError) {
+      console.error('Error fetching user:', userError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء البحث عن المستخدم' },
+        { status: 500 }
+      )
+    }
+
+    if (!user) {
+      console.error('User not found for email:', session.user.email)
+      return NextResponse.json(
+        { error: 'لم يتم العثور على المستخدم. يرجى تسجيل الخروج وإعادة تسجيل الدخول' },
+        { status: 404 }
+      )
+    }
+
+    // Get blog post using admin client
+    const { data: blogPost, error: blogError } = await supabaseAdmin
+      .from('BlogPost')
+      .select(`
+        id,
+        title,
+        content,
+        authorId,
+        published,
+        createdAt,
+        updatedAt,
+        author:User (
+          fullName,
+          email
+        )
+      `)
+      .eq('id', params.id)
+      .single()
+
+    if (blogError) {
+      console.error('Error fetching blog post:', blogError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء جلب المقال' },
+        { status: 500 }
+      )
+    }
+
+    if (!blogPost) {
       return NextResponse.json(
         { error: 'لم يتم العثور على المقال' },
         { status: 404 }
       )
     }
 
-    return NextResponse.json(post)
+    // Check if user is authorized to view the blog post
+    if (!blogPost.published && blogPost.authorId !== user.id && user.role !== 'ADMIN' && user.role !== 'OWNER') {
+      return NextResponse.json(
+        { error: 'غير مصرح لك بالوصول إلى هذا المقال' },
+        { status: 403 }
+      )
+    }
+
+    return NextResponse.json(blogPost)
   } catch (error) {
-    console.error('Error in GET /api/blog/[id]:', error)
+    console.error('Error in get blog post route:', error)
     return NextResponse.json(
-      { error: 'حدث خطأ أثناء جلب المقال' },
+      { error: 'حدث خطأ في الخادم' },
       { status: 500 }
     )
   }
 }
 
-export async function DELETE(request: Request) {
+export async function PUT(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.email || (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER')) {
+    if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'غير مصرح لك بحذف المقالات' },
+        { error: 'غير مصرح لك بالوصول' },
+        { status: 401 }
+      )
+    }
+
+    // Get user from database with case-insensitive email match using admin client
+    const { data: user, error: userError } = await supabaseAdmin
+      .from('User')
+      .select('id, role')
+      .ilike('email', session.user.email)
+      .single()
+
+    if (userError) {
+      console.error('Error fetching user:', userError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء البحث عن المستخدم' },
+        { status: 500 }
+      )
+    }
+
+    if (!user) {
+      console.error('User not found for email:', session.user.email)
+      return NextResponse.json(
+        { error: 'لم يتم العثور على المستخدم. يرجى تسجيل الخروج وإعادة تسجيل الدخول' },
+        { status: 404 }
+      )
+    }
+
+    // Get blog post using admin client
+    const { data: blogPost, error: blogError } = await supabaseAdmin
+      .from('BlogPost')
+      .select('authorId')
+      .eq('id', params.id)
+      .single()
+
+    if (blogError) {
+      console.error('Error fetching blog post:', blogError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء جلب المقال' },
+        { status: 500 }
+      )
+    }
+
+    if (!blogPost) {
+      return NextResponse.json(
+        { error: 'لم يتم العثور على المقال' },
+        { status: 404 }
+      )
+    }
+
+    // Check if user is authorized to update the blog post
+    if (blogPost.authorId !== user.id && user.role !== 'ADMIN' && user.role !== 'OWNER') {
+      return NextResponse.json(
+        { error: 'غير مصرح لك بتعديل هذا المقال' },
         { status: 403 }
-      )
-    }
-
-    const id = request.url.split('/').pop()
-    
-    if (!id) {
-      return NextResponse.json(
-        { error: 'معرف المقال مطلوب' },
-        { status: 400 }
-      )
-    }
-
-    await prisma.blogPost.delete({
-      where: { id },
-    })
-
-    return NextResponse.json({ message: 'تم حذف المقال بنجاح' })
-  } catch (error) {
-    console.error('Error in DELETE /api/blog/[id]:', error)
-    return NextResponse.json(
-      { error: 'حدث خطأ أثناء حذف المقال' },
-      { status: 500 }
-    )
-  }
-}
-
-export async function PUT(request: Request) {
-  try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.email || (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER')) {
-      return NextResponse.json(
-        { error: 'غير مصرح لك بتعديل المقالات' },
-        { status: 403 }
-      )
-    }
-
-    const id = request.url.split('/').pop()
-    
-    if (!id) {
-      return NextResponse.json(
-        { error: 'معرف المقال مطلوب' },
-        { status: 400 }
       )
     }
 
     const body = await request.json()
-    const { title, content, itemLink } = body
+    const { title, content, published } = body
 
-    if (!title || !content) {
+    // Update blog post using admin client
+    const { data: updatedBlogPost, error: updateError } = await supabaseAdmin
+      .from('BlogPost')
+      .update({
+        title,
+        content,
+        published,
+        updatedAt: new Date().toISOString()
+      })
+      .eq('id', params.id)
+      .select()
+      .single()
+
+    if (updateError) {
+      console.error('Error updating blog post:', updateError)
       return NextResponse.json(
-        { error: 'العنوان والمحتوى مطلوبان' },
-        { status: 400 }
+        { error: 'حدث خطأ أثناء تحديث المقال' },
+        { status: 500 }
       )
     }
 
-    const updatedPost = await prisma.blogPost.update({
-      where: { id },
-      data: {
-        title,
-        content,
-        itemLink,
-        updatedAt: new Date().toISOString(),
-      },
-      select: {
-        id: true,
-        title: true,
-        content: true,
-        itemLink: true,
-        createdAt: true,
-        updatedAt: true,
-        authorId: true,
-      },
-    })
-
-    return NextResponse.json(updatedPost)
+    return NextResponse.json(updatedBlogPost)
   } catch (error) {
-    console.error('Error in PUT /api/blog/[id]:', error)
+    console.error('Error in update blog post route:', error)
     return NextResponse.json(
-      { error: 'حدث خطأ أثناء تحديث المقال' },
+      { error: 'حدث خطأ في الخادم' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: 'غير مصرح لك بالوصول' },
+        { status: 401 }
+      )
+    }
+
+    // Get user from database with case-insensitive email match using admin client
+    const { data: user, error: userError } = await supabaseAdmin
+      .from('User')
+      .select('id, role')
+      .ilike('email', session.user.email)
+      .single()
+
+    if (userError) {
+      console.error('Error fetching user:', userError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء البحث عن المستخدم' },
+        { status: 500 }
+      )
+    }
+
+    if (!user) {
+      console.error('User not found for email:', session.user.email)
+      return NextResponse.json(
+        { error: 'لم يتم العثور على المستخدم. يرجى تسجيل الخروج وإعادة تسجيل الدخول' },
+        { status: 404 }
+      )
+    }
+
+    // Get blog post using admin client
+    const { data: blogPost, error: blogError } = await supabaseAdmin
+      .from('BlogPost')
+      .select('authorId')
+      .eq('id', params.id)
+      .single()
+
+    if (blogError) {
+      console.error('Error fetching blog post:', blogError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء جلب المقال' },
+        { status: 500 }
+      )
+    }
+
+    if (!blogPost) {
+      return NextResponse.json(
+        { error: 'لم يتم العثور على المقال' },
+        { status: 404 }
+      )
+    }
+
+    // Check if user is authorized to delete the blog post
+    if (blogPost.authorId !== user.id && user.role !== 'ADMIN' && user.role !== 'OWNER') {
+      return NextResponse.json(
+        { error: 'غير مصرح لك بحذف هذا المقال' },
+        { status: 403 }
+      )
+    }
+
+    // Delete blog post using admin client
+    const { error: deleteError } = await supabaseAdmin
+      .from('BlogPost')
+      .delete()
+      .eq('id', params.id)
+
+    if (deleteError) {
+      console.error('Error deleting blog post:', deleteError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء حذف المقال' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Error in delete blog post route:', error)
+    return NextResponse.json(
+      { error: 'حدث خطأ في الخادم' },
       { status: 500 }
     )
   }

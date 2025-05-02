@@ -18,6 +18,32 @@ console.log('Using Supabase Key:', supabaseKey.substring(0, 5) + '...')
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
+async function runMigration(file) {
+  try {
+    console.log(`Running migration: ${file}`)
+    const sql = fs.readFileSync(path.join(process.cwd(), 'supabase', 'migrations', file), 'utf8')
+    
+    // Split SQL into individual statements
+    const statements = sql.split(';').filter(stmt => stmt.trim())
+    
+    // Execute each statement
+    for (const statement of statements) {
+      const { error } = await supabase.from('_sqlquery').select('*').eq('query', statement.trim())
+      
+      if (error) {
+        console.error(`Error running statement: ${statement.trim()}`)
+        console.error('Error:', error)
+        process.exit(1)
+      }
+    }
+    
+    console.log(`Successfully ran migration: ${file}`)
+  } catch (error) {
+    console.error(`Error running migration ${file}:`, error)
+    process.exit(1)
+  }
+}
+
 async function runMigrations() {
   try {
     // Read migration files
@@ -30,17 +56,7 @@ async function runMigrations() {
 
     // Execute each migration
     for (const file of migrationFiles) {
-      console.log(`Running migration: ${file}`)
-      const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf8')
-      
-      const { error } = await supabase.rpc('exec_sql', { sql })
-      
-      if (error) {
-        console.error(`Error running migration ${file}:`, error)
-        process.exit(1)
-      }
-      
-      console.log(`Successfully ran migration: ${file}`)
+      await runMigration(file)
     }
 
     console.log('All migrations completed successfully')
@@ -50,4 +66,10 @@ async function runMigrations() {
   }
 }
 
-runMigrations() 
+// Check if a specific migration file was provided
+const args = process.argv.slice(2)
+if (args.length > 0) {
+  runMigration(args[0])
+} else {
+  runMigrations()
+} 

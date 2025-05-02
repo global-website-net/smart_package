@@ -2,89 +2,134 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { createClient } from '@supabase/supabase-js'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { toast } from 'sonner'
 import Header from '@/app/components/Header'
 import CreatePackageForm from '@/components/CreatePackageForm'
+
+// Initialize Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+interface User {
+  fullName: string
+  email: string
+}
+
+interface Shop {
+  name: string
+}
 
 interface Package {
   id: string
   trackingNumber: string
+  description: string
   status: string
+  userId: string
+  shopId: string
   createdAt: string
   updatedAt: string
-  user: {
-    fullName: string
-    email: string
-  }
-  shop: {
-    fullName: string
-  }
+  user: User
+  shop: Shop
+}
+
+type PackageWithRelations = Package & {
+  user: User
+  shop: Shop
 }
 
 export default function TrackingPackagesPage() {
-  const { data: session, status } = useSession()
-  const [packages, setPackages] = useState<Package[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [showCreateForm, setShowCreateForm] = useState(false)
-  const [editingPackage, setEditingPackage] = useState<Package | null>(null)
-  const [packageToDelete, setPackageToDelete] = useState<Package | null>(null)
   const router = useRouter()
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'PENDING':
-        return 'قيد الانتظار'
-      case 'PROCESSING':
-        return 'قيد المعالجة'
-      case 'SHIPPED':
-        return 'تم الشحن'
-      case 'DELIVERED':
-        return 'تم التسليم'
-      case 'CANCELLED':
-        return 'ملغي'
-      default:
-        return status
-    }
-  }
+  const [packages, setPackages] = useState<PackageWithRelations[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showCreateForm, setShowCreateForm] = useState(false)
+  const [editingPackage, setEditingPackage] = useState<PackageWithRelations | null>(null)
+  const [packageToDelete, setPackageToDelete] = useState<PackageWithRelations | null>(null)
 
   useEffect(() => {
-    const checkAuth = async () => {
-      if (status === 'loading') return
+    fetchPackages()
+  }, [])
 
+  const fetchPackages = async () => {
+    try {
+      setLoading(true)
+      const { data: { session } } = await supabase.auth.getSession()
+      
       if (!session) {
-        router.push('/auth/login')
+        router.push('/login')
         return
       }
 
-      // Check if user is admin or owner
-      const userRole = session.user?.role
-      if (!userRole || (userRole !== 'ADMIN' && userRole !== 'OWNER')) {
+      // Get user role
+      const { data: user } = await supabase
+        .from('User')
+        .select('role')
+        .eq('email', session.user.email)
+        .single()
+
+      if (!user || (user.role !== 'ADMIN' && user.role !== 'OWNER')) {
         router.push('/')
         return
       }
 
-      try {
-        // Fetch packages
-        const response = await fetch('/api/packages/all')
-        if (!response.ok) {
-          const data = await response.json()
-          throw new Error(data.error || 'Failed to fetch packages')
-        }
-        const data = await response.json()
-        setPackages(data)
-      } catch (error) {
-        console.error('Error fetching packages:', error)
-        setError(error instanceof Error ? error.message : 'حدث خطأ أثناء جلب الطلبات')
-      } finally {
-        setLoading(false)
+      // Get packages with user and shop information
+      const { data: packages, error } = await supabase
+        .from('Package')
+        .select(`
+          id,
+          trackingNumber,
+          description,
+          status,
+          userId,
+          shopId,
+          createdAt,
+          updatedAt,
+          user:User (
+            fullName,
+            email
+          ),
+          shop:Shop (
+            name
+          )
+        `)
+        .order('createdAt', { ascending: false })
+
+      if (error) throw error
+
+      if (packages) {
+        setPackages(packages as unknown as PackageWithRelations[])
       }
+    } catch (error) {
+      console.error('Error fetching packages:', error)
+      toast.error('حدث خطأ أثناء جلب الطرود')
+    } finally {
+      setLoading(false)
     }
+  }
 
-    checkAuth()
-  }, [status, session, router])
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('Package')
+        .delete()
+        .eq('id', id)
 
-  if (status === 'loading' || loading) {
+      if (error) throw error
+
+      toast.success('تم حذف الطرد بنجاح')
+      fetchPackages()
+    } catch (error) {
+      console.error('Error deleting package:', error)
+      toast.error('حدث خطأ أثناء حذف الطرد')
+    }
+  }
+
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
@@ -113,105 +158,53 @@ export default function TrackingPackagesPage() {
               </div>
             </div>
             <div className="mt-6 text-center">
-              <button
-                onClick={() => setShowCreateForm(true)}
-                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-              >
+              <Button onClick={() => setShowCreateForm(true)}>
                 إضافة طرد جديد
-              </button>
+              </Button>
             </div>
           </div>
 
-          {error && (
-            <div className="bg-red-50 text-red-800 p-4 rounded-md mb-6">
-              {error}
-            </div>
-          )}
-
-          {packages.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-md p-6 text-center">
-              <p className="text-gray-600 text-lg">لا توجد طرود حالياً</p>
-            </div>
-          ) : (
-            <div className="bg-white shadow-md rounded-lg overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        رقم التتبع
-                      </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        المستخدم
-                      </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        المتجر
-                      </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        الحالة
-                      </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        التاريخ
-                      </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        الإجراءات
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {packages.map((pkg) => (
-                      <tr key={pkg.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {pkg.trackingNumber}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{pkg.user.fullName}</div>
-                          <div className="text-sm text-gray-500">{pkg.user.email}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {pkg.shop.fullName}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            pkg.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                            pkg.status === 'PROCESSING' ? 'bg-blue-100 text-blue-800' :
-                            pkg.status === 'SHIPPED' ? 'bg-green-100 text-green-800' :
-                            pkg.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
-                            {getStatusText(pkg.status)}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {new Date(pkg.createdAt).toLocaleDateString('ar-SA')}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button
-                            onClick={() => router.push(`/tracking_packages/${pkg.id}`)}
-                            className="text-green-600 hover:text-green-900 ml-4"
-                          >
-                            عرض التفاصيل
-                          </button>
-                          <button
-                            onClick={() => setEditingPackage(pkg)}
-                            className="text-blue-600 hover:text-blue-900 ml-4"
-                          >
-                            تعديل
-                          </button>
-                          <button
-                            onClick={() => setPackageToDelete(pkg)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            حذف
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>رقم التتبع</TableHead>
+                <TableHead>الوصف</TableHead>
+                <TableHead>الحالة</TableHead>
+                <TableHead>المستخدم</TableHead>
+                <TableHead>المتجر</TableHead>
+                <TableHead>تاريخ الإنشاء</TableHead>
+                <TableHead>الإجراءات</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {packages.map((pkg) => (
+                <TableRow key={pkg.id}>
+                  <TableCell>{pkg.trackingNumber}</TableCell>
+                  <TableCell>{pkg.description}</TableCell>
+                  <TableCell>{pkg.status}</TableCell>
+                  <TableCell>{pkg.user.fullName}</TableCell>
+                  <TableCell>{pkg.shop.name}</TableCell>
+                  <TableCell>{new Date(pkg.createdAt).toLocaleDateString('ar-SA')}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => router.push(`/packages/edit/${pkg.id}`)}
+                      >
+                        تعديل
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={() => handleDelete(pkg.id)}
+                      >
+                        حذف
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       </div>
 
@@ -235,21 +228,21 @@ export default function TrackingPackagesPage() {
               هل أنت متأكد من حذف الطرد رقم {packageToDelete.trackingNumber}؟
             </p>
             <div className="flex justify-end space-x-4 rtl:space-x-reverse">
-              <button
+              <Button
+                variant="outline"
                 onClick={() => setPackageToDelete(null)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
               >
                 إلغاء
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="destructive"
                 onClick={() => {
-                  setPackages(packages.filter(p => p.id !== packageToDelete.id))
+                  handleDelete(packageToDelete.id)
                   setPackageToDelete(null)
                 }}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
               >
                 حذف
-              </button>
+              </Button>
             </div>
           </div>
         </div>

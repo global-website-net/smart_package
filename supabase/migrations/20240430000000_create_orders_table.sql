@@ -1,5 +1,5 @@
 -- Create Orders table
-CREATE TABLE "Order" (
+CREATE TABLE IF NOT EXISTS "Order" (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "userId" UUID NOT NULL REFERENCES "User"("id") ON DELETE CASCADE,
   "purchaseSite" TEXT NOT NULL,
@@ -13,8 +13,8 @@ CREATE TABLE "Order" (
 );
 
 -- Create indexes for better performance
-CREATE INDEX "idx_order_user_id" ON "Order"("userId");
-CREATE INDEX "idx_order_status" ON "Order"("status");
+CREATE INDEX IF NOT EXISTS "idx_order_user_id" ON "Order"("userId");
+CREATE INDEX IF NOT EXISTS "idx_order_status" ON "Order"("status");
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE "Order" ENABLE ROW LEVEL SECURITY;
