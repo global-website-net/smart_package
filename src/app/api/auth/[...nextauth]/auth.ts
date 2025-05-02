@@ -19,7 +19,7 @@ type UserRole = 'REGULAR' | 'SHOP' | 'ADMIN' | 'OWNER'
 interface DatabaseUser {
   id: string
   email: string
-  fullname: string
+  fullName: string
   role: UserRole
 }
 
@@ -78,7 +78,7 @@ export const authOptions: NextAuthOptions = {
           // Now get the user data from our database
           const { data: userData, error: userError } = await supabase
             .from('User')
-            .select('id, email, fullname, role')
+            .select('id, email, "fullName", role')
             .eq('id', authData.user.id)
             .single()
 
@@ -90,7 +90,7 @@ export const authOptions: NextAuthOptions = {
           return {
             id: userData.id,
             email: userData.email,
-            fullName: userData.fullname,
+            fullName: userData.fullName,
             role: userData.role
           }
         } catch (error) {

@@ -41,16 +41,6 @@ function LoginForm() {
     }
   }
 
-  const handleForgotPassword = (e: React.MouseEvent) => {
-    e.preventDefault()
-    try {
-      // Force a hard navigation to ensure page refresh
-      window.location.href = '/auth/forgot-password'
-    } catch (err) {
-      console.error('Navigation error:', err)
-    }
-  }
-
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
@@ -116,13 +106,12 @@ function LoginForm() {
             )}
 
             <div className="text-sm text-center">
-              <button
-                type="button"
-                onClick={handleForgotPassword}
+              <Link
+                href="/auth/forgot-password"
                 className="font-medium text-green-600 hover:text-green-500"
               >
                 نسيت كلمة المرور؟
-              </button>
+              </Link>
             </div>
 
             <div>

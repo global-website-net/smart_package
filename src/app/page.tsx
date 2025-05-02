@@ -276,7 +276,7 @@ export default function Home() {
               <ul className="space-y-2">
                 <li>
                   <Link href="/faq" className="text-gray-400 hover:text-white transition-colors">
-                    الأسئلة الشائعة
+                    الأسئلة المتكررة
                   </Link>
                 </li>
                 <li>
