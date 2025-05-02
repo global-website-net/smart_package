@@ -23,7 +23,7 @@ export async function GET() {
 
     // Get wallet data
     const { data: wallet, error: walletError } = await supabase
-      .from('Wallet')
+      .from('wallet')
       .select('*')
       .eq('userid', session.user.id)
       .single()
@@ -32,13 +32,13 @@ export async function GET() {
       // If wallet doesn't exist, create one
       if (walletError.code === 'PGRST116') {
         const { data: newWallet, error: createError } = await supabase
-          .from('Wallet')
+          .from('wallet')
           .insert([
             {
               userid: session.user.id,
               balance: 0,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
+              createdat: new Date().toISOString(),
+              updatedat: new Date().toISOString()
             }
           ])
           .select()
@@ -58,10 +58,10 @@ export async function GET() {
 
     // Get wallet transactions
     const { data: transactions, error: transactionsError } = await supabase
-      .from('WalletTransaction')
+      .from('wallettransaction')
       .select('*')
-      .eq('userId', session.user.id)
-      .order('createdAt', { ascending: false })
+      .eq('walletid', wallet.id)
+      .order('createdat', { ascending: false })
 
     if (transactionsError) {
       throw transactionsError
@@ -104,7 +104,7 @@ export async function POST(request: Request) {
 
     // Get wallet
     const { data: wallet, error: walletError } = await supabase
-      .from('Wallet')
+      .from('wallet')
       .select('*')
       .eq('userid', session.user.id)
       .single()
@@ -127,14 +127,14 @@ export async function POST(request: Request) {
 
     // Start a transaction
     const { data: transaction, error: transactionError } = await supabase
-      .from('WalletTransaction')
+      .from('wallettransaction')
       .insert([
         {
           walletid: wallet.id,
           amount,
           type,
           reason,
-          created_at: new Date().toISOString()
+          createdat: new Date().toISOString()
         }
       ])
       .select()
@@ -146,10 +146,10 @@ export async function POST(request: Request) {
 
     // Update wallet balance
     const { error: updateError } = await supabase
-      .from('Wallet')
+      .from('wallet')
       .update({ 
         balance: newBalance,
-        updated_at: new Date().toISOString()
+        updatedat: new Date().toISOString()
       })
       .eq('id', wallet.id)
 

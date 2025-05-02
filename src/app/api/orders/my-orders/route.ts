@@ -50,7 +50,7 @@ export async function GET() {
 
     // Get orders for the user using admin client
     const { data: orders, error: ordersError } = await supabaseAdmin
-      .from('Order')
+      .from('order')
       .select(`
         id,
         userId,

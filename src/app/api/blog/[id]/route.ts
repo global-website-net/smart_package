@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
         authorId,
         createdAt,
         updatedAt,
-        itemLink,
+        itemlink,
         author:User (
           fullName,
           email
@@ -164,23 +164,28 @@ export async function PUT(request: NextRequest) {
     }
 
     // Check if user is authorized to update the blog post
-    if (blogPost.authorId !== user.id && user.role !== 'ADMIN' && user.role !== 'OWNER') {
+    if (user.role !== 'ADMIN' && user.role !== 'OWNER' && blogPost.authorId !== user.id) {
       return NextResponse.json(
-        { error: 'غير مصرح لك بتعديل هذا المقال' },
+        { error: 'غير مصرح لك بتحديث هذا المقال' },
         { status: 403 }
       )
     }
 
-    const body = await request.json()
-    const { title, content, itemLink } = body
+    const { title, content, itemLink } = await request.json()
 
-    // Update blog post using admin client
+    if (!title || !content) {
+      return NextResponse.json(
+        { error: 'العنوان والمحتوى مطلوبان' },
+        { status: 400 }
+      )
+    }
+
     const { data: updatedBlogPost, error: updateError } = await supabaseAdmin
       .from('blogPost')
       .update({
         title,
         content,
-        itemLink,
+        itemlink: itemLink,
         updatedAt: new Date().toISOString()
       })
       .eq('id', id)
@@ -269,14 +274,13 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Check if user is authorized to delete the blog post
-    if (blogPost.authorId !== user.id && user.role !== 'ADMIN' && user.role !== 'OWNER') {
+    if (user.role !== 'ADMIN' && user.role !== 'OWNER' && blogPost.authorId !== user.id) {
       return NextResponse.json(
         { error: 'غير مصرح لك بحذف هذا المقال' },
         { status: 403 }
       )
     }
 
-    // Delete blog post using admin client
     const { error: deleteError } = await supabaseAdmin
       .from('blogPost')
       .delete()

@@ -18,9 +18,9 @@ interface BlogPost {
   id: string
   title: string
   content: string
-  published: boolean
   createdAt: string
   updatedAt: string
+  itemlink: string
   author: {
     fullName: string
     email: string
@@ -65,9 +65,9 @@ export default function BlogPage() {
           id,
           title,
           content,
-          published,
           createdAt,
           updatedAt,
+          itemlink,
           author:User (
             fullName,
             email
@@ -95,7 +95,7 @@ export default function BlogPage() {
   const handleDelete = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('BlogPost')
+        .from('blogPost')
         .delete()
         .eq('id', id)
 
@@ -114,38 +114,31 @@ export default function BlogPage() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>المدونة</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="mb-4">
-          <Button onClick={() => router.push('/blog/new')}>
-            إضافة مقال جديد
-          </Button>
-        </div>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>العنوان</TableHead>
-              <TableHead>المؤلف</TableHead>
-              <TableHead>الحالة</TableHead>
-              <TableHead>تاريخ الإنشاء</TableHead>
-              <TableHead>الإجراءات</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {posts.map((post) => (
-              <TableRow key={post.id}>
-                <TableCell>{post.title}</TableCell>
-                <TableCell>{post.author.fullName}</TableCell>
-                <TableCell>{post.published ? 'منشور' : 'مسودة'}</TableCell>
-                <TableCell>{new Date(post.createdAt).toLocaleDateString('ar-SA')}</TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">المدونة</h1>
+        <Button onClick={() => router.push('/blog/create')}>
+          إنشاء مقال جديد
+        </Button>
+      </div>
+
+      <div className="grid gap-6">
+        {posts.map((post) => (
+          <Card key={post.id}>
+            <CardHeader>
+              <CardTitle>{post.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: post.content }} />
+                <div className="flex justify-between items-center">
+                  <div className="text-sm text-gray-500">
+                    كتب بواسطة: {post.author.fullName}
+                  </div>
+                  <div className="space-x-2">
                     <Button
                       variant="outline"
-                      onClick={() => router.push(`/blog/edit/${post.id}`)}
+                      onClick={() => router.push(`/blog/${post.id}/edit`)}
                     >
                       تعديل
                     </Button>
@@ -156,12 +149,12 @@ export default function BlogPage() {
                       حذف
                     </Button>
                   </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
   )
 } 
