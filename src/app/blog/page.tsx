@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { createClient } from '@supabase/supabase-js'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -29,37 +30,24 @@ interface BlogPost {
 
 export default function BlogPage() {
   const router = useRouter()
+  const { data: session, status } = useSession()
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
-  const [userRole, setUserRole] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchPosts()
-  }, [])
+    if (status === 'unauthenticated') {
+      router.push('/auth/login')
+      return
+    }
+
+    if (status === 'authenticated') {
+      fetchPosts()
+    }
+  }, [status, session])
 
   const fetchPosts = async () => {
     try {
       setLoading(true)
-      const { data: { session } } = await supabase.auth.getSession()
-      
-      if (!session) {
-        router.push('/auth/login')
-        return
-      }
-
-      // Get user role
-      const { data: user } = await supabase
-        .from('User')
-        .select('role')
-        .eq('email', session.user.email)
-        .single()
-
-      if (!user) {
-        router.push('/')
-        return
-      }
-
-      setUserRole(user.role)
 
       // Get blog posts with author information
       const { data: blogPosts, error } = await supabase
@@ -116,15 +104,17 @@ export default function BlogPage() {
     return <div>جاري التحميل...</div>
   }
 
+  const isAdminOrOwner = session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER'
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">المدونة</h1>
-        {userRole === 'ADMIN' || userRole === 'OWNER' ? (
+        {isAdminOrOwner && (
           <Button onClick={() => router.push('/blog/create')}>
             إنشاء مقال جديد
           </Button>
-        ) : null}
+        )}
       </div>
 
       <div className="grid gap-6">
@@ -140,7 +130,7 @@ export default function BlogPage() {
                   <div className="text-sm text-gray-500">
                     كتب بواسطة: {post.author.fullName}
                   </div>
-                  {(userRole === 'ADMIN' || userRole === 'OWNER') && (
+                  {isAdminOrOwner && (
                     <div className="space-x-2">
                       <Button
                         variant="outline"

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { createClient } from '@supabase/supabase-js'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -45,6 +46,7 @@ type PackageWithRelations = Package & {
 
 export default function TrackingPackagesPage() {
   const router = useRouter()
+  const { data: session, status } = useSession()
   const [packages, setPackages] = useState<PackageWithRelations[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreateForm, setShowCreateForm] = useState(false)
@@ -52,30 +54,24 @@ export default function TrackingPackagesPage() {
   const [packageToDelete, setPackageToDelete] = useState<PackageWithRelations | null>(null)
 
   useEffect(() => {
-    fetchPackages()
-  }, [])
+    if (status === 'unauthenticated') {
+      router.push('/auth/login')
+      return
+    }
+
+    if (status === 'authenticated' && (session?.user?.role !== 'ADMIN' && session?.user?.role !== 'OWNER')) {
+      router.push('/')
+      return
+    }
+
+    if (status === 'authenticated') {
+      fetchPackages()
+    }
+  }, [status, session])
 
   const fetchPackages = async () => {
     try {
       setLoading(true)
-      const { data: { session } } = await supabase.auth.getSession()
-      
-      if (!session) {
-        router.push('/login')
-        return
-      }
-
-      // Get user role
-      const { data: user } = await supabase
-        .from('User')
-        .select('role')
-        .eq('email', session.user.email)
-        .single()
-
-      if (!user || (user.role !== 'ADMIN' && user.role !== 'OWNER')) {
-        router.push('/')
-        return
-      }
 
       // Get packages with user and shop information
       const { data: packages, error } = await supabase
