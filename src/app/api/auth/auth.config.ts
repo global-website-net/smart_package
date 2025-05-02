@@ -3,7 +3,6 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
 import { createClient } from '@supabase/supabase-js'
 import prisma from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -63,28 +62,30 @@ export const authOptions: AuthOptions = {
           throw new Error('البريد الإلكتروني وكلمة المرور مطلوبان')
         }
 
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email,
-          },
+        // Sign in with Supabase Auth
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+          email: credentials.email,
+          password: credentials.password
         })
 
-        if (!user || !user.email || !user.password) {
+        if (authError || !authData.user) {
           throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
         }
 
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        )
+        // Get user data from Prisma
+        const user = await prisma.user.findUnique({
+          where: {
+            id: authData.user.id
+          }
+        })
 
-        if (!isPasswordValid) {
+        if (!user) {
           throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
         }
 
         return {
           id: user.id,
-          email: user.email,
+          email: user.email!,
           name: user.fullName,
           fullName: user.fullName,
           role: user.role as UserRole,
