@@ -3,6 +3,12 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/auth.config'
 import { createClient } from '@supabase/supabase-js'
 
+type RouteParams = {
+  params: {
+    id: string
+  }
+}
+
 // Initialize Supabase admin client with service role key
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,7 +23,7 @@ const supabaseAdmin = createClient(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -97,7 +103,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -197,7 +203,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
   try {
     const session = await getServerSession(authOptions)
