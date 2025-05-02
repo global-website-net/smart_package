@@ -1,6 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+
+interface Shop {
+  id: string
+  fullName: string
+  email: string
+}
+
+interface User {
+  id: string
+  fullName: string
+  email: string
+}
 
 interface CreatePackageFormProps {
   onPackageCreated: () => void
@@ -10,6 +22,8 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
   const [isOpen, setIsOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [shops, setShops] = useState<Shop[]>([])
+  const [users, setUsers] = useState<User[]>([])
   const [formData, setFormData] = useState({
     trackingNumber: '',
     status: 'PENDING',
@@ -17,6 +31,41 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
     currentLocation: '',
     userId: ''
   })
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchShops()
+      fetchUsers()
+    }
+  }, [isOpen])
+
+  const fetchShops = async () => {
+    try {
+      const response = await fetch('/api/users/shops')
+      if (!response.ok) {
+        throw new Error('Failed to fetch shops')
+      }
+      const data = await response.json()
+      setShops(data)
+    } catch (error) {
+      console.error('Error fetching shops:', error)
+      setError('حدث خطأ أثناء جلب المتاجر')
+    }
+  }
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch('/api/users/regular')
+      if (!response.ok) {
+        throw new Error('Failed to fetch users')
+      }
+      const data = await response.json()
+      setUsers(data)
+    } catch (error) {
+      console.error('Error fetching users:', error)
+      setError('حدث خطأ أثناء جلب المستخدمين')
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -110,14 +159,20 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
                 <label htmlFor="shopId" className="block text-sm font-medium text-gray-700 mb-1">
                   المتجر
                 </label>
-                <input
-                  type="text"
+                <select
                   id="shopId"
                   value={formData.shopId}
                   onChange={(e) => setFormData({ ...formData, shopId: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
-                />
+                >
+                  <option value="">اختر المتجر</option>
+                  {shops.map((shop) => (
+                    <option key={shop.id} value={shop.id}>
+                      {shop.fullName}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>
@@ -136,32 +191,38 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
 
               <div>
                 <label htmlFor="userId" className="block text-sm font-medium text-gray-700 mb-1">
-                  معرف المستخدم
+                  المستخدم
                 </label>
-                <input
-                  type="text"
+                <select
                   id="userId"
                   value={formData.userId}
                   onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
-                />
+                >
+                  <option value="">اختر المستخدم</option>
+                  {users.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.fullName} ({user.email})
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              <div className="flex justify-end space-x-4 rtl:space-x-reverse">
-                <button
-                  type="button"
-                  onClick={() => setIsOpen(false)}
-                  className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                >
-                  إلغاء
-                </button>
+              <div className="flex justify-center space-x-4 rtl:space-x-reverse mt-6">
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
+                  className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
                 >
-                  {isSubmitting ? 'جاري الإضافة...' : 'إضافة'}
+                  {isSubmitting ? 'جاري الإضافة...' : 'حفظ'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(false)}
+                  className="bg-white text-gray-700 border border-gray-300 px-6 py-2 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                >
+                  إلغاء
                 </button>
               </div>
             </form>

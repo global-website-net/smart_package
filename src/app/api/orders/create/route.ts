@@ -16,6 +16,28 @@ const supabaseAdmin = createClient(
   }
 )
 
+// Function to generate a unique order number
+async function generateUniqueOrderNumber(): Promise<string> {
+  const prefix = 'ORD'
+  const timestamp = Date.now().toString().slice(-6)
+  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0')
+  const orderNumber = `${prefix}-${timestamp}-${random}`
+
+  // Check if the order number already exists
+  const { data: existingOrder } = await supabaseAdmin
+    .from('order')
+    .select('orderNumber')
+    .eq('orderNumber', orderNumber)
+    .single()
+
+  // If the order number exists, generate a new one recursively
+  if (existingOrder) {
+    return generateUniqueOrderNumber()
+  }
+
+  return orderNumber
+}
+
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
@@ -60,6 +82,9 @@ export async function POST(request: Request) {
       )
     }
 
+    // Generate unique order number
+    const orderNumber = await generateUniqueOrderNumber()
+
     // Create order in database using admin client
     const { data: orderData, error: orderError } = await supabaseAdmin
       .from('order')
@@ -72,6 +97,7 @@ export async function POST(request: Request) {
           notes,
           additionalInfo,
           status: 'PENDING',
+          orderNumber,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         }

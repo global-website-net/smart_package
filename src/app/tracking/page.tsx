@@ -32,6 +32,7 @@ interface Order {
   status: string
   createdAt: string
   updatedAt: string
+  orderNumber: string
 }
 
 export default function TrackingPage() {
@@ -51,6 +52,7 @@ export default function TrackingPage() {
     if (status === 'authenticated') {
       if (session.user.role === 'ADMIN' || session.user.role === 'OWNER') {
         fetchAllOrders()
+        fetchPackages()
       } else {
         fetchOrders()
       }
@@ -150,8 +152,7 @@ export default function TrackingPage() {
   }
 
   const isAdminOrOwner = session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER'
-  const items = isAdminOrOwner ? packages : orders
-  const isEmpty = items.length === 0
+  const isEmpty = isAdminOrOwner ? (orders.length === 0 && packages.length === 0) : orders.length === 0
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -193,55 +194,153 @@ export default function TrackingPage() {
             </div>
           ) : (
             <div className="space-y-6">
-              {orders.map((order) => (
-                <div key={order.id} className="bg-white rounded-lg shadow-md p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-gray-500">موقع الشراء</p>
-                      <p className="font-medium">{order.purchaseSite}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">رابط الشراء</p>
-                      <a 
-                        href={order.purchaseLink} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="font-medium text-green-600 hover:text-green-700"
-                      >
-                        {order.purchaseLink}
-                      </a>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">رقم الهاتف</p>
-                      <p className="font-medium">{order.phoneNumber}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">الحالة</p>
-                      <p className="font-medium">{getStatusText(order.status)}</p>
-                    </div>
-                    {order.notes && (
-                      <div className="col-span-2">
-                        <p className="text-sm text-gray-500">ملاحظات</p>
-                        <p className="font-medium">{order.notes}</p>
+              {isAdminOrOwner ? (
+                <>
+                  {orders.map((order) => (
+                    <div key={order.id} className="bg-white rounded-lg shadow-md p-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-gray-500">رقم الطلب</p>
+                          <p className="font-medium">{order.orderNumber}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">موقع الشراء</p>
+                          <p className="font-medium">{order.purchaseSite}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">رابط الشراء</p>
+                          <a 
+                            href={order.purchaseLink} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="font-medium text-green-600 hover:text-green-700"
+                          >
+                            {order.purchaseLink}
+                          </a>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">رقم الهاتف</p>
+                          <p className="font-medium">{order.phoneNumber}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">الحالة</p>
+                          <p className="font-medium">{getStatusText(order.status)}</p>
+                        </div>
+                        {order.notes && (
+                          <div className="col-span-2">
+                            <p className="text-sm text-gray-500">ملاحظات</p>
+                            <p className="font-medium">{order.notes}</p>
+                          </div>
+                        )}
+                        {order.additionalInfo && (
+                          <div className="col-span-2">
+                            <p className="text-sm text-gray-500">معلومات إضافية</p>
+                            <p className="font-medium">{order.additionalInfo}</p>
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-sm text-gray-500">تاريخ الإنشاء</p>
+                          <p className="font-medium">{new Date(order.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">آخر تحديث</p>
+                          <p className="font-medium">{new Date(order.updatedAt).toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
+                        </div>
                       </div>
-                    )}
-                    {order.additionalInfo && (
-                      <div className="col-span-2">
-                        <p className="text-sm text-gray-500">معلومات إضافية</p>
-                        <p className="font-medium">{order.additionalInfo}</p>
-                      </div>
-                    )}
-                    <div>
-                      <p className="text-sm text-gray-500">تاريخ الإنشاء</p>
-                      <p className="font-medium">{new Date(order.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-500">آخر تحديث</p>
-                      <p className="font-medium">{new Date(order.updatedAt).toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
+                  ))}
+                  {packages.map((pkg) => (
+                    <div key={pkg.id} className="bg-white rounded-lg shadow-md p-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-gray-500">رقم التتبع</p>
+                          <p className="font-medium">{pkg.trackingNumber}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">الحالة</p>
+                          <p className="font-medium">{getStatusText(pkg.status)}</p>
+                        </div>
+                        {pkg.currentLocation && (
+                          <div>
+                            <p className="text-sm text-gray-500">الموقع الحالي</p>
+                            <p className="font-medium">{pkg.currentLocation}</p>
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-sm text-gray-500">المستخدم</p>
+                          <p className="font-medium">{pkg.user.fullName}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">المتجر</p>
+                          <p className="font-medium">{pkg.shop.fullName}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">تاريخ الإنشاء</p>
+                          <p className="font-medium">{new Date(pkg.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">آخر تحديث</p>
+                          <p className="font-medium">{new Date(pkg.updatedAt).toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                orders.map((order) => (
+                  <div key={order.id} className="bg-white rounded-lg shadow-md p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-gray-500">رقم الطلب</p>
+                        <p className="font-medium">{order.orderNumber}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">موقع الشراء</p>
+                        <p className="font-medium">{order.purchaseSite}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">رابط الشراء</p>
+                        <a 
+                          href={order.purchaseLink} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="font-medium text-green-600 hover:text-green-700"
+                        >
+                          {order.purchaseLink}
+                        </a>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">رقم الهاتف</p>
+                        <p className="font-medium">{order.phoneNumber}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">الحالة</p>
+                        <p className="font-medium">{getStatusText(order.status)}</p>
+                      </div>
+                      {order.notes && (
+                        <div className="col-span-2">
+                          <p className="text-sm text-gray-500">ملاحظات</p>
+                          <p className="font-medium">{order.notes}</p>
+                        </div>
+                      )}
+                      {order.additionalInfo && (
+                        <div className="col-span-2">
+                          <p className="text-sm text-gray-500">معلومات إضافية</p>
+                          <p className="font-medium">{order.additionalInfo}</p>
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-sm text-gray-500">تاريخ الإنشاء</p>
+                        <p className="font-medium">{new Date(order.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">آخر تحديث</p>
+                        <p className="font-medium">{new Date(order.updatedAt).toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           )}
         </div>

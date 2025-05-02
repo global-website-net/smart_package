@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { toast } from 'sonner'
+import { Header } from '@/components/Header'
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -107,28 +108,41 @@ export default function BlogPage() {
   const isAdminOrOwner = session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER'
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">المدونة</h1>
-        {isAdminOrOwner && (
-          <Button onClick={() => router.push('/blog/create')}>
-            إنشاء مقال جديد
-          </Button>
-        )}
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <div className="pt-20 pb-10">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold text-center mb-6">المدونة</h1>
+            <div className="flex justify-center items-center">
+              <div className="relative w-48 sm:w-64 md:w-80">
+                <div className="w-full h-0.5 bg-green-500"></div>
+                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
+              </div>
+            </div>
+            {isAdminOrOwner && (
+              <div className="mt-6 text-center">
+                <Button 
+                  onClick={() => router.push('/blog/create')}
+                  className="bg-green-500 text-white px-8 py-3 rounded-md hover:bg-green-600 transition-colors"
+                >
+                  إنشاء مقال جديد
+                </Button>
+              </div>
+            )}
+          </div>
 
-      <div className="grid gap-6">
-        {posts.map((post) => (
-          <Card key={post.id}>
-            <CardHeader>
-              <CardTitle>{post.title}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: post.content }} />
-                <div className="flex justify-between items-center">
+          <div className="space-y-6">
+            {posts.map((post) => (
+              <div key={post.id} className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-2xl font-bold mb-4">{post.title}</h2>
+                <div className="prose max-w-none mb-4" dangerouslySetInnerHTML={{ __html: post.content }} />
+                <div className="flex justify-between items-center border-t pt-4">
                   <div className="text-sm text-gray-500">
                     كتب بواسطة: {post.author.fullName}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {new Date(post.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' })}
                   </div>
                   {isAdminOrOwner && (
                     <div className="space-x-2">
@@ -148,9 +162,9 @@ export default function BlogPage() {
                   )}
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        ))}
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )
