@@ -14,37 +14,38 @@ export async function GET() {
       )
     }
 
-    if (session.user.role !== 'REGULAR') {
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER') {
       return NextResponse.json(
         { error: 'غير مصرح لك بالوصول' },
         { status: 403 }
       )
     }
 
-    const orders = await prisma.order.findMany({
-      where: {
-        userId: session.user.id,
-      },
+    const packages = await prisma.package.findMany({
       orderBy: {
         createdAt: 'desc',
       },
-      select: {
-        id: true,
-        purchaseSite: true,
-        purchaseLink: true,
-        phoneNumber: true,
-        notes: true,
-        additionalInfo: true,
-        status: true,
-        createdAt: true,
+      include: {
+        user: {
+          select: {
+            fullName: true,
+            email: true,
+          },
+        },
+        shop: {
+          select: {
+            fullName: true,
+            email: true,
+          },
+        },
       },
     })
 
-    return NextResponse.json(orders)
+    return NextResponse.json(packages)
   } catch (error) {
-    console.error('Error fetching orders:', error)
+    console.error('Error fetching packages:', error)
     return NextResponse.json(
-      { error: 'حدث خطأ أثناء جلب الطلبات' },
+      { error: 'حدث خطأ أثناء جلب الطرود' },
       { status: 500 }
     )
   }

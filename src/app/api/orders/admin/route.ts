@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
-import { supabase } from '@/lib/supabase'
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import prisma from '@/lib/prisma'
 
 interface OrderUser {
   fullName: string
@@ -43,51 +43,35 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER')) {
+    if (!session?.user) {
       return NextResponse.json(
-        { error: 'غير مصرح لك بالوصول إلى هذه الصفحة' },
+        { error: 'لم يتم العثور على المستخدم' },
+        { status: 401 }
+      )
+    }
+
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER') {
+      return NextResponse.json(
+        { error: 'غير مصرح لك بالوصول' },
         { status: 403 }
       )
     }
 
-    const { data: orders, error } = await supabase
-      .from('order')
-      .select(`
-        id,
-        userId,
-        purchaseSite,
-        purchaseLink,
-        phoneNumber,
-        notes,
-        additionalInfo,
-        status,
-        createdAt,
-        updatedAt,
-        user:userId (
-          fullName,
-          email
-        )
-      `)
-      .order('createdAt', { ascending: false })
+    const orders = await prisma.order.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        user: {
+          select: {
+            fullName: true,
+            email: true,
+          },
+        },
+      },
+    })
 
-    if (error) {
-      console.error('Error fetching orders:', error)
-      return NextResponse.json(
-        { error: 'حدث خطأ أثناء جلب الطلبات' },
-        { status: 500 }
-      )
-    }
-
-    // Transform the data to match the expected format
-    const formattedOrders = (orders as unknown as RawSupabaseOrder[]).map(order => ({
-      ...order,
-      user: order.user ? {
-        fullName: order.user.fullName || 'غير معروف',
-        email: order.user.email || ''
-      } : null
-    })) as OrderData[]
-
-    return NextResponse.json(formattedOrders)
+    return NextResponse.json(orders)
   } catch (error) {
     console.error('Error fetching orders:', error)
     return NextResponse.json(

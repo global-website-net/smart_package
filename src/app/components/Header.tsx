@@ -32,6 +32,7 @@ export default function Header() {
         { href: '/tracking_orders', label: 'ادارة الطلبات' },
         { href: '/tracking_packages', label: 'ادارة الطرود' },
         { href: '/blog', label: 'المدونة' },
+        { href: '/account', label: 'الملف الشخصي' },
       ]
     } else if (session?.user?.role === 'SHOP') {
       return [

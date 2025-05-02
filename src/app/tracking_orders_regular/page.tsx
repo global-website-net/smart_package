@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Header from '@/app/components/Header'
+import Link from 'next/link'
 
 interface Order {
   id: string
@@ -65,6 +66,27 @@ export default function TrackingOrdersRegular() {
                 <div className="w-full h-0.5 bg-green-500"></div>
                 <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
               </div>
+            </div>
+            <div className="flex justify-center mt-8">
+              <Link
+                href="/new-order"
+                className="bg-green-500 text-white px-6 py-3 rounded-md hover:bg-green-600 transition-colors flex items-center space-x-2 rtl:space-x-reverse"
+              >
+                <svg 
+                  className="w-5 h-5" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M12 4v16m8-8H4" 
+                  />
+                </svg>
+                <span>طلب جديد</span>
+              </Link>
             </div>
           </div>
 

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
-import { supabase } from '@/lib/supabase'
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import prisma from '@/lib/prisma'
 
 export async function GET(request: Request) {
   try {
@@ -14,21 +14,20 @@ export async function GET(request: Request) {
       )
     }
 
-    const { data: post, error } = await supabase
-      .from('blogPost')
-      .select(`
-        *,
-        author:authorId (
-          id,
-          fullName,
-          email
-        )
-      `)
-      .eq('id', id)
-      .single()
+    const post = await prisma.blogPost.findUnique({
+      where: { id },
+      include: {
+        author: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+          },
+        },
+      },
+    })
 
-    if (error) {
-      console.error('Error fetching blog post:', error)
+    if (!post) {
       return NextResponse.json(
         { error: 'لم يتم العثور على المقال' },
         { status: 404 }
@@ -64,18 +63,9 @@ export async function DELETE(request: Request) {
       )
     }
 
-    const { error } = await supabase
-      .from('blogPost')
-      .delete()
-      .eq('id', id)
-
-    if (error) {
-      console.error('Error deleting blog post:', error)
-      return NextResponse.json(
-        { error: 'حدث خطأ أثناء حذف المقال' },
-        { status: 500 }
-      )
-    }
+    await prisma.blogPost.delete({
+      where: { id },
+    })
 
     return NextResponse.json({ message: 'تم حذف المقال بنجاح' })
   } catch (error) {
@@ -116,26 +106,26 @@ export async function PUT(request: Request) {
       )
     }
 
-    const { data: post, error } = await supabase
-      .from('blogPost')
-      .update({
+    const updatedPost = await prisma.blogPost.update({
+      where: { id },
+      data: {
         title,
         content,
-        itemlink: itemLink,
-        updatedAt: new Date().toISOString()
-      })
-      .eq('id', id)
-      .select()
+        itemLink,
+        updatedAt: new Date().toISOString(),
+      },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        itemLink: true,
+        createdAt: true,
+        updatedAt: true,
+        authorId: true,
+      },
+    })
 
-    if (error) {
-      console.error('Error updating blog post:', error)
-      return NextResponse.json(
-        { error: 'حدث خطأ أثناء تحديث المقال' },
-        { status: 500 }
-      )
-    }
-
-    return NextResponse.json(post[0])
+    return NextResponse.json(updatedPost)
   } catch (error) {
     console.error('Error in PUT /api/blog/[id]:', error)
     return NextResponse.json(

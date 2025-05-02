@@ -47,7 +47,7 @@ export default function EditBlogPostClient({ id }: EditBlogPostClientProps) {
         setPost(data)
         setTitle(data.title)
         setContent(data.content)
-        setItemLink(data.itemLink || '')
+        setItemLink(data.itemlink || '')
       } catch (err) {
         console.error('Error fetching blog post:', err)
         setError('حدث خطأ أثناء جلب المقال')
@@ -128,8 +128,14 @@ export default function EditBlogPostClient({ id }: EditBlogPostClientProps) {
       
       <main className="p-4 pt-24">
         <div className="max-w-4xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold">تعديل المقال</h1>
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold text-center mb-6">تعديل المقال</h1>
+            <div className="flex justify-center items-center">
+              <div className="relative w-48 sm:w-64 md:w-80">
+                <div className="w-full h-0.5 bg-green-500"></div>
+                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
+              </div>
+            </div>
           </div>
           
           <div className="bg-white rounded-lg shadow-md p-6">
