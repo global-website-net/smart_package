@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '../../auth/[...nextauth]/auth'
-import { supabase } from '@/lib/supabase'
+import { authOptions } from '@/app/api/auth/auth.config'
+import prisma from '@/lib/prisma'
 
 export async function GET() {
   try {
@@ -22,39 +22,35 @@ export async function GET() {
     }
 
     // Fetch all orders with user information
-    const { data: orders, error: ordersError } = await supabase
-      .from('Order')
-      .select(`
-        id,
-        userId,
-        purchaseSite,
-        purchaseLink,
-        phoneNumber,
-        notes,
-        additionalInfo,
-        status,
-        createdAt,
-        updatedAt,
-        User!Order_userId_fkey (
-          fullName,
-          email
-        )
-      `)
-      .order('createdAt', { ascending: false })
-
-    if (ordersError) {
-      console.error('Error fetching orders:', ordersError)
-      return NextResponse.json(
-        { error: 'حدث خطأ أثناء جلب الطلبات' },
-        { status: 500 }
-      )
-    }
+    const orders = await prisma.order.findMany({
+      select: {
+        id: true,
+        userId: true,
+        purchaseSite: true,
+        purchaseLink: true,
+        phoneNumber: true,
+        notes: true,
+        additionalInfo: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        user: {
+          select: {
+            fullName: true,
+            email: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    })
 
     // Transform the data to match the expected format
-    const transformedOrders = orders?.map(order => ({
+    const transformedOrders = orders.map(order => ({
       ...order,
-      user: order.User?.[0] || null
-    })) || []
+      user: order.user || null
+    }))
 
     return NextResponse.json(transformedOrders)
   } catch (error) {
@@ -64,4 +60,4 @@ export async function GET() {
       { status: 500 }
     )
   }
-} 
+}

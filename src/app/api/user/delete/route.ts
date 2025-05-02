@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '../../auth/[...nextauth]/auth'
-import { supabase } from '@/lib/supabase'
+import { signOut } from 'next-auth/react'
+import { authOptions } from '@/app/api/auth/auth.config'
+import prisma from '@/lib/prisma'
 
 export async function DELETE() {
   try {
@@ -14,29 +15,14 @@ export async function DELETE() {
     }
 
     // First, delete the user from the database table
-    const { error: deleteError } = await supabase
-      .from('User')
-      .delete()
-      .eq('email', session.user.email)
+    await prisma.user.delete({
+      where: {
+        email: session.user.email,
+      },
+    })
 
-    if (deleteError) {
-      console.error('Error deleting user from database:', deleteError)
-      return NextResponse.json(
-        { error: 'حدث خطأ أثناء حذف الحساب' },
-        { status: 500 }
-      )
-    }
-
-    // Then, delete the user from Authentication using the service role
-    const { error: authError } = await supabase.auth.signOut()
-
-    if (authError) {
-      console.error('Error signing out user:', authError)
-      return NextResponse.json(
-        { error: 'حدث خطأ أثناء تسجيل الخروج' },
-        { status: 500 }
-      )
-    }
+    // Sign out the user
+    await signOut({ redirect: false })
 
     return NextResponse.json({ success: true })
   } catch (error) {

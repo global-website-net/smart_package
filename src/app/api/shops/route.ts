@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '../auth/[...nextauth]/auth'
+import { authOptions } from '../auth/auth.config'
+import prisma from '@/lib/prisma'
 
 export async function GET() {
   try {

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/auth'
+import { authOptions } from '@/app/api/auth/auth.config'
 import { createClient } from '@supabase/supabase-js'
+import prisma from '@/lib/prisma'
 
 // Initialize Supabase admin client with service role key
 const supabaseAdmin = createClient(

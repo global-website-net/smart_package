@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '../../auth/[...nextauth]/auth'
-import { supabase } from '@/lib/supabase'
+import { authOptions } from '@/app/api/auth/auth.config'
+import prisma from '@/lib/prisma'
 
 interface PackageData {
   id: string;
@@ -17,19 +17,6 @@ interface PackageData {
   currentLocation?: string | null;
 }
 
-interface RawPackageData {
-  id: string;
-  trackingNumber: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-  user: {
-    id: string;
-    fullname: string;
-    email: string;
-  };
-}
-
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
@@ -41,34 +28,25 @@ export async function GET() {
     }
 
     // Fetch the packages with user data
-    const { data: packages, error: packagesError } = await supabase
-      .from('Package')
-      .select(`
-        *,
-        user:userId (
-          id,
-          fullName,
-          email
-        )
-      `)
-      .eq('userId', session.user.id)
-      .order('createdAt', { ascending: false })
-
-    if (packagesError) {
-      console.error('Error fetching packages:', packagesError)
-      return NextResponse.json(
-        { error: 'حدث خطأ أثناء جلب الشحنات' },
-        { status: 500 }
-      )
-    }
+    const packages = await prisma.package.findMany({
+      where: {
+        userId: session.user.id
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      include: {
+        user: true
+      }
+    })
 
     // Transform the data to match the expected format
-    const transformedPackages = (packages as RawPackageData[]).map(pkg => ({
+    const transformedPackages = packages.map(pkg => ({
       id: pkg.id,
       trackingNumber: pkg.trackingNumber,
       status: pkg.status,
-      createdAt: pkg.createdAt,
-      updatedAt: pkg.updatedAt,
+      createdAt: pkg.createdAt.toISOString(),
+      updatedAt: pkg.updatedAt.toISOString(),
       user: pkg.user,
       currentLocation: null
     }))
@@ -81,4 +59,4 @@ export async function GET() {
       { status: 500 }
     )
   }
-} 
+}

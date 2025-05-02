@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '../../auth/[...nextauth]/auth'
+import { authOptions } from '../../auth/auth.config'
 import { createClient } from '@supabase/supabase-js'
 import bcrypt from 'bcryptjs'
+import prisma from '@/lib/prisma'
 
 // Initialize Supabase client with service role key for admin access
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!

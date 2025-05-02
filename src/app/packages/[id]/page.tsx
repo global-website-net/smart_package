@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
+import { authOptions } from '@/app/api/auth/auth.config'
 import { redirect } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import PackageDetails from '@/components/PackageDetails'

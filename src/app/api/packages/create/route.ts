@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '../../auth/[...nextauth]/auth'
+import { authOptions } from '@/app/api/auth/auth.config'
 import prisma from '@/lib/prisma'
 import { v4 as uuidv4 } from 'uuid'
 import QRCode from 'qrcode'
