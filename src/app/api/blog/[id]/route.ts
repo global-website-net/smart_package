@@ -15,9 +15,15 @@ const supabaseAdmin = createClient(
   }
 )
 
+type RouteContext = {
+  params: {
+    id: string
+  }
+}
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -53,21 +59,21 @@ export async function GET(
 
     // Get blog post using admin client
     const { data: blogPost, error: blogError } = await supabaseAdmin
-      .from('BlogPost')
+      .from('blogPost')
       .select(`
         id,
         title,
         content,
         authorId,
-        published,
         createdAt,
         updatedAt,
+        itemLink,
         author:User (
           fullName,
           email
         )
       `)
-      .eq('id', params.id)
+      .eq('id', context.params.id)
       .single()
 
     if (blogError) {
@@ -85,14 +91,6 @@ export async function GET(
       )
     }
 
-    // Check if user is authorized to view the blog post
-    if (!blogPost.published && blogPost.authorId !== user.id && user.role !== 'ADMIN' && user.role !== 'OWNER') {
-      return NextResponse.json(
-        { error: 'غير مصرح لك بالوصول إلى هذا المقال' },
-        { status: 403 }
-      )
-    }
-
     return NextResponse.json(blogPost)
   } catch (error) {
     console.error('Error in get blog post route:', error)
@@ -105,7 +103,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -141,9 +139,9 @@ export async function PUT(
 
     // Get blog post using admin client
     const { data: blogPost, error: blogError } = await supabaseAdmin
-      .from('BlogPost')
+      .from('blogPost')
       .select('authorId')
-      .eq('id', params.id)
+      .eq('id', context.params.id)
       .single()
 
     if (blogError) {
@@ -170,18 +168,18 @@ export async function PUT(
     }
 
     const body = await request.json()
-    const { title, content, published } = body
+    const { title, content, itemLink } = body
 
     // Update blog post using admin client
     const { data: updatedBlogPost, error: updateError } = await supabaseAdmin
-      .from('BlogPost')
+      .from('blogPost')
       .update({
         title,
         content,
-        published,
+        itemLink,
         updatedAt: new Date().toISOString()
       })
-      .eq('id', params.id)
+      .eq('id', context.params.id)
       .select()
       .single()
 
@@ -205,7 +203,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -241,9 +239,9 @@ export async function DELETE(
 
     // Get blog post using admin client
     const { data: blogPost, error: blogError } = await supabaseAdmin
-      .from('BlogPost')
+      .from('blogPost')
       .select('authorId')
-      .eq('id', params.id)
+      .eq('id', context.params.id)
       .single()
 
     if (blogError) {
@@ -271,9 +269,9 @@ export async function DELETE(
 
     // Delete blog post using admin client
     const { error: deleteError } = await supabaseAdmin
-      .from('BlogPost')
+      .from('blogPost')
       .delete()
-      .eq('id', params.id)
+      .eq('id', context.params.id)
 
     if (deleteError) {
       console.error('Error deleting blog post:', deleteError)
