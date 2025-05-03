@@ -1,17 +1,23 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
-export async function PATCH(
-  request: NextRequest,
-  context: { params: { id: string } }
-) {
+export const dynamic = 'force-dynamic'
+
+export async function PATCH(request: NextRequest) {
   try {
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
 
-    const id = context.params.id
+    const id = request.url.split('/').pop()
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Order ID is required' },
+        { status: 400 }
+      )
+    }
+
     const { status } = await request.json()
 
     // Update the order status
