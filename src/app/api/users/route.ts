@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { data, error } = await supabase
-      .from('user')
+      .from('User')
       .select('id, email')
       .eq('role', role)
       .order('email', { ascending: true })

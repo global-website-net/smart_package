@@ -35,6 +35,12 @@ export default function BlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [editingPost, setEditingPost] = useState<BlogPost | null>(null)
+  const [editFormData, setEditFormData] = useState({
+    title: '',
+    content: '',
+    itemlink: ''
+  })
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -79,6 +85,51 @@ export default function BlogPage() {
       setError('حدث خطأ أثناء جلب المقالات')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleDeletePost = async (postId: string) => {
+    try {
+      const response = await fetch(`/api/blog-posts/${postId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to delete post')
+      }
+
+      // Remove the deleted post from the state
+      setPosts(posts.filter(post => post.id !== postId))
+      toast.success('تم حذف المقال بنجاح')
+    } catch (error) {
+      console.error('Error deleting post:', error)
+      toast.error(error instanceof Error ? error.message : 'حدث خطأ أثناء حذف المقال')
+    }
+  }
+
+  const handleEditPost = async (postId: string) => {
+    try {
+      const response = await fetch(`/api/blog-posts/${postId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editFormData),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to update post')
+      }
+
+      const updatedPost = await response.json()
+      setPosts(posts.map(post => post.id === postId ? updatedPost : post))
+      setEditingPost(null)
+      toast.success('تم تحديث المقال بنجاح')
+    } catch (error) {
+      console.error('Error updating post:', error)
+      toast.error(error instanceof Error ? error.message : 'حدث خطأ أثناء تحديث المقال')
     }
   }
 
@@ -140,7 +191,36 @@ export default function BlogPage() {
               {posts.map((post) => (
                 <div key={post.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
                   <div className="p-6">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-2">{post.title}</h2>
+                    <div className="flex justify-between items-start mb-2">
+                      <h2 className="text-xl font-semibold text-gray-900">{post.title}</h2>
+                      {isAdminOrOwner && (
+                        <div className="flex space-x-2 rtl:space-x-reverse">
+                          <button
+                            onClick={() => {
+                              setEditingPost(post)
+                              setEditFormData({
+                                title: post.title,
+                                content: post.content,
+                                itemlink: post.itemlink
+                              })
+                            }}
+                            className="text-blue-500 hover:text-blue-700 transition-colors"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => handleDeletePost(post.id)}
+                            className="text-red-500 hover:text-red-700 transition-colors"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
+                    </div>
                     <p className="text-gray-600 mb-4 line-clamp-3">{post.content}</p>
                     <div className="flex flex-col space-y-2 text-sm text-gray-500">
                       <div className="flex items-center">
@@ -170,6 +250,71 @@ export default function BlogPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Edit Modal */}
+          {editingPost && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                <h2 className="text-2xl font-bold mb-4">تعديل المقال</h2>
+                
+                <form onSubmit={(e) => {
+                  e.preventDefault()
+                  handleEditPost(editingPost.id)
+                }}>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-gray-700 mb-2">العنوان</label>
+                      <input
+                        type="text"
+                        value={editFormData.title}
+                        onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                        className="w-full px-3 py-2 border rounded-md"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-gray-700 mb-2">المحتوى</label>
+                      <textarea
+                        value={editFormData.content}
+                        onChange={(e) => setEditFormData({ ...editFormData, content: e.target.value })}
+                        className="w-full px-3 py-2 border rounded-md"
+                        rows={4}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-gray-700 mb-2">رابط المنتج</label>
+                      <input
+                        type="url"
+                        value={editFormData.itemlink}
+                        onChange={(e) => setEditFormData({ ...editFormData, itemlink: e.target.value })}
+                        className="w-full px-3 py-2 border rounded-md"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-center space-x-4 rtl:space-x-reverse mt-6">
+                    <button
+                      type="button"
+                      onClick={() => setEditingPost(null)}
+                      className="px-4 py-2 bg-gray-200 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-300 transition-colors"
+                    >
+                      إلغاء
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+                    >
+                      حفظ التغييرات
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           )}
         </div>

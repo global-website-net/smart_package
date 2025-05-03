@@ -25,7 +25,16 @@ export async function POST(request: Request) {
       .eq('email', email)
       .single()
 
-    if (userError || !user) {
+    if (userError) {
+      console.error('Error finding user:', userError)
+      return NextResponse.json(
+        { error: 'لم يتم العثور على حساب بهذا البريد الإلكتروني' },
+        { status: 404 }
+      )
+    }
+
+    if (!user) {
+      console.log('No user found with email:', email)
       return NextResponse.json(
         { error: 'لم يتم العثور على حساب بهذا البريد الإلكتروني' },
         { status: 404 }

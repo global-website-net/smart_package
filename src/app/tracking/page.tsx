@@ -305,7 +305,7 @@ export default function TrackingPage() {
                             {order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && (
                               <Button
                                 variant="outline"
-                                className="font-bold"
+                                className="font-bold bg-blue-500 text-white hover:bg-blue-600"
                                 onClick={() => setEditingOrder(order)}
                               >
                                 تعديل
