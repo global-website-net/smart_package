@@ -31,15 +31,9 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-type Props = {
-  params: {
-    id: string
-  }
-}
-
 export async function PATCH(
   request: NextRequest,
-  props: Props
+  context: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -48,7 +42,7 @@ export async function PATCH(
     }
 
     const { status } = await request.json()
-    const id = props.params.id
+    const id = context.params.id
 
     const { error } = await supabase
       .from('package')
