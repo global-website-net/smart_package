@@ -31,10 +31,12 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-export async function PATCH(
+type RouteHandler = (
   request: NextRequest,
   context: { params: { id: string } }
-) {
+) => Promise<NextResponse>
+
+export const PATCH: RouteHandler = async (request, context) => {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER')) {
