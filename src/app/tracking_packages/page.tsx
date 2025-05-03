@@ -18,7 +18,8 @@ const supabase = createClient(
 )
 
 interface User {
-  fullName: string
+  id: string
+  name: string
   email: string
 }
 
@@ -53,21 +54,15 @@ interface Order {
   updatedAt: string
 }
 
-interface RegularUser {
-  id: string
-  fullName: string
-  email: string
-}
-
 export default function TrackingPackagesPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
   const [packages, setPackages] = useState<Package[]>([])
   const [orders, setOrders] = useState<Order[]>([])
   const [shops, setShops] = useState<Shop[]>([])
-  const [regularUsers, setRegularUsers] = useState<RegularUser[]>([])
+  const [regularUsers, setRegularUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [error, setError] = useState<string | null>(null)
   const [editingPackage, setEditingPackage] = useState<Package | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [newPackage, setNewPackage] = useState({
@@ -77,6 +72,7 @@ export default function TrackingPackagesPage() {
     shopId: '',
     userId: ''
   })
+  const [shopUsers, setShopUsers] = useState<User[]>([])
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -89,6 +85,7 @@ export default function TrackingPackagesPage() {
       fetchOrders()
       fetchShops()
       fetchRegularUsers()
+      fetchShopUsers()
     }
   }, [status])
 
@@ -119,7 +116,7 @@ export default function TrackingPackagesPage() {
       setLoading(true)
       setError('')
 
-      const response = await fetch('/api/orders/all')
+      const response = await fetch('/api/orders')
       if (!response.ok) {
         throw new Error('Failed to fetch orders')
       }
@@ -138,23 +135,25 @@ export default function TrackingPackagesPage() {
 
   const fetchRegularUsers = async () => {
     try {
-      setLoading(true)
-      setError('')
-
-      const response = await fetch('/api/users/regular')
-      if (!response.ok) {
-        throw new Error('Failed to fetch regular users')
-      }
-
+      const response = await fetch('/api/users?role=REGULAR')
+      if (!response.ok) throw new Error('Failed to fetch regular users')
       const data = await response.json()
-      // Filter out any users that don't have a fullName
-      const validUsers = data.filter((user: RegularUser) => user.fullName)
-      setRegularUsers(validUsers)
-    } catch (err) {
-      console.error('Error fetching regular users:', err)
-      setError('حدث خطأ أثناء جلب المستخدمين')
-    } finally {
-      setLoading(false)
+      setRegularUsers(data)
+    } catch (error) {
+      console.error('Error fetching regular users:', error)
+      setError('Failed to load regular users')
+    }
+  }
+
+  const fetchShopUsers = async () => {
+    try {
+      const response = await fetch('/api/users?role=SHOP')
+      if (!response.ok) throw new Error('Failed to fetch shop users')
+      const data = await response.json()
+      setShopUsers(data)
+    } catch (error) {
+      console.error('Error fetching shop users:', error)
+      setError('Failed to load shop users')
     }
   }
 
@@ -372,9 +371,9 @@ export default function TrackingPackagesPage() {
                   required
                 >
                   <option value="">اختر المتجر</option>
-                  {shops.map((shop) => (
+                  {shopUsers.map((shop) => (
                     <option key={shop.id} value={shop.id}>
-                      {shop.fullName}
+                      {shop.name} ({shop.email})
                     </option>
                   ))}
                 </select>
@@ -391,7 +390,7 @@ export default function TrackingPackagesPage() {
                   <option value="">اختر المستخدم</option>
                   {regularUsers.map((user) => (
                     <option key={user.id} value={user.id}>
-                      {user.fullName}
+                      {user.name} ({user.email})
                     </option>
                   ))}
                 </select>
