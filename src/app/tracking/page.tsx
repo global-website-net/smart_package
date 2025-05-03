@@ -203,8 +203,11 @@ export default function TrackingPage() {
           : order
       ))
 
-      toast.success('تم تحديث حالة الطلب بنجاح')
+      // Close the edit modal
       setEditingOrder(null)
+      
+      // Show success message
+      toast.success('تم تحديث حالة الطلب بنجاح')
     } catch (error) {
       console.error('Error updating order status:', error)
       toast.error(error instanceof Error ? error.message : 'حدث خطأ أثناء تحديث حالة الطلب')
