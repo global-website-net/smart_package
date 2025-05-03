@@ -121,4 +121,57 @@ export default function Header() {
                   >
                     <span>{session.user?.fullName || session.user?.email || 'المستخدم'}</span>
                     <svg
-                      className={`w-4 h-4 transform transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`
+                      className={`w-4 h-4 transform transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+
+                  {isUserMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                      {getMenuItems().map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                      <button
+                        onClick={handleSignOut}
+                        className="block w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        تسجيل الخروج
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link
+                  href="/auth/login"
+                  className="text-white hover:text-green-500 transition-colors"
+                >
+                  تسجيل الدخول
+                </Link>
+              )}
+            </div>
+
+            {/* Mobile View */}
+            <div className="md:hidden">
+              <MobileHeaderIcons isRegularUser={isRegularUser} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+  )
+}
