@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     // Check if user exists
     const { data: user, error: userError } = await supabase
       .from('User')
-      .select('id, email, fullName, governorate, town, phonePrefix, phoneNumber, role')
+      .select('id, fullName, email, password, governorate, town, phonePrefix, phoneNumber, role, createdAt, updatedAt, resetToken, resetTokenExpiry')
       .eq('email', email)
       .single()
 
@@ -41,7 +41,8 @@ export async function POST(request: Request) {
       .from('User')
       .update({
         resetToken,
-        resetTokenExpiry: resetTokenExpiry.toISOString()
+        resetTokenExpiry: resetTokenExpiry.toISOString(),
+        updatedAt: new Date().toISOString()
       })
       .eq('id', user.id)
 

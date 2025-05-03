@@ -44,8 +44,8 @@ export default function CreatePackageForm({ onSuccess, onCancel, orders }: Creat
     currentLocation: '',
     status: 'PENDING'
   })
-  const [users, setUsers] = useState<{ id: string; fullName: string }[]>([])
-  const [shops, setShops] = useState<{ id: string; fullName: string }[]>([])
+  const [users, setUsers] = useState<{ id: string; email: string }[]>([])
+  const [shops, setShops] = useState<{ id: string; email: string }[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
 
@@ -149,7 +149,7 @@ export default function CreatePackageForm({ onSuccess, onCancel, orders }: Creat
                 <option value="">اختر المستخدم</option>
                 {users.map(user => (
                   <option key={user.id} value={user.id}>
-                    {user.fullName}
+                    {user.email}
                   </option>
                 ))}
               </select>
@@ -166,7 +166,7 @@ export default function CreatePackageForm({ onSuccess, onCancel, orders }: Creat
                 <option value="">اختر المتجر</option>
                 {shops.map(shop => (
                   <option key={shop.id} value={shop.id}>
-                    {shop.fullName}
+                    {shop.email}
                   </option>
                 ))}
               </select>

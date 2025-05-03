@@ -19,10 +19,10 @@ export async function GET(request: NextRequest) {
     }
 
     const { data, error } = await supabase
-      .from('User')
-      .select('id, fullName, email, role')
+      .from('user')
+      .select('id, email')
       .eq('role', role)
-      .order('fullName', { ascending: true })
+      .order('email', { ascending: true })
 
     if (error) {
       console.error('Error fetching users:', error)
