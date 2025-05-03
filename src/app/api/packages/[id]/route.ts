@@ -29,9 +29,15 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
+type RouteContext = {
+  params: {
+    id: string
+  }
+}
+
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -40,7 +46,7 @@ export async function PATCH(
     }
 
     const { status } = await request.json()
-    const id = params.id
+    const id = context.params.id
 
     const { error } = await supabase
       .from('package')
