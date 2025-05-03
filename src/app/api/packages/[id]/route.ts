@@ -29,7 +29,10 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(
+  request: NextRequest,
+  context: { params: { id: string } }
+) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER')) {
@@ -37,7 +40,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     }
 
     const { status } = await request.json()
-    const id = params.id
+    const id = context.params.id
 
     const { error } = await supabase
       .from('package')
