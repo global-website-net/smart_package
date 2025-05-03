@@ -55,6 +55,7 @@ declare module 'next-auth/jwt' {
 }
 
 export const authOptions: AuthOptions = {
+  debug: false,
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -151,5 +152,4 @@ export const authOptions: AuthOptions = {
     strategy: 'jwt',
   },
   secret: nextAuthSecret,
-  debug: true
 } 

@@ -10,7 +10,7 @@ export async function GET() {
 
     // Fetch all users with SHOP role
     const { data, error } = await supabase
-      .from('User')
+      .from('user')
       .select('id, fullName, email, role')
       .eq('role', 'SHOP')
       .order('fullName', { ascending: true })

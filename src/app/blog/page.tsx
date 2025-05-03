@@ -141,7 +141,7 @@ export default function BlogPage() {
                   <CardHeader>
                     <CardTitle className="text-xl">{post.title}</CardTitle>
                     <p className="text-sm text-gray-500">
-                      بواسطة {post.author.fullName}
+                      بواسطة {post.author?.fullName || 'مستخدم غير معروف'}
                     </p>
                   </CardHeader>
                   <CardContent>

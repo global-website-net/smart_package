@@ -49,7 +49,7 @@ export async function GET() {
         updatedAt,
         orderNumber,
         user:userId (
-          name,
+          fullName,
           email
         )
       `)

@@ -22,7 +22,8 @@ export default function Header() {
   const getMenuItems = () => {
     if (session?.user?.role === 'REGULAR') {
       return [
-        { href: '/packages', label: 'الطرود' },
+        { href: '/tracking', label: 'تتبع الطلبات' },
+        { href: '/tracking_packages', label: 'تتبع الطرود' },
         { href: '/wallet', label: 'المحفظة' },
         { href: '/account', label: 'الملف الشخصي' },
         { href: '/blog', label: 'بلوج' },

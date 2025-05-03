@@ -63,7 +63,7 @@ export default function CreatePackageForm({ onSuccess, onCancel, orders }: Creat
         setShops(shopsData)
 
         // Fetch regular users
-        const usersResponse = await fetch('/api/users/regular')
+        const usersResponse = await fetch('/api/users?role=REGULAR')
         if (!usersResponse.ok) {
           throw new Error('Failed to fetch regular users')
         }

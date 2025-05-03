@@ -19,7 +19,7 @@ const supabase = createClient(
 
 interface User {
   id: string
-  name: string
+  fullName: string
   email: string
   role: string
 }
@@ -180,11 +180,11 @@ export default function TrackingPackagesPage() {
           currentLocation,
           createdAt,
           updatedAt,
-          user:User (
+          user:user (
             fullName,
             email
           ),
-          shop:Shop (
+          shop:user (
             fullName
           ),
           orderNumber

@@ -1,5 +1,11 @@
 {
   "version": 2,
   "buildCommand": "node vercel-build.js",
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    }
+  ]
 } 
