@@ -56,6 +56,11 @@ interface Order {
   status: string
   createdAt: string
   updatedAt: string
+  userId: string
+  user: {
+    name: string
+    email: string
+  }
 }
 
 export default function TrackingPackagesPage() {
@@ -120,7 +125,7 @@ export default function TrackingPackagesPage() {
       setLoading(true)
       setError('')
 
-      const response = await fetch('/api/orders')
+      const response = await fetch('/api/orders/all')
       if (!response.ok) {
         throw new Error('Failed to fetch orders')
       }
@@ -151,7 +156,7 @@ export default function TrackingPackagesPage() {
 
   const fetchShopUsers = async () => {
     try {
-      const response = await fetch('/api/users?role=SHOP')
+      const response = await fetch('/api/users/shops')
       if (!response.ok) throw new Error('Failed to fetch shop users')
       const data = await response.json()
       setShopUsers(data)
@@ -344,87 +349,14 @@ export default function TrackingPackagesPage() {
 
       {/* Create Package Modal */}
       {showCreateForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4">إنشاء طرد جديد</h2>
-            <form onSubmit={handleCreatePackage}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  رقم الطلب
-                </label>
-                <select
-                  name="orderNumber"
-                  value={newPackage.orderNumber}
-                  onChange={(e) => setNewPackage({ ...newPackage, orderNumber: e.target.value })}
-                  className="w-full p-2 border rounded"
-                  required
-                >
-                  <option value="">اختر رقم الطلب</option>
-                  {orders.map((order) => (
-                    <option key={order.id} value={order.orderNumber}>
-                      {order.orderNumber}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  المستخدم
-                </label>
-                <select
-                  name="userId"
-                  value={newPackage.userId}
-                  onChange={(e) => setNewPackage({ ...newPackage, userId: e.target.value })}
-                  className="w-full p-2 border rounded"
-                  required
-                >
-                  <option value="">اختر المستخدم</option>
-                  {regularUsers.map((user) => (
-                    <option key={user.id} value={user.id}>
-                      {user.name} ({user.email})
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  المتجر
-                </label>
-                <select
-                  name="shopId"
-                  value={newPackage.shopId}
-                  onChange={(e) => setNewPackage({ ...newPackage, shopId: e.target.value })}
-                  className="w-full p-2 border rounded"
-                  required
-                >
-                  <option value="">اختر المتجر</option>
-                  {shopUsers.map((shop) => (
-                    <option key={shop.id} value={shop.id}>
-                      {shop.name} ({shop.email})
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              <div className="flex justify-center space-x-8 rtl:space-x-reverse mt-6">
-                <button
-                  onClick={() => setShowCreateForm(false)}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-300 transition-colors"
-                >
-                  إلغاء
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
-                >
-                  حفظ
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <CreatePackageForm
+          onSuccess={(newPackage) => {
+            setPackages([newPackage, ...packages])
+            setShowCreateForm(false)
+          }}
+          onCancel={() => setShowCreateForm(false)}
+          orders={orders}
+        />
       )}
 
       {/* Delete Confirmation Modal */}

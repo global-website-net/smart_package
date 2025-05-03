@@ -19,14 +19,18 @@ export async function PATCH(request: NextRequest) {
     }
 
     const { status } = await request.json()
+    if (!status) {
+      return NextResponse.json(
+        { error: 'Status is required' },
+        { status: 400 }
+      )
+    }
 
     // Update the order status
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('order')
-      .update({ status })
+      .update({ status, updatedAt: new Date().toISOString() })
       .eq('id', id)
-      .select()
-      .single()
 
     if (error) {
       console.error('Error updating order status:', error)
@@ -36,7 +40,22 @@ export async function PATCH(request: NextRequest) {
       )
     }
 
-    return NextResponse.json(data)
+    // Fetch the updated order
+    const { data: updatedOrder, error: fetchError } = await supabase
+      .from('order')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (fetchError) {
+      console.error('Error fetching updated order:', fetchError)
+      return NextResponse.json(
+        { error: 'Failed to fetch updated order' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json(updatedOrder)
   } catch (error) {
     console.error('Error in PATCH /api/orders/[id]:', error)
     return NextResponse.json(

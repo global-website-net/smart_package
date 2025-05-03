@@ -351,12 +351,13 @@ export default function TrackingPage() {
                               {getStatusText(pkg.status)}
                             </span>
                             {session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER' ? (
-                              <button
+                              <Button
+                                variant="outline"
                                 onClick={() => setEditingPackage(pkg)}
-                                className="text-blue-600 hover:text-blue-800 text-sm"
+                                className="bg-blue-500 text-white hover:bg-blue-600"
                               >
                                 تعديل
-                              </button>
+                              </Button>
                             ) : null}
                           </div>
                         </div>
@@ -462,7 +463,7 @@ export default function TrackingPage() {
 
       {editingOrder && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="bg-white p-6 rounded-lg max-w-sm w-full mx-4">
             <h2 className="text-2xl font-bold mb-4">تعديل حالة الطلب</h2>
             
             <div className="mb-4">
@@ -480,19 +481,19 @@ export default function TrackingPage() {
               </select>
             </div>
 
-            <div className="flex justify-center space-x-8 rtl:space-x-reverse mt-6">
-              <button
+            <div className="flex justify-end space-x-4 rtl:space-x-reverse">
+              <Button
+                variant="outline"
                 onClick={() => setEditingOrder(null)}
-                className="px-4 py-2 bg-gray-200 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-300 transition-colors"
               >
                 إلغاء
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => handleUpdateOrderStatus(editingOrder.id, editingOrder.status)}
-                className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+                className="bg-green-500 text-white hover:bg-green-600"
               >
                 حفظ
-              </button>
+              </Button>
             </div>
           </div>
         </div>

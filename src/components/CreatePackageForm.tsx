@@ -9,9 +9,23 @@ interface User {
   role: string
 }
 
+interface Order {
+  id: string
+  orderNumber: string
+  status: string
+  createdAt: string
+  updatedAt: string
+  userId: string
+  user: {
+    name: string
+    email: string
+  }
+}
+
 interface CreatePackageFormProps {
   onSuccess: (newPackage: any) => void
   onCancel: () => void
+  orders: Order[]
 }
 
 interface PackageFormData {
@@ -21,16 +35,18 @@ interface PackageFormData {
   shopId: string
   currentLocation?: string
   notes?: string
+  status: string
 }
 
-export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackageFormProps) {
+export default function CreatePackageForm({ onSuccess, onCancel, orders }: CreatePackageFormProps) {
   const [formData, setFormData] = useState<PackageFormData>({
     trackingNumber: '',
     orderNumber: '',
     userId: '',
     shopId: '',
     currentLocation: '',
-    notes: ''
+    notes: '',
+    status: 'PENDING'
   })
   const [users, setUsers] = useState<{ id: string; fullName: string }[]>([])
   const [shops, setShops] = useState<{ id: string; fullName: string }[]>([])
@@ -122,13 +138,19 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
 
             <div>
               <label className="block text-gray-700 mb-2">رقم الطلب</label>
-              <input
-                type="text"
+              <select
                 value={formData.orderNumber}
                 onChange={(e) => setFormData({ ...formData, orderNumber: e.target.value })}
                 className="w-full px-3 py-2 border rounded-md"
                 required
-              />
+              >
+                <option value="">اختر رقم الطلب</option>
+                {orders.map(order => (
+                  <option key={order.id} value={order.orderNumber}>
+                    {order.orderNumber} - {order.user.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
@@ -166,13 +188,19 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
             </div>
 
             <div>
-              <label className="block text-gray-700 mb-2">الموقع الحالي</label>
-              <input
-                type="text"
-                value={formData.currentLocation}
-                onChange={(e) => setFormData({ ...formData, currentLocation: e.target.value })}
+              <label className="block text-gray-700 mb-2">الحالة</label>
+              <select
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                 className="w-full px-3 py-2 border rounded-md"
-              />
+                required
+              >
+                <option value="PENDING">قيد الانتظار</option>
+                <option value="IN_TRANSIT">قيد الشحن</option>
+                <option value="DELIVERED">تم التسليم</option>
+                <option value="CANCELLED">ملغي</option>
+                <option value="RETURNED">تم الإرجاع</option>
+              </select>
             </div>
 
             <div>

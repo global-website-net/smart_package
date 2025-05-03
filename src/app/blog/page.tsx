@@ -60,7 +60,7 @@ export default function BlogPage() {
           imageUrl,
           createdAt,
           updatedAt,
-          author:User (
+          author:authorId (
             fullName,
             email
           )
@@ -114,7 +114,7 @@ export default function BlogPage() {
             {isAdminOrOwner && (
               <div className="mt-6">
                 <Button
-                  onClick={() => router.push('/blog/new')}
+                  onClick={() => router.push('/blog/create')}
                   className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                 >
                   إنشاء مقال جديد

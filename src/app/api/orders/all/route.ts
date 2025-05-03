@@ -48,8 +48,8 @@ export async function GET() {
         createdAt,
         updatedAt,
         orderNumber,
-        user:User (
-          fullName,
+        user:userId (
+          name,
           email
         )
       `)
