@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { toast } from 'react-hot-toast'
 
 interface User {
   id: string
@@ -9,21 +10,32 @@ interface User {
 }
 
 interface CreatePackageFormProps {
-  onClose: () => void
-  onSuccess: (newPackage: any) => void
+  onSuccess: () => void
+  onCancel: () => void
 }
 
-export default function CreatePackageForm({ onClose, onSuccess }: CreatePackageFormProps) {
+interface PackageFormData {
+  trackingNumber: string
+  orderNumber: string
+  userId: string
+  shopId: string
+  currentLocation?: string
+  notes?: string
+}
+
+export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackageFormProps) {
+  const [formData, setFormData] = useState<PackageFormData>({
+    trackingNumber: '',
+    orderNumber: '',
+    userId: '',
+    shopId: '',
+    currentLocation: '',
+    notes: ''
+  })
+  const [users, setUsers] = useState<{ id: string; fullName: string }[]>([])
+  const [shops, setShops] = useState<{ id: string; fullName: string }[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
-  const [shops, setShops] = useState<User[]>([])
-  const [users, setUsers] = useState<User[]>([])
-  const [formData, setFormData] = useState({
-    trackingNumber: '',
-    status: 'PENDING',
-    shopId: '',
-    userId: ''
-  })
 
   useEffect(() => {
     // Fetch shops and users when component mounts
@@ -61,7 +73,7 @@ export default function CreatePackageForm({ onClose, onSuccess }: CreatePackageF
     setError('')
 
     try {
-      const response = await fetch('/api/packages/create', {
+      const response = await fetch('/api/packages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,26 +82,17 @@ export default function CreatePackageForm({ onClose, onSuccess }: CreatePackageF
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to create package')
+        throw new Error('Failed to create package')
       }
 
-      const newPackage = await response.json()
-      onSuccess(newPackage)
-    } catch (error) {
-      console.error('Error creating package:', error)
+      toast.success('تم إنشاء الطرد بنجاح')
+      onSuccess()
+    } catch (err) {
+      console.error('Error creating package:', err)
       setError('حدث خطأ أثناء إنشاء الطرد')
     } finally {
       setIsSubmitting(false)
     }
-  }
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
   }
 
   return (
@@ -104,75 +107,88 @@ export default function CreatePackageForm({ onClose, onSuccess }: CreatePackageF
         )}
 
         <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-gray-700 mb-2">رقم التتبع</label>
-            <input
-              type="text"
-              name="trackingNumber"
-              value={formData.trackingNumber}
-              onChange={handleInputChange}
-              required
-              className="w-full px-3 py-2 border rounded-md"
-            />
-          </div>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-gray-700 mb-2">رقم التتبع</label>
+              <input
+                type="text"
+                value={formData.trackingNumber}
+                onChange={(e) => setFormData({ ...formData, trackingNumber: e.target.value })}
+                className="w-full px-3 py-2 border rounded-md"
+                required
+              />
+            </div>
 
-          <div className="mb-4">
-            <label className="block text-gray-700 mb-2">الحالة</label>
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleInputChange}
-              required
-              className="w-full px-3 py-2 border rounded-md"
-            >
-              <option value="PENDING">قيد الانتظار</option>
-              <option value="PROCESSING">قيد المعالجة</option>
-              <option value="SHIPPED">تم الشحن</option>
-              <option value="DELIVERED">تم التسليم</option>
-              <option value="CANCELLED">ملغي</option>
-            </select>
-          </div>
+            <div>
+              <label className="block text-gray-700 mb-2">رقم الطلب</label>
+              <input
+                type="text"
+                value={formData.orderNumber}
+                onChange={(e) => setFormData({ ...formData, orderNumber: e.target.value })}
+                className="w-full px-3 py-2 border rounded-md"
+                required
+              />
+            </div>
 
-          <div className="mb-4">
-            <label className="block text-gray-700 mb-2">المتجر</label>
-            <select
-              name="shopId"
-              value={formData.shopId}
-              onChange={handleInputChange}
-              required
-              className="w-full px-3 py-2 border rounded-md"
-            >
-              <option value="">اختر المتجر</option>
-              {shops.map(shop => (
-                <option key={shop.id} value={shop.id}>
-                  {shop.fullName}
-                </option>
-              ))}
-            </select>
-          </div>
+            <div>
+              <label className="block text-gray-700 mb-2">المستخدم</label>
+              <select
+                value={formData.userId}
+                onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
+                className="w-full px-3 py-2 border rounded-md"
+                required
+              >
+                <option value="">اختر المستخدم</option>
+                {users.map(user => (
+                  <option key={user.id} value={user.id}>
+                    {user.fullName}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <div className="mb-4">
-            <label className="block text-gray-700 mb-2">المستخدم</label>
-            <select
-              name="userId"
-              value={formData.userId}
-              onChange={handleInputChange}
-              required
-              className="w-full px-3 py-2 border rounded-md"
-            >
-              <option value="">اختر المستخدم</option>
-              {users.map(user => (
-                <option key={user.id} value={user.id}>
-                  {user.fullName}
-                </option>
-              ))}
-            </select>
+            <div>
+              <label className="block text-gray-700 mb-2">المتجر</label>
+              <select
+                value={formData.shopId}
+                onChange={(e) => setFormData({ ...formData, shopId: e.target.value })}
+                className="w-full px-3 py-2 border rounded-md"
+                required
+              >
+                <option value="">اختر المتجر</option>
+                {shops.map(shop => (
+                  <option key={shop.id} value={shop.id}>
+                    {shop.fullName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-gray-700 mb-2">الموقع الحالي</label>
+              <input
+                type="text"
+                value={formData.currentLocation}
+                onChange={(e) => setFormData({ ...formData, currentLocation: e.target.value })}
+                className="w-full px-3 py-2 border rounded-md"
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 mb-2">ملاحظات</label>
+              <textarea
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                className="w-full px-3 py-2 border rounded-md"
+                rows={3}
+              />
+            </div>
           </div>
 
           <div className="flex justify-center space-x-8 rtl:space-x-reverse mt-6">
             <button
               type="button"
-              onClick={onClose}
+              onClick={onCancel}
               className="px-4 py-2 bg-gray-200 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-300 transition-colors"
             >
               إلغاء

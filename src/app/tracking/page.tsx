@@ -123,20 +123,14 @@ export default function TrackingPage() {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'PENDING':
-        return 'قيد الانتظار'
+      case 'PENDING_APPROVAL':
+        return 'في انتظار الموافقة'
       case 'AWAITING_PAYMENT':
         return 'في انتظار الدفع'
-      case 'PROCESSING':
-        return 'قيد المعالجة'
-      case 'SHIPPED':
-        return 'تم الشحن'
-      case 'DELIVERED':
-        return 'تم التسليم'
+      case 'ORDERING':
+        return 'قيد الطلب'
       case 'ORDER_COMPLETED':
-        return 'تمت الطلبية'
-      case 'CANCELLED':
-        return 'ملغي'
+        return 'تم الطلب'
       default:
         return status
     }
@@ -144,20 +138,14 @@ export default function TrackingPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PENDING':
+      case 'PENDING_APPROVAL':
         return 'bg-yellow-100 text-yellow-800'
       case 'AWAITING_PAYMENT':
         return 'bg-orange-100 text-orange-800'
-      case 'PROCESSING':
+      case 'ORDERING':
         return 'bg-blue-100 text-blue-800'
-      case 'SHIPPED':
-        return 'bg-purple-100 text-purple-800'
-      case 'DELIVERED':
-        return 'bg-green-100 text-green-800'
       case 'ORDER_COMPLETED':
-        return 'bg-teal-100 text-teal-800'
-      case 'CANCELLED':
-        return 'bg-red-100 text-red-800'
+        return 'bg-green-100 text-green-800'
       default:
         return 'bg-gray-100 text-gray-800'
     }

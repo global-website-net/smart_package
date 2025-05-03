@@ -10,13 +10,10 @@ interface EditPackageStatusProps {
 }
 
 const statusOptions = [
-  { value: 'PENDING', label: 'قيد الانتظار' },
+  { value: 'PENDING_APPROVAL', label: 'في انتظار الموافقة' },
   { value: 'AWAITING_PAYMENT', label: 'في انتظار الدفع' },
-  { value: 'PROCESSING', label: 'قيد المعالجة' },
-  { value: 'SHIPPED', label: 'تم الشحن' },
-  { value: 'DELIVERED', label: 'تم التسليم' },
-  { value: 'ORDER_COMPLETED', label: 'تمت الطلبية' },
-  { value: 'CANCELLED', label: 'ملغي' }
+  { value: 'ORDERING', label: 'قيد الطلب' },
+  { value: 'ORDER_COMPLETED', label: 'تم الطلب' }
 ]
 
 export default function EditPackageStatus({ packageId, currentStatus, onClose, onSuccess }: EditPackageStatusProps) {
@@ -93,4 +90,4 @@ export default function EditPackageStatus({ packageId, currentStatus, onClose, o
       </div>
     </div>
   )
-} 
+}
