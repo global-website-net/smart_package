@@ -1,9 +1,15 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
+interface RouteParams {
+  params: {
+    id: string
+  }
+}
+
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
   try {
     const supabase = createClient(
