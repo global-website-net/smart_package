@@ -31,18 +31,19 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER')) {
       return NextResponse.json({ error: 'غير مصرح لك بالوصول' }, { status: 403 })
     }
 
+    const id = request.url.split('/').pop()
+    if (!id) {
+      return NextResponse.json({ error: 'Package ID is required' }, { status: 400 })
+    }
+
     const { status } = await request.json()
-    const id = params.id
 
     const { error } = await supabase
       .from('package')
