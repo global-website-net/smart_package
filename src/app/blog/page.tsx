@@ -91,7 +91,7 @@ export default function BlogPage() {
 
   const handleDeletePost = async (postId: string) => {
     try {
-      const response = await fetch(`/api/blog-posts/${postId}`, {
+      const response = await fetch(`/api/blog/${postId}`, {
         method: 'DELETE',
       })
 
@@ -114,7 +114,7 @@ export default function BlogPage() {
     try {
       console.log('Updating post with data:', editFormData)
       
-      const response = await fetch(`/api/blog-posts/${postId}`, {
+      const response = await fetch(`/api/blog/${postId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

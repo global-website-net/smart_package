@@ -203,6 +203,10 @@ export default function TrackingPage() {
           : order
       ))
 
+      // Close the edit form
+      setEditingOrder(null)
+      
+      // Show success message
       toast.success('تم تحديث حالة الطلب بنجاح')
     } catch (error) {
       console.error('Error updating order status:', error)

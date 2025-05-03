@@ -2,6 +2,18 @@ import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 
+// Initialize Supabase admin client with service role key
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+)
+
 export async function POST(request: Request) {
   try {
     console.log('Received forgot password request')
@@ -19,18 +31,14 @@ export async function POST(request: Request) {
       )
     }
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-
-    console.log('Searching for user with email:', email)
+    const normalizedEmail = email.toLowerCase().trim()
+    console.log('Normalized email:', normalizedEmail)
 
     // Check if user exists
-    const { data: users, error: userError } = await supabase
+    const { data: users, error: userError } = await supabaseAdmin
       .from('User')
-      .select('*')
-      .eq('email', email.toLowerCase().trim())
+      .select('id, email, fullName')
+      .ilike('email', normalizedEmail)
 
     console.log('Query result:', { users, userError })
 
@@ -43,7 +51,7 @@ export async function POST(request: Request) {
     }
 
     if (!users || users.length === 0) {
-      console.log('No user found with email:', email)
+      console.log('No user found with email:', normalizedEmail)
       return NextResponse.json(
         { error: 'لم يتم العثور على حساب بهذا البريد الإلكتروني' },
         { status: 404 }
@@ -58,7 +66,7 @@ export async function POST(request: Request) {
     const resetTokenExpiry = new Date(Date.now() + 3600000) // 1 hour from now
 
     // Update user with reset token
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from('User')
       .update({
         resetToken,
