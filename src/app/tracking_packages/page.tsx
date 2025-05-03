@@ -71,7 +71,6 @@ export default function TrackingPackagesPage() {
   const [editingPackage, setEditingPackage] = useState<Package | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [newPackage, setNewPackage] = useState({
-    trackingNumber: '',
     status: 'PENDING',
     currentLocation: '',
     orderNumber: '',
@@ -95,43 +94,67 @@ export default function TrackingPackagesPage() {
 
   const fetchShops = async () => {
     try {
+      setLoading(true)
+      setError('')
+
       const response = await fetch('/api/users/shops')
       if (!response.ok) {
         throw new Error('Failed to fetch shops')
       }
+
       const data = await response.json()
-      setShops(data)
+      // Filter out any shops that don't have a fullName
+      const validShops = data.filter((shop: Shop) => shop.fullName)
+      setShops(validShops)
     } catch (err) {
       console.error('Error fetching shops:', err)
       setError('حدث خطأ أثناء جلب المتاجر')
+    } finally {
+      setLoading(false)
     }
   }
 
   const fetchOrders = async () => {
     try {
+      setLoading(true)
+      setError('')
+
       const response = await fetch('/api/orders/all')
       if (!response.ok) {
         throw new Error('Failed to fetch orders')
       }
+
       const data = await response.json()
-      setOrders(data)
+      // Filter out any orders that don't have an orderNumber
+      const validOrders = data.filter((order: Order) => order.orderNumber)
+      setOrders(validOrders)
     } catch (err) {
       console.error('Error fetching orders:', err)
       setError('حدث خطأ أثناء جلب الطلبات')
+    } finally {
+      setLoading(false)
     }
   }
 
   const fetchRegularUsers = async () => {
     try {
+      setLoading(true)
+      setError('')
+
       const response = await fetch('/api/users/regular')
       if (!response.ok) {
         throw new Error('Failed to fetch regular users')
       }
+
       const data = await response.json()
-      setRegularUsers(data)
+      // Filter out any users that don't have a fullName
+      const validUsers = data.filter((user: RegularUser) => user.fullName)
+      setRegularUsers(validUsers)
     } catch (err) {
       console.error('Error fetching regular users:', err)
       setError('حدث خطأ أثناء جلب المستخدمين')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -173,13 +196,21 @@ export default function TrackingPackagesPage() {
     }
   }
 
+  const generateTrackingNumber = () => {
+    const timestamp = Date.now().toString(36)
+    const random = Math.random().toString(36).substring(2, 8)
+    return `PKG-${timestamp}-${random}`.toUpperCase()
+  }
+
   const handleCreatePackage = async () => {
     try {
+      const trackingNumber = generateTrackingNumber()
+      
       const { data, error } = await supabase
         .from('package')
         .insert([
           {
-            trackingNumber: newPackage.trackingNumber,
+            trackingNumber,
             status: newPackage.status,
             currentLocation: newPackage.currentLocation,
             orderNumber: newPackage.orderNumber,
@@ -196,7 +227,6 @@ export default function TrackingPackagesPage() {
         setPackages([data[0], ...packages])
         setShowCreateForm(false)
         setNewPackage({
-          trackingNumber: '',
           status: 'PENDING',
           currentLocation: '',
           orderNumber: '',
@@ -366,19 +396,6 @@ export default function TrackingPackagesPage() {
                   ))}
                 </select>
               </div>
-
-              <div>
-                <label className="block text-gray-700 mb-2">رقم التتبع</label>
-                <input
-                  type="text"
-                  value={newPackage.trackingNumber}
-                  onChange={(e) => setNewPackage({ ...newPackage, trackingNumber: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md"
-                  required
-                />
-              </div>
-
-              {/* ... rest of the form ... */}
             </div>
 
             <div className="flex justify-center space-x-8 rtl:space-x-reverse mt-6">

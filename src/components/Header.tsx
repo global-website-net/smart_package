@@ -10,6 +10,14 @@ export default function Header() {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
+  const navigation = [
+    { name: 'الرئيسية', href: '/' },
+    { name: 'المدونة', href: '/blog' },
+    { name: 'تتبع الطلبات', href: '/tracking' },
+    { name: 'تتبع الطرود', href: '/tracking_packages_user' },
+    { name: 'إنشاء طلب جديد', href: '/new-order' },
+  ]
+
   return (
     <header className="bg-white shadow-md">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

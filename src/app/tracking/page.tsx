@@ -7,6 +7,7 @@ import Header from '../components/Header'
 import Link from 'next/link'
 import EditPackageStatus from '@/components/EditPackageStatus'
 import { toast } from 'react-hot-toast'
+import { Button } from '@/components/ui/button'
 
 interface Package {
   id: string
@@ -141,6 +142,16 @@ export default function TrackingPage() {
         return 'قيد الطلب'
       case 'ORDER_COMPLETED':
         return 'تم الطلب'
+      case 'PENDING':
+        return 'قيد الانتظار'
+      case 'PROCESSING':
+        return 'قيد المعالجة'
+      case 'SHIPPED':
+        return 'تم الشحن'
+      case 'DELIVERED':
+        return 'تم التسليم'
+      case 'CANCELLED':
+        return 'ملغي'
       default:
         return status
     }
@@ -149,13 +160,20 @@ export default function TrackingPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'PENDING_APPROVAL':
+      case 'PENDING':
         return 'bg-yellow-100 text-yellow-800'
       case 'AWAITING_PAYMENT':
         return 'bg-orange-100 text-orange-800'
       case 'ORDERING':
+      case 'PROCESSING':
         return 'bg-blue-100 text-blue-800'
       case 'ORDER_COMPLETED':
+      case 'SHIPPED':
+        return 'bg-purple-100 text-purple-800'
+      case 'DELIVERED':
         return 'bg-green-100 text-green-800'
+      case 'CANCELLED':
+        return 'bg-red-100 text-red-800'
       default:
         return 'bg-gray-100 text-gray-800'
     }
@@ -175,8 +193,13 @@ export default function TrackingPage() {
         throw new Error('Failed to update order status')
       }
 
+      setOrders(orders.map(order => 
+        order.id === orderId 
+          ? { ...order, status: newStatus }
+          : order
+      ))
+
       toast.success('تم تحديث حالة الطلب بنجاح')
-      fetchAllOrders()
       setEditingOrder(null)
     } catch (error) {
       console.error('Error updating order status:', error)
@@ -276,12 +299,15 @@ export default function TrackingPage() {
                             <span className={`px-2 py-1 rounded-full ${getStatusColor(order.status)}`}>
                               {getStatusText(order.status)}
                             </span>
-                            <button
-                              onClick={() => setEditingOrder(order)}
-                              className="text-blue-600 hover:text-blue-800 text-sm"
-                            >
-                              تعديل
-                            </button>
+                            {order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && (
+                              <Button
+                                variant="outline"
+                                className="font-bold"
+                                onClick={() => setEditingOrder(order)}
+                              >
+                                تعديل
+                              </Button>
+                            )}
                           </div>
                         </div>
                         {order.notes && (
@@ -389,7 +415,9 @@ export default function TrackingPage() {
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">الحالة</p>
-                        <p className="font-medium">{getStatusText(order.status)}</p>
+                        <span className={`px-2 py-1 rounded-full ${getStatusColor(order.status)}`}>
+                          {getStatusText(order.status)}
+                        </span>
                       </div>
                       {order.notes && (
                         <div className="col-span-2">

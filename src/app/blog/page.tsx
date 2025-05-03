@@ -3,17 +3,29 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import Header from '../components/Header'
-import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { toast } from 'sonner'
+import Header from '@/app/components/Header'
+
+// Initialize Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 interface BlogPost {
   id: string
   title: string
   content: string
-  imageUrl: string
+  imageUrl?: string
   createdAt: string
   updatedAt: string
+  author: {
+    fullName: string
+    email: string
+  }
 }
 
 export default function BlogPage() {
@@ -29,7 +41,9 @@ export default function BlogPage() {
       return
     }
 
-    fetchPosts()
+    if (status === 'authenticated') {
+      fetchPosts()
+    }
   }, [status])
 
   const fetchPosts = async () => {
@@ -37,20 +51,29 @@ export default function BlogPage() {
       setLoading(true)
       setError('')
 
-      const { data, error } = await supabase
+      const { data: posts, error } = await supabase
         .from('blogPost')
-        .select('*')
+        .select(`
+          id,
+          title,
+          content,
+          imageUrl,
+          createdAt,
+          updatedAt,
+          author:User (
+            fullName,
+            email
+          )
+        `)
         .order('createdAt', { ascending: false })
 
-      if (error) {
-        throw error
-      }
+      if (error) throw error
 
-      if (data) {
-        setPosts(data)
+      if (posts) {
+        setPosts(posts as unknown as BlogPost[])
       }
-    } catch (err) {
-      console.error('Error fetching posts:', err)
+    } catch (error) {
+      console.error('Error fetching posts:', error)
       setError('حدث خطأ أثناء جلب المقالات')
     } finally {
       setLoading(false)
@@ -72,6 +95,8 @@ export default function BlogPage() {
     )
   }
 
+  const isAdminOrOwner = session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER'
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -86,16 +111,16 @@ export default function BlogPage() {
                 <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
               </div>
             </div>
-            {session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER' ? (
+            {isAdminOrOwner && (
               <div className="mt-6">
-                <Link
-                  href="/blog/create"
+                <Button
+                  onClick={() => router.push('/blog/new')}
                   className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                 >
                   إنشاء مقال جديد
-                </Link>
+                </Button>
               </div>
-            ) : null}
+            )}
           </div>
 
           {error && (
@@ -111,34 +136,33 @@ export default function BlogPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {posts.map((post) => (
-                <div key={post.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-                  {post.imageUrl && (
-                    <img
-                      src={post.imageUrl}
-                      alt={post.title}
-                      className="w-full h-48 object-cover"
-                    />
-                  )}
-                  <div className="p-6">
-                    <h2 className="text-xl font-bold mb-2">{post.title}</h2>
-                    <p className="text-gray-600 mb-4 line-clamp-3">{post.content}</p>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-500">
-                        {new Date(post.createdAt).toLocaleDateString('ar-EG', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}
-                      </span>
-                      <Link
-                        href={`/blog/${post.id}`}
-                        className="text-green-600 hover:text-green-700 font-medium"
-                      >
-                        اقرأ المزيد
-                      </Link>
-                    </div>
-                  </div>
-                </div>
+                <Card key={post.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <CardTitle className="text-xl">{post.title}</CardTitle>
+                    <p className="text-sm text-gray-500">
+                      بواسطة {post.author.fullName}
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    {post.imageUrl && (
+                      <img
+                        src={post.imageUrl}
+                        alt={post.title}
+                        className="w-full h-48 object-cover rounded-md mb-4"
+                      />
+                    )}
+                    <p className="text-gray-600 mb-4 line-clamp-3">
+                      {post.content}
+                    </p>
+                    <Button
+                      variant="outline"
+                      onClick={() => router.push(`/blog/${post.id}`)}
+                      className="w-full"
+                    >
+                      اقرأ المزيد
+                    </Button>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}

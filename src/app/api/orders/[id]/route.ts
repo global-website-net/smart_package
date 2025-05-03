@@ -1,31 +1,38 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
-export async function GET() {
+export async function PATCH(
+  request: Request,
+  context: { params: { id: string } }
+) {
   try {
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
 
-    // Fetch all users with SHOP role
+    const { id } = context.params
+    const { status } = await request.json()
+
+    // Update the order status
     const { data, error } = await supabase
-      .from('User')
-      .select('id, fullName, email')
-      .eq('role', 'SHOP')
-      .order('fullName', { ascending: true })
+      .from('order')
+      .update({ status })
+      .eq('id', id)
+      .select()
+      .single()
 
     if (error) {
-      console.error('Error fetching shops:', error)
+      console.error('Error updating order status:', error)
       return NextResponse.json(
-        { error: 'Failed to fetch shops' },
+        { error: 'Failed to update order status' },
         { status: 500 }
       )
     }
 
     return NextResponse.json(data)
   } catch (error) {
-    console.error('Error in GET /api/users/shops:', error)
+    console.error('Error in PATCH /api/orders/[id]:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
