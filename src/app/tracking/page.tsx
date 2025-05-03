@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react'
 import Header from '../components/Header'
 import Link from 'next/link'
 import EditPackageStatus from '@/components/EditPackageStatus'
+import { toast } from 'react-hot-toast'
 
 interface Package {
   id: string
@@ -21,6 +22,7 @@ interface Package {
   shop: {
     fullName: string
   }
+  orderNumber: string
 }
 
 interface Order {
@@ -44,6 +46,14 @@ export default function TrackingPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [editingPackage, setEditingPackage] = useState<Package | null>(null)
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null)
+
+  const statusOptions = [
+    { value: 'PENDING_APPROVAL', label: 'في انتظار الموافقة' },
+    { value: 'AWAITING_PAYMENT', label: 'في انتظار الدفع' },
+    { value: 'ORDERING', label: 'قيد الطلب' },
+    { value: 'ORDER_COMPLETED', label: 'تم الطلب' }
+  ]
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -151,6 +161,29 @@ export default function TrackingPage() {
     }
   }
 
+  const handleUpdateOrderStatus = async (orderId: string, newStatus: string) => {
+    try {
+      const response = await fetch(`/api/orders/${orderId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update order status')
+      }
+
+      toast.success('تم تحديث حالة الطلب بنجاح')
+      fetchAllOrders()
+      setEditingOrder(null)
+    } catch (error) {
+      console.error('Error updating order status:', error)
+      toast.error('حدث خطأ أثناء تحديث حالة الطلب')
+    }
+  }
+
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -239,7 +272,17 @@ export default function TrackingPage() {
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">الحالة</p>
-                          <p className="font-medium">{getStatusText(order.status)}</p>
+                          <div className="flex items-center gap-2">
+                            <span className={`px-2 py-1 rounded-full ${getStatusColor(order.status)}`}>
+                              {getStatusText(order.status)}
+                            </span>
+                            <button
+                              onClick={() => setEditingOrder(order)}
+                              className="text-blue-600 hover:text-blue-800 text-sm"
+                            >
+                              تعديل
+                            </button>
+                          </div>
                         </div>
                         {order.notes && (
                           <div className="col-span-2">
@@ -272,17 +315,23 @@ export default function TrackingPage() {
                           <p className="font-medium">{pkg.trackingNumber}</p>
                         </div>
                         <div>
+                          <p className="text-sm text-gray-500">رقم الطلب</p>
+                          <p className="font-medium">{pkg.orderNumber}</p>
+                        </div>
+                        <div>
                           <p className="text-sm text-gray-500">الحالة</p>
                           <div className="flex items-center gap-2">
                             <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
                               {getStatusText(pkg.status)}
                             </span>
-                            <button
-                              onClick={() => setEditingPackage(pkg)}
-                              className="text-blue-600 hover:text-blue-800 text-sm"
-                            >
-                              تعديل
-                            </button>
+                            {session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER' ? (
+                              <button
+                                onClick={() => setEditingPackage(pkg)}
+                                className="text-blue-600 hover:text-blue-800 text-sm"
+                              >
+                                تعديل
+                              </button>
+                            ) : null}
                           </div>
                         </div>
                         {pkg.currentLocation && (
@@ -381,6 +430,44 @@ export default function TrackingPage() {
             setEditingPackage(null)
           }}
         />
+      )}
+
+      {editingOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-2xl font-bold mb-4">تعديل حالة الطلب</h2>
+            
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">الحالة</label>
+              <select
+                value={editingOrder.status}
+                onChange={(e) => setEditingOrder({ ...editingOrder, status: e.target.value })}
+                className="w-full px-3 py-2 border rounded-md"
+              >
+                {statusOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex justify-center space-x-8 rtl:space-x-reverse mt-6">
+              <button
+                onClick={() => setEditingOrder(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-300 transition-colors"
+              >
+                إلغاء
+              </button>
+              <button
+                onClick={() => handleUpdateOrderStatus(editingOrder.id, editingOrder.status)}
+                className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+              >
+                حفظ
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

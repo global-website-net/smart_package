@@ -3,42 +3,17 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { createClient } from '@supabase/supabase-js'
-import { Button } from '@/components/ui/button'
-import { toast } from 'sonner'
-import Header from '@/app/components/Header'
-
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import Header from '../components/Header'
+import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
 
 interface BlogPost {
   id: string
   title: string
   content: string
+  imageUrl: string
   createdAt: string
   updatedAt: string
-  itemLink: string
-  author: {
-    fullName: string
-    email: string
-  }
-}
-
-interface SupabaseBlogPost {
-  id: string
-  title: string
-  content: string
-  createdAt: string
-  updatedAt: string
-  itemLink: string
-  authorId: string
-  User: {
-    fullName: string
-    email: string
-  }[]
 }
 
 export default function BlogPage() {
@@ -46,6 +21,7 @@ export default function BlogPage() {
   const { data: session, status } = useSession()
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -53,158 +29,121 @@ export default function BlogPage() {
       return
     }
 
-    if (status === 'authenticated') {
-      fetchPosts()
-    }
+    fetchPosts()
   }, [status])
 
   const fetchPosts = async () => {
     try {
       setLoading(true)
+      setError('')
 
-      // Get blog posts with author information
-      const { data: blogPosts, error } = await supabase
+      const { data, error } = await supabase
         .from('blogPost')
-        .select(`
-          id,
-          title,
-          content,
-          createdAt,
-          updatedAt,
-          itemLink,
-          authorId,
-          User:authorId (
-            fullName,
-            email
-          )
-        `)
+        .select('*')
         .order('createdAt', { ascending: false })
 
-      if (error) throw error
+      if (error) {
+        throw error
+      }
 
-      // Transform the data to match the BlogPost interface
-      const transformedPosts = (blogPosts as SupabaseBlogPost[] || []).map(post => ({
-        id: post.id,
-        title: post.title,
-        content: post.content,
-        createdAt: post.createdAt,
-        updatedAt: post.updatedAt,
-        itemLink: post.itemLink,
-        author: {
-          fullName: post.User?.[0]?.fullName || 'مجهول',
-          email: post.User?.[0]?.email || ''
-        }
-      }))
-
-      setPosts(transformedPosts)
-    } catch (error) {
-      console.error('Error fetching blog posts:', error)
-      toast.error('حدث خطأ أثناء جلب المقالات')
+      if (data) {
+        setPosts(data)
+      }
+    } catch (err) {
+      console.error('Error fetching posts:', err)
+      setError('حدث خطأ أثناء جلب المقالات')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleDelete = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('blogPost')
-        .delete()
-        .eq('id', id)
-
-      if (error) throw error
-
-      toast.success('تم حذف المقال بنجاح')
-      fetchPosts()
-    } catch (error) {
-      console.error('Error deleting blog post:', error)
-      toast.error('حدث خطأ أثناء حذف المقال')
-    }
+  if (status === 'loading' || loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <main className="p-4 pt-24">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+            </div>
+          </div>
+        </main>
+      </div>
+    )
   }
-
-  if (loading) {
-    return <div>جاري التحميل...</div>
-  }
-
-  const isAdminOrOwner = session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER'
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="pt-20 pb-10">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-center mb-6">المدونة</h1>
+      
+      <main className="p-4 pt-24">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold mb-6">المدونة</h1>
             <div className="flex justify-center items-center">
-              <div className="relative w-48 sm:w-64 md:w-80">
+              <div className="relative w-32 sm:w-48 md:w-64">
                 <div className="w-full h-0.5 bg-green-500"></div>
                 <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
               </div>
             </div>
-            {isAdminOrOwner && (
-              <div className="mt-6 text-center">
-                <Button 
-                  onClick={() => router.push('/blog/create')}
-                  className="bg-green-500 text-white px-8 py-3 rounded-md hover:bg-green-600 transition-colors"
+            {session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER' ? (
+              <div className="mt-6">
+                <Link
+                  href="/blog/create"
+                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                 >
                   إنشاء مقال جديد
-                </Button>
+                </Link>
               </div>
-            )}
+            ) : null}
           </div>
 
+          {error && (
+            <div className="bg-red-50 text-red-800 p-4 rounded-md mb-6">
+              {error}
+            </div>
+          )}
+
           {posts.length === 0 ? (
-            <div className="text-center py-8">
+            <div className="bg-white rounded-lg shadow-md p-6 text-center">
               <p className="text-gray-600 text-lg">لا توجد مقالات حتى الآن</p>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {posts.map((post) => (
-                <div key={post.id} className="bg-white rounded-lg shadow-md p-6">
-                  <h2 className="text-2xl font-bold mb-4">{post.title}</h2>
-                  <div className="prose max-w-none mb-4" dangerouslySetInnerHTML={{ __html: post.content }} />
-                  {post.itemLink && (
-                    <div className="mb-4">
-                      <a 
-                        href={post.itemLink} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="text-green-600 hover:text-green-700"
-                      >
-                        رابط المقال
-                      </a>
-                    </div>
+                <div key={post.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                  {post.imageUrl && (
+                    <img
+                      src={post.imageUrl}
+                      alt={post.title}
+                      className="w-full h-48 object-cover"
+                    />
                   )}
-                  <div className="flex justify-between items-center border-t pt-4">
-                    <div className="text-sm text-gray-500">
-                      كتب بواسطة: {post.author.fullName}
+                  <div className="p-6">
+                    <h2 className="text-xl font-bold mb-2">{post.title}</h2>
+                    <p className="text-gray-600 mb-4 line-clamp-3">{post.content}</p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">
+                        {new Date(post.createdAt).toLocaleDateString('ar-EG', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </span>
+                      <Link
+                        href={`/blog/${post.id}`}
+                        className="text-green-600 hover:text-green-700 font-medium"
+                      >
+                        اقرأ المزيد
+                      </Link>
                     </div>
-                    <div className="text-sm text-gray-500">
-                      {new Date(post.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' })}
-                    </div>
-                    {isAdminOrOwner && (
-                      <div className="space-x-2">
-                        <Button
-                          variant="outline"
-                          onClick={() => router.push(`/blog/${post.id}/edit`)}
-                        >
-                          تعديل
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          onClick={() => handleDelete(post.id)}
-                        >
-                          حذف
-                        </Button>
-                      </div>
-                    )}
                   </div>
                 </div>
               ))}
             </div>
           )}
         </div>
-      </div>
+      </main>
     </div>
   )
 } 

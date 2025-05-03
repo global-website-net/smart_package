@@ -23,35 +23,61 @@ interface User {
 }
 
 interface Shop {
-  name: string
+  id: string
+  fullName: string
+  email: string
 }
 
 interface Package {
   id: string
   trackingNumber: string
-  description: string
   status: string
-  userId: string
-  shopId: string
+  currentLocation?: string
   createdAt: string
   updatedAt: string
-  user: User
-  shop: Shop
+  user: {
+    fullName: string
+    email: string
+  }
+  shop: {
+    fullName: string
+  }
+  orderNumber: string
 }
 
-type PackageWithRelations = Package & {
-  user: User
-  shop: Shop
+interface Order {
+  id: string
+  orderNumber: string
+  status: string
+  createdAt: string
+  updatedAt: string
+}
+
+interface RegularUser {
+  id: string
+  fullName: string
+  email: string
 }
 
 export default function TrackingPackagesPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
-  const [packages, setPackages] = useState<PackageWithRelations[]>([])
+  const [packages, setPackages] = useState<Package[]>([])
+  const [orders, setOrders] = useState<Order[]>([])
+  const [shops, setShops] = useState<Shop[]>([])
+  const [regularUsers, setRegularUsers] = useState<RegularUser[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [editingPackage, setEditingPackage] = useState<Package | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
-  const [editingPackage, setEditingPackage] = useState<PackageWithRelations | null>(null)
-  const [packageToDelete, setPackageToDelete] = useState<PackageWithRelations | null>(null)
+  const [newPackage, setNewPackage] = useState({
+    trackingNumber: '',
+    status: 'PENDING',
+    currentLocation: '',
+    orderNumber: '',
+    shopId: '',
+    userId: ''
+  })
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -59,30 +85,68 @@ export default function TrackingPackagesPage() {
       return
     }
 
-    if (status === 'authenticated' && (session?.user?.role !== 'ADMIN' && session?.user?.role !== 'OWNER')) {
-      router.push('/')
-      return
-    }
-
     if (status === 'authenticated') {
       fetchPackages()
+      fetchOrders()
+      fetchShops()
+      fetchRegularUsers()
     }
-  }, [status, session])
+  }, [status])
+
+  const fetchShops = async () => {
+    try {
+      const response = await fetch('/api/users/shops')
+      if (!response.ok) {
+        throw new Error('Failed to fetch shops')
+      }
+      const data = await response.json()
+      setShops(data)
+    } catch (err) {
+      console.error('Error fetching shops:', err)
+      setError('حدث خطأ أثناء جلب المتاجر')
+    }
+  }
+
+  const fetchOrders = async () => {
+    try {
+      const response = await fetch('/api/orders/all')
+      if (!response.ok) {
+        throw new Error('Failed to fetch orders')
+      }
+      const data = await response.json()
+      setOrders(data)
+    } catch (err) {
+      console.error('Error fetching orders:', err)
+      setError('حدث خطأ أثناء جلب الطلبات')
+    }
+  }
+
+  const fetchRegularUsers = async () => {
+    try {
+      const response = await fetch('/api/users/regular')
+      if (!response.ok) {
+        throw new Error('Failed to fetch regular users')
+      }
+      const data = await response.json()
+      setRegularUsers(data)
+    } catch (err) {
+      console.error('Error fetching regular users:', err)
+      setError('حدث خطأ أثناء جلب المستخدمين')
+    }
+  }
 
   const fetchPackages = async () => {
     try {
       setLoading(true)
+      setError('')
 
-      // Get packages with user and shop information
       const { data: packages, error } = await supabase
-        .from('Package')
+        .from('package')
         .select(`
           id,
           trackingNumber,
-          description,
           status,
-          userId,
-          shopId,
+          currentLocation,
           createdAt,
           updatedAt,
           user:User (
@@ -90,35 +154,73 @@ export default function TrackingPackagesPage() {
             email
           ),
           shop:Shop (
-            name
-          )
+            fullName
+          ),
+          orderNumber
         `)
         .order('createdAt', { ascending: false })
 
       if (error) throw error
 
       if (packages) {
-        setPackages(packages as unknown as PackageWithRelations[])
+        setPackages(packages as unknown as Package[])
       }
     } catch (error) {
       console.error('Error fetching packages:', error)
-      toast.error('حدث خطأ أثناء جلب الطرود')
+      setError('حدث خطأ أثناء جلب الطرود')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleCreatePackage = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('package')
+        .insert([
+          {
+            trackingNumber: newPackage.trackingNumber,
+            status: newPackage.status,
+            currentLocation: newPackage.currentLocation,
+            orderNumber: newPackage.orderNumber,
+            shopId: newPackage.shopId,
+            userId: newPackage.userId
+          }
+        ])
+        .select()
+
+      if (error) throw error
+
+      if (data) {
+        toast.success('تم إنشاء الطرد بنجاح')
+        setPackages([data[0], ...packages])
+        setShowCreateForm(false)
+        setNewPackage({
+          trackingNumber: '',
+          status: 'PENDING',
+          currentLocation: '',
+          orderNumber: '',
+          shopId: '',
+          userId: ''
+        })
+      }
+    } catch (error) {
+      console.error('Error creating package:', error)
+      toast.error('حدث خطأ أثناء إنشاء الطرد')
     }
   }
 
   const handleDelete = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('Package')
+        .from('package')
         .delete()
         .eq('id', id)
 
       if (error) throw error
 
       toast.success('تم حذف الطرد بنجاح')
-      fetchPackages()
+      setPackages(packages.filter(pkg => pkg.id !== id))
     } catch (error) {
       console.error('Error deleting package:', error)
       toast.error('حدث خطأ أثناء حذف الطرد')
@@ -167,10 +269,10 @@ export default function TrackingPackagesPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>رقم التتبع</TableHead>
-                <TableHead>الوصف</TableHead>
                 <TableHead>الحالة</TableHead>
                 <TableHead>المستخدم</TableHead>
                 <TableHead>المتجر</TableHead>
+                <TableHead>رقم الطلب</TableHead>
                 <TableHead>تاريخ الإنشاء</TableHead>
                 <TableHead>الإجراءات</TableHead>
               </TableRow>
@@ -179,10 +281,10 @@ export default function TrackingPackagesPage() {
               {packages.map((pkg) => (
                 <TableRow key={pkg.id}>
                   <TableCell>{pkg.trackingNumber}</TableCell>
-                  <TableCell>{pkg.description}</TableCell>
                   <TableCell>{pkg.status}</TableCell>
                   <TableCell>{pkg.user.fullName}</TableCell>
-                  <TableCell>{pkg.shop.name}</TableCell>
+                  <TableCell>{pkg.shop.fullName}</TableCell>
+                  <TableCell>{pkg.orderNumber}</TableCell>
                   <TableCell>{new Date(pkg.createdAt).toLocaleDateString('ar-SA')}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
@@ -209,35 +311,114 @@ export default function TrackingPackagesPage() {
 
       {/* Create Package Modal */}
       {showCreateForm && (
-        <CreatePackageForm
-          onCancel={() => setShowCreateForm(false)}
-          onSuccess={(newPackage) => {
-            setPackages([newPackage, ...packages])
-            setShowCreateForm(false)
-          }}
-        />
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-2xl font-bold mb-4">إنشاء طرد جديد</h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-gray-700 mb-2">رقم الطلب</label>
+                <select
+                  value={newPackage.orderNumber}
+                  onChange={(e) => setNewPackage({ ...newPackage, orderNumber: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-md"
+                  required
+                >
+                  <option value="">اختر رقم الطلب</option>
+                  {orders.map((order) => (
+                    <option key={order.id} value={order.orderNumber}>
+                      {order.orderNumber}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-gray-700 mb-2">المتجر</label>
+                <select
+                  value={newPackage.shopId}
+                  onChange={(e) => setNewPackage({ ...newPackage, shopId: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-md"
+                  required
+                >
+                  <option value="">اختر المتجر</option>
+                  {shops.map((shop) => (
+                    <option key={shop.id} value={shop.id}>
+                      {shop.fullName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-gray-700 mb-2">المستخدم</label>
+                <select
+                  value={newPackage.userId}
+                  onChange={(e) => setNewPackage({ ...newPackage, userId: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-md"
+                  required
+                >
+                  <option value="">اختر المستخدم</option>
+                  {regularUsers.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.fullName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-gray-700 mb-2">رقم التتبع</label>
+                <input
+                  type="text"
+                  value={newPackage.trackingNumber}
+                  onChange={(e) => setNewPackage({ ...newPackage, trackingNumber: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-md"
+                  required
+                />
+              </div>
+
+              {/* ... rest of the form ... */}
+            </div>
+
+            <div className="flex justify-center space-x-8 rtl:space-x-reverse mt-6">
+              <button
+                onClick={() => setShowCreateForm(false)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-300 transition-colors"
+              >
+                إلغاء
+              </button>
+              <button
+                onClick={handleCreatePackage}
+                className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+              >
+                حفظ
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Delete Confirmation Modal */}
-      {packageToDelete && (
+      {editingPackage && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg max-w-sm w-full mx-4">
             <h3 className="text-lg font-semibold mb-4">تأكيد الحذف</h3>
             <p className="text-gray-600 mb-6">
-              هل أنت متأكد من حذف الطرد رقم {packageToDelete.trackingNumber}؟
+              هل أنت متأكد من حذف الطرد رقم {editingPackage.trackingNumber}؟
             </p>
             <div className="flex justify-end space-x-4 rtl:space-x-reverse">
               <Button
                 variant="outline"
-                onClick={() => setPackageToDelete(null)}
+                onClick={() => setEditingPackage(null)}
               >
                 إلغاء
               </Button>
               <Button
                 variant="destructive"
                 onClick={() => {
-                  handleDelete(packageToDelete.id)
-                  setPackageToDelete(null)
+                  handleDelete(editingPackage.id)
+                  setEditingPackage(null)
                 }}
               >
                 حذف
