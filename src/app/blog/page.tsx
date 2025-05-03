@@ -26,6 +26,7 @@ interface BlogPost {
     fullName: string
     email: string
   }
+  itemlink: string
 }
 
 export default function BlogPage() {
@@ -135,36 +136,50 @@ export default function BlogPage() {
               <p className="text-gray-600 text-lg">لا توجد مقالات حتى الآن</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {posts.map((post) => (
-                <Card key={post.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <CardTitle className="text-xl">{post.title}</CardTitle>
-                    <p className="text-sm text-gray-500">
-                      بواسطة {post.author?.fullName || 'مستخدم غير معروف'}
-                    </p>
-                  </CardHeader>
-                  <CardContent>
-                    {post.imageUrl && (
-                      <img
-                        src={post.imageUrl}
-                        alt={post.title}
-                        className="w-full h-48 object-cover rounded-md mb-4"
-                      />
-                    )}
-                    <p className="text-gray-600 mb-4 line-clamp-3">
-                      {post.content}
-                    </p>
-                    <Button
-                      variant="outline"
-                      onClick={() => router.push(`/blog/${post.id}`)}
-                      className="w-full"
-                    >
-                      اقرأ المزيد
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      العنوان
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      المحتوى
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      تاريخ الإنشاء
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      رابط المقال
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {posts.map((post) => (
+                    <tr key={post.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {post.title}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500 max-w-md truncate">
+                        {post.content}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(post.createdAt).toLocaleDateString('ar-SA')}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <a 
+                          href={post.itemlink} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-green-600 hover:text-green-800"
+                        >
+                          {post.itemlink}
+                        </a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>

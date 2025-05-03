@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     // Check if user exists
     const { data: user, error: userError } = await supabase
       .from('User')
-      .select('id, email, fullName')
+      .select('id, email, fullName, governorate, town, phonePrefix, phoneNumber, role')
       .eq('email', email)
       .single()
 

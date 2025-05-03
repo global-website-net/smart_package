@@ -190,12 +190,16 @@ export default function TrackingPage() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to update order status')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to update order status')
       }
 
+      const updatedOrder = await response.json()
+      
+      // Update the orders state with the new status
       setOrders(orders.map(order => 
         order.id === orderId 
-          ? { ...order, status: newStatus }
+          ? { ...order, status: updatedOrder.status, updatedAt: updatedOrder.updatedAt }
           : order
       ))
 
@@ -203,7 +207,7 @@ export default function TrackingPage() {
       setEditingOrder(null)
     } catch (error) {
       console.error('Error updating order status:', error)
-      toast.error('حدث خطأ أثناء تحديث حالة الطلب')
+      toast.error(error instanceof Error ? error.message : 'حدث خطأ أثناء تحديث حالة الطلب')
     }
   }
 
@@ -481,10 +485,11 @@ export default function TrackingPage() {
               </select>
             </div>
 
-            <div className="flex justify-end space-x-4 rtl:space-x-reverse">
+            <div className="flex justify-center space-x-4 rtl:space-x-reverse">
               <Button
                 variant="outline"
                 onClick={() => setEditingOrder(null)}
+                className="bg-gray-200 text-gray-700 hover:bg-gray-300"
               >
                 إلغاء
               </Button>
