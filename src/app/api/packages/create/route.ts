@@ -34,15 +34,18 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { trackingNumber, status, shopId, userId } = body
+    const { status, shopId, userId } = body
 
     // Validate required fields
-    if (!trackingNumber || !status || !shopId || !userId) {
+    if (!status || !shopId || !userId) {
       return NextResponse.json(
         { error: 'جميع الحقول مطلوبة' },
         { status: 400 }
       )
     }
+
+    // Generate a unique tracking number
+    const trackingNumber = `TRK${Date.now()}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`
 
     // Create the package
     const newPackage = await prisma.package.create({

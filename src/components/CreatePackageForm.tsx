@@ -34,7 +34,6 @@ interface PackageFormData {
   shopId: string
   currentLocation?: string
   status: string
-  trackingNumber: string
 }
 
 export default function CreatePackageForm({ onSuccess, onCancel, orders }: CreatePackageFormProps) {
@@ -43,8 +42,7 @@ export default function CreatePackageForm({ onSuccess, onCancel, orders }: Creat
     userId: '',
     shopId: '',
     currentLocation: '',
-    status: 'PENDING',
-    trackingNumber: ''
+    status: 'PENDING'
   })
   const [users, setUsers] = useState<{ id: string; email: string }[]>([])
   const [shops, setShops] = useState<{ id: string; email: string }[]>([])
@@ -123,17 +121,6 @@ export default function CreatePackageForm({ onSuccess, onCancel, orders }: Creat
 
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
-            <div>
-              <label className="block text-gray-700 mb-2">رقم التتبع</label>
-              <input
-                type="text"
-                value={formData.trackingNumber}
-                onChange={(e) => setFormData({ ...formData, trackingNumber: e.target.value })}
-                className="w-full px-3 py-2 border rounded-md"
-                required
-              />
-            </div>
-
             <div>
               <label className="block text-gray-700 mb-2">رقم الطلب</label>
               <select

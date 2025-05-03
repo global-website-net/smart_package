@@ -210,6 +210,10 @@ export async function PUT(request: NextRequest) {
   }
 }
 
+export async function PATCH(request: NextRequest) {
+  return PUT(request)
+}
+
 export async function DELETE(request: NextRequest) {
   try {
     const id = request.url.split('/').pop()
