@@ -31,12 +31,10 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-type RouteHandler = (
+export async function PATCH(
   request: NextRequest,
-  context: { params: { id: string } }
-) => Promise<NextResponse>
-
-export const PATCH: RouteHandler = async (request, context) => {
+  { params }: { params: { id: string } }
+): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER')) {
@@ -44,7 +42,7 @@ export const PATCH: RouteHandler = async (request, context) => {
     }
 
     const { status } = await request.json()
-    const id = context.params.id
+    const id = params.id
 
     const { error } = await supabase
       .from('package')
