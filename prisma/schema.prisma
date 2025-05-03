@@ -55,7 +55,7 @@ model User {
   emailVerified DateTime?
   image         String?
   fullName      String
-  role          String     @default("USER")
+  role          UserRole   @default(REGULAR)
   password      String?
   resetToken    String?    @unique
   resetTokenExpiry DateTime?

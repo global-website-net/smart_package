@@ -33,6 +33,14 @@ export async function POST(request: Request) {
       )
     }
 
+    // Check if user is ADMIN or OWNER
+    if (user.role !== 'ADMIN' && user.role !== 'OWNER') {
+      return NextResponse.json(
+        { error: 'غير مصرح لك بإنشاء طرد' },
+        { status: 403 }
+      )
+    }
+
     const body = await request.json()
     const { status, shopId, userId } = body
 

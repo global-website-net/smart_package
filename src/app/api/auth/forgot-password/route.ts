@@ -83,35 +83,27 @@ export async function POST(request: Request) {
       )
     }
 
-    // Send reset email
+    // Send reset email using Supabase's email service
     const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${resetToken}`
-    const emailBody = `
-      مرحباً ${user.fullName},
-      
-      لقد تلقيت هذا البريد الإلكتروني لأنك طلبت إعادة تعيين كلمة المرور لحسابك.
-      
-      انقر على الرابط التالي لإعادة تعيين كلمة المرور:
-      ${resetUrl}
-      
-      إذا لم تطلب إعادة تعيين كلمة المرور، يمكنك تجاهل هذا البريد الإلكتروني.
-      
-      هذا الرابط صالح لمدة ساعة واحدة فقط.
-      
-      مع أطيب التحيات،
-      فريق Smart Package
-    `
+    const { error: emailError } = await supabaseAdmin.auth.resetPasswordForEmail(normalizedEmail, {
+      redirectTo: resetUrl
+    })
 
-    // TODO: Implement email sending logic here
-    // For now, we'll just log the reset URL
-    console.log('Reset URL:', resetUrl)
+    if (emailError) {
+      console.error('Error sending reset email:', emailError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء إرسال بريد إعادة التعيين' },
+        { status: 500 }
+      )
+    }
 
-    return NextResponse.json({
-      message: 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني'
+    return NextResponse.json({ 
+      message: 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني' 
     })
   } catch (error) {
-    console.error('Error in forgot password:', error)
+    console.error('Error in forgot password route:', error)
     return NextResponse.json(
-      { error: 'حدث خطأ أثناء معالجة طلبك' },
+      { error: 'حدث خطأ في الخادم' },
       { status: 500 }
     )
   }
