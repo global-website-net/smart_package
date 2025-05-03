@@ -41,7 +41,7 @@ export default function CreatePackageForm({ onClose, onSuccess }: CreatePackageF
         // Fetch regular users
         const usersResponse = await fetch('/api/users/regular')
         if (!usersResponse.ok) {
-          throw new Error('Failed to fetch users')
+          throw new Error('Failed to fetch regular users')
         }
         const usersData = await usersResponse.json()
         console.log('Fetched regular users:', usersData)
@@ -169,11 +169,11 @@ export default function CreatePackageForm({ onClose, onSuccess }: CreatePackageF
             </select>
           </div>
 
-          <div className="flex justify-center space-x-4 rtl:space-x-reverse mt-6">
+          <div className="flex justify-center space-x-8 rtl:space-x-reverse mt-6">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors"
+              className="px-4 py-2 bg-gray-200 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-300 transition-colors"
             >
               إلغاء
             </button>

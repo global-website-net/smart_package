@@ -24,7 +24,7 @@ export async function GET() {
     // Fetch all users with role SHOP
     const { data: shops, error } = await supabase
       .from('User')
-      .select('id, fullName, email')
+      .select('id, fullName, email, role')
       .eq('role', 'SHOP')
       .order('fullName', { ascending: true })
 
@@ -36,13 +36,22 @@ export async function GET() {
       )
     }
 
+    console.log('Fetched shops:', shops)
+
+    if (!shops || shops.length === 0) {
+      console.log('No shops found in the database')
+      return NextResponse.json([])
+    }
+
     // Format the response to match the expected structure
     const formattedShops = shops.map(shop => ({
       id: shop.id,
       fullName: shop.fullName || shop.email?.split('@')[0] || 'متجر',
       email: shop.email,
-      role: 'SHOP'
+      role: shop.role
     }))
+
+    console.log('Formatted shops:', formattedShops)
 
     return NextResponse.json(formattedShops)
   } catch (error) {

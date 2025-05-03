@@ -9,8 +9,8 @@ interface PackageUser {
 }
 
 interface PackageShop {
-  name: string
-  address: string
+  fullName: string
+  email: string
 }
 
 interface RawSupabasePackage {
@@ -22,14 +22,8 @@ interface RawSupabasePackage {
   shopId: string
   createdAt: string
   updatedAt: string
-  user: {
-    fullName: string
-    email: string
-  } | null
-  shop: {
-    name: string
-    address: string
-  } | null
+  user: PackageUser | null
+  shop: PackageShop | null
 }
 
 interface PackageData {
@@ -67,13 +61,13 @@ export async function GET() {
         shopId,
         createdAt,
         updatedAt,
-        User:User (
+        user:User!Package_userId_fkey (
           fullName,
           email
         ),
-        Shop:Shop (
+        shop:User!Package_shopId_fkey (
           fullName,
-          address
+          email
         )
       `)
       .order('createdAt', { ascending: false })
@@ -87,24 +81,29 @@ export async function GET() {
     }
 
     // Transform the data to match the expected format
-    const formattedPackages = packages.map(pkg => ({
-      id: pkg.id,
-      trackingNumber: pkg.trackingNumber,
-      description: pkg.description,
-      status: pkg.status,
-      userId: pkg.userId,
-      shopId: pkg.shopId,
-      createdAt: pkg.createdAt,
-      updatedAt: pkg.updatedAt,
-      user: pkg.User?.[0] ? {
-        fullName: pkg.User[0].fullName || 'غير معروف',
-        email: pkg.User[0].email || ''
-      } : null,
-      shop: pkg.Shop?.[0] ? {
-        fullName: pkg.Shop[0].fullName || 'غير معروف',
-        address: pkg.Shop[0].address || ''
-      } : null
-    }))
+    const formattedPackages = packages.map(pkg => {
+      const user = Array.isArray(pkg.user) ? pkg.user[0] : pkg.user
+      const shop = Array.isArray(pkg.shop) ? pkg.shop[0] : pkg.shop
+
+      return {
+        id: pkg.id,
+        trackingNumber: pkg.trackingNumber,
+        description: pkg.description,
+        status: pkg.status,
+        userId: pkg.userId,
+        shopId: pkg.shopId,
+        createdAt: pkg.createdAt,
+        updatedAt: pkg.updatedAt,
+        user: user ? {
+          fullName: user.fullName || 'غير معروف',
+          email: user.email || ''
+        } : null,
+        shop: shop ? {
+          fullName: shop.fullName || 'غير معروف',
+          email: shop.email || ''
+        } : null
+      }
+    }) as PackageData[]
 
     return NextResponse.json(formattedPackages)
   } catch (error) {

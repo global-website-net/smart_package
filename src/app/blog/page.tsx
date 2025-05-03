@@ -56,7 +56,7 @@ export default function BlogPage() {
     if (status === 'authenticated') {
       fetchPosts()
     }
-  }, [status, session])
+  }, [status])
 
   const fetchPosts = async () => {
     try {

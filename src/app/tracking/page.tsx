@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Header from '../components/Header'
 import Link from 'next/link'
+import EditPackageStatus from '@/components/EditPackageStatus'
 
 interface Package {
   id: string
@@ -42,6 +43,7 @@ export default function TrackingPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [editingPackage, setEditingPackage] = useState<Package | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -123,16 +125,41 @@ export default function TrackingPage() {
     switch (status) {
       case 'PENDING':
         return 'قيد الانتظار'
+      case 'AWAITING_PAYMENT':
+        return 'في انتظار الدفع'
       case 'PROCESSING':
         return 'قيد المعالجة'
       case 'SHIPPED':
         return 'تم الشحن'
       case 'DELIVERED':
         return 'تم التسليم'
+      case 'ORDER_COMPLETED':
+        return 'تمت الطلبية'
       case 'CANCELLED':
         return 'ملغي'
       default:
         return status
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'PENDING':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'AWAITING_PAYMENT':
+        return 'bg-orange-100 text-orange-800'
+      case 'PROCESSING':
+        return 'bg-blue-100 text-blue-800'
+      case 'SHIPPED':
+        return 'bg-purple-100 text-purple-800'
+      case 'DELIVERED':
+        return 'bg-green-100 text-green-800'
+      case 'ORDER_COMPLETED':
+        return 'bg-teal-100 text-teal-800'
+      case 'CANCELLED':
+        return 'bg-red-100 text-red-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
     }
   }
 
@@ -258,7 +285,17 @@ export default function TrackingPage() {
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">الحالة</p>
-                          <p className="font-medium">{getStatusText(pkg.status)}</p>
+                          <div className="flex items-center gap-2">
+                            <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
+                              {getStatusText(pkg.status)}
+                            </span>
+                            <button
+                              onClick={() => setEditingPackage(pkg)}
+                              className="text-blue-600 hover:text-blue-800 text-sm"
+                            >
+                              تعديل
+                            </button>
+                          </div>
                         </div>
                         {pkg.currentLocation && (
                           <div>
@@ -345,6 +382,18 @@ export default function TrackingPage() {
           )}
         </div>
       </main>
+
+      {editingPackage && (
+        <EditPackageStatus
+          packageId={editingPackage.id}
+          currentStatus={editingPackage.status}
+          onClose={() => setEditingPackage(null)}
+          onSuccess={() => {
+            fetchPackages()
+            setEditingPackage(null)
+          }}
+        />
+      )}
     </div>
   )
 } 

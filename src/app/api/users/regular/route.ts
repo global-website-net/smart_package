@@ -38,6 +38,11 @@ export async function GET() {
 
     console.log('Fetched regular users:', users)
 
+    if (!users || users.length === 0) {
+      console.log('No regular users found in the database')
+      return NextResponse.json([])
+    }
+
     // Format the response to match the expected structure
     const formattedUsers = users.map(user => ({
       id: user.id,
@@ -46,7 +51,7 @@ export async function GET() {
       role: user.role
     }))
 
-    console.log('Formatted users:', formattedUsers)
+    console.log('Formatted regular users:', formattedUsers)
 
     return NextResponse.json(formattedUsers)
   } catch (error) {
