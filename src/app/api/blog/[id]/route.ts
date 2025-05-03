@@ -185,7 +185,7 @@ export async function PUT(request: NextRequest) {
       .update({
         title,
         content,
-        itemlink: itemLink,
+        itemlink: itemLink || null,
         updatedAt: new Date().toISOString()
       })
       .eq('id', id)

@@ -85,24 +85,29 @@ export default function CreatePackageForm({ onSuccess, onCancel, orders }: Creat
     setError('')
 
     try {
-      const response = await fetch('/api/packages', {
+      const response = await fetch('/api/packages/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          status: formData.status,
+          shopId: formData.shopId,
+          userId: formData.userId
+        }),
       })
 
       if (!response.ok) {
-        throw new Error('Failed to create package')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create package')
       }
 
       const newPackage = await response.json()
       toast.success('تم إنشاء الطرد بنجاح')
       onSuccess(newPackage)
-    } catch (err) {
-      console.error('Error creating package:', err)
-      setError('حدث خطأ أثناء إنشاء الطرد')
+    } catch (error) {
+      console.error('Error creating package:', error)
+      setError(error instanceof Error ? error.message : 'حدث خطأ أثناء إنشاء الطرد')
     } finally {
       setIsSubmitting(false)
     }

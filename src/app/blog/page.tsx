@@ -40,7 +40,7 @@ export default function BlogPage() {
   const [editFormData, setEditFormData] = useState({
     title: '',
     content: '',
-    itemlink: ''
+    itemLink: ''
   })
 
   useEffect(() => {
@@ -119,7 +119,11 @@ export default function BlogPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(editFormData),
+        body: JSON.stringify({
+          title: editFormData.title,
+          content: editFormData.content,
+          itemLink: editFormData.itemLink
+        }),
       })
 
       if (!response.ok) {
@@ -217,7 +221,7 @@ export default function BlogPage() {
                               setEditFormData({
                                 title: post.title,
                                 content: post.content,
-                                itemlink: post.itemlink
+                                itemLink: post.itemlink
                               })
                             }}
                             className="text-blue-500 hover:text-blue-700 transition-colors"
@@ -306,8 +310,8 @@ export default function BlogPage() {
                       <label className="block text-gray-700 mb-2">رابط المنتج</label>
                       <input
                         type="url"
-                        value={editFormData.itemlink}
-                        onChange={(e) => setEditFormData({ ...editFormData, itemlink: e.target.value })}
+                        value={editFormData.itemLink}
+                        onChange={(e) => setEditFormData({ ...editFormData, itemLink: e.target.value })}
                         className="w-full px-3 py-2 border rounded-md"
                         required
                       />
