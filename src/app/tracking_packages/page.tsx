@@ -210,7 +210,7 @@ export default function TrackingPackagesPage() {
       {/* Create Package Modal */}
       {showCreateForm && (
         <CreatePackageForm
-          onClose={() => setShowCreateForm(false)}
+          onCancel={() => setShowCreateForm(false)}
           onSuccess={(newPackage) => {
             setPackages([newPackage, ...packages])
             setShowCreateForm(false)
