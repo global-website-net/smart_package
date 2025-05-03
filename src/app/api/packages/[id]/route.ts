@@ -13,7 +13,7 @@ export async function DELETE(request: NextRequest) {
     const id = request.url.split('/').pop()
 
     const { error } = await supabase
-      .from('Package')
+      .from('package')
       .delete()
       .eq('id', id)
 
@@ -31,7 +31,7 @@ export async function DELETE(request: NextRequest) {
 
 export async function PATCH(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -40,11 +40,14 @@ export async function PATCH(
     }
 
     const { status } = await request.json()
-    const id = context.params.id
+    const id = params.id
 
     const { error } = await supabase
       .from('package')
-      .update({ status })
+      .update({ 
+        status,
+        updatedAt: new Date().toISOString()
+      })
       .eq('id', id)
 
     if (error) {
