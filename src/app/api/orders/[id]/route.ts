@@ -3,13 +3,20 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
+// Initialize Supabase admin client with service role key
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+)
+
 export async function PATCH(request: NextRequest) {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-
     const id = request.url.split('/').pop()
     if (!id) {
       return NextResponse.json(
@@ -26,8 +33,8 @@ export async function PATCH(request: NextRequest) {
       )
     }
 
-    // Update the order status
-    const { error } = await supabase
+    // Update the order status using admin client
+    const { error } = await supabaseAdmin
       .from('order')
       .update({ 
         status, 
@@ -43,8 +50,8 @@ export async function PATCH(request: NextRequest) {
       )
     }
 
-    // Fetch the updated order with all columns
-    const { data: updatedOrder, error: fetchError } = await supabase
+    // Fetch the updated order with all columns using admin client
+    const { data: updatedOrder, error: fetchError } = await supabaseAdmin
       .from('order')
       .select(`
         id,
@@ -56,7 +63,8 @@ export async function PATCH(request: NextRequest) {
         additionalInfo,
         status,
         createdAt,
-        updatedAt
+        updatedAt,
+        orderNumber
       `)
       .eq('id', id)
       .single()

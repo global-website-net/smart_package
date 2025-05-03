@@ -4,9 +4,15 @@ import crypto from 'crypto'
 
 export async function POST(request: Request) {
   try {
-    const { email } = await request.json()
+    console.log('Received forgot password request')
+    
+    const body = await request.json()
+    console.log('Request body:', body)
+    
+    const { email } = body
 
     if (!email) {
+      console.log('No email provided')
       return NextResponse.json(
         { error: 'البريد الإلكتروني مطلوب' },
         { status: 400 }
@@ -18,35 +24,34 @@ export async function POST(request: Request) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
 
+    console.log('Searching for user with email:', email)
+
     // Check if user exists
-    const { data: user, error: userError } = await supabase
+    const { data: users, error: userError } = await supabase
       .from('User')
-      .select('id, fullName, email')
-      .eq('email', email)
-      .single()
+      .select('*')
+      .eq('email', email.toLowerCase().trim())
+
+    console.log('Query result:', { users, userError })
 
     if (userError) {
       console.error('Error finding user:', userError)
-      if (userError.code === 'PGRST116') {
-        // This is the error code for "no rows returned"
-        return NextResponse.json(
-          { error: 'لم يتم العثور على حساب بهذا البريد الإلكتروني' },
-          { status: 404 }
-        )
-      }
       return NextResponse.json(
         { error: 'حدث خطأ أثناء البحث عن المستخدم' },
         { status: 500 }
       )
     }
 
-    if (!user) {
+    if (!users || users.length === 0) {
       console.log('No user found with email:', email)
       return NextResponse.json(
         { error: 'لم يتم العثور على حساب بهذا البريد الإلكتروني' },
         { status: 404 }
       )
     }
+
+    const user = users[0]
+    console.log('Found user:', { id: user.id, email: user.email })
 
     // Generate reset token
     const resetToken = crypto.randomBytes(32).toString('hex')

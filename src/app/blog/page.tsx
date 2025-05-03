@@ -112,6 +112,8 @@ export default function BlogPage() {
 
   const handleEditPost = async (postId: string) => {
     try {
+      console.log('Updating post with data:', editFormData)
+      
       const response = await fetch(`/api/blog-posts/${postId}`, {
         method: 'PATCH',
         headers: {
@@ -126,6 +128,7 @@ export default function BlogPage() {
       }
 
       const updatedPost = await response.json()
+      console.log('Updated post:', updatedPost)
       
       // Update the posts array with the new post data
       setPosts(posts.map(post => 
@@ -270,7 +273,7 @@ export default function BlogPage() {
           {editingPost && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white rounded-lg p-6 w-full max-w-md">
-                <h2 className="text-2xl font-bold mb-4">تعديل المقال</h2>
+                <h2 className="text-2xl font-bold mb-4 text-center">تعديل المقال</h2>
                 
                 <form onSubmit={(e) => {
                   e.preventDefault()
@@ -311,17 +314,18 @@ export default function BlogPage() {
                     </div>
                   </div>
 
-                  <div className="flex justify-center space-x-4 rtl:space-x-reverse mt-6">
+                  <div className="flex justify-center space-x-8 rtl:space-x-reverse mt-6">
                     <Button
                       type="button"
                       variant="outline"
                       onClick={() => setEditingPost(null)}
+                      className="px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-200"
                     >
                       إلغاء
                     </Button>
                     <Button
                       type="submit"
-                      className="bg-green-500 text-white hover:bg-green-600"
+                      className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
                     >
                       حفظ التغييرات
                     </Button>
@@ -335,20 +339,22 @@ export default function BlogPage() {
           {postToDelete && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white p-6 rounded-lg max-w-sm w-full mx-4">
-                <h3 className="text-lg font-semibold mb-4">تأكيد الحذف</h3>
-                <p className="text-gray-600 mb-6">
+                <h3 className="text-lg font-semibold mb-4 text-center">تأكيد الحذف</h3>
+                <p className="text-gray-600 mb-6 text-center">
                   هل أنت متأكد من حذف المقال "{postToDelete.title}"؟
                 </p>
-                <div className="flex justify-end space-x-4 rtl:space-x-reverse">
+                <div className="flex justify-center space-x-4 rtl:space-x-reverse">
                   <Button
                     variant="outline"
                     onClick={() => setPostToDelete(null)}
+                    className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
                   >
                     إلغاء
                   </Button>
                   <Button
                     variant="destructive"
                     onClick={() => handleDeletePost(postToDelete.id)}
+                    className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
                   >
                     حذف
                   </Button>
