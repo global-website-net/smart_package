@@ -1,6 +1,6 @@
+import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
-import { v4 as uuidv4 } from 'uuid'
+import crypto from 'crypto'
 
 export async function POST(request: Request) {
   try {
@@ -13,10 +13,15 @@ export async function POST(request: Request) {
       )
     }
 
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+
     // Check if user exists
     const { data: user, error: userError } = await supabase
       .from('User')
-      .select('id, email')
+      .select('id, email, fullName')
       .eq('email', email)
       .single()
 
@@ -28,9 +33,8 @@ export async function POST(request: Request) {
     }
 
     // Generate reset token
-    const resetToken = uuidv4()
-    const resetTokenExpiry = new Date()
-    resetTokenExpiry.setHours(resetTokenExpiry.getHours() + 1) // Token expires in 1 hour
+    const resetToken = crypto.randomBytes(32).toString('hex')
+    const resetTokenExpiry = new Date(Date.now() + 3600000) // 1 hour from now
 
     // Update user with reset token
     const { error: updateError } = await supabase
@@ -42,19 +46,34 @@ export async function POST(request: Request) {
       .eq('id', user.id)
 
     if (updateError) {
-      console.error('Error updating user with reset token:', updateError)
+      console.error('Error updating user:', updateError)
       return NextResponse.json(
         { error: 'حدث خطأ أثناء إنشاء رمز إعادة التعيين' },
         { status: 500 }
       )
     }
 
-    // Send reset password email
-    const resetLink = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${resetToken}`
-    
-    // TODO: Implement email sending functionality
-    // For now, we'll just log the reset link
-    console.log('Password reset link:', resetLink)
+    // Send reset email
+    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${resetToken}`
+    const emailBody = `
+      مرحباً ${user.fullName},
+      
+      لقد تلقيت هذا البريد الإلكتروني لأنك طلبت إعادة تعيين كلمة المرور لحسابك.
+      
+      انقر على الرابط التالي لإعادة تعيين كلمة المرور:
+      ${resetUrl}
+      
+      إذا لم تطلب إعادة تعيين كلمة المرور، يمكنك تجاهل هذا البريد الإلكتروني.
+      
+      هذا الرابط صالح لمدة ساعة واحدة فقط.
+      
+      مع أطيب التحيات،
+      فريق Smart Package
+    `
+
+    // TODO: Implement email sending logic here
+    // For now, we'll just log the reset URL
+    console.log('Reset URL:', resetUrl)
 
     return NextResponse.json({
       message: 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني'

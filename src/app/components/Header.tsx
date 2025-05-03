@@ -20,18 +20,18 @@ export default function Header() {
   }
 
   const getMenuItems = () => {
-    if (isRegularUser) {
+    if (session?.user?.role === 'REGULAR') {
       return [
-        { href: '/tracking', label: 'تتبع الطلبات' },
+        { href: '/packages', label: 'الطرود' },
         { href: '/wallet', label: 'المحفظة' },
         { href: '/account', label: 'الملف الشخصي' },
-        { href: '/blog', label: 'المدونة' },
+        { href: '/blog', label: 'بلوج' },
       ]
     } else if (session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') {
       return [
         { href: '/tracking', label: 'ادارة الطلبات' },
         { href: '/tracking_packages', label: 'ادارة الطرود' },
-        { href: '/blog', label: 'المدونة' },
+        { href: '/blog', label: 'بلوج' },
         { href: '/account', label: 'الملف الشخصي' },
       ]
     } else if (session?.user?.role === 'SHOP') {
@@ -121,105 +121,4 @@ export default function Header() {
                   >
                     <span>{session.user?.fullName || session.user?.email || 'المستخدم'}</span>
                     <svg
-                      className={`w-4 h-4 transform transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </button>
-
-                  {/* User Dropdown Menu */}
-                  {isUserMenuOpen && (
-                    <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-                      <div className="py-1" role="menu" aria-orientation="vertical">
-                        {getMenuItems().map((item, index) => (
-                          <Link
-                            key={index}
-                            href={item.href}
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            onClick={() => setIsUserMenuOpen(false)}
-                          >
-                            {item.label}
-                          </Link>
-                        ))}
-                        <button
-                          onClick={handleSignOut}
-                          className="block w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        >
-                          تسجيل الخروج
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : !isLoginPage && (
-                <Link
-                  href="/auth/login"
-                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
-                >
-                  تسجيل الدخول
-                </Link>
-              )}
-            </div>
-
-            {/* Mobile View */}
-            {isLoggedIn ? (
-              <div className="md:hidden">
-                <MobileHeaderIcons isRegularUser={isRegularUser} />
-              </div>
-            ) : !isLoginPage && (
-              <div className="md:hidden">
-                <Link
-                  href="/auth/login"
-                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
-                >
-                  تسجيل الدخول
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && !isLoginPage && (
-          <div className="md:hidden py-4">
-            <nav className="flex flex-col space-y-4 text-right px-4">
-              <Link
-                href="/packages"
-                className="hover:text-green-500 transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                أسعارنا
-              </Link>
-              {isLoggedIn && getMenuItems().map((item, index) => (
-                <Link
-                  key={index}
-                  href={item.href}
-                  className="hover:text-green-500 transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {item.label}
-                </Link>
-              ))}
-              {isLoggedIn && (
-                <button
-                  onClick={handleSignOut}
-                  className="text-right text-red-500 hover:text-red-600 transition-colors"
-                >
-                  تسجيل الخروج
-                </button>
-              )}
-            </nav>
-          </div>
-        )}
-      </div>
-    </header>
-  )
-} 
+                      className={`w-4 h-4 transform transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`

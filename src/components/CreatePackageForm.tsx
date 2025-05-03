@@ -29,23 +29,19 @@ interface CreatePackageFormProps {
 }
 
 interface PackageFormData {
-  trackingNumber: string
   orderNumber: string
   userId: string
   shopId: string
   currentLocation?: string
-  notes?: string
   status: string
 }
 
 export default function CreatePackageForm({ onSuccess, onCancel, orders }: CreatePackageFormProps) {
   const [formData, setFormData] = useState<PackageFormData>({
-    trackingNumber: '',
     orderNumber: '',
     userId: '',
     shopId: '',
     currentLocation: '',
-    notes: '',
     status: 'PENDING'
   })
   const [users, setUsers] = useState<{ id: string; fullName: string }[]>([])
@@ -126,17 +122,6 @@ export default function CreatePackageForm({ onSuccess, onCancel, orders }: Creat
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label className="block text-gray-700 mb-2">رقم التتبع</label>
-              <input
-                type="text"
-                value={formData.trackingNumber}
-                onChange={(e) => setFormData({ ...formData, trackingNumber: e.target.value })}
-                className="w-full px-3 py-2 border rounded-md"
-                required
-              />
-            </div>
-
-            <div>
               <label className="block text-gray-700 mb-2">رقم الطلب</label>
               <select
                 value={formData.orderNumber}
@@ -201,16 +186,6 @@ export default function CreatePackageForm({ onSuccess, onCancel, orders }: Creat
                 <option value="CANCELLED">ملغي</option>
                 <option value="RETURNED">تم الإرجاع</option>
               </select>
-            </div>
-
-            <div>
-              <label className="block text-gray-700 mb-2">ملاحظات</label>
-              <textarea
-                value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                className="w-full px-3 py-2 border rounded-md"
-                rows={3}
-              />
             </div>
           </div>
 
