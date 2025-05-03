@@ -21,6 +21,7 @@ interface User {
   id: string
   name: string
   email: string
+  role: string
 }
 
 interface Shop {
@@ -33,17 +34,20 @@ interface Package {
   id: string
   trackingNumber: string
   status: string
-  currentLocation?: string
+  currentLocation: string
+  orderNumber: string
+  userId: string
+  shopId: string
   createdAt: string
   updatedAt: string
   user: {
-    fullName: string
+    name: string
     email: string
   }
   shop: {
-    fullName: string
+    name: string
+    email: string
   }
-  orderNumber: string
 }
 
 interface Order {
@@ -66,11 +70,11 @@ export default function TrackingPackagesPage() {
   const [editingPackage, setEditingPackage] = useState<Package | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [newPackage, setNewPackage] = useState({
-    status: 'PENDING',
-    currentLocation: '',
     orderNumber: '',
+    userId: '',
     shopId: '',
-    userId: ''
+    status: 'PENDING',
+    currentLocation: ''
   })
   const [shopUsers, setShopUsers] = useState<User[]>([])
 
@@ -311,8 +315,8 @@ export default function TrackingPackagesPage() {
                 <TableRow key={pkg.id}>
                   <TableCell>{pkg.trackingNumber}</TableCell>
                   <TableCell>{pkg.status}</TableCell>
-                  <TableCell>{pkg.user.fullName}</TableCell>
-                  <TableCell>{pkg.shop.fullName}</TableCell>
+                  <TableCell>{pkg.user.name}</TableCell>
+                  <TableCell>{pkg.shop.name}</TableCell>
                   <TableCell>{pkg.orderNumber}</TableCell>
                   <TableCell>{new Date(pkg.createdAt).toLocaleDateString('ar-SA')}</TableCell>
                   <TableCell>
@@ -340,17 +344,19 @@ export default function TrackingPackagesPage() {
 
       {/* Create Package Modal */}
       {showCreateForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-2xl font-bold mb-4">إنشاء طرد جديد</h2>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-gray-700 mb-2">رقم الطلب</label>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4">إنشاء طرد جديد</h2>
+            <form onSubmit={handleCreatePackage}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  رقم الطلب
+                </label>
                 <select
+                  name="orderNumber"
                   value={newPackage.orderNumber}
                   onChange={(e) => setNewPackage({ ...newPackage, orderNumber: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md"
+                  className="w-full p-2 border rounded"
                   required
                 >
                   <option value="">اختر رقم الطلب</option>
@@ -361,30 +367,16 @@ export default function TrackingPackagesPage() {
                   ))}
                 </select>
               </div>
-
-              <div>
-                <label className="block text-gray-700 mb-2">المتجر</label>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  المستخدم
+                </label>
                 <select
-                  value={newPackage.shopId}
-                  onChange={(e) => setNewPackage({ ...newPackage, shopId: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md"
-                  required
-                >
-                  <option value="">اختر المتجر</option>
-                  {shopUsers.map((shop) => (
-                    <option key={shop.id} value={shop.id}>
-                      {shop.name} ({shop.email})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-gray-700 mb-2">المستخدم</label>
-                <select
+                  name="userId"
                   value={newPackage.userId}
                   onChange={(e) => setNewPackage({ ...newPackage, userId: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md"
+                  className="w-full p-2 border rounded"
                   required
                 >
                   <option value="">اختر المستخدم</option>
@@ -395,22 +387,42 @@ export default function TrackingPackagesPage() {
                   ))}
                 </select>
               </div>
-            </div>
-
-            <div className="flex justify-center space-x-8 rtl:space-x-reverse mt-6">
-              <button
-                onClick={() => setShowCreateForm(false)}
-                className="px-4 py-2 bg-gray-200 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-300 transition-colors"
-              >
-                إلغاء
-              </button>
-              <button
-                onClick={handleCreatePackage}
-                className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
-              >
-                حفظ
-              </button>
-            </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  المتجر
+                </label>
+                <select
+                  name="shopId"
+                  value={newPackage.shopId}
+                  onChange={(e) => setNewPackage({ ...newPackage, shopId: e.target.value })}
+                  className="w-full p-2 border rounded"
+                  required
+                >
+                  <option value="">اختر المتجر</option>
+                  {shopUsers.map((shop) => (
+                    <option key={shop.id} value={shop.id}>
+                      {shop.name} ({shop.email})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="flex justify-center space-x-8 rtl:space-x-reverse mt-6">
+                <button
+                  onClick={() => setShowCreateForm(false)}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-300 transition-colors"
+                >
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+                >
+                  حفظ
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

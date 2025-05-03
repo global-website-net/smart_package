@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     const supabase = createClient(
@@ -11,7 +11,7 @@ export async function PATCH(
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
 
-    const { id } = params
+    const id = context.params.id
     const { status } = await request.json()
 
     // Update the order status
