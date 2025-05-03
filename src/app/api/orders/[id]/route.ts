@@ -28,7 +28,7 @@ export async function PATCH(request: NextRequest) {
 
     // Update the order status
     const { error } = await supabase
-      .from('Order')
+      .from('order')
       .update({ 
         status, 
         updatedAt: new Date().toISOString() 
@@ -45,7 +45,7 @@ export async function PATCH(request: NextRequest) {
 
     // Fetch the updated order with all columns
     const { data: updatedOrder, error: fetchError } = await supabase
-      .from('Order')
+      .from('order')
       .select(`
         id,
         userId,

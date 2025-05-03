@@ -36,6 +36,7 @@ export default function BlogPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null)
+  const [postToDelete, setPostToDelete] = useState<BlogPost | null>(null)
   const [editFormData, setEditFormData] = useState({
     title: '',
     content: '',
@@ -101,6 +102,7 @@ export default function BlogPage() {
 
       // Remove the deleted post from the state
       setPosts(posts.filter(post => post.id !== postId))
+      setPostToDelete(null)
       toast.success('تم حذف المقال بنجاح')
     } catch (error) {
       console.error('Error deleting post:', error)
@@ -124,7 +126,18 @@ export default function BlogPage() {
       }
 
       const updatedPost = await response.json()
-      setPosts(posts.map(post => post.id === postId ? updatedPost : post))
+      
+      // Update the posts array with the new post data
+      setPosts(posts.map(post => 
+        post.id === postId ? {
+          ...post,
+          title: updatedPost.title,
+          content: updatedPost.content,
+          itemlink: updatedPost.itemlink,
+          updatedAt: updatedPost.updatedAt
+        } : post
+      ))
+      
       setEditingPost(null)
       toast.success('تم تحديث المقال بنجاح')
     } catch (error) {
@@ -211,7 +224,7 @@ export default function BlogPage() {
                             </svg>
                           </button>
                           <button
-                            onClick={() => handleDeletePost(post.id)}
+                            onClick={() => setPostToDelete(post)}
                             className="text-red-500 hover:text-red-700 transition-colors"
                           >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -299,21 +312,47 @@ export default function BlogPage() {
                   </div>
 
                   <div className="flex justify-center space-x-4 rtl:space-x-reverse mt-6">
-                    <button
+                    <Button
                       type="button"
+                      variant="outline"
                       onClick={() => setEditingPost(null)}
-                      className="px-4 py-2 bg-gray-200 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-300 transition-colors"
                     >
                       إلغاء
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="submit"
-                      className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+                      className="bg-green-500 text-white hover:bg-green-600"
                     >
                       حفظ التغييرات
-                    </button>
+                    </Button>
                   </div>
                 </form>
+              </div>
+            </div>
+          )}
+
+          {/* Delete Confirmation Wizard */}
+          {postToDelete && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white p-6 rounded-lg max-w-sm w-full mx-4">
+                <h3 className="text-lg font-semibold mb-4">تأكيد الحذف</h3>
+                <p className="text-gray-600 mb-6">
+                  هل أنت متأكد من حذف المقال "{postToDelete.title}"؟
+                </p>
+                <div className="flex justify-end space-x-4 rtl:space-x-reverse">
+                  <Button
+                    variant="outline"
+                    onClick={() => setPostToDelete(null)}
+                  >
+                    إلغاء
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => handleDeletePost(postToDelete.id)}
+                  >
+                    حذف
+                  </Button>
+                </div>
               </div>
             </div>
           )}

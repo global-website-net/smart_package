@@ -21,15 +21,22 @@ export async function POST(request: Request) {
     // Check if user exists
     const { data: user, error: userError } = await supabase
       .from('User')
-      .select('id, fullName, email, password, governorate, town, phonePrefix, phoneNumber, role, createdAt, updatedAt, resetToken, resetTokenExpiry')
+      .select('id, fullName, email')
       .eq('email', email)
       .single()
 
     if (userError) {
       console.error('Error finding user:', userError)
+      if (userError.code === 'PGRST116') {
+        // This is the error code for "no rows returned"
+        return NextResponse.json(
+          { error: 'لم يتم العثور على حساب بهذا البريد الإلكتروني' },
+          { status: 404 }
+        )
+      }
       return NextResponse.json(
-        { error: 'لم يتم العثور على حساب بهذا البريد الإلكتروني' },
-        { status: 404 }
+        { error: 'حدث خطأ أثناء البحث عن المستخدم' },
+        { status: 500 }
       )
     }
 

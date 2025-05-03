@@ -188,11 +188,11 @@ export default function TrackingPackagesPage() {
           currentLocation,
           createdAt,
           updatedAt,
-          user:user (
+          user:User!userId (
             fullName,
             email
           ),
-          shop:user (
+          shop:User!shopId (
             fullName
           ),
           orderNumber
