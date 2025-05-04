@@ -87,7 +87,7 @@ export default function Header() {
                     {item.label}
                   </Link>
                 ))}
-                {isLoggedIn ? (
+                {isLoggedIn && (
                   <button
                     onClick={() => {
                       handleSignOut()
@@ -97,14 +97,6 @@ export default function Header() {
                   >
                     تسجيل الخروج
                   </button>
-                ) : (
-                  <Link
-                    href="/auth/login"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="block w-full text-right px-4 py-2 text-sm text-white hover:bg-gray-800"
-                  >
-                    تسجيل الدخول
-                  </Link>
                 )}
               </div>
             )}

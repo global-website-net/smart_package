@@ -32,6 +32,13 @@ export async function POST(request: Request) {
       )
     }
 
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'خطأ في التكوين: لم يتم العثور على مفتاح الخدمة' },
+        { status: 500 }
+      )
+    }
+
     const currentTime = new Date().toISOString()
 
     const { data, error } = await supabaseAdmin
