@@ -48,24 +48,10 @@ interface Package {
   }[]
 }
 
-interface Order {
-  id: string
-  orderNumber: string
-  status: string
-  createdAt: string
-  updatedAt: string
-  userId: string
-  user: {
-    fullName: string
-    email: string
-  }
-}
-
 export default function TrackingPackagesPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
   const [packages, setPackages] = useState<Package[]>([])
-  const [orders, setOrders] = useState<Order[]>([])
   const [shops, setShops] = useState<Shop[]>([])
   const [regularUsers, setRegularUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
@@ -73,11 +59,11 @@ export default function TrackingPackagesPage() {
   const [editingPackage, setEditingPackage] = useState<Package | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [newPackage, setNewPackage] = useState({
-    orderNumber: '',
+    trackingNumber: '',
     userId: '',
     shopId: '',
     status: 'PENDING',
-    currentLocation: ''
+    description: ''
   })
   const [shopUsers, setShopUsers] = useState<User[]>([])
   const [isAdminOrOwner, setIsAdminOrOwner] = useState(false)
@@ -90,7 +76,6 @@ export default function TrackingPackagesPage() {
 
     if (status === 'authenticated') {
       fetchPackages()
-      fetchOrders()
       fetchShops()
       fetchRegularUsers()
       fetchShopUsers()
@@ -121,28 +106,6 @@ export default function TrackingPackagesPage() {
     } catch (err) {
       console.error('Error fetching shops:', err)
       setError('حدث خطأ أثناء جلب المتاجر')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const fetchOrders = async () => {
-    try {
-      setLoading(true)
-      setError('')
-
-      const response = await fetch('/api/orders/all')
-      if (!response.ok) {
-        throw new Error('Failed to fetch orders')
-      }
-
-      const data = await response.json()
-      // Filter out any orders that don't have an orderNumber
-      const validOrders = data.filter((order: Order) => order.orderNumber)
-      setOrders(validOrders)
-    } catch (err) {
-      console.error('Error fetching orders:', err)
-      setError('حدث خطأ أثناء جلب الطلبات')
     } finally {
       setLoading(false)
     }
@@ -225,7 +188,7 @@ export default function TrackingPackagesPage() {
           {
             trackingNumber,
             status: newPackage.status,
-            description: newPackage.currentLocation,
+            description: newPackage.description,
             shopId: newPackage.shopId,
             userId: newPackage.userId
           }
@@ -240,8 +203,8 @@ export default function TrackingPackagesPage() {
         setShowCreateForm(false)
         setNewPackage({
           status: 'PENDING',
-          currentLocation: '',
-          orderNumber: '',
+          description: '',
+          trackingNumber: '',
           shopId: '',
           userId: ''
         })
@@ -363,7 +326,6 @@ export default function TrackingPackagesPage() {
             setShowCreateForm(false)
           }}
           onCancel={() => setShowCreateForm(false)}
-          orders={orders}
         />
       )}
 
