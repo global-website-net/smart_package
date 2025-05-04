@@ -34,8 +34,7 @@ interface Package {
   id: string
   trackingNumber: string
   status: string
-  currentLocation: string
-  orderNumber: string
+  description?: string
   userId: string
   shopId: string
   createdAt: string
@@ -43,10 +42,10 @@ interface Package {
   user: {
     fullName: string
     email: string
-  }
+  }[]
   shop: {
     fullName: string
-  }
+  }[]
 }
 
 interface Order {
@@ -176,7 +175,7 @@ export default function TrackingPackagesPage() {
   const fetchPackages = async () => {
     try {
       setLoading(true)
-      setError('')
+      setError(null)
 
       const { data: packages, error } = await supabase
         .from('package')
@@ -184,7 +183,9 @@ export default function TrackingPackagesPage() {
           id,
           trackingNumber,
           status,
-          currentLocation,
+          description,
+          userId,
+          shopId,
           createdAt,
           updatedAt,
           user:User!userId (
@@ -193,16 +194,13 @@ export default function TrackingPackagesPage() {
           ),
           shop:User!shopId (
             fullName
-          ),
-          orderNumber
+          )
         `)
         .order('createdAt', { ascending: false })
 
       if (error) throw error
 
-      if (packages) {
-        setPackages(packages as unknown as Package[])
-      }
+      setPackages(packages as Package[])
     } catch (error) {
       console.error('Error fetching packages:', error)
       setError('حدث خطأ أثناء جلب الطرود')
@@ -227,8 +225,7 @@ export default function TrackingPackagesPage() {
           {
             trackingNumber,
             status: newPackage.status,
-            currentLocation: newPackage.currentLocation,
-            orderNumber: newPackage.orderNumber,
+            description: newPackage.currentLocation,
             shopId: newPackage.shopId,
             userId: newPackage.userId
           }
@@ -294,7 +291,7 @@ export default function TrackingPackagesPage() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-6">
-              {isAdminOrOwner ? 'ادارة الطرود' : 'تتبع الطرود'}
+              {session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER' ? 'ادارة الطرود' : 'تتبع الطرود'}
             </h1>
             <div className="flex justify-center items-center">
               <div className="relative w-32 sm:w-48 md:w-64">
@@ -302,7 +299,7 @@ export default function TrackingPackagesPage() {
                 <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
               </div>
             </div>
-            {isAdminOrOwner && (
+            {(session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') && (
               <div className="mt-6">
                 <Button
                   onClick={() => setShowCreateForm(true)}
@@ -319,10 +316,10 @@ export default function TrackingPackagesPage() {
               <TableRow>
                 <TableHead>رقم التتبع</TableHead>
                 <TableHead>الحالة</TableHead>
-                <TableHead>المستخدم</TableHead>
-                <TableHead>المتجر</TableHead>
-                <TableHead>رقم الطلب</TableHead>
+                <TableHead>الوصف</TableHead>
                 <TableHead>تاريخ الإنشاء</TableHead>
+                <TableHead>المتجر</TableHead>
+                <TableHead>المستخدم</TableHead>
                 <TableHead>الإجراءات</TableHead>
               </TableRow>
             </TableHeader>
@@ -331,21 +328,10 @@ export default function TrackingPackagesPage() {
                 <TableRow key={pkg.id}>
                   <TableCell>{pkg.trackingNumber}</TableCell>
                   <TableCell>{pkg.status}</TableCell>
-                  <TableCell className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {pkg.user.fullName}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {pkg.user.email}
-                    </div>
-                  </TableCell>
-                  <TableCell className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {pkg.shop.fullName}
-                    </div>
-                  </TableCell>
-                  <TableCell>{pkg.orderNumber}</TableCell>
-                  <TableCell>{new Date(pkg.createdAt).toLocaleDateString('ar-SA')}</TableCell>
+                  <TableCell>{pkg.description || 'لا يوجد وصف'}</TableCell>
+                  <TableCell>{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
+                  <TableCell>{pkg.shop?.[0]?.fullName || 'غير محدد'}</TableCell>
+                  <TableCell>{pkg.user?.[0]?.fullName || 'غير محدد'}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button

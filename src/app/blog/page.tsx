@@ -207,16 +207,16 @@ export default function BlogPage() {
               <Card key={post.id} className="bg-white rounded-lg shadow-md">
                 <CardHeader>
                   <div className="mb-2">
-                    <span className="text-sm font-medium text-gray-500">العنوان:</span>
+                    <span className="text-sm font-bold text-gray-500">العنوان:</span>
                   </div>
-                  <CardTitle className="text-2xl font-bold text-gray-900">
+                  <CardTitle className="text-2xl font-normal text-gray-900">
                     {post.title}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="prose max-w-none">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">المحتوى:</h3>
-                    <p className="text-gray-700 whitespace-pre-wrap">{post.content}</p>
+                    <h3 className="text-lg font-bold text-gray-800 mb-3">المحتوى:</h3>
+                    <p className="text-gray-700 whitespace-pre-wrap font-normal">{post.content}</p>
                   </div>
                   {post.itemlink && (
                     <div className="mt-4">
@@ -231,8 +231,8 @@ export default function BlogPage() {
                     </div>
                   )}
                   <div className="mt-4">
-                    <div className="text-sm font-medium text-gray-500 mb-1">تاريخ الإنشاء:</div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm font-bold text-gray-500 mb-1">تاريخ الإنشاء:</div>
+                    <div className="text-sm font-normal text-gray-500">
                       {new Date(post.createdAt).toLocaleDateString('ar-SA', {
                         year: 'numeric',
                         month: '2-digit',
@@ -245,6 +245,12 @@ export default function BlogPage() {
                     <div className="mt-4 flex justify-center">
                       <div className="flex gap-4 rtl:space-x-reverse">
                         <button
+                          onClick={() => setPostToDelete(post)}
+                          className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors"
+                        >
+                          حذف
+                        </button>
+                        <button
                           onClick={() => {
                             setEditingPost(post)
                             setEditFormData({
@@ -256,12 +262,6 @@ export default function BlogPage() {
                           className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors"
                         >
                           تعديل
-                        </button>
-                        <button
-                          onClick={() => setPostToDelete(post)}
-                          className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors"
-                        >
-                          حذف
                         </button>
                       </div>
                     </div>

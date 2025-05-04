@@ -1,49 +1,49 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../auth/auth.config'
 import { supabase } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER')) {
-      return NextResponse.json({ error: 'غير مصرح لك بالوصول' }, { status: 403 })
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'غير مصرح لك بالوصول' },
+        { status: 401 }
+      )
     }
 
-    const { trackingNumber, orderNumber, userId, shopId, currentLocation, notes } = await request.json()
+    const data = await request.json()
+    const { trackingNumber, status, shopId, description, userId } = data
 
-    // Validate required fields
-    if (!trackingNumber || !orderNumber || !userId || !shopId) {
-      return NextResponse.json({ error: 'جميع الحقول المطلوبة يجب أن تكون مكتملة' }, { status: 400 })
-    }
-
-    const { data, error } = await supabase
+    const { data: packageData, error } = await supabase
       .from('package')
       .insert([
         {
           trackingNumber,
-          orderNumber,
+          status,
+          description,
           userId,
           shopId,
-          currentLocation,
-          notes,
-          status: 'PENDING_APPROVAL',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         }
       ])
       .select()
+      .single()
 
     if (error) {
-      console.error('Error creating package:', error)
-      return NextResponse.json({ error: 'حدث خطأ أثناء إنشاء الطرد' }, { status: 500 })
+      throw error
     }
 
-    return NextResponse.json(data[0])
+    return NextResponse.json(packageData)
   } catch (error) {
-    console.error('Error in POST /api/packages:', error)
-    return NextResponse.json({ error: 'حدث خطأ في الخادم' }, { status: 500 })
+    console.error('Error in package creation:', error)
+    return NextResponse.json(
+      { error: 'حدث خطأ أثناء إنشاء الشحنة' },
+      { status: 500 }
+    )
   }
 } 

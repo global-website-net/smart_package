@@ -63,7 +63,6 @@ export async function GET() {
         shopId,
         createdAt,
         updatedAt,
-        orderNumber,
         user:User!Package_userId_fkey (
           fullName,
           email

@@ -18,18 +18,26 @@ interface CreatePackageFormProps {
   onPackageCreated: () => void
 }
 
+interface FormData {
+  trackingNumber: string;
+  status: string;
+  shopId: string;
+  description: string;
+  userId: string;
+}
+
 export default function CreatePackageForm({ onPackageCreated }: CreatePackageFormProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [shops, setShops] = useState<Shop[]>([])
   const [users, setUsers] = useState<User[]>([])
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     trackingNumber: '',
     status: 'PENDING',
     shopId: '',
-    currentLocation: '',
-    userId: ''
+    description: '',
+    userId: '',
   })
 
   useEffect(() => {
@@ -90,8 +98,8 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
         trackingNumber: '',
         status: 'PENDING',
         shopId: '',
-        currentLocation: '',
-        userId: ''
+        description: '',
+        userId: '',
       })
       setIsOpen(false)
       onPackageCreated()
@@ -176,16 +184,15 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
               </div>
 
               <div>
-                <label htmlFor="currentLocation" className="block text-sm font-medium text-gray-700 mb-1">
-                  الموقع الحالي
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                  الوصف
                 </label>
                 <input
                   type="text"
-                  id="currentLocation"
-                  value={formData.currentLocation}
-                  onChange={(e) => setFormData({ ...formData, currentLocation: e.target.value })}
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  required
                 />
               </div>
 

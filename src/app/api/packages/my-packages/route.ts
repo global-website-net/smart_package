@@ -1,21 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/auth.config'
-import prisma from '@/lib/prisma'
-
-interface PackageData {
-  id: string;
-  trackingNumber: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-  user: {
-    id: string;
-    fullname: string;
-    email: string;
-  };
-  currentLocation?: string | null;
-}
+import { supabase } from '@/lib/supabase'
 
 export async function GET() {
   try {
@@ -27,31 +13,33 @@ export async function GET() {
       )
     }
 
-    // Fetch the packages with user data
-    const packages = await prisma.package.findMany({
-      where: {
-        userId: session.user.id
-      },
-      orderBy: {
-        createdAt: 'desc'
-      },
-      include: {
-        user: true
-      }
-    })
+    const { data: packages, error } = await supabase
+      .from('package')
+      .select(`
+        id,
+        trackingNumber,
+        status,
+        description,
+        createdAt,
+        updatedAt,
+        user:User!userId (
+          id,
+          fullName,
+          email
+        ),
+        shop:User!shopId (
+          id,
+          fullName
+        )
+      `)
+      .eq('userId', session.user.id)
+      .order('createdAt', { ascending: false })
 
-    // Transform the data to match the expected format
-    const transformedPackages = packages.map(pkg => ({
-      id: pkg.id,
-      trackingNumber: pkg.trackingNumber,
-      status: pkg.status,
-      createdAt: pkg.createdAt.toISOString(),
-      updatedAt: pkg.updatedAt.toISOString(),
-      user: pkg.user,
-      currentLocation: null
-    }))
+    if (error) {
+      throw error
+    }
 
-    return NextResponse.json(transformedPackages)
+    return NextResponse.json(packages)
   } catch (error) {
     console.error('Error in my-packages route:', error)
     return NextResponse.json(
