@@ -161,7 +161,7 @@ export default function AccountsPage() {
                           {user.town || 'غير متوفر'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {new Date(user.createdAt).toLocaleDateString('ar-SA', {
+                          {new Date(user.createdAt).toLocaleDateString('en-US', {
                             year: 'numeric',
                             month: '2-digit',
                             day: '2-digit'

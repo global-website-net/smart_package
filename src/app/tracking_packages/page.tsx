@@ -39,6 +39,7 @@ interface Package {
   shopId: string
   createdAt: string
   updatedAt: string
+  orderNumber?: string
   user: {
     fullName: string
     email: string
@@ -203,19 +204,12 @@ export default function TrackingPackagesPage() {
       const { data: packages, error } = await supabase
         .from('package')
         .select(`
-          id,
-          trackingNumber,
-          status,
-          description,
-          userId,
-          shopId,
-          createdAt,
-          updatedAt,
-          user:User!userId (
+          *,
+          user:userId (
             fullName,
             email
           ),
-          shop:User!shopId (
+          shop:shopId (
             fullName
           )
         `)
@@ -223,7 +217,14 @@ export default function TrackingPackagesPage() {
 
       if (error) throw error
 
-      setPackages(packages as Package[])
+      // Transform the data to match the Package interface
+      const transformedPackages = packages.map(pkg => ({
+        ...pkg,
+        user: [pkg.user], // Wrap in array to match interface
+        shop: [pkg.shop]  // Wrap in array to match interface
+      }))
+
+      setPackages(transformedPackages)
     } catch (error) {
       console.error('Error fetching packages:', error)
       setError('حدث خطأ أثناء جلب الطرود')
@@ -246,6 +247,40 @@ export default function TrackingPackagesPage() {
     } catch (error) {
       console.error('Error deleting package:', error)
       toast.error('حدث خطأ أثناء حذف الطرد')
+    }
+  }
+
+  const getPackageStatusText = (status: string) => {
+    switch (status) {
+      case 'PENDING':
+        return 'قيد الانتظار'
+      case 'IN_TRANSIT':
+        return 'قيد الشحن'
+      case 'DELIVERED':
+        return 'تم التسليم'
+      case 'CANCELLED':
+        return 'ملغي'
+      case 'RETURNED':
+        return 'تم الإرجاع'
+      default:
+        return status
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'PENDING':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'IN_TRANSIT':
+        return 'bg-blue-100 text-blue-800'
+      case 'DELIVERED':
+        return 'bg-green-100 text-green-800'
+      case 'CANCELLED':
+        return 'bg-red-100 text-red-800'
+      case 'RETURNED':
+        return 'bg-orange-100 text-orange-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
     }
   }
 
@@ -307,25 +342,29 @@ export default function TrackingPackagesPage() {
               {packages.map((pkg) => (
                 <TableRow key={pkg.id}>
                   <TableCell>{pkg.trackingNumber}</TableCell>
-                  <TableCell>{pkg.status}</TableCell>
+                  <TableCell>
+                    <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
+                      {getPackageStatusText(pkg.status)}
+                    </span>
+                  </TableCell>
                   <TableCell>{pkg.description || 'لا يوجد وصف'}</TableCell>
                   <TableCell>{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
                   <TableCell>{pkg.shop?.[0]?.fullName || 'غير محدد'}</TableCell>
                   <TableCell>{pkg.user?.[0]?.fullName || 'غير محدد'}</TableCell>
                   <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => router.push(`/packages/edit/${pkg.id}`)}
-                      >
-                        تعديل
-                      </Button>
-                      <Button
-                        variant="destructive"
+                    <div className="flex gap-4 rtl:space-x-reverse">
+                      <button
                         onClick={() => handleDelete(pkg.id)}
+                        className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors"
                       >
                         حذف
-                      </Button>
+                      </button>
+                      <button
+                        onClick={() => router.push(`/packages/edit/${pkg.id}`)}
+                        className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors"
+                      >
+                        تعديل
+                      </button>
                     </div>
                   </TableCell>
                 </TableRow>

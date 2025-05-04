@@ -373,7 +373,7 @@ export default function TrackingPage() {
                           </div>
                           {order.status === 'AWAITING_PAYMENT' && (
                             <p className="text-sm font-medium text-gray-900 mt-2">
-                              مبلغ الدفع: {order.totalAmount?.toFixed(2) || 0} شيكل
+                              مبلغ الدفع: {order.totalAmount ? order.totalAmount.toFixed(2) : '0'} شيكل
                             </p>
                           )}
                         </div>

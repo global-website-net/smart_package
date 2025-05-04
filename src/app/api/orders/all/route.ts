@@ -48,6 +48,7 @@ export async function GET() {
         createdAt,
         updatedAt,
         orderNumber,
+        totalAmount,
         user:userId (
           fullName,
           email
