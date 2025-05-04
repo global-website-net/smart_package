@@ -230,13 +230,16 @@ export default function BlogPage() {
                       </a>
                     </div>
                   )}
-                  <div className="mt-4 text-sm text-gray-500">
-                    {new Date(post.createdAt).toLocaleDateString('ar-SA', {
-                      year: 'numeric',
-                      month: '2-digit',
-                      day: '2-digit',
-                      calendar: 'gregory'
-                    })}
+                  <div className="mt-4">
+                    <div className="text-sm font-medium text-gray-500 mb-1">تاريخ الإنشاء:</div>
+                    <div className="text-sm text-gray-500">
+                      {new Date(post.createdAt).toLocaleDateString('ar-SA', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        calendar: 'gregory'
+                      })}
+                    </div>
                   </div>
                   {isAdminOrOwner && (
                     <div className="mt-4 flex justify-center">
@@ -250,7 +253,7 @@ export default function BlogPage() {
                               itemLink: post.itemlink
                             })
                           }}
-                          className="bg-gray-300 text-gray-800 px-6 py-2 rounded-md hover:bg-gray-400 transition-colors"
+                          className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors"
                         >
                           تعديل
                         </button>
@@ -272,7 +275,7 @@ export default function BlogPage() {
           {editingPost && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
               <div className="bg-white rounded-lg p-6 max-w-2xl w-full">
-                <h2 className="text-xl font-bold mb-4">تعديل المقال</h2>
+                <h2 className="text-2xl font-bold mb-6 text-center">تعديل المقال</h2>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">العنوان</label>
@@ -280,7 +283,7 @@ export default function BlogPage() {
                       type="text"
                       value={editFormData.title}
                       onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      className="mt-1 block w-full rounded-md border-2 border-black shadow-sm focus:border-black focus:ring-black"
                     />
                   </div>
                   <div>
@@ -289,7 +292,7 @@ export default function BlogPage() {
                       value={editFormData.content}
                       onChange={(e) => setEditFormData({ ...editFormData, content: e.target.value })}
                       rows={4}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      className="mt-1 block w-full rounded-md border-2 border-black shadow-sm focus:border-black focus:ring-black"
                     />
                   </div>
                   <div>
@@ -298,22 +301,24 @@ export default function BlogPage() {
                       type="text"
                       value={editFormData.itemLink}
                       onChange={(e) => setEditFormData({ ...editFormData, itemLink: e.target.value })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      className="mt-1 block w-full rounded-md border-2 border-black shadow-sm focus:border-black focus:ring-black"
                     />
                   </div>
-                  <div className="flex justify-end space-x-4">
-                    <button
-                      onClick={() => setEditingPost(null)}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-                    >
-                      إلغاء
-                    </button>
-                    <button
-                      onClick={() => handleEditPost(editingPost.id)}
-                      className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
-                    >
-                      حفظ التغييرات
-                    </button>
+                  <div className="flex justify-center items-center mt-6">
+                    <div className="flex gap-4 rtl:space-x-reverse">
+                      <button
+                        onClick={() => setEditingPost(null)}
+                        className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                      >
+                        إلغاء
+                      </button>
+                      <button
+                        onClick={() => handleEditPost(editingPost.id)}
+                        className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                      >
+                        حفظ التغييرات
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
