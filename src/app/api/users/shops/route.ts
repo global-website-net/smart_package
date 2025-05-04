@@ -1,41 +1,23 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
-
-// Initialize Supabase admin client with service role key
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  }
-)
+import { supabase } from '@/lib/supabase'
 
 export async function GET() {
   try {
-    // Fetch all users with SHOP role
-    const { data, error } = await supabaseAdmin
+    const { data: shops, error } = await supabase
       .from('User')
       .select('id, email')
       .eq('role', 'SHOP')
       .order('email', { ascending: true })
 
     if (error) {
-      console.error('Error fetching shops:', error)
-      return NextResponse.json(
-        { error: 'Failed to fetch shops' },
-        { status: 500 }
-      )
+      throw error
     }
 
-    console.log('Fetched shops:', data)
-    return NextResponse.json(data)
+    return NextResponse.json(shops)
   } catch (error) {
-    console.error('Error in GET /api/users/shops:', error)
+    console.error('Error fetching shops:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to fetch shops' },
       { status: 500 }
     )
   }

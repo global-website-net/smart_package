@@ -9,6 +9,7 @@ import EditPackageStatus from '@/components/EditPackageStatus'
 import { toast } from 'react-hot-toast'
 import { Button } from '@/components/ui/button'
 import PaymentConfirmationWizard from '@/components/PaymentConfirmationWizard'
+import EditOrderStatus from '@/components/EditOrderStatus'
 
 interface Package {
   id: string
@@ -370,9 +371,9 @@ export default function TrackingPage() {
                               </Button>
                             )}
                           </div>
-                          {order.status === 'AWAITING_PAYMENT' && order.totalAmount && (
-                            <p className="text-sm text-gray-500 mt-2">
-                              مبلغ الدفع: {order.totalAmount.toFixed(2)} شيكل
+                          {order.status === 'AWAITING_PAYMENT' && (
+                            <p className="text-sm font-medium text-gray-900 mt-2">
+                              مبلغ الدفع: {order.totalAmount?.toFixed(2) || 0} شيكل
                             </p>
                           )}
                         </div>
@@ -524,56 +525,18 @@ export default function TrackingPage() {
       )}
 
       {editingOrder && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-sm w-full mx-4">
-            <h2 className="text-2xl font-bold mb-4">تعديل حالة الطلب</h2>
-            
-            <div className="mb-4">
-              <label className="block text-gray-700 mb-2">الحالة</label>
-              <select
-                value={editingOrder.status}
-                onChange={(e) => setEditingOrder({ ...editingOrder, status: e.target.value })}
-                className="w-full px-3 py-2 border rounded-md"
-              >
-                {statusOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {editingOrder.status === 'AWAITING_PAYMENT' && (
-              <div className="mb-4">
-                <label className="block text-gray-700 mb-2">مبلغ الدفع (شيكل)</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={editingOrder.totalAmount || ''}
-                  onChange={(e) => setEditingOrder({ ...editingOrder, totalAmount: parseFloat(e.target.value) })}
-                  className="w-full px-3 py-2 border rounded-md"
-                  required
-                />
-              </div>
-            )}
-
-            <div className="flex justify-center space-x-4 rtl:space-x-reverse mt-6 gap-4">
-              <button
-                onClick={() => setEditingOrder(null)}
-                className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-              >
-                إلغاء
-              </button>
-              <button
-                onClick={() => handleUpdateOrderStatus(editingOrder.id, editingOrder.status)}
-                className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-              >
-                حفظ
-              </button>
-            </div>
-          </div>
-        </div>
+        <EditOrderStatus
+          order={editingOrder}
+          onClose={() => setEditingOrder(null)}
+          onSuccess={(updatedOrder) => {
+            setOrders(orders.map(order => 
+              order.id === updatedOrder.id 
+                ? { ...order, status: updatedOrder.status, totalAmount: updatedOrder.totalAmount, updatedAt: updatedOrder.updatedAt }
+                : order
+            ))
+            setEditingOrder(null)
+          }}
+        />
       )}
 
       {showPaymentWizard && (

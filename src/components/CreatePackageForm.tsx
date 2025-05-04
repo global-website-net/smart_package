@@ -42,7 +42,6 @@ export default function CreatePackageForm({ onSuccess, onCancel, orders }: Creat
     orderNumber: '',
     userId: '',
     shopId: '',
-    currentLocation: '',
     status: 'PENDING'
   })
   const [users, setUsers] = useState<{ id: string; email: string }[]>([])
@@ -51,23 +50,48 @@ export default function CreatePackageForm({ onSuccess, onCancel, orders }: Creat
   const [error, setError] = useState('')
 
   useEffect(() => {
-    // Fetch users when component mounts
     fetchUsers()
-  }, []) // Empty dependency array means this runs once when component mounts
+    fetchShops()
+  }, [])
+
+  // When an order is selected, automatically set the user
+  useEffect(() => {
+    if (formData.orderNumber) {
+      const selectedOrder = orders.find(order => order.orderNumber === formData.orderNumber)
+      if (selectedOrder) {
+        setFormData(prev => ({
+          ...prev,
+          userId: selectedOrder.userId
+        }))
+      }
+    }
+  }, [formData.orderNumber, orders])
 
   const fetchUsers = async () => {
     try {
-      // Fetch regular users using the correct endpoint
-      const usersResponse = await fetch('/api/users/regular')
-      if (!usersResponse.ok) {
-        throw new Error('Failed to fetch regular users')
+      const response = await fetch('/api/users/regular')
+      if (!response.ok) {
+        throw new Error('Failed to fetch users')
       }
-      const usersData = await usersResponse.json()
-      console.log('Fetched regular users:', usersData)
-      setUsers(usersData)
+      const data = await response.json()
+      setUsers(data)
     } catch (error) {
       console.error('Error fetching users:', error)
-      setError('حدث خطأ أثناء جلب البيانات')
+      setError('Failed to fetch users')
+    }
+  }
+
+  const fetchShops = async () => {
+    try {
+      const response = await fetch('/api/users/shops')
+      if (!response.ok) {
+        throw new Error('Failed to fetch shops')
+      }
+      const data = await response.json()
+      setShops(data)
+    } catch (error) {
+      console.error('Error fetching shops:', error)
+      setError('حدث خطأ أثناء جلب المتاجر')
     }
   }
 
@@ -128,7 +152,7 @@ export default function CreatePackageForm({ onSuccess, onCancel, orders }: Creat
                 required
               >
                 <option value="">اختر رقم الطلب</option>
-                {orders.map(order => (
+                {orders?.map(order => (
                   <option key={order.id} value={order.orderNumber}>
                     {order.orderNumber} - {order.user?.fullName || 'غير معروف'}
                   </option>
@@ -143,6 +167,7 @@ export default function CreatePackageForm({ onSuccess, onCancel, orders }: Creat
                 onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
                 className="w-full px-3 py-2 border rounded-md"
                 required
+                disabled={!!formData.orderNumber} // Disable if order is selected
               >
                 <option value="">اختر المستخدم</option>
                 {users.map(user => (
@@ -187,23 +212,21 @@ export default function CreatePackageForm({ onSuccess, onCancel, orders }: Creat
             </div>
           </div>
 
-          <div className="flex justify-center items-center mt-6">
-            <div className="flex gap-4 rtl:space-x-reverse">
-              <Button
-                type="button"
-                onClick={onCancel}
-                className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-              >
-                إلغاء
-              </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
-              >
-                {isSubmitting ? 'جاري الحفظ...' : 'حفظ'}
-              </Button>
-            </div>
+          <div className="mt-6 flex justify-end gap-4">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            >
+              إلغاء
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            >
+              {isSubmitting ? 'جاري الإنشاء...' : 'إنشاء'}
+            </button>
           </div>
         </form>
       </div>

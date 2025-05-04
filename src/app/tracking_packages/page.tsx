@@ -81,8 +81,12 @@ export default function TrackingPackagesPage() {
     }
 
     if (status === 'authenticated') {
-      fetchPackages()
-      fetchOrders()
+      if (session.user.role === 'ADMIN' || session.user.role === 'OWNER') {
+        fetchOrders()
+        fetchPackages()
+      } else {
+        router.push('/')
+      }
       fetchShops()
       fetchRegularUsers()
       checkAdminOrOwner()
@@ -112,6 +116,9 @@ export default function TrackingPackagesPage() {
 
   const fetchOrders = async () => {
     try {
+      setLoading(true)
+      setError('')
+
       // First get all orders
       const { data: orders, error: ordersError } = await supabase
         .from('order')
@@ -123,6 +130,7 @@ export default function TrackingPackagesPage() {
           updatedAt,
           userId,
           user:User!userId (
+            id,
             fullName,
             email
           )
@@ -134,8 +142,6 @@ export default function TrackingPackagesPage() {
         throw ordersError
       }
 
-      console.log('Fetched orders:', orders) // Debug log
-
       // Get all packages to check which orders already have packages
       const { data: packages, error: packagesError } = await supabase
         .from('package')
@@ -146,25 +152,31 @@ export default function TrackingPackagesPage() {
         throw packagesError
       }
 
-      console.log('Fetched packages:', packages) // Debug log
-
       // Filter out orders that already have packages
       const usedOrderNumbers = new Set(packages?.map(p => p.orderNumber) || [])
-      const availableOrders = orders.filter(order => !usedOrderNumbers.has(order.orderNumber))
-      
-      console.log('Available orders:', availableOrders) // Debug log
+      const availableOrders = orders?.filter(order => !usedOrderNumbers.has(order.orderNumber)) || []
       
       // Transform the data to match the Order interface
       const transformedOrders = availableOrders.map(order => ({
-        ...order,
-        user: order.user?.[0] || { fullName: 'غير معروف', email: '' }
-      })) as Order[]
+        id: order.id,
+        orderNumber: order.orderNumber,
+        status: order.status,
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
+        userId: order.userId,
+        user: {
+          id: order.user?.[0]?.id,
+          fullName: order.user?.[0]?.fullName || 'غير معروف',
+          email: order.user?.[0]?.email || ''
+        }
+      }))
       
-      console.log('Transformed orders:', transformedOrders) // Debug log
       setOrders(transformedOrders)
     } catch (err) {
       console.error('Error fetching orders:', err)
       setError('حدث خطأ أثناء جلب الطلبات')
+    } finally {
+      setLoading(false)
     }
   }
 
