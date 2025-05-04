@@ -79,6 +79,7 @@ model VerificationToken {
 model Package {
   id             String   @id @default(cuid())
   trackingNumber String   @unique
+  description    String?
   status         String   @default("PENDING")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

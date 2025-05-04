@@ -1,6 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
-import crypto from 'crypto'
 
 // Initialize Supabase admin client with service role key
 const supabaseAdmin = createClient(
@@ -34,63 +33,13 @@ export async function POST(request: Request) {
     const normalizedEmail = email.toLowerCase().trim()
     console.log('Normalized email:', normalizedEmail)
 
-    // Check if user exists
-    const { data: users, error: userError } = await supabaseAdmin
-      .from('User')
-      .select('id, email, fullName')
-      .ilike('email', normalizedEmail)
-
-    console.log('Query result:', { users, userError })
-
-    if (userError) {
-      console.error('Error finding user:', userError)
-      return NextResponse.json(
-        { error: 'حدث خطأ أثناء البحث عن المستخدم' },
-        { status: 500 }
-      )
-    }
-
-    if (!users || users.length === 0) {
-      console.log('No user found with email:', normalizedEmail)
-      return NextResponse.json(
-        { error: 'لم يتم العثور على حساب بهذا البريد الإلكتروني' },
-        { status: 404 }
-      )
-    }
-
-    const user = users[0]
-    console.log('Found user:', { id: user.id, email: user.email })
-
-    // Generate reset token
-    const resetToken = crypto.randomBytes(32).toString('hex')
-    const resetTokenExpiry = new Date(Date.now() + 3600000) // 1 hour from now
-
-    // Update user with reset token
-    const { error: updateError } = await supabaseAdmin
-      .from('User')
-      .update({
-        resetToken,
-        resetTokenExpiry: resetTokenExpiry.toISOString(),
-        updatedAt: new Date().toISOString()
-      })
-      .eq('id', user.id)
-
-    if (updateError) {
-      console.error('Error updating user:', updateError)
-      return NextResponse.json(
-        { error: 'حدث خطأ أثناء إنشاء رمز إعادة التعيين' },
-        { status: 500 }
-      )
-    }
-
-    // Send reset email using Supabase's email service
-    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${resetToken}`
-    const { error: emailError } = await supabaseAdmin.auth.resetPasswordForEmail(normalizedEmail, {
-      redirectTo: resetUrl
+    // Use Supabase's built-in reset password functionality
+    const { error } = await supabaseAdmin.auth.resetPasswordForEmail(normalizedEmail, {
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password`
     })
 
-    if (emailError) {
-      console.error('Error sending reset email:', emailError)
+    if (error) {
+      console.error('Error sending reset email:', error)
       return NextResponse.json(
         { error: 'حدث خطأ أثناء إرسال بريد إعادة التعيين' },
         { status: 500 }

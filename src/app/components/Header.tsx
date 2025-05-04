@@ -70,6 +70,51 @@ export default function Header() {
             </button>
           </div>
 
+          {/* Mobile Menu Content */}
+          {isMobileMenuOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 md:hidden">
+              <div className="fixed top-0 right-0 w-full bg-white h-screen transform transition-transform duration-300 ease-in-out">
+                <div className="p-4">
+                  <div className="flex justify-between items-center mb-6">
+                    <button
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                    <h2 className="text-xl font-semibold text-gray-900">القائمة</h2>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    {getMenuItems().map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="block px-4 py-2 text-lg text-gray-700 hover:bg-gray-100 rounded-md"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                    {isLoggedIn && (
+                      <button
+                        onClick={() => {
+                          handleSignOut()
+                          setIsMobileMenuOpen(false)
+                        }}
+                        className="block w-full text-right px-4 py-2 text-lg text-gray-700 hover:bg-gray-100 rounded-md"
+                      >
+                        تسجيل الخروج
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Center Logo */}
           <div className={`flex items-center justify-center ${isLoginPage ? 'flex-1' : 'order-2'}`}>
             <Link href="/" className="flex items-center space-x-2 rtl:space-x-reverse">

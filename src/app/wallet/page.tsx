@@ -99,96 +99,77 @@ export default function WalletPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <Header />
       
       <main className="p-4 pt-24">
         <div className="max-w-4xl mx-auto">
+          {/* Title and Wallet Icon */}
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-6">المحفظة</h1>
-            <div className="flex justify-center items-center">
+            <div className="flex justify-center items-center mb-4">
               <div className="relative w-32 sm:w-48 md:w-64">
                 <div className="w-full h-0.5 bg-green-500"></div>
                 <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
               </div>
             </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-2xl font-semibold mb-4">الرصيد الحالي</h2>
-                <p className="text-3xl font-bold text-green-600">
-                  {walletData.balance.toFixed(2)} شيكل
-                </p>
-              </div>
-              <button
-                onClick={() => setShowPaymentWizard(true)}
-                className="bg-green-500 text-white px-6 py-3 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-              >
-                إضافة رصيد
-              </button>
+            <div className="flex justify-center mb-8">
+              <svg className="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              </svg>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <h2 className="text-xl font-semibold p-6 border-b">سجل المعاملات</h2>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      التاريخ
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      نوع المعاملة
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      المبلغ
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      السبب
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {walletData.transactions.map((transaction) => (
-                    <tr key={transaction.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(transaction.createdAt).toLocaleDateString('ar-SA', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
-                          hour: 'numeric',
-                          minute: 'numeric'
-                        })}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <span className={`px-2 py-1 rounded-full ${
-                          transaction.type === 'CREDIT' 
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {transaction.type === 'CREDIT' ? 'إيداع' : 'سحب'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {transaction.amount.toFixed(2)} شيكل
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {transaction.reason}
-                      </td>
-                    </tr>
-                  ))}
-                  {walletData.transactions.length === 0 && (
-                    <tr>
-                      <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
-                        لا توجد معاملات حتى الآن
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+          {/* Balance Display */}
+          <div className="text-center mb-12">
+            <div className="flex justify-center items-center gap-4">
+              <button
+                onClick={() => setShowPaymentWizard(true)}
+                className="text-4xl font-bold"
+              >
+                &#171;
+              </button>
+              <span className="text-4xl font-bold">{walletData.balance.toFixed(2)} ₪</span>
+              <button
+                onClick={() => setShowPaymentWizard(true)}
+                className="text-4xl font-bold"
+              >
+                &#187;
+              </button>
+            </div>
+            <button
+              onClick={() => setShowPaymentWizard(true)}
+              className="mt-6 bg-green-500 text-white px-8 py-2 rounded-full hover:bg-green-600 transition-colors"
+            >
+              Call To Action
+            </button>
+          </div>
+
+          {/* Transaction History */}
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold text-center mb-6">تاريخ المعملات</h2>
+            <div className="space-y-4">
+              {walletData.transactions.map((transaction) => (
+                <div key={transaction.id} className="flex justify-between items-center border-b pb-4">
+                  <div className="flex items-center gap-4">
+                    <span className={`text-xl font-bold ${transaction.type === 'CREDIT' ? 'text-green-600' : 'text-red-600'}`}>
+                      {transaction.type === 'CREDIT' ? '+' : '-'}{transaction.amount.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="text-gray-600">
+                    {new Date(transaction.createdAt).toLocaleDateString('ar-SA', {
+                      month: '2-digit',
+                      day: '2-digit',
+                      year: '2-digit'
+                    })}
+                  </div>
+                </div>
+              ))}
+              {walletData.transactions.length === 0 && (
+                <div className="text-center text-gray-500">
+                  لا توجد معاملات حتى الآن
+                </div>
+              )}
             </div>
           </div>
         </div>

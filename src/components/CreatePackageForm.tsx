@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { toast } from 'react-hot-toast'
+import { Button } from '@/components/ui/button'
 
 interface User {
   id: string
@@ -194,21 +195,23 @@ export default function CreatePackageForm({ onSuccess, onCancel, orders }: Creat
             </div>
           </div>
 
-          <div className="flex justify-center space-x-8 rtl:space-x-reverse mt-6">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="px-4 py-2 bg-gray-200 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-300 transition-colors"
-            >
-              إلغاء
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:opacity-50 transition-colors"
-            >
-              {isSubmitting ? 'جاري الحفظ...' : 'حفظ'}
-            </button>
+          <div className="flex justify-center items-center mt-6">
+            <div className="flex gap-4 rtl:space-x-reverse">
+              <Button
+                type="button"
+                onClick={onCancel}
+                className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              >
+                إلغاء
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
+              >
+                {isSubmitting ? 'جاري الحفظ...' : 'حفظ'}
+              </Button>
+            </div>
           </div>
         </form>
       </div>

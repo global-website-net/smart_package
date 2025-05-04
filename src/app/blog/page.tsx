@@ -207,69 +207,90 @@ export default function BlogPage() {
               <p className="text-gray-600 text-lg">لا توجد مقالات حتى الآن</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {posts.map((post) => (
-                <div key={post.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                  <div className="p-6">
-                    <div className="flex justify-between items-start mb-2">
-                      <h2 className="text-xl font-semibold text-gray-900">{post.title}</h2>
-                      {isAdminOrOwner && (
-                        <div className="flex space-x-2 rtl:space-x-reverse">
-                          <button
-                            onClick={() => {
-                              setEditingPost(post)
-                              setEditFormData({
-                                title: post.title,
-                                content: post.content,
-                                itemLink: post.itemlink
-                              })
-                            }}
-                            className="text-blue-500 hover:text-blue-700 transition-colors"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                          </button>
-                          <button
-                            onClick={() => setPostToDelete(post)}
-                            className="text-red-500 hover:text-red-700 transition-colors"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                    <p className="text-gray-600 mb-4 line-clamp-3">{post.content}</p>
-                    <div className="flex flex-col space-y-2 text-sm text-gray-500">
-                      <div className="flex items-center">
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        {new Date(post.createdAt).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: '2-digit',
-                          day: '2-digit'
-                        })}
-                      </div>
-                      <div className="flex items-center">
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                        </svg>
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      العنوان
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      المحتوى
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      رابط المنتج
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      تاريخ الإنشاء
+                    </th>
+                    {isAdminOrOwner && (
+                      <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        الإجراءات
+                      </th>
+                    )}
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {posts.map((post) => (
+                    <tr key={post.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">{post.title}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900 line-clamp-2">{post.content}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <a 
                           href={post.itemlink} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="text-green-600 hover:text-green-800 truncate"
+                          className="text-sm text-green-600 hover:text-green-800 truncate"
                         >
                           {post.itemlink}
                         </a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500">
+                          {new Date(post.createdAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit'
+                          })}
+                        </div>
+                      </td>
+                      {isAdminOrOwner && (
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <div className="flex space-x-2 rtl:space-x-reverse justify-end">
+                            <button
+                              onClick={() => {
+                                setEditingPost(post)
+                                setEditFormData({
+                                  title: post.title,
+                                  content: post.content,
+                                  itemLink: post.itemlink
+                                })
+                              }}
+                              className="text-blue-500 hover:text-blue-700 transition-colors"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => setPostToDelete(post)}
+                              className="text-red-500 hover:text-red-700 transition-colors"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
 
@@ -318,21 +339,23 @@ export default function BlogPage() {
                     </div>
                   </div>
 
-                  <div className="flex justify-center space-x-8 rtl:space-x-reverse mt-6">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setEditingPost(null)}
-                      className="px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-200"
-                    >
-                      إلغاء
-                    </Button>
-                    <Button
-                      type="submit"
-                      className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
-                    >
-                      حفظ التغييرات
-                    </Button>
+                  <div className="flex justify-center items-center mt-6">
+                    <div className="flex gap-4 rtl:space-x-reverse">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setEditingPost(null)}
+                        className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                      >
+                        إلغاء
+                      </Button>
+                      <Button
+                        type="submit"
+                        className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                      >
+                        حفظ التغييرات
+                      </Button>
+                    </div>
                   </div>
                 </form>
               </div>
@@ -347,21 +370,23 @@ export default function BlogPage() {
                 <p className="text-gray-600 mb-6 text-center">
                   هل أنت متأكد من حذف المقال "{postToDelete.title}"؟
                 </p>
-                <div className="flex justify-center space-x-4 rtl:space-x-reverse">
-                  <Button
-                    variant="outline"
-                    onClick={() => setPostToDelete(null)}
-                    className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
-                  >
-                    إلغاء
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    onClick={() => handleDeletePost(postToDelete.id)}
-                    className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-                  >
-                    حذف
-                  </Button>
+                <div className="flex justify-center items-center mt-6">
+                  <div className="flex gap-4 rtl:space-x-reverse">
+                    <Button
+                      variant="outline"
+                      onClick={() => setPostToDelete(null)}
+                      className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                    >
+                      إلغاء
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={() => handleDeletePost(postToDelete.id)}
+                      className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                    >
+                      حذف
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>

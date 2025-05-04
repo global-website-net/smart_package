@@ -1,10 +1,14 @@
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 
 interface MobileHeaderIconsProps {
   isRegularUser: boolean
 }
 
 export default function MobileHeaderIcons({ isRegularUser }: MobileHeaderIconsProps) {
+  const { data: session } = useSession()
+  const isLoggedIn = !!session
+
   return (
     <div className="md:hidden flex items-center gap-4">
       {/* Wallet - Right */}
@@ -31,12 +35,21 @@ export default function MobileHeaderIcons({ isRegularUser }: MobileHeaderIconsPr
         </Link>
       )}
 
-      {/* User Account - Left */}
-      <Link href="/account" className="text-white">
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      </Link>
+      {/* User Account or Login Button - Left */}
+      {isLoggedIn ? (
+        <Link href="/account" className="text-white">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        </Link>
+      ) : (
+        <Link 
+          href="/auth/login" 
+          className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600 transition-colors text-sm"
+        >
+          تسجيل الدخول
+        </Link>
+      )}
     </div>
   )
 } 
