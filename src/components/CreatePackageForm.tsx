@@ -18,7 +18,7 @@ interface Order {
   updatedAt: string
   userId: string
   user: {
-    name: string
+    fullName: string
     email: string
   }
 }
@@ -138,7 +138,7 @@ export default function CreatePackageForm({ onSuccess, onCancel, orders }: Creat
                 <option value="">اختر رقم الطلب</option>
                 {orders.map(order => (
                   <option key={order.id} value={order.orderNumber}>
-                    {order.orderNumber} - {order.user.name}
+                    {order.orderNumber} - {order.user.fullName}
                   </option>
                 ))}
               </select>
