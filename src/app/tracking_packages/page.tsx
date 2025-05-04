@@ -291,7 +291,7 @@ export default function TrackingPackagesPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="pt-20 pb-10">
+      <div className="pt-32 pb-10">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-6">

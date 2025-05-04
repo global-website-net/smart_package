@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/auth.config'
-import prisma from '@/lib/prisma'
+import { createClient } from '@supabase/supabase-js'
 import { v4 as uuidv4 } from 'uuid'
 import QRCode from 'qrcode'
+
+// Initialize Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 export async function POST(request: Request) {
   try {
@@ -16,17 +21,13 @@ export async function POST(request: Request) {
     }
 
     // Get user from database to check role
-    const user = await prisma.user.findUnique({
-      where: {
-        email: session.user.email,
-      },
-      select: {
-        id: true,
-        role: true,
-      },
-    })
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('id, role')
+      .eq('email', session.user.email)
+      .single()
 
-    if (!user) {
+    if (userError || !user) {
       return NextResponse.json(
         { error: 'لم يتم العثور على المستخدم' },
         { status: 404 }
@@ -42,7 +43,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { status, shopId, userId } = body
+    const { status, shopId, userId, description } = body
 
     // Validate required fields
     if (!status || !shopId || !userId) {
@@ -55,15 +56,26 @@ export async function POST(request: Request) {
     // Generate a unique tracking number
     const trackingNumber = `TRK${Date.now()}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`
 
-    // Create the package
-    const newPackage = await prisma.package.create({
-      data: {
-        trackingNumber,
-        status,
-        userId,
-        shopId,
-      },
-    })
+    // Create the package in Supabase
+    const { data: newPackage, error: packageError } = await supabase
+      .from('package')
+      .insert([
+        {
+          trackingNumber,
+          status,
+          userId,
+          shopId,
+          description: description || null,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      ])
+      .select()
+      .single()
+
+    if (packageError) {
+      throw packageError
+    }
 
     return NextResponse.json(newPackage)
   } catch (error) {

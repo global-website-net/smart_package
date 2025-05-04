@@ -114,35 +114,53 @@ export default function WalletPage() {
               </div>
             </div>
             <div className="flex justify-center mb-8">
-              <svg className="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              <svg className="w-24 h-24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path 
+                  d="M4 4C2.89543 4 2 4.89543 2 6V18C2 19.1046 2.89543 20 4 20H20C21.1046 20 22 19.1046 22 18V8C22 6.89543 21.1046 6 20 6H4"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <path 
+                  d="M16 14H16.01"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
               </svg>
             </div>
           </div>
 
           {/* Balance Display */}
           <div className="text-center mb-12">
-            <div className="flex justify-center items-center gap-4">
-              <button
-                onClick={() => setShowPaymentWizard(true)}
-                className="text-4xl font-bold"
-              >
-                &#171;
-              </button>
+            <div className="flex justify-center items-center gap-8">
+              <div className="flex items-center">
+                <div className="text-3xl text-gray-400">
+                  <span>&#171;&#171;</span>
+                </div>
+                <div className="text-3xl text-gray-400 mr-4">
+                  <span>&#171;</span>
+                </div>
+              </div>
               <span className="text-4xl font-bold">{walletData.balance.toFixed(2)} ₪</span>
-              <button
-                onClick={() => setShowPaymentWizard(true)}
-                className="text-4xl font-bold"
-              >
-                &#187;
-              </button>
+              <div className="flex items-center">
+                <div className="text-3xl text-gray-400 ml-4">
+                  <span>&#187;</span>
+                </div>
+                <div className="text-3xl text-gray-400">
+                  <span>&#187;&#187;</span>
+                </div>
+              </div>
             </div>
             <button
               onClick={() => setShowPaymentWizard(true)}
               className="mt-6 bg-green-500 text-white px-8 py-2 rounded-full hover:bg-green-600 transition-colors"
             >
-              Call To Action
+              إضافة رصيد
             </button>
+            <div className="mt-12 flex justify-center items-center">
+              <div className="w-full h-0.5 bg-green-500"></div>
+            </div>
           </div>
 
           {/* Transaction History */}

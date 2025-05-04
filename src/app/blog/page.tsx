@@ -202,12 +202,8 @@ export default function BlogPage() {
             </div>
           )}
 
-          {posts.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-md p-6 text-center">
-              <p className="text-gray-600 text-lg">لا توجد مقالات حتى الآن</p>
-            </div>
-          ) : (
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
@@ -219,6 +215,9 @@ export default function BlogPage() {
                     </th>
                     <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       رابط المنتج
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      الكاتب
                     </th>
                     <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       تاريخ الإنشاء
@@ -237,21 +236,25 @@ export default function BlogPage() {
                         <div className="text-sm font-medium text-gray-900">{post.title}</div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900 line-clamp-2">{post.content}</div>
+                        <div className="text-sm text-gray-900 max-w-xs truncate">{post.content}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <a 
                           href={post.itemlink} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="text-sm text-green-600 hover:text-green-800 truncate"
+                          className="text-sm text-blue-600 hover:text-blue-800"
                         >
-                          {post.itemlink}
+                          عرض المنتج
                         </a>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">
-                          {new Date(post.createdAt).toLocaleDateString('en-US', {
+                        <div className="text-sm text-gray-900">{post.author.fullName}</div>
+                        <div className="text-sm text-gray-500">{post.author.email}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {new Date(post.createdAt).toLocaleDateString('ar-SA', {
                             year: 'numeric',
                             month: '2-digit',
                             day: '2-digit'
@@ -260,31 +263,25 @@ export default function BlogPage() {
                       </td>
                       {isAdminOrOwner && (
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <div className="flex space-x-2 rtl:space-x-reverse justify-end">
-                            <button
-                              onClick={() => {
-                                setEditingPost(post)
-                                setEditFormData({
-                                  title: post.title,
-                                  content: post.content,
-                                  itemLink: post.itemlink
-                                })
-                              }}
-                              className="text-blue-500 hover:text-blue-700 transition-colors"
-                            >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                              </svg>
-                            </button>
-                            <button
-                              onClick={() => setPostToDelete(post)}
-                              className="text-red-500 hover:text-red-700 transition-colors"
-                            >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
-                          </div>
+                          <button
+                            onClick={() => {
+                              setEditingPost(post)
+                              setEditFormData({
+                                title: post.title,
+                                content: post.content,
+                                itemLink: post.itemlink
+                              })
+                            }}
+                            className="text-indigo-600 hover:text-indigo-900 mr-4"
+                          >
+                            تعديل
+                          </button>
+                          <button
+                            onClick={() => setPostToDelete(post)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            حذف
+                          </button>
                         </td>
                       )}
                     </tr>
@@ -292,101 +289,82 @@ export default function BlogPage() {
                 </tbody>
               </table>
             </div>
-          )}
+          </div>
 
           {/* Edit Modal */}
           {editingPost && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg p-6 w-full max-w-md">
-                <h2 className="text-2xl font-bold mb-4 text-center">تعديل المقال</h2>
-                
-                <form onSubmit={(e) => {
-                  e.preventDefault()
-                  handleEditPost(editingPost.id)
-                }}>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-gray-700 mb-2">العنوان</label>
-                      <input
-                        type="text"
-                        value={editFormData.title}
-                        onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
-                        className="w-full px-3 py-2 border rounded-md"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-gray-700 mb-2">المحتوى</label>
-                      <textarea
-                        value={editFormData.content}
-                        onChange={(e) => setEditFormData({ ...editFormData, content: e.target.value })}
-                        className="w-full px-3 py-2 border rounded-md"
-                        rows={4}
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-gray-700 mb-2">رابط المنتج</label>
-                      <input
-                        type="url"
-                        value={editFormData.itemLink}
-                        onChange={(e) => setEditFormData({ ...editFormData, itemLink: e.target.value })}
-                        className="w-full px-3 py-2 border rounded-md"
-                        required
-                      />
-                    </div>
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-lg p-6 max-w-2xl w-full">
+                <h2 className="text-xl font-bold mb-4">تعديل المقال</h2>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">العنوان</label>
+                    <input
+                      type="text"
+                      value={editFormData.title}
+                      onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
                   </div>
-
-                  <div className="flex justify-center items-center mt-6">
-                    <div className="flex gap-4 rtl:space-x-reverse">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setEditingPost(null)}
-                        className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                      >
-                        إلغاء
-                      </Button>
-                      <Button
-                        type="submit"
-                        className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                      >
-                        حفظ التغييرات
-                      </Button>
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">المحتوى</label>
+                    <textarea
+                      value={editFormData.content}
+                      onChange={(e) => setEditFormData({ ...editFormData, content: e.target.value })}
+                      rows={4}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
                   </div>
-                </form>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">رابط المنتج</label>
+                    <input
+                      type="text"
+                      value={editFormData.itemLink}
+                      onChange={(e) => setEditFormData({ ...editFormData, itemLink: e.target.value })}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-4">
+                    <button
+                      onClick={() => setEditingPost(null)}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                    >
+                      إلغاء
+                    </button>
+                    <button
+                      onClick={() => handleEditPost(editingPost.id)}
+                      className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
+                    >
+                      حفظ التغييرات
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          {/* Delete Confirmation Wizard */}
+          {/* Delete Confirmation Modal */}
           {postToDelete && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white p-6 rounded-lg max-w-sm w-full mx-4">
-                <h3 className="text-lg font-semibold mb-4 text-center">تأكيد الحذف</h3>
-                <p className="text-gray-600 mb-6 text-center">
-                  هل أنت متأكد من حذف المقال "{postToDelete.title}"؟
-                </p>
-                <div className="flex justify-center items-center mt-6">
-                  <div className="flex gap-4 rtl:space-x-reverse">
-                    <Button
-                      variant="outline"
-                      onClick={() => setPostToDelete(null)}
-                      className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                    >
-                      إلغاء
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      onClick={() => handleDeletePost(postToDelete.id)}
-                      className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                    >
-                      حذف
-                    </Button>
-                  </div>
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-lg p-6">
+                <h2 className="text-xl font-bold mb-4">تأكيد الحذف</h2>
+                <p className="mb-4">هل أنت متأكد من حذف هذا المقال؟</p>
+                <div className="flex justify-end space-x-4">
+                  <button
+                    onClick={() => setPostToDelete(null)}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                  >
+                    إلغاء
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleDeletePost(postToDelete.id)
+                      setPostToDelete(null)
+                    }}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                  >
+                    حذف
+                  </button>
                 </div>
               </div>
             </div>
