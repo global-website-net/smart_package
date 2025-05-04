@@ -371,7 +371,7 @@ export default function TrackingPage() {
                               </Button>
                             )}
                           </div>
-                          {order.status === 'AWAITING_PAYMENT' && (
+                          {order.status !== 'PENDING_APPROVAL' && (
                             <p className="text-sm font-medium text-gray-900 mt-2">
                               مبلغ الدفع: {order.totalAmount ? order.totalAmount.toFixed(2) : '0'} شيكل
                             </p>

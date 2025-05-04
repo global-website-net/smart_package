@@ -46,6 +46,7 @@ interface Package {
   }[]
   shop: {
     fullName: string
+    email: string
   }[]
 }
 
@@ -204,13 +205,22 @@ export default function TrackingPackagesPage() {
       const { data: packages, error } = await supabase
         .from('package')
         .select(`
-          *,
+          id,
+          trackingNumber,
+          status,
+          description,
+          userId,
+          shopId,
+          createdAt,
+          updatedAt,
+          orderNumber,
           user:userId (
             fullName,
             email
           ),
           shop:shopId (
-            fullName
+            fullName,
+            email
           )
         `)
         .order('createdAt', { ascending: false })
@@ -218,16 +228,28 @@ export default function TrackingPackagesPage() {
       if (error) throw error
 
       // Transform the data to match the Package interface
-      const transformedPackages = packages.map(pkg => ({
-        ...pkg,
-        user: [pkg.user], // Wrap in array to match interface
-        shop: [pkg.shop]  // Wrap in array to match interface
-      }))
+      const transformedPackages = packages.map(pkg => {
+        const userData = pkg.user as unknown as { fullName: string; email: string } | null
+        const shopData = pkg.shop as unknown as { fullName: string; email: string } | null
+
+        return {
+          ...pkg,
+          user: [{
+            fullName: userData?.fullName || 'غير معروف',
+            email: userData?.email || ''
+          }],
+          shop: [{
+            fullName: shopData?.fullName || 'غير معروف',
+            email: shopData?.email || ''
+          }]
+        }
+      })
 
       setPackages(transformedPackages)
     } catch (error) {
       console.error('Error fetching packages:', error)
       setError('حدث خطأ أثناء جلب الطرود')
+      toast.error('حدث خطأ أثناء جلب الطرود')
     } finally {
       setLoading(false)
     }

@@ -120,7 +120,7 @@ export default function EditOrderStatus({ order, onClose, onSuccess }: EditOrder
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-2.5 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+            className="px-6 py-2.5 text-base font-medium text-white bg-gray-500 border border-transparent rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200"
             disabled={isSubmitting}
           >
             إلغاء

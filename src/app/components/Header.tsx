@@ -24,7 +24,7 @@ export default function Header() {
     if (session?.user?.role === 'REGULAR') {
       return [
         { href: '/tracking', label: 'تتبع الطلبات' },
-        { href: '/tracking_packages', label: 'تتبع الطرود' },
+        { href: '/tracking_packages_regular_accounts', label: 'تتبع الطرود' },
         { href: '/wallet', label: 'المحفظة' },
         { href: '/account', label: 'الملف الشخصي' },
         { href: '/blog', label: 'بلوج' },
