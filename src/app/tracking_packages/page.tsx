@@ -41,12 +41,11 @@ interface Package {
   createdAt: string
   updatedAt: string
   user: {
-    name: string
+    fullName: string
     email: string
   }
   shop: {
-    name: string
-    email: string
+    fullName: string
   }
 }
 
@@ -58,7 +57,7 @@ interface Order {
   updatedAt: string
   userId: string
   user: {
-    name: string
+    fullName: string
     email: string
   }
 }
@@ -332,8 +331,19 @@ export default function TrackingPackagesPage() {
                 <TableRow key={pkg.id}>
                   <TableCell>{pkg.trackingNumber}</TableCell>
                   <TableCell>{pkg.status}</TableCell>
-                  <TableCell>{pkg.user.name}</TableCell>
-                  <TableCell>{pkg.shop.name}</TableCell>
+                  <TableCell className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">
+                      {pkg.user.fullName}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {pkg.user.email}
+                    </div>
+                  </TableCell>
+                  <TableCell className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">
+                      {pkg.shop.fullName}
+                    </div>
+                  </TableCell>
                   <TableCell>{pkg.orderNumber}</TableCell>
                   <TableCell>{new Date(pkg.createdAt).toLocaleDateString('ar-SA')}</TableCell>
                   <TableCell>
