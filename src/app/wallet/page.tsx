@@ -131,28 +131,28 @@ export default function WalletPage() {
           </div>
 
           {/* Balance Display with Arrows */}
-          <div className="flex items-center justify-center mb-8">
+          <div className="flex justify-center items-center mb-8">
             {/* Left Side Arrows */}
             <div className="flex items-center gap-2">
-              <button className="bg-black text-white px-3 py-1 rounded cursor-pointer">
+              <button className="bg-black text-white w-8 h-8 rounded-full flex items-center justify-center cursor-pointer">
                 &lt;&lt;
               </button>
-              <button className="bg-black text-white px-3 py-1 rounded cursor-pointer">
+              <button className="bg-black text-white w-8 h-8 rounded-full flex items-center justify-center cursor-pointer">
                 &lt;
               </button>
             </div>
 
             {/* Balance Amount */}
             <div className="mx-4">
-              <p className="text-4xl font-bold">{walletData.balance.toFixed(2)} ₪</p>
+              <p className="text-4xl font-bold" dir="rtl">{walletData.balance.toFixed(2)} ₪</p>
             </div>
 
             {/* Right Side Arrows */}
             <div className="flex items-center gap-2">
-              <button className="bg-black text-white px-3 py-1 rounded cursor-pointer">
+              <button className="bg-black text-white w-8 h-8 rounded-full flex items-center justify-center cursor-pointer">
                 &gt;
               </button>
-              <button className="bg-black text-white px-3 py-1 rounded cursor-pointer">
+              <button className="bg-black text-white w-8 h-8 rounded-full flex items-center justify-center cursor-pointer">
                 &gt;&gt;
               </button>
             </div>
@@ -176,8 +176,8 @@ export default function WalletPage() {
               {walletData.transactions.map((transaction) => (
                 <div key={transaction.id} className="flex justify-between items-center border-b pb-4">
                   <div className="flex items-center gap-4">
-                    <span className={`text-xl font-bold ${transaction.type === 'CREDIT' ? 'text-green-600' : 'text-red-600'}`}>
-                      {transaction.type === 'CREDIT' ? '+' : '-'}{transaction.amount.toFixed(2)}
+                    <span className={`text-xl font-bold ${transaction.type === 'CREDIT' ? 'text-green-600' : 'text-red-600'}`} dir="rtl">
+                      {transaction.type === 'CREDIT' ? '+' : '-'}{transaction.amount.toFixed(2)} ₪
                     </span>
                   </div>
                   <div className="flex items-center gap-2">

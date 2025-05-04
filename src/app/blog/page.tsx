@@ -206,19 +206,12 @@ export default function BlogPage() {
             {posts.map((post) => (
               <Card key={post.id} className="bg-white rounded-lg shadow-md">
                 <CardHeader>
+                  <div className="mb-2">
+                    <span className="text-sm font-medium text-gray-500">العنوان:</span>
+                  </div>
                   <CardTitle className="text-2xl font-bold text-gray-900">
                     {post.title}
                   </CardTitle>
-                  <div className="flex items-center justify-between text-sm text-gray-500">
-                    <div>
-                      {new Date(post.createdAt).toLocaleDateString('ar-SA', {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        calendar: 'gregory'
-                      })}
-                    </div>
-                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="prose max-w-none">
@@ -237,27 +230,37 @@ export default function BlogPage() {
                       </a>
                     </div>
                   )}
+                  <div className="mt-4 text-sm text-gray-500">
+                    {new Date(post.createdAt).toLocaleDateString('ar-SA', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      calendar: 'gregory'
+                    })}
+                  </div>
                   {isAdminOrOwner && (
-                    <div className="mt-4 flex justify-center space-x-4 rtl:space-x-reverse">
-                      <button
-                        onClick={() => {
-                          setEditingPost(post)
-                          setEditFormData({
-                            title: post.title,
-                            content: post.content,
-                            itemLink: post.itemlink
-                          })
-                        }}
-                        className="bg-gray-300 text-gray-800 px-6 py-2 rounded-md hover:bg-gray-400 transition-colors"
-                      >
-                        تعديل
-                      </button>
-                      <button
-                        onClick={() => setPostToDelete(post)}
-                        className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors"
-                      >
-                        حذف
-                      </button>
+                    <div className="mt-4 flex justify-center">
+                      <div className="flex gap-4 rtl:space-x-reverse">
+                        <button
+                          onClick={() => {
+                            setEditingPost(post)
+                            setEditFormData({
+                              title: post.title,
+                              content: post.content,
+                              itemLink: post.itemlink
+                            })
+                          }}
+                          className="bg-gray-300 text-gray-800 px-6 py-2 rounded-md hover:bg-gray-400 transition-colors"
+                        >
+                          تعديل
+                        </button>
+                        <button
+                          onClick={() => setPostToDelete(post)}
+                          className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors"
+                        >
+                          حذف
+                        </button>
+                      </div>
                     </div>
                   )}
                 </CardContent>

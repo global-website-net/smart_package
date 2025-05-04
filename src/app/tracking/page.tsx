@@ -12,8 +12,8 @@ import { Button } from '@/components/ui/button'
 interface Package {
   id: string
   trackingNumber: string
+  description: string
   status: string
-  currentLocation?: string
   createdAt: string
   updatedAt: string
   user: {
@@ -35,7 +35,6 @@ interface Order {
   status: string
   createdAt: string
   updatedAt: string
-  orderNumber: string
 }
 
 export default function TrackingPage() {
@@ -277,10 +276,6 @@ export default function TrackingPage() {
                     <div key={order.id} className="bg-white rounded-lg shadow-md p-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <p className="text-sm text-gray-500">رقم الطلب</p>
-                          <p className="font-medium">{order.orderNumber}</p>
-                        </div>
-                        <div>
                           <p className="text-sm text-gray-500">موقع الشراء</p>
                           <p className="font-medium">{order.purchaseSite}</p>
                         </div>
@@ -363,12 +358,6 @@ export default function TrackingPage() {
                             ) : null}
                           </div>
                         </div>
-                        {pkg.currentLocation && (
-                          <div>
-                            <p className="text-sm text-gray-500">الموقع الحالي</p>
-                            <p className="font-medium">{pkg.currentLocation}</p>
-                          </div>
-                        )}
                         <div>
                           <p className="text-sm text-gray-500">المستخدم</p>
                           <p className="font-medium">{pkg.user?.fullName || 'غير معروف'}</p>
@@ -393,10 +382,6 @@ export default function TrackingPage() {
                 orders.map((order) => (
                   <div key={order.id} className="bg-white rounded-lg shadow-md p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm text-gray-500">رقم الطلب</p>
-                        <p className="font-medium">{order.orderNumber}</p>
-                      </div>
                       <div>
                         <p className="text-sm text-gray-500">موقع الشراء</p>
                         <p className="font-medium">{order.purchaseSite}</p>
