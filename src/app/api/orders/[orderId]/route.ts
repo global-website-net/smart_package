@@ -46,7 +46,13 @@ export async function PATCH(request: NextRequest) {
         updatedAt: new Date().toISOString()
       })
       .eq('id', orderId)
-      .select()
+      .select(`
+        *,
+        user:userId (
+          fullName,
+          email
+        )
+      `)
       .single()
 
     if (error) {

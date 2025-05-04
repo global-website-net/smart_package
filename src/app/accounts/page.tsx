@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react'
 import { supabase } from '@/lib/supabase'
 import Header from '@/app/components/Header'
 import { Button } from '@/components/ui/button'
+import { createClient } from '@supabase/supabase-js'
 
 interface User {
   id: string
@@ -47,14 +48,30 @@ export default function AccountsPage() {
       setLoading(true)
       setError('')
 
-      const { data: users, error } = await supabase
+      // Create admin client
+      const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false
+          }
+        }
+      )
+
+      const { data: users, error } = await supabaseAdmin
         .from('User')
         .select('*')
         .eq('role', 'REGULAR')
         .order('createdAt', { ascending: false })
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase error:', error)
+        throw error
+      }
 
+      console.log('Fetched users:', users)
       setUsers(users || [])
     } catch (error) {
       console.error('Error fetching users:', error)

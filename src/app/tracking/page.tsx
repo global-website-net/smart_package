@@ -530,9 +530,7 @@ export default function TrackingPage() {
           onClose={() => setEditingOrder(null)}
           onSuccess={(updatedOrder) => {
             setOrders(orders.map(order => 
-              order.id === updatedOrder.id 
-                ? { ...order, status: updatedOrder.status, totalAmount: updatedOrder.totalAmount, updatedAt: updatedOrder.updatedAt }
-                : order
+              order.id === updatedOrder.id ? updatedOrder : order
             ))
             setEditingOrder(null)
           }}

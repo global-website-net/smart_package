@@ -26,7 +26,6 @@ interface Order {
 interface CreatePackageFormProps {
   onSuccess: (newPackage: any) => void
   onCancel: () => void
-  orders: Order[]
 }
 
 interface PackageFormData {
@@ -37,7 +36,7 @@ interface PackageFormData {
   status: string
 }
 
-export default function CreatePackageForm({ onSuccess, onCancel, orders }: CreatePackageFormProps) {
+export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackageFormProps) {
   const [formData, setFormData] = useState<PackageFormData>({
     orderNumber: '',
     userId: '',
@@ -45,13 +44,15 @@ export default function CreatePackageForm({ onSuccess, onCancel, orders }: Creat
     status: 'PENDING'
   })
   const [users, setUsers] = useState<{ id: string; email: string }[]>([])
-  const [shops, setShops] = useState<{ id: string; email: string }[]>([])
+  const [shops, setShops] = useState<{ id: string; fullName: string }[]>([])
+  const [orders, setOrders] = useState<{ id: string; orderNumber: string; userId: string; user: { fullName: string } }[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
     fetchUsers()
     fetchShops()
+    fetchOrders()
   }, [])
 
   // When an order is selected, automatically set the user
@@ -83,7 +84,7 @@ export default function CreatePackageForm({ onSuccess, onCancel, orders }: Creat
 
   const fetchShops = async () => {
     try {
-      const response = await fetch('/api/users/shops')
+      const response = await fetch('/api/shops')
       if (!response.ok) {
         throw new Error('Failed to fetch shops')
       }
@@ -92,6 +93,20 @@ export default function CreatePackageForm({ onSuccess, onCancel, orders }: Creat
     } catch (error) {
       console.error('Error fetching shops:', error)
       setError('حدث خطأ أثناء جلب المتاجر')
+    }
+  }
+
+  const fetchOrders = async () => {
+    try {
+      const response = await fetch('/api/orders/all')
+      if (!response.ok) {
+        throw new Error('Failed to fetch orders')
+      }
+      const data = await response.json()
+      setOrders(data)
+    } catch (error) {
+      console.error('Error fetching orders:', error)
+      setError('حدث خطأ أثناء جلب الطلبات')
     }
   }
 
@@ -152,7 +167,7 @@ export default function CreatePackageForm({ onSuccess, onCancel, orders }: Creat
                 required
               >
                 <option value="">اختر رقم الطلب</option>
-                {orders?.map(order => (
+                {orders.map(order => (
                   <option key={order.id} value={order.orderNumber}>
                     {order.orderNumber} - {order.user?.fullName || 'غير معروف'}
                   </option>
@@ -189,7 +204,7 @@ export default function CreatePackageForm({ onSuccess, onCancel, orders }: Creat
                 <option value="">اختر المتجر</option>
                 {shops.map(shop => (
                   <option key={shop.id} value={shop.id}>
-                    {shop.email}
+                    {shop.fullName}
                   </option>
                 ))}
               </select>
