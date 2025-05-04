@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -10,11 +10,23 @@ function LoginForm() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const searchParams = useSearchParams()
   const callbackUrl = searchParams?.get('callbackUrl')
   const redirectUrl = callbackUrl || '/'
+
+  // Load saved credentials on component mount
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('rememberedEmail')
+    const savedPassword = localStorage.getItem('rememberedPassword')
+    if (savedEmail && savedPassword) {
+      setEmail(savedEmail)
+      setPassword(savedPassword)
+      setRememberMe(true)
+    }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,6 +43,15 @@ function LoginForm() {
       if (result?.error) {
         setError('البريد الإلكتروني أو كلمة المرور غير صحيحة')
         return
+      }
+
+      // Save or clear credentials based on remember me checkbox
+      if (rememberMe) {
+        localStorage.setItem('rememberedEmail', email)
+        localStorage.setItem('rememberedPassword', password)
+      } else {
+        localStorage.removeItem('rememberedEmail')
+        localStorage.removeItem('rememberedPassword')
       }
 
       router.push(redirectUrl)
@@ -105,7 +126,20 @@ function LoginForm() {
               </div>
             )}
 
-            <div className="text-sm text-center">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <input
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
+                <label htmlFor="remember-me" className="mr-2 block text-sm text-gray-900">
+                  تذكرني
+                </label>
+              </div>
               <Link
                 href="/auth/forgot-password"
                 className="font-medium text-green-600 hover:text-green-500"

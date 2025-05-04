@@ -3,17 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
 import Header from '@/app/components/Header'
-
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 interface BlogPost {
   id: string
@@ -23,9 +17,9 @@ interface BlogPost {
   createdAt: string
   updatedAt: string
   author: {
-    fullName: string
-    email: string
-  }
+    fullName: string | null
+    email: string | null
+  } | null
   itemlink: string
 }
 
@@ -79,7 +73,13 @@ export default function BlogPage() {
       if (error) throw error
 
       if (posts) {
-        setPosts(posts as unknown as BlogPost[])
+        setPosts(posts.map(post => ({
+          ...post,
+          author: post.author || {
+            fullName: 'مجهول',
+            email: null
+          }
+        })) as unknown as BlogPost[])
       }
     } catch (error) {
       console.error('Error fetching posts:', error)
@@ -249,8 +249,8 @@ export default function BlogPage() {
                         </a>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{post.author.fullName}</div>
-                        <div className="text-sm text-gray-500">{post.author.email}</div>
+                        <div className="text-sm text-gray-900">{post.author?.fullName || 'مجهول'}</div>
+                        <div className="text-sm text-gray-500">{post.author?.email || ''}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">

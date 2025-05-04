@@ -22,12 +22,13 @@ export async function POST(request: Request) {
 
     // Get user from database to check role
     const { data: user, error: userError } = await supabase
-      .from('users')
+      .from('User')
       .select('id, role')
       .eq('email', session.user.email)
       .single()
 
     if (userError || !user) {
+      console.error('User lookup error:', userError)
       return NextResponse.json(
         { error: 'لم يتم العثور على المستخدم' },
         { status: 404 }
@@ -74,6 +75,7 @@ export async function POST(request: Request) {
       .single()
 
     if (packageError) {
+      console.error('Package creation error:', packageError)
       throw packageError
     }
 

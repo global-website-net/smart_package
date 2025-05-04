@@ -99,7 +99,7 @@ export default function WalletPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
       <Header />
       
       <main className="p-4 pt-24">
@@ -107,65 +107,73 @@ export default function WalletPage() {
           {/* Title and Wallet Icon */}
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-6">المحفظة</h1>
-            <div className="flex justify-center items-center mb-4">
+            <div className="flex justify-center items-center">
               <div className="relative w-32 sm:w-48 md:w-64">
                 <div className="w-full h-0.5 bg-green-500"></div>
                 <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
               </div>
             </div>
-            <div className="flex justify-center mb-8">
-              <svg className="w-24 h-24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path 
-                  d="M4 4C2.89543 4 2 4.89543 2 6V18C2 19.1046 2.89543 20 4 20H20C21.1046 20 22 19.1046 22 18V8C22 6.89543 21.1046 6 20 6H4"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <path 
-                  d="M16 14H16.01"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </div>
           </div>
 
-          {/* Balance Display */}
-          <div className="text-center mb-12">
-            <div className="flex justify-center items-center gap-8">
-              <div className="flex items-center">
-                <div className="text-3xl text-gray-400">
-                  <span>&#171;&#171;</span>
+          {/* Wallet Icon */}
+          <div className="flex justify-center mb-12">
+            <svg 
+              className="w-24 h-24" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="black" 
+              strokeWidth="1.5"
+            >
+              <rect x="3" y="5" width="18" height="14" rx="2" />
+              <path d="M3 9h18" />
+              <path d="M15 12h2" />
+            </svg>
+          </div>
+
+          {/* Balance Display with Arrows */}
+          <div className="flex flex-col items-center justify-center mb-8">
+            <div className="flex items-center justify-center gap-6 mb-6">
+              {/* Left Arrows */}
+              <div className="flex items-center gap-2">
+                <div className="flex">
+                  <span className="text-4xl text-black">&#171;&#171;</span>
                 </div>
-                <div className="text-3xl text-gray-400 mr-4">
-                  <span>&#171;</span>
+                <div className="flex">
+                  <span className="text-4xl text-black">&#171;</span>
                 </div>
               </div>
-              <span className="text-4xl font-bold">{walletData.balance.toFixed(2)} ₪</span>
-              <div className="flex items-center">
-                <div className="text-3xl text-gray-400 ml-4">
-                  <span>&#187;</span>
+
+              {/* Balance Amount */}
+              <div className="text-4xl font-bold mx-4">
+                {walletData.balance.toFixed(2)} ₪
+              </div>
+
+              {/* Right Arrows */}
+              <div className="flex items-center gap-2">
+                <div className="flex">
+                  <span className="text-4xl text-black">&#187;</span>
                 </div>
-                <div className="text-3xl text-gray-400">
-                  <span>&#187;&#187;</span>
+                <div className="flex">
+                  <span className="text-4xl text-black">&#187;&#187;</span>
                 </div>
               </div>
             </div>
+
+            {/* Add Balance Button */}
             <button
               onClick={() => setShowPaymentWizard(true)}
-              className="mt-6 bg-green-500 text-white px-8 py-2 rounded-full hover:bg-green-600 transition-colors"
+              className="bg-green-500 text-white px-8 py-3 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 mb-8"
             >
               إضافة رصيد
             </button>
-            <div className="mt-12 flex justify-center items-center">
-              <div className="w-full h-0.5 bg-green-500"></div>
-            </div>
+
+            {/* Green Line Separator */}
+            <div className="w-full max-w-md h-0.5 bg-green-500"></div>
           </div>
 
           {/* Transaction History */}
           <div className="mt-12">
-            <h2 className="text-2xl font-bold text-center mb-6">تاريخ المعملات</h2>
+            <h2 className="text-2xl font-bold text-center mb-8">تاريخ المعملات</h2>
             <div className="space-y-4">
               {walletData.transactions.map((transaction) => (
                 <div key={transaction.id} className="flex justify-between items-center border-b pb-4">
@@ -174,12 +182,17 @@ export default function WalletPage() {
                       {transaction.type === 'CREDIT' ? '+' : '-'}{transaction.amount.toFixed(2)}
                     </span>
                   </div>
-                  <div className="text-gray-600">
-                    {new Date(transaction.createdAt).toLocaleDateString('ar-SA', {
-                      month: '2-digit',
-                      day: '2-digit',
-                      year: '2-digit'
-                    })}
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-600">
+                      {new Date(transaction.createdAt).toLocaleDateString('ar-SA', {
+                        month: '2-digit',
+                        day: '2-digit',
+                        year: '2-digit'
+                      })}
+                    </span>
+                    <svg className="w-5 h-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                    </svg>
                   </div>
                 </div>
               ))}

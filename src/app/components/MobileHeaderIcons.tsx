@@ -14,23 +14,33 @@ export default function MobileHeaderIcons({ isRegularUser }: MobileHeaderIconsPr
       {/* Wallet - Right */}
       {isRegularUser && (
         <Link href="/wallet" className="text-white">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+          <svg 
+            className="w-8 h-8" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="1.5"
+          >
+            <rect x="3" y="5" width="18" height="14" rx="2" />
+            <path d="M3 9h18" />
+            <path d="M15 12h2" />
           </svg>
         </Link>
       )}
 
       {/* New Order - Middle */}
       {isRegularUser && (
-        <Link href="/new-order" className="relative">
-          <div className="w-7 h-7 rounded-full border-2 border-green-500"></div>
+        <Link href="/new-order" className="text-white">
           <svg 
-            className="w-6 h-6 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" 
+            className="w-8 h-8" 
+            viewBox="0 0 24 24" 
             fill="none" 
-            stroke="#22C55E" 
-            viewBox="0 0 24 24"
+            stroke="currentColor" 
+            strokeWidth="1.5"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <path d="M12 8v8" />
+            <path d="M8 12h8" />
           </svg>
         </Link>
       )}
@@ -38,8 +48,15 @@ export default function MobileHeaderIcons({ isRegularUser }: MobileHeaderIconsPr
       {/* User Account or Login Button - Left */}
       {isLoggedIn ? (
         <Link href="/account" className="text-white">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          <svg 
+            className="w-8 h-8" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="1.5"
+          >
+            <circle cx="12" cy="8" r="4" />
+            <path d="M20 21a8 8 0 10-16 0" />
           </svg>
         </Link>
       ) : (
