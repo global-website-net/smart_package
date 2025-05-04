@@ -23,7 +23,6 @@ interface Package {
   shop: {
     fullName: string
   }
-  orderNumber: string
 }
 
 interface Order {
@@ -348,10 +347,6 @@ export default function TrackingPage() {
                           <p className="font-medium">{pkg.trackingNumber}</p>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-500">رقم الطلب</p>
-                          <p className="font-medium">{pkg.orderNumber}</p>
-                        </div>
-                        <div>
                           <p className="text-sm text-gray-500">الحالة</p>
                           <div className="flex items-center gap-2">
                             <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
@@ -376,11 +371,11 @@ export default function TrackingPage() {
                         )}
                         <div>
                           <p className="text-sm text-gray-500">المستخدم</p>
-                          <p className="font-medium">{pkg.user.fullName}</p>
+                          <p className="font-medium">{pkg.user?.fullName || 'غير معروف'}</p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">المتجر</p>
-                          <p className="font-medium">{pkg.shop.fullName}</p>
+                          <p className="font-medium">{pkg.shop?.fullName || 'غير معروف'}</p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">تاريخ الإنشاء</p>

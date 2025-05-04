@@ -131,37 +131,29 @@ export default function WalletPage() {
           </div>
 
           {/* Balance Display with Arrows */}
-          <div className="flex justify-center items-center mb-12">
+          <div className="flex items-center justify-center mb-8">
             {/* Left Side Arrows */}
             <div className="flex items-center gap-2">
-              <button className="text-4xl text-black cursor-pointer">
-                <svg viewBox="0 0 24 24" className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+              <button className="bg-black text-white px-3 py-1 rounded cursor-pointer">
+                &lt;&lt;
               </button>
-              <button className="text-4xl text-black cursor-pointer">
-                <svg viewBox="0 0 24 24" className="w-12 h-8" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M6 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+              <button className="bg-black text-white px-3 py-1 rounded cursor-pointer">
+                &lt;
               </button>
             </div>
 
             {/* Balance Amount */}
-            <div className="mx-8">
+            <div className="mx-4">
               <p className="text-4xl font-bold">{walletData.balance.toFixed(2)} ₪</p>
             </div>
 
             {/* Right Side Arrows */}
             <div className="flex items-center gap-2">
-              <button className="text-4xl text-black cursor-pointer">
-                <svg viewBox="0 0 24 24" className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M15 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+              <button className="bg-black text-white px-3 py-1 rounded cursor-pointer">
+                &gt;
               </button>
-              <button className="text-4xl text-black cursor-pointer">
-                <svg viewBox="0 0 24 24" className="w-12 h-8" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M18 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+              <button className="bg-black text-white px-3 py-1 rounded cursor-pointer">
+                &gt;&gt;
               </button>
             </div>
           </div>

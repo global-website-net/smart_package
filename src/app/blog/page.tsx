@@ -211,12 +211,6 @@ export default function BlogPage() {
                   </CardTitle>
                   <div className="flex items-center justify-between text-sm text-gray-500">
                     <div>
-                      <span>بواسطة: {post.author?.fullName || 'مجهول'}</span>
-                      {post.author?.email && (
-                        <span className="mr-2"> ({post.author.email})</span>
-                      )}
-                    </div>
-                    <div>
                       {new Date(post.createdAt).toLocaleDateString('ar-SA', {
                         year: 'numeric',
                         month: '2-digit',
@@ -228,6 +222,7 @@ export default function BlogPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="prose max-w-none">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">المحتوى:</h3>
                     <p className="text-gray-700 whitespace-pre-wrap">{post.content}</p>
                   </div>
                   {post.itemlink && (

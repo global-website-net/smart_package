@@ -115,7 +115,7 @@ export default function Header() {
           )}
 
           {/* Center Logo */}
-          <div className="flex items-center justify-center order-2">
+          <div className="flex-1 flex justify-center order-2">
             <Link href="/" className="flex items-center space-x-2 rtl:space-x-reverse">
               <span className="text-sm md:text-xl">SMART PACKAGE</span>
               <svg 
@@ -202,10 +202,10 @@ export default function Header() {
           )}
 
           {/* Mobile Icons */}
-          <div className="md:hidden order-3">
-                <MobileHeaderIcons isRegularUser={isRegularUser} />
-              </div>
+          <div className={`md:hidden order-3 ${isLoginPage ? 'invisible' : ''}`}>
+            <MobileHeaderIcons isRegularUser={isRegularUser} />
           </div>
+        </div>
       </div>
     </header>
   )
