@@ -207,15 +207,15 @@ export default function BlogPage() {
               <Card key={post.id} className="bg-white rounded-lg shadow-md">
                 <CardHeader>
                   <div className="mb-2">
-                    <span className="text-lg font-bold text-gray-500">العنوان:</span>
+                    <span className="text-lg font-bold text-black">العنوان:</span>
                   </div>
-                  <CardTitle className="text-base font-normal text-gray-900">
+                  <CardTitle className="text-base font-normal text-gray-700">
                     {post.title}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="prose max-w-none">
-                    <h3 className="text-lg font-bold text-gray-800 mb-3">المحتوى:</h3>
+                    <h3 className="text-lg font-bold text-black mb-3">المحتوى:</h3>
                     <p className="text-base font-normal text-gray-700 whitespace-pre-wrap">{post.content}</p>
                   </div>
                   {post.itemlink && (
@@ -231,8 +231,8 @@ export default function BlogPage() {
                     </div>
                   )}
                   <div className="mt-4">
-                    <div className="text-lg font-bold text-gray-500 mb-1">تاريخ الإنشاء:</div>
-                    <div className="text-base font-normal text-gray-500">
+                    <div className="text-lg font-bold text-black mb-1">تاريخ الإنشاء:</div>
+                    <div className="text-base font-normal text-gray-700">
                       {new Date(post.createdAt).toLocaleDateString('ar-SA', {
                         year: 'numeric',
                         month: '2-digit',

@@ -8,6 +8,7 @@ import Link from 'next/link'
 import EditPackageStatus from '@/components/EditPackageStatus'
 import { toast } from 'react-hot-toast'
 import { Button } from '@/components/ui/button'
+import PaymentConfirmationWizard from '@/components/PaymentConfirmationWizard'
 
 interface Package {
   id: string
@@ -35,6 +36,7 @@ interface Order {
   status: string
   createdAt: string
   updatedAt: string
+  totalAmount?: number
 }
 
 export default function TrackingPage() {
@@ -46,6 +48,9 @@ export default function TrackingPage() {
   const [error, setError] = useState('')
   const [editingPackage, setEditingPackage] = useState<Package | null>(null)
   const [editingOrder, setEditingOrder] = useState<Order | null>(null)
+  const [showPaymentWizard, setShowPaymentWizard] = useState(false)
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const [paymentAmount, setPaymentAmount] = useState(0)
 
   const statusOptions = [
     { value: 'PENDING_APPROVAL', label: 'في انتظار الموافقة' },
@@ -209,6 +214,58 @@ export default function TrackingPage() {
     } catch (error) {
       console.error('Error updating order status:', error)
       toast.error(error instanceof Error ? error.message : 'حدث خطأ أثناء تحديث حالة الطلب')
+    }
+  }
+
+  const handlePayClick = (order: Order) => {
+    setSelectedOrder(order)
+    setPaymentAmount(order.totalAmount || 0)
+    setShowPaymentWizard(true)
+  }
+
+  const handlePaymentConfirm = async () => {
+    try {
+      // First check if user has enough balance
+      const walletResponse = await fetch('/api/wallet')
+      if (!walletResponse.ok) {
+        throw new Error('Failed to fetch wallet data')
+      }
+      const walletData = await walletResponse.json()
+
+      if (walletData.balance < paymentAmount) {
+        toast.error('رصيد المحفظة غير كافٍ')
+        return
+      }
+
+      // Process payment
+      const paymentResponse = await fetch('/api/orders/pay', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderId: selectedOrder?.id,
+          amount: paymentAmount
+        }),
+      })
+
+      if (!paymentResponse.ok) {
+        throw new Error('Failed to process payment')
+      }
+
+      // Update local state
+      setOrders(orders.map(order => 
+        order.id === selectedOrder?.id 
+          ? { ...order, status: 'ORDERING' }
+          : order
+      ))
+
+      toast.success('تم الدفع بنجاح')
+      setShowPaymentWizard(false)
+      setSelectedOrder(null)
+    } catch (error) {
+      console.error('Payment error:', error)
+      toast.error('حدث خطأ أثناء عملية الدفع')
     }
   }
 
@@ -403,9 +460,19 @@ export default function TrackingPage() {
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">الحالة</p>
-                        <span className={`px-2 py-1 rounded-full ${getStatusColor(order.status)}`}>
-                          {getStatusText(order.status)}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2 py-1 rounded-full ${getStatusColor(order.status)}`}>
+                            {getStatusText(order.status)}
+                          </span>
+                          {session?.user?.role === 'REGULAR' && order.status === 'AWAITING_PAYMENT' && (
+                            <Button
+                              onClick={() => handlePayClick(order)}
+                              className="bg-green-500 text-white hover:bg-green-600"
+                            >
+                              دفع
+                            </Button>
+                          )}
+                        </div>
                       </div>
                       {order.notes && (
                         <div className="col-span-2">
@@ -484,6 +551,17 @@ export default function TrackingPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {showPaymentWizard && (
+        <PaymentConfirmationWizard
+          onClose={() => {
+            setShowPaymentWizard(false)
+            setSelectedOrder(null)
+          }}
+          onConfirm={handlePaymentConfirm}
+          amount={paymentAmount}
+        />
       )}
     </div>
   )

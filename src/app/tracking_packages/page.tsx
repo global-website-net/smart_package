@@ -112,7 +112,8 @@ export default function TrackingPackagesPage() {
 
   const fetchOrders = async () => {
     try {
-      const { data: orders, error } = await supabase
+      // First get all orders
+      const { data: orders, error: ordersError } = await supabase
         .from('order')
         .select(`
           id,
@@ -128,10 +129,21 @@ export default function TrackingPackagesPage() {
         `)
         .order('createdAt', { ascending: false })
 
-      if (error) throw error
+      if (ordersError) throw ordersError
+
+      // Get all packages to check which orders already have packages
+      const { data: packages, error: packagesError } = await supabase
+        .from('package')
+        .select('orderNumber')
+
+      if (packagesError) throw packagesError
+
+      // Filter out orders that already have packages
+      const usedOrderNumbers = new Set(packages?.map(p => p.orderNumber) || [])
+      const availableOrders = orders.filter(order => !usedOrderNumbers.has(order.orderNumber))
       
       // Transform the data to match the Order interface
-      const transformedOrders = orders.map(order => ({
+      const transformedOrders = availableOrders.map(order => ({
         ...order,
         user: order.user?.[0] || { fullName: 'غير معروف', email: '' }
       })) as Order[]
