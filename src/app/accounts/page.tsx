@@ -3,10 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { supabase } from '@/lib/supabase'
 import Header from '@/app/components/Header'
-import { Button } from '@/components/ui/button'
-import { createClient } from '@supabase/supabase-js'
 
 interface User {
   id: string
@@ -48,30 +45,12 @@ export default function AccountsPage() {
       setLoading(true)
       setError('')
 
-      // Create admin client
-      const supabaseAdmin = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-        {
-          auth: {
-            autoRefreshToken: false,
-            persistSession: false
-          }
-        }
-      )
-
-      const { data: users, error } = await supabaseAdmin
-        .from('User')
-        .select('*')
-        .eq('role', 'REGULAR')
-        .order('createdAt', { ascending: false })
-
-      if (error) {
-        console.error('Supabase error:', error)
-        throw error
+      const response = await fetch('/api/users')
+      if (!response.ok) {
+        throw new Error('Failed to fetch users')
       }
-
-      console.log('Fetched users:', users)
+      
+      const users = await response.json()
       setUsers(users || [])
     } catch (error) {
       console.error('Error fetching users:', error)
