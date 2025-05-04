@@ -34,13 +34,11 @@ export default function MobileHeaderIcons({ isRegularUser }: MobileHeaderIconsPr
           <svg 
             className="w-8 h-8" 
             viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="1.5"
+            fill="none"
           >
-            <circle cx="12" cy="12" r="10" fill="#22c55e" stroke="#22c55e" />
-            <path d="M12 8v8" stroke="white" strokeWidth="2" />
-            <path d="M8 12h8" stroke="white" strokeWidth="2" />
+            <circle cx="12" cy="12" r="10" stroke="#22c55e" strokeWidth="1.5" fill="black" />
+            <path d="M12 8v8" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M8 12h8" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </Link>
       )}

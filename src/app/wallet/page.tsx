@@ -131,45 +131,55 @@ export default function WalletPage() {
           </div>
 
           {/* Balance Display with Arrows */}
-          <div className="flex flex-col items-center justify-center mb-8">
-            <div className="flex items-center justify-center gap-6 mb-6">
-              {/* Left Arrows */}
-              <div className="flex items-center gap-2">
-                <div className="flex">
-                  <span className="text-4xl text-black">&#171;&#171;</span>
-                </div>
-                <div className="flex">
-                  <span className="text-4xl text-black">&#171;</span>
-                </div>
-              </div>
-
-              {/* Balance Amount */}
-              <div className="text-4xl font-bold mx-4">
-                {walletData.balance.toFixed(2)} ₪
-              </div>
-
-              {/* Right Arrows */}
-              <div className="flex items-center gap-2">
-                <div className="flex">
-                  <span className="text-4xl text-black">&#187;</span>
-                </div>
-                <div className="flex">
-                  <span className="text-4xl text-black">&#187;&#187;</span>
-                </div>
-              </div>
+          <div className="flex items-center justify-center gap-6 mb-6">
+            {/* Right Side Arrows */}
+            <div className="flex items-center gap-2">
+              <button className="text-4xl text-black cursor-pointer">
+                <svg viewBox="0 0 24 24" className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M15 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              <button className="text-4xl text-black cursor-pointer">
+                <svg viewBox="0 0 24 24" className="w-12 h-8" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M12 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
             </div>
 
-            {/* Add Balance Button */}
+            {/* Balance Amount */}
+            <div className="text-4xl font-bold mx-4 font-mono">
+              {walletData.balance.toFixed(2)}₪
+            </div>
+
+            {/* Left Side Arrows */}
+            <div className="flex items-center gap-2">
+              <button className="text-4xl text-black cursor-pointer">
+                <svg viewBox="0 0 24 24" className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              <button className="text-4xl text-black cursor-pointer">
+                <svg viewBox="0 0 24 24" className="w-12 h-8" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M6 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M12 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Add Balance Button */}
+          <div className="flex justify-center">
             <button
               onClick={() => setShowPaymentWizard(true)}
-              className="bg-green-500 text-white px-8 py-3 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 mb-8"
+              className="bg-green-500 text-white px-8 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 mb-12"
             >
-              إضافة رصيد
+              Call To Action
             </button>
-
-            {/* Green Line Separator */}
-            <div className="w-full max-w-md h-0.5 bg-green-500"></div>
           </div>
+
+          {/* Green Line Separator */}
+          <div className="w-full max-w-md h-0.5 bg-green-500"></div>
 
           {/* Transaction History */}
           <div className="mt-12">

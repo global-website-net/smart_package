@@ -40,8 +40,13 @@ export default function Header() {
         { href: '/shop/orders', label: 'الطلبات' },
         { href: '/shop/packages', label: 'الطرود' },
       ]
+    } else {
+      // Default menu items for non-logged-in users
+      return [
+        { href: '/packages', label: 'أسعارنا' },
+        { href: '/blog', label: 'بلوج' },
+      ]
     }
-    return []
   }
 
   return (
@@ -82,7 +87,7 @@ export default function Header() {
                     {item.label}
                   </Link>
                 ))}
-                {isLoggedIn && (
+                {isLoggedIn ? (
                   <button
                     onClick={() => {
                       handleSignOut()
@@ -92,13 +97,21 @@ export default function Header() {
                   >
                     تسجيل الخروج
                   </button>
+                ) : (
+                  <Link
+                    href="/auth/login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block w-full text-right px-4 py-2 text-sm text-white hover:bg-gray-800"
+                  >
+                    تسجيل الدخول
+                  </Link>
                 )}
               </div>
             )}
           </div>
 
           {/* Center Logo */}
-          <div className={`flex items-center justify-center ${isLoginPage ? 'flex-1' : 'order-2'}`}>
+          <div className="flex items-center justify-center order-2">
             <Link href="/" className="flex items-center space-x-2 rtl:space-x-reverse">
               <span className="text-sm md:text-xl">SMART PACKAGE</span>
               <svg 
@@ -131,7 +144,7 @@ export default function Header() {
           </div>
 
           {/* Desktop Navigation - Hidden on Mobile */}
-          <div className="hidden md:flex items-center space-x-4 rtl:space-x-reverse">
+          <div className="hidden md:flex items-center space-x-4 rtl:space-x-reverse order-3">
             {!isLoginPage && (
               <>
                 <Link 
@@ -140,10 +153,55 @@ export default function Header() {
                 >
                   أسعارنا
                 </Link>
-                {!isLoggedIn && (
+                {isLoggedIn ? (
+                  <div className="relative">
+                    <button
+                      onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                      className="flex items-center space-x-2 rtl:space-x-reverse text-white hover:text-green-500 transition-colors"
+                    >
+                      <span className="text-lg font-medium">{session?.user?.name}</span>
+                      <svg
+                        className={`w-5 h-5 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </button>
+                    {isUserMenuOpen && (
+                      <div className="absolute right-0 mt-2 w-48 bg-black rounded-md shadow-lg overflow-hidden">
+                        {getMenuItems().map((item) => (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="block px-4 py-2 text-sm text-white hover:bg-gray-800"
+                          >
+                            {item.label}
+                          </Link>
+                        ))}
+                        <button
+                          onClick={() => {
+                            handleSignOut()
+                            setIsUserMenuOpen(false)
+                          }}
+                          className="block w-full text-right px-4 py-2 text-sm text-white hover:bg-gray-800"
+                        >
+                          تسجيل الخروج
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
                   <Link
                     href="/auth/login"
-                    className="text-white hover:text-green-500 transition-colors text-lg font-semibold border-b-2 border-transparent hover:border-green-500"
+                    className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors text-sm font-medium"
                   >
                     تسجيل الدخول
                   </Link>
