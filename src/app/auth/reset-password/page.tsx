@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 import { toast } from 'sonner'
@@ -12,7 +12,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [loading, setLoading] = useState(true)
@@ -21,7 +21,7 @@ export default function ResetPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
 
   useEffect(() => {
-    const accessToken = searchParams.get('access_token')
+    const accessToken = searchParams?.get('access_token')
     if (!accessToken) {
       setError('رابط إعادة تعيين كلمة المرور غير صالح')
       setLoading(false)
@@ -69,7 +69,7 @@ export default function ResetPasswordPage() {
       setLoading(true)
       setError('')
 
-      const accessToken = searchParams.get('access_token')
+      const accessToken = searchParams?.get('access_token')
       if (!accessToken) {
         throw new Error('رابط إعادة تعيين كلمة المرور غير صالح')
       }
@@ -169,5 +169,24 @@ export default function ResetPasswordPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <main className="p-4 pt-24">
+          <div className="max-w-md mx-auto">
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+            </div>
+          </div>
+        </main>
+      </div>
+    }>
+      <ResetPasswordContent />
+    </Suspense>
   )
 } 
