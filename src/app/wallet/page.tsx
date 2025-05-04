@@ -142,14 +142,13 @@ export default function WalletPage() {
               <button className="text-4xl text-black cursor-pointer">
                 <svg viewBox="0 0 24 24" className="w-12 h-8" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M6 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M12 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </button>
             </div>
 
             {/* Balance Amount */}
-            <div className="text-4xl font-bold mx-4 font-mono">
-              {walletData.balance.toFixed(2)}₪
+            <div className="mx-8">
+              <p className="text-4xl font-bold">{walletData.balance.toFixed(2)} ₪</p>
             </div>
 
             {/* Right Side Arrows */}
@@ -162,24 +161,21 @@ export default function WalletPage() {
               <button className="text-4xl text-black cursor-pointer">
                 <svg viewBox="0 0 24 24" className="w-12 h-8" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M18 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M12 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </button>
             </div>
           </div>
 
-          {/* Add Balance Button */}
-          <div className="flex justify-center">
+          {/* Add Balance Button and Green Line */}
+          <div className="flex flex-col items-center">
             <button
               onClick={() => setShowPaymentWizard(true)}
-              className="bg-green-500 text-white px-8 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 mb-12"
+              className="bg-green-500 text-white px-8 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 mb-4"
             >
               إضافة رصيد
             </button>
+            <div className="w-48 h-0.5 bg-green-500"></div>
           </div>
-
-          {/* Green Line Separator */}
-          <div className="w-full max-w-md h-0.5 bg-green-500"></div>
 
           {/* Transaction History */}
           <div className="mt-12">

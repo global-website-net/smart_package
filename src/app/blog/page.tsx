@@ -220,7 +220,8 @@ export default function BlogPage() {
                       {new Date(post.createdAt).toLocaleDateString('ar-SA', {
                         year: 'numeric',
                         month: '2-digit',
-                        day: '2-digit'
+                        day: '2-digit',
+                        calendar: 'gregory'
                       })}
                     </div>
                   </div>
@@ -242,9 +243,8 @@ export default function BlogPage() {
                     </div>
                   )}
                   {isAdminOrOwner && (
-                    <div className="mt-4 flex justify-end space-x-4 rtl:space-x-reverse">
-                      <Button
-                        variant="outline"
+                    <div className="mt-4 flex justify-center space-x-4 rtl:space-x-reverse">
+                      <button
                         onClick={() => {
                           setEditingPost(post)
                           setEditFormData({
@@ -253,16 +253,16 @@ export default function BlogPage() {
                             itemLink: post.itemlink
                           })
                         }}
-                        className="text-indigo-600 hover:text-indigo-900"
+                        className="bg-gray-300 text-gray-800 px-6 py-2 rounded-md hover:bg-gray-400 transition-colors"
                       >
                         تعديل
-                      </Button>
-                      <Button
-                        variant="destructive"
+                      </button>
+                      <button
                         onClick={() => setPostToDelete(post)}
+                        className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors"
                       >
                         حذف
-                      </Button>
+                      </button>
                     </div>
                   )}
                 </CardContent>
@@ -324,14 +324,16 @@ export default function BlogPage() {
 
           {/* Delete Confirmation Modal */}
           {postToDelete && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-              <div className="bg-white rounded-lg p-6">
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-lg p-6 max-w-md w-full">
                 <h2 className="text-xl font-bold mb-4">تأكيد الحذف</h2>
-                <p className="mb-4">هل أنت متأكد من حذف هذا المقال؟</p>
-                <div className="flex justify-end space-x-4">
+                <p className="text-gray-600 mb-6">
+                  هل أنت متأكد من رغبتك في حذف هذا المقال؟ لا يمكن التراجع عن هذا الإجراء.
+                </p>
+                <div className="flex justify-center space-x-4 rtl:space-x-reverse mt-6 gap-4">
                   <button
                     onClick={() => setPostToDelete(null)}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                    className="bg-gray-300 text-gray-800 px-6 py-2 rounded-md hover:bg-gray-400 transition-colors"
                   >
                     إلغاء
                   </button>
@@ -340,7 +342,7 @@ export default function BlogPage() {
                       handleDeletePost(postToDelete.id)
                       setPostToDelete(null)
                     }}
-                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                    className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors"
                   >
                     حذف
                   </button>

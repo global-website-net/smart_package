@@ -488,20 +488,19 @@ export default function TrackingPage() {
               </select>
             </div>
 
-            <div className="flex justify-center space-x-4 rtl:space-x-reverse">
-              <Button
-                variant="outline"
+            <div className="flex justify-center space-x-4 rtl:space-x-reverse mt-6 gap-4">
+              <button
                 onClick={() => setEditingOrder(null)}
-                className="bg-gray-200 text-gray-700 hover:bg-gray-300"
+                className="bg-gray-300 text-gray-800 px-6 py-2 rounded-md hover:bg-gray-400 transition-colors"
               >
                 إلغاء
-              </Button>
-              <Button
+              </button>
+              <button
                 onClick={() => handleUpdateOrderStatus(editingOrder.id, editingOrder.status)}
-                className="bg-green-500 text-white hover:bg-green-600"
+                className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 transition-colors"
               >
                 حفظ
-              </Button>
+              </button>
             </div>
           </div>
         </div>

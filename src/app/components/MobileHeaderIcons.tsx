@@ -15,7 +15,7 @@ export default function MobileHeaderIcons({ isRegularUser }: MobileHeaderIconsPr
       {isRegularUser && (
         <Link href="/wallet" className="text-white">
           <svg 
-            className="w-8 h-8" 
+            className="w-6 h-6" 
             viewBox="0 0 24 24" 
             fill="none" 
             stroke="currentColor" 
@@ -32,7 +32,7 @@ export default function MobileHeaderIcons({ isRegularUser }: MobileHeaderIconsPr
       {isRegularUser && (
         <Link href="/new-order" className="text-white">
           <svg 
-            className="w-8 h-8" 
+            className="w-6 h-6" 
             viewBox="0 0 24 24" 
             fill="none"
           >
@@ -47,7 +47,7 @@ export default function MobileHeaderIcons({ isRegularUser }: MobileHeaderIconsPr
       {isLoggedIn ? (
         <Link href="/account" className="text-white">
           <svg 
-            className="w-8 h-8" 
+            className="w-6 h-6" 
             viewBox="0 0 24 24" 
             fill="none" 
             stroke="currentColor" 
