@@ -31,6 +31,7 @@ export default function Header() {
       ]
     } else if (session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') {
       return [
+        { href: '/accounts', label: 'جميع الحسابات' },
         { href: '/tracking', label: 'ادارة الطلبات' },
         { href: '/tracking_packages', label: 'ادارة الطرود' },
         { href: '/blog', label: 'بلوج' },
@@ -206,46 +207,6 @@ export default function Header() {
           <div className={`md:hidden order-3 ${isLoginPage ? 'invisible' : ''}`}>
             <MobileHeaderIcons isRegularUser={isRegularUser} />
           </div>
-
-          {/* Right Side - Dropdown for ADMIN/OWNER */}
-          {!isLoginPage && (
-            <div className="hidden md:flex items-center order-4">
-              {(session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') && (
-                <div className="relative">
-                  <button
-                    onClick={() => setShowDropdown(!showDropdown)}
-                    className="flex items-center text-gray-700 hover:text-gray-900"
-                  >
-                    <span className="mr-2">الإدارة</span>
-                    <svg
-                      className={`h-5 w-5 transition-transform ${showDropdown ? 'rotate-180' : ''}`}
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-
-                  {showDropdown && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                      <Link
-                        href="/accounts"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        onClick={() => setShowDropdown(false)}
-                      >
-                        جميع الحسابات
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </div>
     </header>

@@ -129,18 +129,30 @@ export default function TrackingPackagesPage() {
         `)
         .order('createdAt', { ascending: false })
 
-      if (ordersError) throw ordersError
+      if (ordersError) {
+        console.error('Error fetching orders:', ordersError)
+        throw ordersError
+      }
+
+      console.log('Fetched orders:', orders) // Debug log
 
       // Get all packages to check which orders already have packages
       const { data: packages, error: packagesError } = await supabase
         .from('package')
         .select('orderNumber')
 
-      if (packagesError) throw packagesError
+      if (packagesError) {
+        console.error('Error fetching packages:', packagesError)
+        throw packagesError
+      }
+
+      console.log('Fetched packages:', packages) // Debug log
 
       // Filter out orders that already have packages
       const usedOrderNumbers = new Set(packages?.map(p => p.orderNumber) || [])
       const availableOrders = orders.filter(order => !usedOrderNumbers.has(order.orderNumber))
+      
+      console.log('Available orders:', availableOrders) // Debug log
       
       // Transform the data to match the Order interface
       const transformedOrders = availableOrders.map(order => ({
@@ -148,6 +160,7 @@ export default function TrackingPackagesPage() {
         user: order.user?.[0] || { fullName: 'غير معروف', email: '' }
       })) as Order[]
       
+      console.log('Transformed orders:', transformedOrders) // Debug log
       setOrders(transformedOrders)
     } catch (err) {
       console.error('Error fetching orders:', err)

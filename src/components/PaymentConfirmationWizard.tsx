@@ -22,20 +22,19 @@ export default function PaymentConfirmationWizard({
           <p className="text-center text-gray-700">
             هل أنت متأكد من رغبتك في دفع مبلغ {amount.toFixed(2)} ₪؟
           </p>
-          <div className="flex justify-center space-x-4 rtl:space-x-reverse">
-            <Button
-              variant="outline"
+          <div className="flex justify-center gap-4 rtl:space-x-reverse">
+            <button
               onClick={onClose}
-              className="bg-gray-500 text-white hover:bg-gray-600"
+              className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
             >
               إلغاء
-            </Button>
-            <Button
+            </button>
+            <button
               onClick={onConfirm}
-              className="bg-green-500 text-white hover:bg-green-600"
+              className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
             >
               تأكيد الدفع
-            </Button>
+            </button>
           </div>
         </div>
       </div>

@@ -189,7 +189,10 @@ export default function TrackingPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ 
+          status: newStatus,
+          totalAmount: editingOrder?.totalAmount 
+        }),
       })
 
       if (!response.ok) {
@@ -199,10 +202,10 @@ export default function TrackingPage() {
 
       const updatedOrder = await response.json()
       
-      // Update the orders state with the new status
+      // Update the orders state with the new status and amount
       setOrders(orders.map(order => 
         order.id === orderId 
-          ? { ...order, status: updatedOrder.status, updatedAt: updatedOrder.updatedAt }
+          ? { ...order, status: updatedOrder.status, totalAmount: updatedOrder.totalAmount, updatedAt: updatedOrder.updatedAt }
           : order
       ))
 
@@ -367,6 +370,11 @@ export default function TrackingPage() {
                               </Button>
                             )}
                           </div>
+                          {order.status === 'AWAITING_PAYMENT' && order.totalAmount && (
+                            <p className="text-sm text-gray-500 mt-2">
+                              مبلغ الدفع: {order.totalAmount.toFixed(2)} شيكل
+                            </p>
+                          )}
                         </div>
                         {order.notes && (
                           <div className="col-span-2">
@@ -535,16 +543,31 @@ export default function TrackingPage() {
               </select>
             </div>
 
+            {editingOrder.status === 'AWAITING_PAYMENT' && (
+              <div className="mb-4">
+                <label className="block text-gray-700 mb-2">مبلغ الدفع (شيكل)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={editingOrder.totalAmount || ''}
+                  onChange={(e) => setEditingOrder({ ...editingOrder, totalAmount: parseFloat(e.target.value) })}
+                  className="w-full px-3 py-2 border rounded-md"
+                  required
+                />
+              </div>
+            )}
+
             <div className="flex justify-center space-x-4 rtl:space-x-reverse mt-6 gap-4">
               <button
                 onClick={() => setEditingOrder(null)}
-                className="bg-gray-300 text-gray-800 px-6 py-2 rounded-md hover:bg-gray-400 transition-colors"
+                className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
               >
                 إلغاء
               </button>
               <button
                 onClick={() => handleUpdateOrderStatus(editingOrder.id, editingOrder.status)}
-                className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 transition-colors"
+                className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
               >
                 حفظ
               </button>

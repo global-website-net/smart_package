@@ -51,34 +51,25 @@ export default function CreatePackageForm({ onSuccess, onCancel, orders }: Creat
   const [error, setError] = useState('')
 
   useEffect(() => {
-    // Fetch shops and users when component mounts
-    const fetchUsers = async () => {
-      try {
-        // Fetch shops (users with SHOP role)
-        const shopsResponse = await fetch('/api/users/shops')
-        if (!shopsResponse.ok) {
-          throw new Error('Failed to fetch shops')
-        }
-        const shopsData = await shopsResponse.json()
-        console.log('Fetched shops:', shopsData)
-        setShops(shopsData)
-
-        // Fetch regular users using the correct endpoint
-        const usersResponse = await fetch('/api/users/regular')
-        if (!usersResponse.ok) {
-          throw new Error('Failed to fetch regular users')
-        }
-        const usersData = await usersResponse.json()
-        console.log('Fetched regular users:', usersData)
-        setUsers(usersData)
-      } catch (error) {
-        console.error('Error fetching users:', error)
-        setError('حدث خطأ أثناء جلب البيانات')
-      }
-    }
-
+    // Fetch users when component mounts
     fetchUsers()
-  }, [])
+  }, []) // Empty dependency array means this runs once when component mounts
+
+  const fetchUsers = async () => {
+    try {
+      // Fetch regular users using the correct endpoint
+      const usersResponse = await fetch('/api/users/regular')
+      if (!usersResponse.ok) {
+        throw new Error('Failed to fetch regular users')
+      }
+      const usersData = await usersResponse.json()
+      console.log('Fetched regular users:', usersData)
+      setUsers(usersData)
+    } catch (error) {
+      console.error('Error fetching users:', error)
+      setError('حدث خطأ أثناء جلب البيانات')
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -92,6 +83,7 @@ export default function CreatePackageForm({ onSuccess, onCancel, orders }: Creat
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          orderNumber: formData.orderNumber,
           status: formData.status,
           shopId: formData.shopId,
           userId: formData.userId
