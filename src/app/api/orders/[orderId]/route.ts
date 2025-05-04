@@ -3,11 +3,16 @@ import { supabase } from '@/lib/supabase'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/auth.config'
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { orderId: string } }
-) {
+export async function PATCH(request: NextRequest) {
   try {
+    const orderId = request.url.split('/').pop()
+    if (!orderId) {
+      return NextResponse.json(
+        { error: 'Order ID is required' },
+        { status: 400 }
+      )
+    }
+
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json(
@@ -40,7 +45,7 @@ export async function PATCH(
         totalAmount: status === 'AWAITING_PAYMENT' ? totalAmount : null,
         updatedAt: new Date().toISOString()
       })
-      .eq('id', params.orderId)
+      .eq('id', orderId)
       .select()
       .single()
 
