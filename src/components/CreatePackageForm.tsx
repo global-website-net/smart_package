@@ -15,12 +15,27 @@ interface User {
   email: string
 }
 
+interface Order {
+  id: string
+  orderNumber: string
+  status: string
+  createdAt: string
+  updatedAt: string
+  userId: string
+  user: {
+    fullName: string
+    email: string
+  }
+}
+
 interface CreatePackageFormProps {
   onSuccess: (newPackage: any) => void
   onCancel: () => void
+  orders: Order[]
 }
 
 interface FormData {
+  orderNumber: string
   trackingNumber: string
   status: string
   shopId: string
@@ -34,12 +49,13 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackageFormProps) {
+export default function CreatePackageForm({ onSuccess, onCancel, orders }: CreatePackageFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [shops, setShops] = useState<Shop[]>([])
   const [users, setUsers] = useState<User[]>([])
   const [formData, setFormData] = useState<FormData>({
+    orderNumber: '',
     trackingNumber: '',
     status: 'PENDING',
     shopId: '',
@@ -82,17 +98,25 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
     }
   }
 
+  const generateTrackingNumber = () => {
+    const timestamp = Date.now().toString(36)
+    const random = Math.random().toString(36).substring(2, 8)
+    return `PKG-${timestamp}-${random}`.toUpperCase()
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
     setError('')
 
     try {
+      const trackingNumber = generateTrackingNumber()
+      
       const { data: packageData, error } = await supabase
         .from('package')
         .insert([
           {
-            trackingNumber: formData.trackingNumber,
+            trackingNumber,
             status: formData.status,
             description: formData.description,
             userId: formData.userId,
@@ -128,17 +152,30 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="trackingNumber" className="block text-sm font-medium text-gray-700 mb-1">
-              رقم التتبع
+            <label htmlFor="orderNumber" className="block text-sm font-medium text-gray-700 mb-1">
+              رقم الطلب
             </label>
-            <input
-              type="text"
-              id="trackingNumber"
-              value={formData.trackingNumber}
-              onChange={(e) => setFormData({ ...formData, trackingNumber: e.target.value })}
+            <select
+              id="orderNumber"
+              value={formData.orderNumber}
+              onChange={(e) => {
+                const order = orders.find(o => o.orderNumber === e.target.value)
+                setFormData({
+                  ...formData,
+                  orderNumber: e.target.value,
+                  userId: order?.userId || ''
+                })
+              }}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
               required
-            />
+            >
+              <option value="">اختر رقم الطلب</option>
+              {orders.map((order) => (
+                <option key={order.id} value={order.orderNumber}>
+                  {order.orderNumber} - {order.user?.fullName || 'غير معروف'}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>

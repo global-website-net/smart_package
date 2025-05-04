@@ -48,24 +48,30 @@ interface Package {
   }[]
 }
 
+interface Order {
+  id: string
+  orderNumber: string
+  status: string
+  createdAt: string
+  updatedAt: string
+  userId: string
+  user: {
+    fullName: string
+    email: string
+  }
+}
+
 export default function TrackingPackagesPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
   const [packages, setPackages] = useState<Package[]>([])
+  const [orders, setOrders] = useState<Order[]>([])
   const [shops, setShops] = useState<Shop[]>([])
   const [regularUsers, setRegularUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [editingPackage, setEditingPackage] = useState<Package | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
-  const [newPackage, setNewPackage] = useState({
-    trackingNumber: '',
-    userId: '',
-    shopId: '',
-    status: 'PENDING',
-    description: ''
-  })
-  const [shopUsers, setShopUsers] = useState<User[]>([])
   const [isAdminOrOwner, setIsAdminOrOwner] = useState(false)
 
   useEffect(() => {
@@ -76,9 +82,9 @@ export default function TrackingPackagesPage() {
 
     if (status === 'authenticated') {
       fetchPackages()
+      fetchOrders()
       fetchShops()
       fetchRegularUsers()
-      fetchShopUsers()
       checkAdminOrOwner()
     }
   }, [status])
@@ -91,47 +97,64 @@ export default function TrackingPackagesPage() {
 
   const fetchShops = async () => {
     try {
-      setLoading(true)
-      setError('')
+      const { data: shops, error } = await supabase
+        .from('User')
+        .select('id, fullName, email')
+        .eq('role', 'SHOP')
 
-      const response = await fetch('/api/users/shops')
-      if (!response.ok) {
-        throw new Error('Failed to fetch shops')
-      }
-
-      const data = await response.json()
-      // Filter out any shops that don't have a fullName
-      const validShops = data.filter((shop: Shop) => shop.fullName)
-      setShops(validShops)
+      if (error) throw error
+      setShops(shops)
     } catch (err) {
       console.error('Error fetching shops:', err)
       setError('حدث خطأ أثناء جلب المتاجر')
-    } finally {
-      setLoading(false)
+    }
+  }
+
+  const fetchOrders = async () => {
+    try {
+      const { data: orders, error } = await supabase
+        .from('order')
+        .select(`
+          id,
+          orderNumber,
+          status,
+          createdAt,
+          updatedAt,
+          userId,
+          user:User!userId (
+            fullName,
+            email
+          )
+        `)
+        .order('createdAt', { ascending: false })
+
+      if (error) throw error
+      
+      // Transform the data to match the Order interface
+      const transformedOrders = orders.map(order => ({
+        ...order,
+        user: order.user?.[0] || { fullName: 'غير معروف', email: '' }
+      })) as Order[]
+      
+      setOrders(transformedOrders)
+    } catch (err) {
+      console.error('Error fetching orders:', err)
+      setError('حدث خطأ أثناء جلب الطلبات')
     }
   }
 
   const fetchRegularUsers = async () => {
     try {
-      const response = await fetch('/api/users?role=REGULAR')
-      if (!response.ok) throw new Error('Failed to fetch regular users')
-      const data = await response.json()
-      setRegularUsers(data)
+      const { data: users, error } = await supabase
+        .from('User')
+        .select('id, fullName, email, role')
+        .eq('role', 'REGULAR')
+
+      if (error) throw error
+      setRegularUsers(users as User[])
     } catch (error) {
       console.error('Error fetching regular users:', error)
       setError('Failed to load regular users')
-    }
-  }
-
-  const fetchShopUsers = async () => {
-    try {
-      const response = await fetch('/api/users/shops')
-      if (!response.ok) throw new Error('Failed to fetch shop users')
-      const data = await response.json()
-      setShopUsers(data)
-    } catch (error) {
-      console.error('Error fetching shop users:', error)
-      setError('Failed to load shop users')
     }
   }
 
@@ -169,49 +192,6 @@ export default function TrackingPackagesPage() {
       setError('حدث خطأ أثناء جلب الطرود')
     } finally {
       setLoading(false)
-    }
-  }
-
-  const generateTrackingNumber = () => {
-    const timestamp = Date.now().toString(36)
-    const random = Math.random().toString(36).substring(2, 8)
-    return `PKG-${timestamp}-${random}`.toUpperCase()
-  }
-
-  const handleCreatePackage = async () => {
-    try {
-      const trackingNumber = generateTrackingNumber()
-      
-      const { data, error } = await supabase
-        .from('package')
-        .insert([
-          {
-            trackingNumber,
-            status: newPackage.status,
-            description: newPackage.description,
-            shopId: newPackage.shopId,
-            userId: newPackage.userId
-          }
-        ])
-        .select()
-
-      if (error) throw error
-
-      if (data) {
-        toast.success('تم إنشاء الطرد بنجاح')
-        setPackages([data[0], ...packages])
-        setShowCreateForm(false)
-        setNewPackage({
-          status: 'PENDING',
-          description: '',
-          trackingNumber: '',
-          shopId: '',
-          userId: ''
-        })
-      }
-    } catch (error) {
-      console.error('Error creating package:', error)
-      toast.error('حدث خطأ أثناء إنشاء الطرد')
     }
   }
 
@@ -326,6 +306,7 @@ export default function TrackingPackagesPage() {
             setShowCreateForm(false)
           }}
           onCancel={() => setShowCreateForm(false)}
+          orders={orders}
         />
       )}
 
