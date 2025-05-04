@@ -138,7 +138,7 @@ export default function CreatePackageForm({ onSuccess, onCancel, orders }: Creat
                 <option value="">اختر رقم الطلب</option>
                 {orders.map(order => (
                   <option key={order.id} value={order.orderNumber}>
-                    {order.orderNumber} - {order.user.fullName}
+                    {order.orderNumber} - {order.user?.fullName || 'غير معروف'}
                   </option>
                 ))}
               </select>

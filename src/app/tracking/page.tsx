@@ -266,7 +266,7 @@ export default function TrackingPage() {
             </div>
           )}
 
-          {isEmpty ? (
+          {!loading && isEmpty ? (
             <div className="bg-white rounded-lg shadow-md p-6 text-center">
               <p className="text-gray-600 text-lg">لا توجد طلبات حتى الآن</p>
             </div>

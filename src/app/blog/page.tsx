@@ -202,93 +202,72 @@ export default function BlogPage() {
             </div>
           )}
 
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      العنوان
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      المحتوى
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      رابط المنتج
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      الكاتب
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      تاريخ الإنشاء
-                    </th>
-                    {isAdminOrOwner && (
-                      <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        الإجراءات
-                      </th>
-                    )}
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {posts.map((post) => (
-                    <tr key={post.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{post.title}</div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900 max-w-xs truncate">{post.content}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <a 
-                          href={post.itemlink} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-sm text-blue-600 hover:text-blue-800"
-                        >
-                          عرض المنتج
-                        </a>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{post.author?.fullName || 'مجهول'}</div>
-                        <div className="text-sm text-gray-500">{post.author?.email || ''}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {new Date(post.createdAt).toLocaleDateString('ar-SA', {
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit'
-                          })}
-                        </div>
-                      </td>
-                      {isAdminOrOwner && (
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <button
-                            onClick={() => {
-                              setEditingPost(post)
-                              setEditFormData({
-                                title: post.title,
-                                content: post.content,
-                                itemLink: post.itemlink
-                              })
-                            }}
-                            className="text-indigo-600 hover:text-indigo-900 mr-4"
-                          >
-                            تعديل
-                          </button>
-                          <button
-                            onClick={() => setPostToDelete(post)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            حذف
-                          </button>
-                        </td>
+          <div className="space-y-6">
+            {posts.map((post) => (
+              <Card key={post.id} className="bg-white rounded-lg shadow-md">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-bold text-gray-900">
+                    {post.title}
+                  </CardTitle>
+                  <div className="flex items-center justify-between text-sm text-gray-500">
+                    <div>
+                      <span>بواسطة: {post.author?.fullName || 'مجهول'}</span>
+                      {post.author?.email && (
+                        <span className="mr-2"> ({post.author.email})</span>
                       )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                    </div>
+                    <div>
+                      {new Date(post.createdAt).toLocaleDateString('ar-SA', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit'
+                      })}
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="prose max-w-none">
+                    <p className="text-gray-700 whitespace-pre-wrap">{post.content}</p>
+                  </div>
+                  {post.itemlink && (
+                    <div className="mt-4">
+                      <a
+                        href={post.itemlink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-green-600 hover:text-green-800 font-medium"
+                      >
+                        عرض المنتج
+                      </a>
+                    </div>
+                  )}
+                  {isAdminOrOwner && (
+                    <div className="mt-4 flex justify-end space-x-4 rtl:space-x-reverse">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setEditingPost(post)
+                          setEditFormData({
+                            title: post.title,
+                            content: post.content,
+                            itemLink: post.itemlink
+                          })
+                        }}
+                        className="text-indigo-600 hover:text-indigo-900"
+                      >
+                        تعديل
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={() => setPostToDelete(post)}
+                      >
+                        حذف
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
           </div>
 
           {/* Edit Modal */}

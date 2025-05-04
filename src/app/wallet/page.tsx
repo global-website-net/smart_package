@@ -131,27 +131,7 @@ export default function WalletPage() {
           </div>
 
           {/* Balance Display with Arrows */}
-          <div className="flex items-center justify-center gap-6 mb-6">
-            {/* Right Side Arrows */}
-            <div className="flex items-center gap-2">
-              <button className="text-4xl text-black cursor-pointer">
-                <svg viewBox="0 0 24 24" className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M15 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-              <button className="text-4xl text-black cursor-pointer">
-                <svg viewBox="0 0 24 24" className="w-12 h-8" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M18 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M12 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-            </div>
-
-            {/* Balance Amount */}
-            <div className="text-4xl font-bold mx-4 font-mono">
-              {walletData.balance.toFixed(2)}₪
-            </div>
-
+          <div className="flex justify-center items-center mb-12">
             {/* Left Side Arrows */}
             <div className="flex items-center gap-2">
               <button className="text-4xl text-black cursor-pointer">
@@ -166,6 +146,26 @@ export default function WalletPage() {
                 </svg>
               </button>
             </div>
+
+            {/* Balance Amount */}
+            <div className="text-4xl font-bold mx-4 font-mono">
+              {walletData.balance.toFixed(2)}₪
+            </div>
+
+            {/* Right Side Arrows */}
+            <div className="flex items-center gap-2">
+              <button className="text-4xl text-black cursor-pointer">
+                <svg viewBox="0 0 24 24" className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M15 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              <button className="text-4xl text-black cursor-pointer">
+                <svg viewBox="0 0 24 24" className="w-12 h-8" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M12 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
           </div>
 
           {/* Add Balance Button */}
@@ -174,7 +174,7 @@ export default function WalletPage() {
               onClick={() => setShowPaymentWizard(true)}
               className="bg-green-500 text-white px-8 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 mb-12"
             >
-              Call To Action
+              إضافة رصيد
             </button>
           </div>
 

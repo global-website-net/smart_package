@@ -143,7 +143,7 @@ export default function Header() {
           </div>
 
           {/* Left Side - Login/User Menu (Desktop) */}
-            {!isLoginPage && (
+          {!isLoginPage && (
             <div className="hidden md:flex items-center order-3">
               {isLoggedIn ? (
                 <div className="relative">
@@ -151,7 +151,7 @@ export default function Header() {
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                     className="flex items-center space-x-2 rtl:space-x-reverse text-white hover:text-green-500 transition-colors"
                   >
-                    <span className="text-lg font-medium">{session?.user?.name}</span>
+                    <span className="text-lg font-medium">{session?.user?.fullName || session?.user?.name}</span>
                     <svg
                       className={`w-5 h-5 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`}
                       fill="none"
@@ -169,24 +169,24 @@ export default function Header() {
                   {isUserMenuOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-black rounded-md shadow-lg overflow-hidden">
                       {getMenuItems().map((item) => (
-                          <Link
+                        <Link
                           key={item.href}
-                            href={item.href}
-                            onClick={() => setIsUserMenuOpen(false)}
+                          href={item.href}
+                          onClick={() => setIsUserMenuOpen(false)}
                           className="block px-4 py-2 text-sm text-white hover:bg-gray-800"
-                          >
-                            {item.label}
-                          </Link>
-                        ))}
-                        <button
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                      <button
                         onClick={() => {
                           handleSignOut()
                           setIsUserMenuOpen(false)
                         }}
                         className="block w-full text-right px-4 py-2 text-sm text-white hover:bg-gray-800"
-                        >
-                          تسجيل الخروج
-                        </button>
+                      >
+                        تسجيل الخروج
+                      </button>
                     </div>
                   )}
                 </div>
