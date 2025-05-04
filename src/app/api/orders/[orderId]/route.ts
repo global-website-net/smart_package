@@ -1,11 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/auth.config'
 
-export async function PATCH(request: NextRequest) {
+// Initialize Supabase admin client with service role key
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+)
+
+export async function PATCH(request: NextRequest, { params }: { params: { orderId: string } }) {
   try {
-    const orderId = request.url.split('/').pop()
+    const { orderId } = params
     if (!orderId) {
       return NextResponse.json(
         { error: 'Order ID is required' },
@@ -38,7 +50,22 @@ export async function PATCH(request: NextRequest) {
       )
     }
 
-    const { data: order, error } = await supabase
+    // First check if the order exists
+    const { data: existingOrder, error: checkError } = await supabaseAdmin
+      .from('order')
+      .select('id')
+      .eq('id', orderId)
+      .single()
+
+    if (checkError || !existingOrder) {
+      console.error('Order not found:', orderId)
+      return NextResponse.json(
+        { error: 'Order not found' },
+        { status: 404 }
+      )
+    }
+
+    const { data: order, error } = await supabaseAdmin
       .from('order')
       .update({ 
         status,

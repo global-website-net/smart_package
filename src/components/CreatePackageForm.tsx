@@ -44,7 +44,7 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
     status: 'PENDING'
   })
   const [users, setUsers] = useState<{ id: string; email: string }[]>([])
-  const [shops, setShops] = useState<{ id: string; fullName: string }[]>([])
+  const [shops, setShops] = useState<{ id: string; email: string }[]>([])
   const [orders, setOrders] = useState<{ id: string; orderNumber: string; userId: string; user: { fullName: string } }[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -84,7 +84,7 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
 
   const fetchShops = async () => {
     try {
-      const response = await fetch('/api/shops')
+      const response = await fetch('/api/users/shops')
       if (!response.ok) {
         throw new Error('Failed to fetch shops')
       }
@@ -204,7 +204,7 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
                 <option value="">اختر المتجر</option>
                 {shops.map(shop => (
                   <option key={shop.id} value={shop.id}>
-                    {shop.fullName}
+                    {shop.email}
                   </option>
                 ))}
               </select>
