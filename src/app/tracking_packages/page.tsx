@@ -343,7 +343,6 @@ export default function TrackingPackagesPage() {
             setShowCreateForm(false)
           }}
           onCancel={() => setShowCreateForm(false)}
-          orders={orders}
         />
       )}
 
