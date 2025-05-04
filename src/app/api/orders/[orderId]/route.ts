@@ -15,9 +15,12 @@ const supabaseAdmin = createClient(
   }
 )
 
-export async function PATCH(request: NextRequest, { params }: { params: { orderId: string } }) {
+export async function PATCH(
+  request: NextRequest,
+  context: { params: { orderId: string } }
+) {
   try {
-    const { orderId } = params
+    const { orderId } = context.params
     if (!orderId) {
       return NextResponse.json(
         { error: 'Order ID is required' },
