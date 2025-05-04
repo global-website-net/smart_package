@@ -137,7 +137,7 @@ function LoginForm() {
                   onChange={(e) => setRememberMe(e.target.checked)}
                 />
                 <label htmlFor="remember-me" className="mr-2 block text-sm text-gray-900">
-                  تذكرني
+                  احفظ الدخول
                 </label>
               </div>
               <Link

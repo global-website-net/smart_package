@@ -71,7 +71,7 @@ export default function Header() {
 
             {/* Mobile Menu Dropdown */}
             {isMobileMenuOpen && (
-              <div className="absolute top-full left-0 w-48 bg-black shadow-lg rounded-b-md overflow-hidden">
+              <div className="absolute top-full right-0 w-48 bg-black shadow-lg rounded-b-md overflow-hidden">
                 {getMenuItems().map((item) => (
                   <Link
                     key={item.href}
@@ -133,12 +133,22 @@ export default function Header() {
           {/* Desktop Navigation - Hidden on Mobile */}
           <div className="hidden md:flex items-center space-x-4 rtl:space-x-reverse">
             {!isLoginPage && (
-              <Link 
-                href="/packages" 
-                className="text-white hover:text-green-500 transition-colors text-lg font-semibold border-b-2 border-transparent hover:border-green-500"
-              >
-                أسعارنا
-              </Link>
+              <>
+                <Link 
+                  href="/packages" 
+                  className="text-white hover:text-green-500 transition-colors text-lg font-semibold border-b-2 border-transparent hover:border-green-500"
+                >
+                  أسعارنا
+                </Link>
+                {!isLoggedIn && (
+                  <Link
+                    href="/auth/login"
+                    className="text-white hover:text-green-500 transition-colors text-lg font-semibold border-b-2 border-transparent hover:border-green-500"
+                  >
+                    تسجيل الدخول
+                  </Link>
+                )}
+              </>
             )}
           </div>
         </div>
