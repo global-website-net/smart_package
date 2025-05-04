@@ -22,7 +22,6 @@ interface RawSupabasePackage {
   shopId: string
   createdAt: string
   updatedAt: string
-  orderNumber: string
   user: PackageUser | null
   shop: PackageShop | null
 }
@@ -36,7 +35,6 @@ interface PackageData {
   shopId: string
   createdAt: string
   updatedAt: string
-  orderNumber: string
   user: PackageUser | null
   shop: PackageShop | null
 }
@@ -96,7 +94,6 @@ export async function GET() {
         shopId: pkg.shopId,
         createdAt: pkg.createdAt,
         updatedAt: pkg.updatedAt,
-        orderNumber: pkg.orderNumber,
         user: user ? {
           fullName: user.fullName || 'غير معروف',
           email: user.email || ''
