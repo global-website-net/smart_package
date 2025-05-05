@@ -263,59 +263,46 @@ export default function TrackingPackagesPage() {
       setLoading(true)
       setError(null)
 
-      // Initialize Supabase with the session
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-          auth: {
-            persistSession: true,
-            autoRefreshToken: true,
-            detectSessionInUrl: true
-          }
-        }
-      )
+      const response = await fetch('/api/packages')
+      if (!response.ok) {
+        throw new Error('Failed to fetch packages')
+      }
+      
+      const packages = await response.json()
+      console.log('Fetched packages:', packages)
 
-      const { data: packages, error } = await supabase
-        .from('package')
-        .select(`
-          *,
-          shop:shopId (
-            id,
-            fullName
-          ),
-          user:userId (
-            id,
-            fullName
-          )
-        `)
-        .order('createdAt', { ascending: false })
-
-      if (error) {
-        console.error('Error fetching packages:', error)
-        throw error
+      if (!packages || packages.length === 0) {
+        console.log('No packages found in the database')
+        setPackages([])
+        return
       }
 
       // Transform the data to match the Package interface
-      const transformedPackages: Package[] = packages.map(pkg => ({
-        id: pkg.id,
-        trackingNumber: pkg.trackingNumber,
-        status: pkg.status,
-        description: pkg.description,
-        shopId: pkg.shopId,
-        userId: pkg.userId,
-        createdAt: pkg.createdAt,
-        updatedAt: pkg.updatedAt,
-        shop: {
-          id: pkg.shop?.id || '',
-          name: pkg.shop?.fullName || 'غير معروف'
-        },
-        user: {
-          id: pkg.user?.id || '',
-          name: pkg.user?.fullName || 'غير معروف'
-        }
-      }))
+      const transformedPackages = packages.map((pkg: any) => {
+        const shopData = Array.isArray(pkg.shop) ? pkg.shop[0] : pkg.shop
+        const userData = Array.isArray(pkg.user) ? pkg.user[0] : pkg.user
 
+        return {
+          id: pkg.id,
+          trackingNumber: pkg.trackingNumber,
+          status: pkg.status,
+          description: pkg.description,
+          shopId: pkg.shopId,
+          userId: pkg.userId,
+          createdAt: pkg.createdAt,
+          updatedAt: pkg.updatedAt,
+          shop: {
+            id: shopData?.id || '',
+            name: shopData?.fullName || 'غير معروف'
+          },
+          user: {
+            id: userData?.id || '',
+            name: userData?.fullName || 'غير معروف'
+          }
+        }
+      })
+
+      console.log('Transformed packages:', transformedPackages)
       setPackages(transformedPackages)
     } catch (error) {
       console.error('Error in fetchPackages:', error)

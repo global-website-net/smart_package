@@ -63,18 +63,36 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
-    // Check if user is authenticated and is ADMIN/OWNER
+    // Check if user is authenticated
     const session = await getServerSession(authOptions)
-    if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER')) {
+    if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { data, error } = await supabaseAdmin
+    // If user is not ADMIN or OWNER, return unauthorized
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { data: packages, error } = await supabaseAdmin
       .from('package')
       .select(`
-        *,
-        shop:shopId (id, fullName),
-        user:userId (id, fullName)
+        id,
+        trackingNumber,
+        status,
+        description,
+        shopId,
+        userId,
+        createdAt,
+        updatedAt,
+        shop:shopId (
+          id,
+          fullName
+        ),
+        user:userId (
+          id,
+          fullName
+        )
       `)
       .order('createdAt', { ascending: false })
 
@@ -86,7 +104,8 @@ export async function GET() {
       )
     }
 
-    return NextResponse.json(data)
+    console.log('Fetched packages:', packages)
+    return NextResponse.json(packages)
   } catch (error) {
     console.error('Error in GET /api/packages:', error)
     return NextResponse.json(

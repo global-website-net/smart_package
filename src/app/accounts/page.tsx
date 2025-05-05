@@ -154,7 +154,7 @@ export default function AccountsPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {user.phonePrefix && user.phoneNumber 
-                            ? `${user.phonePrefix}-${user.phoneNumber}`
+                            ? `${user.phonePrefix.substring(1)}-${user.phoneNumber}`
                             : 'غير متوفر'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
