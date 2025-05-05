@@ -74,7 +74,20 @@ export default function UserPackagesPage() {
         throw new Error('No user ID found')
       }
 
-      console.log('Fetching packages for user:', session.user.id)
+      console.log('Fetching packages for user:', {
+        userId: session.user.id,
+        email: session.user.email,
+        role: session.user.role
+      })
+
+      // First verify the Supabase session
+      const { data: { session: supabaseSession }, error: sessionError } = await supabase.auth.getSession()
+      console.log('Supabase session:', supabaseSession)
+
+      if (sessionError) {
+        console.error('Error getting Supabase session:', sessionError)
+        throw sessionError
+      }
 
       const { data: packages, error } = await supabase
         .from('package')

@@ -506,7 +506,7 @@ export default function TrackingPackagesPage() {
             ))
           }}
           shops={shops}
-          users={users}
+          users={regularUsers}
         />
       )}
     </div>

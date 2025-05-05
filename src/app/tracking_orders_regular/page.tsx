@@ -91,12 +91,12 @@ export default function UserOrdersPage() {
           userId,
           createdAt,
           updatedAt,
-          shop:shopId (
+          shop:Shop (
             id,
             fullName,
             email
           ),
-          user:userId (
+          user:User (
             id,
             fullName,
             email

@@ -43,13 +43,15 @@ export default function EditPackageModal({ isOpen, onClose, pkg, onSave, shops, 
 
   // Update form data when package changes
   useEffect(() => {
-    setFormData({
-      trackingNumber: pkg.trackingNumber,
-      status: pkg.status,
-      description: pkg.description || '',
-      shopId: pkg.shopId,
-      userId: pkg.userId
-    })
+    if (pkg) {
+      setFormData({
+        trackingNumber: pkg.trackingNumber,
+        status: pkg.status,
+        description: pkg.description || '',
+        shopId: pkg.shopId,
+        userId: pkg.userId
+      })
+    }
   }, [pkg])
 
   const handleSave = async () => {

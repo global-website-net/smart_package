@@ -1,26 +1,37 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { toast } from 'react-hot-toast'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { toast } from 'sonner'
+import { createClient } from '@supabase/supabase-js'
+
+// Initialize Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  }
+)
+
+interface Shop {
+  id: string
+  fullName: string
+  email: string
+}
 
 interface User {
   id: string
   fullName: string
-  role: string
-}
-
-interface Order {
-  id: string
-  orderNumber: string
-  status: string
-  createdAt: string
-  updatedAt: string
-  userId: string
-  user: {
-    fullName: string
-    email: string
-  }
+  email: string
 }
 
 interface CreatePackageFormProps {
@@ -28,223 +39,186 @@ interface CreatePackageFormProps {
   onCancel: () => void
 }
 
-interface PackageFormData {
-  orderNumber: string
-  userId: string
-  shopId: string
-  currentLocation?: string
-  status: string
-}
-
 export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackageFormProps) {
-  const [formData, setFormData] = useState<PackageFormData>({
-    orderNumber: '',
-    userId: '',
+  const [shops, setShops] = useState<Shop[]>([])
+  const [users, setUsers] = useState<User[]>([])
+  const [loading, setLoading] = useState(false)
+  const [formData, setFormData] = useState({
+    trackingNumber: '',
+    status: 'AWAITING_PAYMENT',
+    description: '',
     shopId: '',
-    status: 'PENDING'
+    userId: ''
   })
-  const [users, setUsers] = useState<{ id: string; email: string }[]>([])
-  const [shops, setShops] = useState<{ id: string; email: string }[]>([])
-  const [orders, setOrders] = useState<{ id: string; orderNumber: string; userId: string; user: { fullName: string } }[]>([])
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState('')
 
   useEffect(() => {
-    fetchUsers()
     fetchShops()
-    fetchOrders()
+    fetchUsers()
   }, [])
-
-  // When an order is selected, automatically set the user
-  useEffect(() => {
-    if (formData.orderNumber) {
-      const selectedOrder = orders.find(order => order.orderNumber === formData.orderNumber)
-      if (selectedOrder) {
-        setFormData(prev => ({
-          ...prev,
-          userId: selectedOrder.userId
-        }))
-      }
-    }
-  }, [formData.orderNumber, orders])
-
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch('/api/users/regular')
-      if (!response.ok) {
-        throw new Error('Failed to fetch users')
-      }
-      const data = await response.json()
-      setUsers(data)
-    } catch (error) {
-      console.error('Error fetching users:', error)
-      setError('Failed to fetch users')
-    }
-  }
 
   const fetchShops = async () => {
     try {
-      const response = await fetch('/api/users/shops')
-      if (!response.ok) {
-        throw new Error('Failed to fetch shops')
-      }
-      const data = await response.json()
-      setShops(data)
+      const { data, error } = await supabase
+        .from('User')
+        .select('id, fullName, email')
+        .eq('role', 'SHOP')
+
+      if (error) throw error
+      setShops(data || [])
     } catch (error) {
       console.error('Error fetching shops:', error)
-      setError('حدث خطأ أثناء جلب المتاجر')
+      toast.error('حدث خطأ أثناء جلب المتاجر')
     }
   }
 
-  const fetchOrders = async () => {
+  const fetchUsers = async () => {
     try {
-      const response = await fetch('/api/orders/all')
-      if (!response.ok) {
-        throw new Error('Failed to fetch orders')
-      }
-      const data = await response.json()
-      setOrders(data)
+      const { data, error } = await supabase
+        .from('User')
+        .select('id, fullName, email')
+        .eq('role', 'REGULAR')
+
+      if (error) throw error
+      setUsers(data || [])
     } catch (error) {
-      console.error('Error fetching orders:', error)
-      setError('حدث خطأ أثناء جلب الطلبات')
+      console.error('Error fetching users:', error)
+      toast.error('حدث خطأ أثناء جلب المستخدمين')
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setError('')
-
+  const handleSave = async () => {
     try {
-      const response = await fetch('/api/packages/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          orderNumber: formData.orderNumber,
+      setLoading(true)
+
+      if (!formData.shopId || !formData.userId) {
+        toast.error('الرجاء اختيار المتجر والمستخدم')
+        return
+      }
+
+      const { data, error } = await supabase
+        .from('package')
+        .insert([{
+          trackingNumber: formData.trackingNumber,
           status: formData.status,
+          description: formData.description,
           shopId: formData.shopId,
           userId: formData.userId
-        }),
-      })
+        }])
+        .select()
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to create package')
-      }
+      if (error) throw error
 
-      const newPackage = await response.json()
-      toast.success('تم إنشاء الطرد بنجاح')
-      onSuccess(newPackage)
+      toast.success('تم إضافة الطرد بنجاح')
+      onSuccess(data[0])
     } catch (error) {
       console.error('Error creating package:', error)
-      setError(error instanceof Error ? error.message : 'حدث خطأ أثناء إنشاء الطرد')
+      toast.error('حدث خطأ أثناء إضافة الطرد')
     } finally {
-      setIsSubmitting(false)
+      setLoading(false)
     }
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg max-w-md w-full">
-        <h2 className="text-2xl font-bold mb-4">إنشاء طرد جديد</h2>
-        
-        {error && (
-          <div className="bg-red-50 text-red-800 p-4 rounded-md mb-4">
-            {error}
+    <Dialog open={true} onOpenChange={onCancel}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>إنشاء طرد جديد</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="trackingNumber" className="text-right">
+              رقم التتبع
+            </label>
+            <Input
+              id="trackingNumber"
+              value={formData.trackingNumber}
+              onChange={(e) => setFormData({ ...formData, trackingNumber: e.target.value })}
+              className="col-span-3"
+              placeholder="أدخل رقم التتبع"
+            />
           </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-gray-700 mb-2">رقم الطلب</label>
-              <select
-                value={formData.orderNumber}
-                onChange={(e) => setFormData({ ...formData, orderNumber: e.target.value })}
-                className="w-full px-3 py-2 border rounded-md"
-                required
-              >
-                <option value="">اختر رقم الطلب</option>
-                {orders.map(order => (
-                  <option key={order.id} value={order.orderNumber}>
-                    {order.orderNumber} - {order.user?.fullName || 'غير معروف'}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-gray-700 mb-2">المستخدم</label>
-              <select
-                value={formData.userId}
-                onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
-                className="w-full px-3 py-2 border rounded-md"
-                required
-                disabled={!!formData.orderNumber} // Disable if order is selected
-              >
-                <option value="">اختر المستخدم</option>
-                {users.map(user => (
-                  <option key={user.id} value={user.id}>
-                    {user.email}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-gray-700 mb-2">المتجر</label>
-              <select
-                value={formData.shopId}
-                onChange={(e) => setFormData({ ...formData, shopId: e.target.value })}
-                className="w-full px-3 py-2 border rounded-md"
-                required
-              >
-                <option value="">اختر المتجر</option>
-                {shops.map(shop => (
-                  <option key={shop.id} value={shop.id}>
-                    {shop.email}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-gray-700 mb-2">الحالة</label>
-              <select
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full px-3 py-2 border rounded-md"
-                required
-              >
-                <option value="PENDING">قيد الانتظار</option>
-                <option value="IN_TRANSIT">قيد الشحن</option>
-                <option value="DELIVERED">تم التسليم</option>
-                <option value="CANCELLED">ملغي</option>
-                <option value="RETURNED">تم الإرجاع</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="flex gap-4 mt-6">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1 bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="status" className="text-right">
+              الحالة
+            </label>
+            <Select
+              value={formData.status}
+              onValueChange={(value) => setFormData({ ...formData, status: value })}
             >
-              {isSubmitting ? 'جاري الإنشاء...' : 'إنشاء'}
-            </button>
-            <button
-              type="button"
-              onClick={onCancel}
-              className="flex-1 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-            >
-              إلغاء
-            </button>
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="اختر الحالة" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="AWAITING_PAYMENT">في انتظار الدفع</SelectItem>
+                <SelectItem value="PREPARING">قيد التحضير</SelectItem>
+                <SelectItem value="DELIVERING_TO_SHOP">قيد التوصيل للمتجر</SelectItem>
+                <SelectItem value="IN_SHOP">في المتجر</SelectItem>
+                <SelectItem value="RECEIVED">تم الاستلام</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        </form>
-      </div>
-    </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="description" className="text-right">
+              الوصف
+            </label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="col-span-3"
+              placeholder="أدخل وصف الطرد"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="shopId" className="text-right">
+              المتجر
+            </label>
+            <Select
+              value={formData.shopId}
+              onValueChange={(value) => setFormData({ ...formData, shopId: value })}
+            >
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="اختر المتجر" />
+              </SelectTrigger>
+              <SelectContent>
+                {shops.map((shop) => (
+                  <SelectItem key={shop.id} value={shop.id}>
+                    {shop.fullName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="userId" className="text-right">
+              المستخدم
+            </label>
+            <Select
+              value={formData.userId}
+              onValueChange={(value) => setFormData({ ...formData, userId: value })}
+            >
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="اختر المستخدم" />
+              </SelectTrigger>
+              <SelectContent>
+                {users.map((user) => (
+                  <SelectItem key={user.id} value={user.id}>
+                    {user.fullName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={onCancel}>
+            إلغاء
+          </Button>
+          <Button onClick={handleSave} disabled={loading}>
+            {loading ? 'جاري الحفظ...' : 'حفظ'}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 } 
