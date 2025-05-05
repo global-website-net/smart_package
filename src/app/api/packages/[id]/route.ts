@@ -33,10 +33,7 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies })
     
@@ -44,6 +41,11 @@ export async function PATCH(
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const id = request.url.split('/').pop()
+    if (!id) {
+      return NextResponse.json({ error: 'Package ID is required' }, { status: 400 })
     }
 
     // Get the request body
@@ -61,7 +63,7 @@ export async function PATCH(
         userId,
         updatedAt: new Date().toISOString()
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
 
     if (error) {
