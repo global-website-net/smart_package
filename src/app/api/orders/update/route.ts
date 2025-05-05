@@ -23,12 +23,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id, status } = await request.json()
+    const { id, status, totalAmount } = await request.json()
+
+    // Validate totalAmount when status is AWAITING_PAYMENT
+    if (status === 'AWAITING_PAYMENT' && (!totalAmount || totalAmount <= 0)) {
+      return NextResponse.json(
+        { error: 'يجب إدخال مبلغ الدفع عندما تكون الحالة في انتظار الدفع' },
+        { status: 400 }
+      )
+    }
 
     const { data, error } = await supabaseAdmin
       .from('order')
       .update({
         status,
+        totalAmount: status === 'AWAITING_PAYMENT' ? totalAmount : null,
         updatedAt: new Date().toISOString()
       })
       .eq('id', id)

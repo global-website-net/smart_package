@@ -9,11 +9,11 @@ interface User {
   id: string
   fullName: string
   email: string
-  role: string
+  governorate: string | null
+  town: string | null
+  phonePrefix: string | null
+  phoneNumber: string | null
   createdAt: string
-  phoneNumber?: string
-  governorate?: string
-  town?: string
 }
 
 export default function AccountsPage() {
@@ -60,19 +60,12 @@ export default function AccountsPage() {
     }
   }
 
-  const getRoleText = (role: string) => {
-    switch (role) {
-      case 'ADMIN':
-        return 'مدير'
-      case 'OWNER':
-        return 'مالك'
-      case 'REGULAR':
-        return 'مستخدم عادي'
-      case 'SHOP':
-        return 'متجر'
-      default:
-        return role
-    }
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('ar-SA', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    })
   }
 
   if (loading) {
@@ -129,13 +122,13 @@ export default function AccountsPage() {
                         البريد الإلكتروني
                       </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        رقم الهاتف
-                      </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                         المحافظة
                       </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                         المدينة
+                      </th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        رقم الهاتف
                       </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                         تاريخ التسجيل
@@ -152,20 +145,18 @@ export default function AccountsPage() {
                           {user.email}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user.phoneNumber || 'غير متوفر'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {user.governorate || 'غير متوفر'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {user.town || 'غير متوفر'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {new Date(user.createdAt).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit'
-                          })}
+                          {user.phonePrefix && user.phoneNumber 
+                            ? `${user.phonePrefix} ${user.phoneNumber}`
+                            : 'غير متوفر'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {formatDate(user.createdAt)}
                         </td>
                       </tr>
                     ))}

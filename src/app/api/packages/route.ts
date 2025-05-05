@@ -73,8 +73,8 @@ export async function GET() {
       .from('package')
       .select(`
         *,
-        shop:shopId (id, name),
-        user:userId (id, name)
+        shop:shopId (id, fullName),
+        user:userId (id, fullName)
       `)
       .order('createdAt', { ascending: false })
 

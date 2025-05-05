@@ -72,7 +72,7 @@ export function EditOrderStatusModal({ isOpen, onClose, order, onSave }: EditOrd
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader className="text-center">
-          <DialogTitle>تعديل حالة الطلب</DialogTitle>
+          <DialogTitle className="text-xl font-bold">تعديل حالة الطلب</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
@@ -83,12 +83,12 @@ export function EditOrderStatusModal({ isOpen, onClose, order, onSave }: EditOrd
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="اختر الحالة" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="AWAITING_PAYMENT">بانتظار الدفع</SelectItem>
-                <SelectItem value="PENDING">قيد الانتظار</SelectItem>
-                <SelectItem value="PROCESSING">قيد المعالجة</SelectItem>
-                <SelectItem value="COMPLETED">مكتمل</SelectItem>
-                <SelectItem value="CANCELLED">ملغي</SelectItem>
+              <SelectContent className="text-right">
+                <SelectItem value="AWAITING_PAYMENT" className="text-right">بانتظار الدفع</SelectItem>
+                <SelectItem value="PENDING" className="text-right">قيد الانتظار</SelectItem>
+                <SelectItem value="PROCESSING" className="text-right">قيد المعالجة</SelectItem>
+                <SelectItem value="COMPLETED" className="text-right">مكتمل</SelectItem>
+                <SelectItem value="CANCELLED" className="text-right">ملغي</SelectItem>
               </SelectContent>
             </Select>
           </div>
