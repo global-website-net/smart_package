@@ -27,12 +27,12 @@ const supabase = createClient(
 
 interface User {
   id: string
-  name: string
+  fullName: string
 }
 
 interface Shop {
   id: string
-  name: string
+  fullName: string
 }
 
 interface Package {
@@ -163,13 +163,7 @@ export default function TrackingPackagesPage() {
 
       if (error) throw error
 
-      // Transform the data to match the Shop interface
-      const transformedShops = shops.map(shop => ({
-        id: shop.id,
-        name: shop.fullName
-      }))
-
-      setShops(transformedShops)
+      setShops(shops)
     } catch (error) {
       console.error('Error fetching shops:', error)
       setError('حدث خطأ أثناء جلب المتاجر')
@@ -186,13 +180,7 @@ export default function TrackingPackagesPage() {
 
       if (error) throw error
 
-      // Transform the data to match the User interface
-      const transformedUsers = users.map(user => ({
-        id: user.id,
-        name: user.fullName
-      }))
-
-      setRegularUsers(transformedUsers)
+      setRegularUsers(users)
     } catch (error) {
       console.error('Error fetching regular users:', error)
       setError('حدث خطأ أثناء جلب المستخدمين')

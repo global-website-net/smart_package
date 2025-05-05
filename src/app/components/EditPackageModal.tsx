@@ -25,8 +25,8 @@ interface EditPackageModalProps {
     shopId: string
     userId: string
   }) => void
-  shops: Array<{ id: string; name: string }>
-  users: Array<{ id: string; name: string }>
+  shops: Array<{ id: string; fullName: string }>
+  users: Array<{ id: string; fullName: string }>
 }
 
 export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops, users }: EditPackageModalProps) {
