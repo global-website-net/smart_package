@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { toast } from 'sonner'
 import Header from '@/app/components/Header'
 import CreatePackageForm from '@/components/CreatePackageForm'
-import { EditPackageModal } from '@/app/components/EditPackageModal'
+import EditPackageModal from '@/app/components/EditPackageModal'
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -488,14 +488,25 @@ export default function TrackingPackagesPage() {
         />
       )}
 
-      {selectedPackage && (
+      {isEditModalOpen && selectedPackage && (
         <EditPackageModal
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
-          package={selectedPackage}
-          onSave={handleSavePackage}
+          pkg={selectedPackage}
+          onSave={(updatedPackage) => {
+            setPackages(packages.map(pkg => 
+              pkg.id === updatedPackage.id ? {
+                ...pkg,
+                trackingNumber: updatedPackage.trackingNumber,
+                status: updatedPackage.status,
+                description: updatedPackage.description,
+                shopId: updatedPackage.shopId,
+                userId: updatedPackage.userId
+              } : pkg
+            ))
+          }}
           shops={shops}
-          users={regularUsers}
+          users={users}
         />
       )}
     </div>
