@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/auth.config'
 import { supabase } from '@/lib/supabase'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,53 +33,48 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-export async function PATCH(request: NextRequest) {
+export async function PATCH(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER')) {
-      return NextResponse.json({ error: 'غير مصرح لك بالوصول' }, { status: 403 })
+    const supabase = createRouteHandlerClient({ cookies })
+    
+    // Check if user is authenticated
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const id = request.url.split('/').pop()
-    if (!id) {
-      return NextResponse.json({ error: 'Package ID is required' }, { status: 400 })
-    }
+    // Get the request body
+    const body = await request.json()
+    const { trackingNumber, status, description, shopId, userId } = body
 
-    const { status, description, shopId, userId } = await request.json()
-
+    // Update the package
     const { data, error } = await supabase
       .from('package')
-      .update({ 
+      .update({
+        trackingNumber,
         status,
         description,
         shopId,
         userId,
         updatedAt: new Date().toISOString()
       })
-      .eq('id', id)
-      .select(`
-        *,
-        shop:shopId (
-          id,
-          fullName,
-          email
-        ),
-        user:userId (
-          id,
-          fullName,
-          email
-        )
-      `)
-      .single()
+      .eq('id', params.id)
+      .select()
 
     if (error) {
       console.error('Error updating package:', error)
-      return NextResponse.json({ error: 'حدث خطأ أثناء تحديث الطرد' }, { status: 500 })
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json(data)
+    return NextResponse.json(data[0])
   } catch (error) {
     console.error('Error in PATCH /api/packages/[id]:', error)
-    return NextResponse.json({ error: 'حدث خطأ في الخادم' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    )
   }
 } 

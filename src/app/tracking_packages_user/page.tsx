@@ -69,6 +69,13 @@ export default function UserPackagesPage() {
       setLoading(true)
       setError(null)
 
+      if (!session?.user?.id) {
+        console.error('No user ID found in session')
+        throw new Error('No user ID found')
+      }
+
+      console.log('Fetching packages for user:', session.user.id)
+
       const { data: packages, error } = await supabase
         .from('package')
         .select(`
@@ -91,13 +98,15 @@ export default function UserPackagesPage() {
             email
           )
         `)
-        .eq('userId', session?.user?.id)
+        .eq('userId', session.user.id)
         .order('createdAt', { ascending: false })
 
       if (error) {
         console.error('Error fetching packages:', error)
         throw error
       }
+
+      console.log('Fetched packages:', packages)
 
       if (!packages || packages.length === 0) {
         console.log('No packages found for user')
@@ -112,6 +121,7 @@ export default function UserPackagesPage() {
         user: pkg.user[0] || { id: '', fullName: 'غير معروف', email: '' }
       }))
 
+      console.log('Transformed packages:', transformedPackages)
       setPackages(transformedPackages)
     } catch (error) {
       console.error('Error in fetchPackages:', error)

@@ -69,34 +69,23 @@ export default function UserOrdersPage() {
       setLoading(true)
       setError(null)
 
-      const { data: orders, error } = await supabase
+      if (!session?.user?.id) {
+        console.error('No user ID found in session')
+        throw new Error('No user ID found')
+      }
+
+      console.log('Fetching orders for user:', session.user.id)
+
+      // First, get the orders for the user
+      const { data: orders, error: ordersError } = await supabase
         .from('order')
-        .select(`
-          id,
-          orderNumber,
-          status,
-          description,
-          shopId,
-          userId,
-          createdAt,
-          updatedAt,
-          shop:shopId (
-            id,
-            fullName,
-            email
-          ),
-          user:userId (
-            id,
-            fullName,
-            email
-          )
-        `)
-        .eq('userId', session?.user?.id)
+        .select('*')
+        .eq('userId', session.user.id)
         .order('createdAt', { ascending: false })
 
-      if (error) {
-        console.error('Error fetching orders:', error)
-        throw error
+      if (ordersError) {
+        console.error('Error fetching orders:', ordersError)
+        throw ordersError
       }
 
       if (!orders || orders.length === 0) {
@@ -105,13 +94,36 @@ export default function UserOrdersPage() {
         return
       }
 
-      // Transform the data to match our Order interface
+      // Get all shop IDs from the orders
+      const shopIds = orders.map(order => order.shopId).filter(Boolean)
+      
+      // Fetch shop details in a separate query
+      const { data: shops, error: shopsError } = await supabase
+        .from('User')
+        .select('id, fullName, email')
+        .in('id', shopIds)
+        .eq('role', 'SHOP')
+
+      if (shopsError) {
+        console.error('Error fetching shops:', shopsError)
+        throw shopsError
+      }
+
+      // Create a map of shop details
+      const shopMap = new Map(shops?.map(shop => [shop.id, shop]) || [])
+
+      // Transform the orders with shop details
       const transformedOrders: Order[] = orders.map(order => ({
         ...order,
-        shop: order.shop[0] || { id: '', fullName: 'غير معروف', email: '' },
-        user: order.user[0] || { id: '', fullName: 'غير معروف', email: '' }
+        shop: shopMap.get(order.shopId) || { id: '', fullName: 'غير معروف', email: '' },
+        user: {
+          id: session.user.id,
+          fullName: session.user.fullName || 'غير معروف',
+          email: session.user.email || ''
+        }
       }))
 
+      console.log('Transformed orders:', transformedOrders)
       setOrders(transformedOrders)
     } catch (error) {
       console.error('Error in fetchOrders:', error)

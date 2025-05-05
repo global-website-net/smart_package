@@ -30,11 +30,13 @@ interface EditPackageModalProps {
 }
 
 export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops, users }: EditPackageModalProps) {
-  const [trackingNumber, setTrackingNumber] = useState(pkg.trackingNumber)
-  const [status, setStatus] = useState(pkg.status)
-  const [description, setDescription] = useState(pkg.description || '')
-  const [shopId, setShopId] = useState(pkg.shopId)
-  const [userId, setUserId] = useState(pkg.userId)
+  const [formData, setFormData] = useState({
+    trackingNumber: pkg.trackingNumber,
+    status: pkg.status,
+    description: pkg.description || '',
+    shopId: pkg.shopId,
+    userId: pkg.userId
+  })
   const [isSaving, setIsSaving] = useState(false)
 
   const handleSave = async () => {
@@ -47,26 +49,28 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          status,
-          description,
-          shopId,
-          userId,
+          trackingNumber: formData.trackingNumber,
+          status: formData.status,
+          description: formData.description,
+          shopId: formData.shopId,
+          userId: formData.userId,
         }),
       })
 
       if (!response.ok) {
-        throw new Error('Failed to update package')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to update package')
       }
 
       const updatedPackage = await response.json()
       
       onSave({
         id: pkg.id,
-        trackingNumber: pkg.trackingNumber,
-        status,
-        description,
-        shopId,
-        userId,
+        trackingNumber: formData.trackingNumber,
+        status: formData.status,
+        description: formData.description,
+        shopId: formData.shopId,
+        userId: formData.userId,
       })
 
       toast.success('تم تحديث بيانات الطرد بنجاح')
@@ -92,17 +96,19 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops,
             </Label>
             <Input
               id="trackingNumber"
-              value={trackingNumber}
-              onChange={(e) => setTrackingNumber(e.target.value)}
-              className="col-span-3 bg-gray-100"
-              disabled
+              value={formData.trackingNumber}
+              onChange={(e) => setFormData({ ...formData, trackingNumber: e.target.value })}
+              className="col-span-3"
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="status" className="text-right">
               الحالة
             </Label>
-            <Select value={status} onValueChange={setStatus}>
+            <Select
+              value={formData.status}
+              onValueChange={(value) => setFormData({ ...formData, status: value })}
+            >
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="اختر الحالة" />
               </SelectTrigger>
@@ -121,8 +127,8 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops,
             </Label>
             <Input
               id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               className="col-span-3"
             />
           </div>
@@ -130,7 +136,7 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops,
             <Label htmlFor="shop" className="text-right">
               المتجر
             </Label>
-            <Select value={shopId} onValueChange={setShopId}>
+            <Select value={formData.shopId} onValueChange={(value) => setFormData({ ...formData, shopId: value })}>
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="اختر المتجر" />
               </SelectTrigger>
@@ -147,7 +153,7 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops,
             <Label htmlFor="user" className="text-right">
               المستخدم
             </Label>
-            <Select value={userId} onValueChange={setUserId}>
+            <Select value={formData.userId} onValueChange={(value) => setFormData({ ...formData, userId: value })}>
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="اختر المستخدم" />
               </SelectTrigger>
