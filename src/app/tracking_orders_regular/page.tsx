@@ -5,8 +5,10 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { createClient } from '@supabase/supabase-js'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import Header from '@/app/components/Header'
+import NewOrderModal from '@/app/components/NewOrderModal'
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -48,6 +50,7 @@ export default function UserOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isNewOrderModalOpen, setIsNewOrderModalOpen] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -79,7 +82,26 @@ export default function UserOrdersPage() {
       // First, get the orders for the user
       const { data: orders, error: ordersError } = await supabase
         .from('order')
-        .select('*')
+        .select(`
+          id,
+          orderNumber,
+          status,
+          description,
+          shopId,
+          userId,
+          createdAt,
+          updatedAt,
+          shop:shopId (
+            id,
+            fullName,
+            email
+          ),
+          user:userId (
+            id,
+            fullName,
+            email
+          )
+        `)
         .eq('userId', session.user.id)
         .order('createdAt', { ascending: false })
 
@@ -88,39 +110,19 @@ export default function UserOrdersPage() {
         throw ordersError
       }
 
+      console.log('Raw orders data:', orders)
+
       if (!orders || orders.length === 0) {
         console.log('No orders found for user')
         setOrders([])
         return
       }
 
-      // Get all shop IDs from the orders
-      const shopIds = orders.map(order => order.shopId).filter(Boolean)
-      
-      // Fetch shop details in a separate query
-      const { data: shops, error: shopsError } = await supabase
-        .from('User')
-        .select('id, fullName, email')
-        .in('id', shopIds)
-        .eq('role', 'SHOP')
-
-      if (shopsError) {
-        console.error('Error fetching shops:', shopsError)
-        throw shopsError
-      }
-
-      // Create a map of shop details
-      const shopMap = new Map(shops?.map(shop => [shop.id, shop]) || [])
-
-      // Transform the orders with shop details
+      // Transform the data to match our Order interface
       const transformedOrders: Order[] = orders.map(order => ({
         ...order,
-        shop: shopMap.get(order.shopId) || { id: '', fullName: 'غير معروف', email: '' },
-        user: {
-          id: session.user.id,
-          fullName: session.user.fullName || 'غير معروف',
-          email: session.user.email || ''
-        }
+        shop: order.shop[0] || { id: '', fullName: 'غير معروف', email: '' },
+        user: order.user[0] || { id: '', fullName: 'غير معروف', email: '' }
       }))
 
       console.log('Transformed orders:', transformedOrders)
@@ -164,6 +166,14 @@ export default function UserOrdersPage() {
     }
   }
 
+  const handleNewOrder = () => {
+    setIsNewOrderModalOpen(true)
+  }
+
+  const handleOrderSaved = () => {
+    fetchOrders() // Refresh the orders list
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -192,6 +202,12 @@ export default function UserOrdersPage() {
                 <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
               </div>
             </div>
+          </div>
+
+          <div className="flex justify-end mb-4">
+            <Button onClick={handleNewOrder}>
+              طلب جديد
+            </Button>
           </div>
 
           {error && (
@@ -236,6 +252,13 @@ export default function UserOrdersPage() {
           </Table>
         </div>
       </div>
+
+      <NewOrderModal
+        isOpen={isNewOrderModalOpen}
+        onClose={() => setIsNewOrderModalOpen(false)}
+        onSave={handleOrderSaved}
+        userId={session?.user?.id || ''}
+      />
     </div>
   )
 } 

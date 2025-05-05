@@ -1,4 +1,6 @@
-import { useState } from 'react'
+'use client'
+
+import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,7 +11,7 @@ import { toast } from 'sonner'
 interface EditPackageModalProps {
   isOpen: boolean
   onClose: () => void
-  package: {
+  pkg: {
     id: string
     trackingNumber: string
     status: string
@@ -29,7 +31,7 @@ interface EditPackageModalProps {
   users: Array<{ id: string; fullName: string; email: string }>
 }
 
-export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops, users }: EditPackageModalProps) {
+export default function EditPackageModal({ isOpen, onClose, pkg, onSave, shops, users }: EditPackageModalProps) {
   const [formData, setFormData] = useState({
     trackingNumber: pkg.trackingNumber,
     status: pkg.status,
@@ -37,12 +39,23 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops,
     shopId: pkg.shopId,
     userId: pkg.userId
   })
-  const [isSaving, setIsSaving] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  // Update form data when package changes
+  useEffect(() => {
+    setFormData({
+      trackingNumber: pkg.trackingNumber,
+      status: pkg.status,
+      description: pkg.description || '',
+      shopId: pkg.shopId,
+      userId: pkg.userId
+    })
+  }, [pkg])
 
   const handleSave = async () => {
     try {
-      setIsSaving(true)
-      
+      setLoading(true)
+
       const response = await fetch(`/api/packages/${pkg.id}`, {
         method: 'PATCH',
         headers: {
@@ -51,35 +64,26 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops,
         body: JSON.stringify({
           trackingNumber: formData.trackingNumber,
           status: formData.status,
-          description: formData.description,
+          description: formData.description || null,
           shopId: formData.shopId,
-          userId: formData.userId,
+          userId: formData.userId
         }),
       })
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to update package')
+        throw new Error(errorData.error || 'حدث خطأ أثناء حفظ التغييرات')
       }
 
       const updatedPackage = await response.json()
-      
-      onSave({
-        id: pkg.id,
-        trackingNumber: formData.trackingNumber,
-        status: formData.status,
-        description: formData.description,
-        shopId: formData.shopId,
-        userId: formData.userId,
-      })
-
-      toast.success('تم تحديث بيانات الطرد بنجاح')
+      onSave(updatedPackage)
       onClose()
+      toast.success('تم تحديث بيانات الطرد بنجاح')
     } catch (error) {
       console.error('Error updating package:', error)
-      toast.error('حدث خطأ أثناء تحديث بيانات الطرد')
+      toast.error(error instanceof Error ? error.message : 'حدث خطأ أثناء حفظ التغييرات')
     } finally {
-      setIsSaving(false)
+      setLoading(false)
     }
   }
 
@@ -97,8 +101,8 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops,
             <Input
               id="trackingNumber"
               value={formData.trackingNumber}
-              onChange={(e) => setFormData({ ...formData, trackingNumber: e.target.value })}
-              className="col-span-3"
+              disabled
+              className="col-span-3 bg-gray-100 cursor-not-allowed"
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -176,10 +180,10 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops,
           </button>
           <button
             onClick={handleSave}
-            disabled={isSaving}
+            disabled={loading}
             className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
           >
-            {isSaving ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+            {loading ? 'جاري الحفظ...' : 'حفظ التغييرات'}
           </button>
         </div>
       </DialogContent>

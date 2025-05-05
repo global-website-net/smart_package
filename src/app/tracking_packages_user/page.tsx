@@ -106,7 +106,7 @@ export default function UserPackagesPage() {
         throw error
       }
 
-      console.log('Fetched packages:', packages)
+      console.log('Raw packages data:', packages)
 
       if (!packages || packages.length === 0) {
         console.log('No packages found for user')

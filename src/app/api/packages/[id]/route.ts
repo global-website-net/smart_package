@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/auth.config'
-import { supabase } from '@/lib/supabase'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@supabase/supabase-js'
+
+// Initialize Supabase admin client with service role key
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+)
 
 export const dynamic = 'force-dynamic'
 
@@ -16,7 +26,7 @@ export async function DELETE(request: NextRequest) {
 
     const id = request.url.split('/').pop()
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('package')
       .delete()
       .eq('id', id)
@@ -35,10 +45,7 @@ export async function DELETE(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies })
-    
-    // Check if user is authenticated
-    const { data: { session } } = await supabase.auth.getSession()
+    const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -52,8 +59,20 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json()
     const { trackingNumber, status, description, shopId, userId } = body
 
+    // First check if the package exists
+    const { data: existingPackage, error: checkError } = await supabaseAdmin
+      .from('package')
+      .select('id')
+      .eq('id', id)
+      .single()
+
+    if (checkError || !existingPackage) {
+      console.error('Package not found:', id)
+      return NextResponse.json({ error: 'Package not found' }, { status: 404 })
+    }
+
     // Update the package
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('package')
       .update({
         trackingNumber,
