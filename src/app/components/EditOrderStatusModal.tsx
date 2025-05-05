@@ -21,7 +21,7 @@ interface EditOrderStatusModalProps {
 
 export function EditOrderStatusModal({ isOpen, onClose, order, onSave }: EditOrderStatusModalProps) {
   const [status, setStatus] = useState(order.status)
-  const [totalAmount, setTotalAmount] = useState<number | ''>(order.totalAmount || '')
+  const [totalAmount, setTotalAmount] = useState<number | undefined>(order.totalAmount)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string>('')
 
@@ -103,10 +103,11 @@ export function EditOrderStatusModal({ isOpen, onClose, order, onSave }: EditOrd
                 type="number"
                 min="0"
                 step="0.01"
-                value={totalAmount}
+                value={totalAmount || ''}
                 onChange={(e) => {
                   setError('')
-                  setTotalAmount(e.target.value ? parseFloat(e.target.value) : '')
+                  const value = e.target.value ? parseFloat(e.target.value) : undefined
+                  setTotalAmount(value)
                 }}
                 className={`col-span-3 px-3 py-2 border rounded-md ${error ? 'border-red-500' : ''}`}
                 required
