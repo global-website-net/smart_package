@@ -33,8 +33,8 @@ interface Shop {
 interface Package {
   id: string
   trackingNumber: string
+  description: string | null
   status: string
-  description?: string
   userId: string
   shopId: string
   createdAt: string
@@ -206,8 +206,8 @@ export default function TrackingPackagesPage() {
         .select(`
           id,
           trackingNumber,
-          status,
           description,
+          status,
           userId,
           shopId,
           createdAt,
@@ -337,7 +337,7 @@ export default function TrackingPackagesPage() {
       <div className="pt-32 pb-10">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-6">ادارة الطرود</h1>
+            <h1 className="text-4xl font-bold mb-6">إدارة الطرود</h1>
             <div className="flex justify-center items-center">
               <div className="relative w-32 sm:w-48 md:w-64">
                 <div className="w-full h-0.5 bg-green-500"></div>
@@ -366,8 +366,8 @@ export default function TrackingPackagesPage() {
             <TableHeader>
               <TableRow>
                 <TableHead className="text-center">رقم التتبع</TableHead>
-                <TableHead className="text-center">الحالة</TableHead>
                 <TableHead className="text-center">الوصف</TableHead>
+                <TableHead className="text-center">الحالة</TableHead>
                 <TableHead className="text-center">تاريخ الإنشاء</TableHead>
                 <TableHead className="text-center">المتجر</TableHead>
                 <TableHead className="text-center">المستخدم</TableHead>
@@ -387,15 +387,15 @@ export default function TrackingPackagesPage() {
                 packages.map((pkg) => (
                   <TableRow key={pkg.id}>
                     <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
+                    <TableCell className="text-center">{pkg.description || '-'}</TableCell>
                     <TableCell className="text-center">
                       <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
                         {getPackageStatusText(pkg.status)}
                       </span>
                     </TableCell>
-                    <TableCell className="text-center">{pkg.description || 'لا يوجد وصف'}</TableCell>
                     <TableCell className="text-center">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
-                    <TableCell className="text-center">{pkg.shop?.[0]?.fullName || 'غير محدد'}</TableCell>
-                    <TableCell className="text-center">{pkg.user?.[0]?.fullName || 'غير محدد'}</TableCell>
+                    <TableCell className="text-center">{pkg.shop[0]?.fullName || 'غير معروف'}</TableCell>
+                    <TableCell className="text-center">{pkg.user[0]?.fullName || 'غير معروف'}</TableCell>
                     {(session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') && (
                       <TableCell className="text-center">
                         <div className="flex justify-center gap-4 rtl:space-x-reverse">

@@ -11,12 +11,12 @@ import { supabase } from '@/lib/supabase'
 interface Order {
   id: string
   userId: string
-  purchaseSite: string
-  purchaseLink: string
   phoneNumber: string
   notes: string | null
   additionalInfo: string | null
   status: string
+  totalAmount: number
+  orderNumber: string
   createdAt: string
   updatedAt: string
   user: {
@@ -57,12 +57,12 @@ export default function TrackingPage() {
         .select(`
           id,
           userId,
-          purchaseSite,
-          purchaseLink,
           phoneNumber,
           notes,
           additionalInfo,
           status,
+          totalAmount,
+          orderNumber,
           createdAt,
           updatedAt,
           user:User!userId (
@@ -110,6 +110,8 @@ export default function TrackingPage() {
 
   const getOrderStatusText = (status: string) => {
     switch (status) {
+      case 'AWAITING_PAYMENT':
+        return 'بانتظار الدفع'
       case 'PENDING':
         return 'قيد الانتظار'
       case 'PROCESSING':
@@ -125,6 +127,8 @@ export default function TrackingPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'AWAITING_PAYMENT':
+        return 'bg-yellow-100 text-yellow-800'
       case 'PENDING':
         return 'bg-yellow-100 text-yellow-800'
       case 'PROCESSING':
@@ -177,43 +181,36 @@ export default function TrackingPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-center">موقع الشراء</TableHead>
-                <TableHead className="text-center">رابط الشراء</TableHead>
+                <TableHead className="text-center">رقم الطلب</TableHead>
                 <TableHead className="text-center">رقم الهاتف</TableHead>
+                <TableHead className="text-center">المبلغ</TableHead>
                 <TableHead className="text-center">الحالة</TableHead>
                 <TableHead className="text-center">تاريخ الإنشاء</TableHead>
-                <TableHead className="text-center">المستخدم</TableHead>
+                <TableHead className="text-center">ملاحظات</TableHead>
+                <TableHead className="text-center">معلومات إضافية</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {orders.length === 0 && !loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4">
+                  <TableCell colSpan={7} className="text-center py-4">
                     لا توجد طلبات
                   </TableCell>
                 </TableRow>
               ) : (
                 orders.map((order) => (
                   <TableRow key={order.id}>
-                    <TableCell className="text-center">{order.purchaseSite}</TableCell>
-                    <TableCell className="text-center">
-                      <a 
-                        href={order.purchaseLink} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-green-600 hover:text-green-800"
-                      >
-                        عرض الرابط
-                      </a>
-                    </TableCell>
+                    <TableCell className="text-center">{order.orderNumber}</TableCell>
                     <TableCell className="text-center">{order.phoneNumber}</TableCell>
+                    <TableCell className="text-center">{order.totalAmount}</TableCell>
                     <TableCell className="text-center">
                       <span className={`px-2 py-1 rounded-full ${getStatusColor(order.status)}`}>
                         {getOrderStatusText(order.status)}
                       </span>
                     </TableCell>
                     <TableCell className="text-center">{new Date(order.createdAt).toLocaleDateString('ar')}</TableCell>
-                    <TableCell className="text-center">{order.user.fullName}</TableCell>
+                    <TableCell className="text-center">{order.notes || '-'}</TableCell>
+                    <TableCell className="text-center">{order.additionalInfo || '-'}</TableCell>
                   </TableRow>
                 ))
               )}
