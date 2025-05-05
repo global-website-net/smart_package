@@ -249,7 +249,14 @@ export default function TrackingPackagesPage() {
         .eq('role', 'REGULAR')
 
       if (error) throw error
-      setRegularUsers(users as User[])
+
+      // Transform the data to match the User interface
+      const transformedUsers = users.map(user => ({
+        id: user.id,
+        name: user.fullName || 'غير معروف'
+      }))
+
+      setRegularUsers(transformedUsers)
     } catch (error) {
       console.error('Error fetching regular users:', error)
       setError('Failed to load regular users')
