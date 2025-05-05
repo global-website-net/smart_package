@@ -40,6 +40,7 @@ interface Package {
   createdAt: string
   updatedAt: string
   orderNumber?: string
+  totalAmount?: number
   user: {
     fullName: string
     email: string
@@ -86,11 +87,12 @@ export default function TrackingPackagesPage() {
       if (session.user.role === 'ADMIN' || session.user.role === 'OWNER') {
         fetchOrders()
         fetchPackages()
+        fetchShops()
+        fetchRegularUsers()
       } else {
-        router.push('/')
+        // For regular users, only fetch their packages
+        fetchUserPackages()
       }
-      fetchShops()
-      fetchRegularUsers()
       checkAdminOrOwner()
     }
   }, [status])
@@ -255,6 +257,65 @@ export default function TrackingPackagesPage() {
     }
   }
 
+  const fetchUserPackages = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const { data: packages, error } = await supabase
+        .from('package')
+        .select(`
+          id,
+          trackingNumber,
+          status,
+          description,
+          userId,
+          shopId,
+          createdAt,
+          updatedAt,
+          orderNumber,
+          user:userId (
+            fullName,
+            email
+          ),
+          shop:shopId (
+            fullName,
+            email
+          )
+        `)
+        .eq('userId', session?.user?.id)
+        .order('createdAt', { ascending: false })
+
+      if (error) throw error
+
+      // Transform the data to match the Package interface
+      const transformedPackages = packages.map(pkg => {
+        const userData = pkg.user as unknown as { fullName: string; email: string } | null
+        const shopData = pkg.shop as unknown as { fullName: string; email: string } | null
+
+        return {
+          ...pkg,
+          user: [{
+            fullName: userData?.fullName || 'غير معروف',
+            email: userData?.email || ''
+          }],
+          shop: [{
+            fullName: shopData?.fullName || 'غير معروف',
+            email: shopData?.email || ''
+          }]
+        }
+      })
+
+      setPackages(transformedPackages)
+    } catch (error) {
+      console.error('Error fetching packages:', error)
+      setError('حدث خطأ أثناء جلب الطرود')
+      toast.error('حدث خطأ أثناء جلب الطرود')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleDelete = async (id: string) => {
     try {
       const { error } = await supabase
@@ -351,44 +412,48 @@ export default function TrackingPackagesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>رقم التتبع</TableHead>
-                <TableHead>الحالة</TableHead>
-                <TableHead>الوصف</TableHead>
-                <TableHead>تاريخ الإنشاء</TableHead>
-                <TableHead>المتجر</TableHead>
-                <TableHead>المستخدم</TableHead>
-                <TableHead>الإجراءات</TableHead>
+                <TableHead className="text-center">رقم التتبع</TableHead>
+                <TableHead className="text-center">الحالة</TableHead>
+                <TableHead className="text-center">الوصف</TableHead>
+                <TableHead className="text-center">تاريخ الإنشاء</TableHead>
+                <TableHead className="text-center">المتجر</TableHead>
+                <TableHead className="text-center">المستخدم</TableHead>
+                {(session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') && (
+                  <TableHead className="text-center">الإجراءات</TableHead>
+                )}
               </TableRow>
             </TableHeader>
             <TableBody>
               {packages.map((pkg) => (
                 <TableRow key={pkg.id}>
-                  <TableCell>{pkg.trackingNumber}</TableCell>
-                  <TableCell>
+                  <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
+                  <TableCell className="text-center">
                     <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
                       {getPackageStatusText(pkg.status)}
                     </span>
                   </TableCell>
-                  <TableCell>{pkg.description || 'لا يوجد وصف'}</TableCell>
-                  <TableCell>{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
-                  <TableCell>{pkg.shop?.[0]?.fullName || 'غير محدد'}</TableCell>
-                  <TableCell>{pkg.user?.[0]?.fullName || 'غير محدد'}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-4 rtl:space-x-reverse">
-                      <button
-                        onClick={() => handleDelete(pkg.id)}
-                        className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors"
-                      >
-                        حذف
-                      </button>
-                      <button
-                        onClick={() => router.push(`/packages/edit/${pkg.id}`)}
-                        className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors"
-                      >
-                        تعديل
-                      </button>
-                    </div>
-                  </TableCell>
+                  <TableCell className="text-center">{pkg.description || 'لا يوجد وصف'}</TableCell>
+                  <TableCell className="text-center">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
+                  <TableCell className="text-center">{pkg.shop?.[0]?.fullName || 'غير محدد'}</TableCell>
+                  <TableCell className="text-center">{pkg.user?.[0]?.fullName || 'غير محدد'}</TableCell>
+                  {(session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') && (
+                    <TableCell className="text-center">
+                      <div className="flex justify-center gap-4 rtl:space-x-reverse">
+                        <button
+                          onClick={() => handleDelete(pkg.id)}
+                          className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors"
+                        >
+                          حذف
+                        </button>
+                        <button
+                          onClick={() => router.push(`/packages/edit/${pkg.id}`)}
+                          className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors"
+                        >
+                          تعديل
+                        </button>
+                      </div>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>

@@ -1,45 +1,43 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { createClient } from '@supabase/supabase-js'
-import { useRouter } from 'next/navigation'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { toast } from 'sonner'
+import Header from '@/app/components/Header'
+
+// Initialize Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 interface Package {
   id: string
   trackingNumber: string
   status: string
-  location?: string
+  description?: string
+  userId: string
+  shopId: string
   createdAt: string
   updatedAt: string
-  user: {
-    fullName: string
-    email: string
-  }
-  shop: {
-    fullName: string
-  }
-}
-
-interface SupabasePackage {
-  id: string
-  trackingNumber: string
-  status: string
-  location?: string
-  createdAt: string
-  updatedAt: string
+  orderNumber?: string
+  totalAmount?: number
   user: {
     fullName: string
     email: string
   }[]
   shop: {
     fullName: string
+    email: string
   }[]
 }
 
-export default function TrackingPackagesRegularAccounts() {
-  const { data: session, status } = useSession()
+export default function TrackingPackagesRegularPage() {
   const router = useRouter()
+  const { data: session, status } = useSession()
   const [packages, setPackages] = useState<Package[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -50,41 +48,42 @@ export default function TrackingPackagesRegularAccounts() {
       return
     }
 
-    if (status === 'authenticated' && session.user.role !== 'REGULAR') {
-      router.push('/')
-      return
-    }
-
     if (status === 'authenticated') {
-      fetchPackages()
+      if (session.user.role !== 'REGULAR') {
+        router.push('/')
+        return
+      }
+      fetchUserPackages()
     }
-  }, [status, session, router])
+  }, [status])
 
-  const fetchPackages = async () => {
+  const fetchUserPackages = async () => {
     try {
       setLoading(true)
-      setError('')
+      setError(null)
 
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
-
-      const { data, error } = await supabase
-        .from('Package')
+      const { data: packages, error } = await supabase
+        .from('package')
         .select(`
           id,
           trackingNumber,
           status,
-          location,
+          description,
+          userId,
+          shopId,
           createdAt,
           updatedAt,
+          orderNumber,
+          order:orderNumber (
+            totalAmount
+          ),
           user:userId (
             fullName,
             email
           ),
           shop:shopId (
-            fullName
+            fullName,
+            email
           )
         `)
         .eq('userId', session?.user?.id)
@@ -93,108 +92,128 @@ export default function TrackingPackagesRegularAccounts() {
       if (error) throw error
 
       // Transform the data to match the Package interface
-      const transformedData: Package[] = (data || []).map(pkg => ({
-        ...pkg,
-        user: pkg.user?.[0] || { fullName: '', email: '' },
-        shop: pkg.shop?.[0] || { fullName: '' }
-      }))
+      const transformedPackages = packages.map(pkg => {
+        const userData = pkg.user as unknown as { fullName: string; email: string } | null
+        const shopData = pkg.shop as unknown as { fullName: string; email: string } | null
+        const orderData = pkg.order as unknown as { totalAmount: number } | null
 
-      setPackages(transformedData)
-    } catch (err) {
-      console.error('Error fetching packages:', err)
-      setError('حدث خطأ أثناء جلب الطلبات')
+        return {
+          ...pkg,
+          totalAmount: orderData?.totalAmount || 0,
+          user: [{
+            fullName: userData?.fullName || 'غير معروف',
+            email: userData?.email || ''
+          }],
+          shop: [{
+            fullName: shopData?.fullName || 'غير معروف',
+            email: shopData?.email || ''
+          }]
+        }
+      })
+
+      setPackages(transformedPackages)
+    } catch (error) {
+      console.error('Error fetching packages:', error)
+      setError('حدث خطأ أثناء جلب الطرود')
+      toast.error('حدث خطأ أثناء جلب الطرود')
     } finally {
       setLoading(false)
     }
   }
 
-  const getStatusText = (status: string) => {
+  const getPackageStatusText = (status: string) => {
     switch (status) {
       case 'PENDING':
         return 'قيد الانتظار'
       case 'IN_TRANSIT':
-        return 'قيد التوصيل'
+        return 'قيد الشحن'
       case 'DELIVERED':
-        return 'تم التوصيل'
+        return 'تم التسليم'
       case 'CANCELLED':
         return 'ملغي'
+      case 'RETURNED':
+        return 'تم الإرجاع'
       default:
         return status
     }
   }
 
-  if (status === 'loading' || loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-gray-900">جاري التحميل...</h2>
-          </div>
-        </div>
-      </div>
-    )
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'PENDING':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'IN_TRANSIT':
+        return 'bg-blue-100 text-blue-800'
+      case 'DELIVERED':
+        return 'bg-green-100 text-green-800'
+      case 'CANCELLED':
+        return 'bg-red-100 text-red-800'
+      case 'RETURNED':
+        return 'bg-orange-100 text-orange-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
   }
 
-  if (error) {
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-red-600">{error}</h2>
-            <button
-              onClick={fetchPackages}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              إعادة المحاولة
-            </button>
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <main className="p-4 pt-24">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+            </div>
           </div>
-        </div>
+        </main>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-extrabold text-gray-900">تتبع الطرود</h2>
-        </div>
-
-        {packages.length === 0 ? (
-          <div className="text-center">
-            <p className="text-gray-500 text-lg">لا توجد طرود</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {packages.map((pkg) => (
-              <div
-                key={pkg.id}
-                className="bg-white overflow-hidden shadow rounded-lg"
-              >
-                <div className="px-4 py-5 sm:p-6">
-                  <div className="mb-4">
-                    <h3 className="text-lg font-medium text-gray-900">
-                      رقم التتبع: {pkg.trackingNumber}
-                    </h3>
-                    <p className="mt-1 text-sm text-gray-500">
-                      الحالة: {getStatusText(pkg.status)}
-                    </p>
-                    <p className="mt-1 text-sm text-gray-500">
-                      الموقع: {pkg.location}
-                    </p>
-                    <p className="mt-1 text-sm text-gray-500">
-                      المتجر: {pkg.shop.fullName}
-                    </p>
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    <p>تاريخ الإنشاء: {new Date(pkg.createdAt).toLocaleDateString('ar-SA')}</p>
-                    <p>آخر تحديث: {new Date(pkg.updatedAt).toLocaleDateString('ar-SA')}</p>
-                  </div>
-                </div>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <div className="pt-32 pb-10">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold mb-6">تتبع الطرود</h1>
+            <div className="flex justify-center items-center">
+              <div className="relative w-32 sm:w-48 md:w-64">
+                <div className="w-full h-0.5 bg-green-500"></div>
+                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
               </div>
-            ))}
+            </div>
           </div>
-        )}
+
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-center">رقم التتبع</TableHead>
+                <TableHead className="text-center">الحالة</TableHead>
+                <TableHead className="text-center">الوصف</TableHead>
+                <TableHead className="text-center">المبلغ الإجمالي</TableHead>
+                <TableHead className="text-center">تاريخ الإنشاء</TableHead>
+                <TableHead className="text-center">المتجر</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {packages.map((pkg) => (
+                <TableRow key={pkg.id}>
+                  <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
+                  <TableCell className="text-center">
+                    <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
+                      {getPackageStatusText(pkg.status)}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-center">{pkg.description || 'لا يوجد وصف'}</TableCell>
+                  <TableCell className="text-center">{pkg.totalAmount?.toLocaleString('ar-SA') || '0'} ريال</TableCell>
+                  <TableCell className="text-center">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
+                  <TableCell className="text-center">{pkg.shop?.[0]?.fullName || 'غير محدد'}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   )

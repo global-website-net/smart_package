@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
 import MobileHeaderIcons from './MobileHeaderIcons'
+import { Package } from 'lucide-react'
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -49,6 +50,15 @@ export default function Header() {
         { href: '/blog', label: 'بلوج' },
       ]
     }
+  }
+
+  const getTrackingLink = (role: string) => {
+    if (role === 'ADMIN' || role === 'OWNER') {
+      return '/tracking_packages'
+    } else if (role === 'REGULAR') {
+      return '/tracking_packages_regular_accounts'
+    }
+    return '/'
   }
 
   return (
