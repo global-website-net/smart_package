@@ -32,8 +32,7 @@ interface Package {
   updatedAt: string
   shop: {
     id: string
-    fullName: string
-    email: string
+    name: string
   }
   user: {
     id: string
@@ -88,10 +87,9 @@ export default function UserPackagesPage() {
           userId,
           createdAt,
           updatedAt,
-          shop:User!shopId (
+          shop:shop!shopId (
             id,
-            fullName,
-            email
+            name
           )
         `)
         .eq('userId', session.user.id)
@@ -125,8 +123,7 @@ export default function UserPackagesPage() {
           updatedAt: pkg.updatedAt,
           shop: {
             id: shopData?.id || '',
-            fullName: shopData?.fullName || 'غير معروف',
-            email: shopData?.email || ''
+            name: shopData?.name || 'غير معروف'
           },
           user: {
             id: session.user.id,
@@ -244,7 +241,7 @@ export default function UserPackagesPage() {
                       </span>
                     </TableCell>
                     <TableCell className="text-center">{pkg.description || '-'}</TableCell>
-                    <TableCell className="text-center">{pkg.shop?.fullName || 'غير معروف'}</TableCell>
+                    <TableCell className="text-center">{pkg.shop?.name || 'غير معروف'}</TableCell>
                     <TableCell className="text-center">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
                   </TableRow>
                 ))

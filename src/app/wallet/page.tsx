@@ -145,8 +145,8 @@ export default function WalletPage() {
             {/* Balance Amount */}
             <div className="mx-4">
               <div className="text-4xl font-bold">
-                <span className="inline-block font-bold">{walletData.balance.toFixed(2)}</span>
-                <span className="inline-block font-bold mr-2">₪</span>
+                <span className="font-bold">{walletData.balance.toFixed(2)}</span>
+                <span className="font-bold mr-2">₪</span>
               </div>
             </div>
 
@@ -165,7 +165,7 @@ export default function WalletPage() {
           <div className="flex flex-col items-center">
             <button
               onClick={() => setShowPaymentWizard(true)}
-              className="bg-green-500 text-white px-8 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 mb-4"
+              className="bg-green-500 text-white px-8 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 mb-4 font-bold"
             >
               إضافة رصيد
             </button>
@@ -181,13 +181,13 @@ export default function WalletPage() {
                   <div className="flex items-center gap-4">
                     <span className={`text-xl font-bold ${transaction.type === 'CREDIT' ? 'text-green-600' : 'text-red-600'}`} dir="rtl">
                       <div className="text-lg font-bold">
-                        <span className="inline-block font-bold">{transaction.type === 'CREDIT' ? '+' : '-'}{transaction.amount.toFixed(2)}</span>
-                        <span className="inline-block font-bold mr-2">₪</span>
+                        <span className="font-bold">{transaction.type === 'CREDIT' ? '+' : '-'}{transaction.amount.toFixed(2)}</span>
+                        <span className="font-bold mr-2">₪</span>
                       </div>
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-gray-600">
+                    <span className="text-gray-600 font-bold">
                       {new Date(transaction.createdAt).toLocaleDateString('ar-SA', {
                         month: '2-digit',
                         day: '2-digit',
@@ -201,7 +201,7 @@ export default function WalletPage() {
                 </div>
               ))}
               {walletData.transactions.length === 0 && (
-                <div className="text-center text-gray-500">
+                <div className="text-center text-gray-500 font-bold">
                   لا توجد معاملات حتى الآن
                 </div>
               )}

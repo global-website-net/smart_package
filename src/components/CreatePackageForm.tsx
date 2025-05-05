@@ -45,18 +45,30 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
   })
 
   useEffect(() => {
+    console.log('Component mounted, fetching shops and users...')
     fetchShops()
     fetchUsers()
   }, [])
 
   const fetchShops = async () => {
     try {
+      console.log('Starting to fetch shops...')
       const { data, error } = await supabase
         .from('User')
-        .select('id, fullName, email')
+        .select('id, fullName, email, role')
         .eq('role', 'SHOP')
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase error:', error)
+        throw error
+      }
+
+      console.log('Fetched shops data:', data)
+      if (!data || data.length === 0) {
+        console.log('No shops found in the database')
+      } else {
+        console.log(`Found ${data.length} shops`)
+      }
       setShops(data || [])
     } catch (error) {
       console.error('Error fetching shops:', error)
@@ -118,10 +130,13 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
 
   return (
     <Dialog open={true} onOpenChange={onCancel}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px]" aria-describedby="create-package-description">
         <DialogHeader className="flex flex-col items-center justify-center">
           <DialogTitle className="text-xl font-bold text-center w-full">إنشاء طرد جديد</DialogTitle>
         </DialogHeader>
+        <p id="create-package-description" className="sr-only">
+          نموذج إنشاء طرد جديد
+        </p>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <label htmlFor="status" className="text-right">
@@ -167,11 +182,17 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
                 <SelectValue placeholder="اختر المتجر" className="text-right" />
               </SelectTrigger>
               <SelectContent className="text-right" align="end">
-                {shops.map((shop) => (
-                  <SelectItem key={shop.id} value={shop.id} className="text-right">
-                    {shop.fullName} ({shop.email})
+                {shops.length === 0 ? (
+                  <SelectItem value="no-shops" disabled className="text-right">
+                    لا توجد متاجر متاحة
                   </SelectItem>
-                ))}
+                ) : (
+                  shops.map((shop) => (
+                    <SelectItem key={shop.id} value={shop.id} className="text-right">
+                      {shop.fullName} ({shop.email})
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </div>

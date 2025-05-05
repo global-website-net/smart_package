@@ -233,11 +233,10 @@ export default function BlogPage() {
                   <div className="mt-4">
                     <div className="text-lg font-bold text-black mb-1">تاريخ الإنشاء:</div>
                     <div className="text-base font-normal text-gray-700">
-                      {new Date(post.createdAt).toLocaleDateString('ar-SA', {
+                      {new Date(post.createdAt).toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: '2-digit',
-                        day: '2-digit',
-                        calendar: 'gregory'
+                        day: '2-digit'
                       })}
                     </div>
                   </div>
