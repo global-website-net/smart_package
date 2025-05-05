@@ -29,7 +29,7 @@ interface User {
 }
 
 interface CreatePackageFormProps {
-  onSuccess: () => void
+  onSuccess: (newPackage: any) => void
   onCancel: () => void
 }
 
@@ -106,7 +106,7 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
       if (error) throw error
 
       toast.success('تم إضافة الطرد بنجاح')
-      onSuccess()
+      onSuccess(data[0])
       onCancel()
     } catch (error) {
       console.error('Error creating package:', error)
