@@ -115,15 +115,15 @@ export default function EditPackageModal({ isOpen, onClose, pkg, onSave, shops, 
               value={formData.status}
               onValueChange={(value) => setFormData({ ...formData, status: value })}
             >
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="اختر الحالة" />
+              <SelectTrigger className="col-span-3 text-right">
+                <SelectValue placeholder="اختر الحالة" className="text-right" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="AWAITING_PAYMENT">في انتظار الدفع</SelectItem>
-                <SelectItem value="PREPARING">قيد التحضير</SelectItem>
-                <SelectItem value="DELIVERING_TO_SHOP">قيد التوصيل للمتجر</SelectItem>
-                <SelectItem value="IN_SHOP">في المتجر</SelectItem>
-                <SelectItem value="RECEIVED">تم الاستلام</SelectItem>
+              <SelectContent className="text-right" align="end">
+                <SelectItem value="AWAITING_PAYMENT" className="text-right">في انتظار الدفع</SelectItem>
+                <SelectItem value="PREPARING" className="text-right">قيد التحضير</SelectItem>
+                <SelectItem value="DELIVERING_TO_SHOP" className="text-right">قيد التوصيل للمتجر</SelectItem>
+                <SelectItem value="IN_SHOP" className="text-right">في المتجر</SelectItem>
+                <SelectItem value="RECEIVED" className="text-right">تم الاستلام</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -143,8 +143,8 @@ export default function EditPackageModal({ isOpen, onClose, pkg, onSave, shops, 
               المتجر
             </Label>
             <Select value={formData.shopId} onValueChange={(value) => setFormData({ ...formData, shopId: value })}>
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="اختر المتجر" />
+              <SelectTrigger className="col-span-3 text-right">
+                <SelectValue placeholder="اختر المتجر" className="text-right" />
               </SelectTrigger>
               <SelectContent className="text-right" align="end">
                 {shops.map((shop) => (
@@ -160,8 +160,8 @@ export default function EditPackageModal({ isOpen, onClose, pkg, onSave, shops, 
               المستخدم
             </Label>
             <Select value={formData.userId} onValueChange={(value) => setFormData({ ...formData, userId: value })}>
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="اختر المستخدم" />
+              <SelectTrigger className="col-span-3 text-right">
+                <SelectValue placeholder="اختر المستخدم" className="text-right" />
               </SelectTrigger>
               <SelectContent className="text-right" align="end">
                 {users.map((user) => (

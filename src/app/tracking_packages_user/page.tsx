@@ -89,7 +89,20 @@ export default function UserPackagesPage() {
         throw sessionError
       }
 
-      const { data: packages, error } = await supabase
+      // Get all packages first to verify data exists
+      const { data: allPackages, error: allPackagesError } = await supabase
+        .from('package')
+        .select('*')
+      
+      console.log('All packages in database:', allPackages)
+
+      if (allPackagesError) {
+        console.error('Error fetching all packages:', allPackagesError)
+        throw allPackagesError
+      }
+
+      // Now get packages for the specific user
+      const { data: userPackages, error } = await supabase
         .from('package')
         .select(`
           id,
@@ -114,21 +127,21 @@ export default function UserPackagesPage() {
         .eq('userId', session.user.id)
         .order('createdAt', { ascending: false })
 
+      console.log('Packages for user:', userPackages)
+
       if (error) {
-        console.error('Error fetching packages:', error)
+        console.error('Error fetching user packages:', error)
         throw error
       }
 
-      console.log('Raw packages data:', packages)
-
-      if (!packages || packages.length === 0) {
+      if (!userPackages || userPackages.length === 0) {
         console.log('No packages found for user')
         setPackages([])
         return
       }
 
       // Transform the data to match our Package interface
-      const transformedPackages: Package[] = packages.map(pkg => ({
+      const transformedPackages: Package[] = userPackages.map(pkg => ({
         ...pkg,
         shop: pkg.shop[0] || { id: '', fullName: 'غير معروف', email: '' },
         user: pkg.user[0] || { id: '', fullName: 'غير معروف', email: '' }

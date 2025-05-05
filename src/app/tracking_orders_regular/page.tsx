@@ -25,18 +25,15 @@ const supabase = createClient(
 
 interface Order {
   id: string
-  orderNumber: string
-  status: string
-  description: string | null
-  shopId: string
   userId: string
+  purchaseSite: string
+  purchaseLink: string
+  phoneNumber: string
+  notes: string | null
+  additionalInfo: string | null
+  status: string
   createdAt: string
   updatedAt: string
-  shop: {
-    id: string
-    fullName: string
-    email: string
-  }
   user: {
     id: string
     fullName: string
@@ -80,23 +77,20 @@ export default function UserOrdersPage() {
       console.log('Fetching orders for user:', session.user.id)
 
       // First, get the orders for the user
-      const { data: orders, error: ordersError } = await supabase
+      const { data: orders, error } = await supabase
         .from('order')
         .select(`
           id,
-          orderNumber,
-          status,
-          description,
-          shopId,
           userId,
+          purchaseSite,
+          purchaseLink,
+          phoneNumber,
+          notes,
+          additionalInfo,
+          status,
           createdAt,
           updatedAt,
-          shop:Shop (
-            id,
-            fullName,
-            email
-          ),
-          user:User (
+          user:User!userId (
             id,
             fullName,
             email
@@ -105,12 +99,10 @@ export default function UserOrdersPage() {
         .eq('userId', session.user.id)
         .order('createdAt', { ascending: false })
 
-      if (ordersError) {
-        console.error('Error fetching orders:', ordersError)
-        throw ordersError
+      if (error) {
+        console.error('Error fetching orders:', error)
+        throw error
       }
-
-      console.log('Raw orders data:', orders)
 
       if (!orders || orders.length === 0) {
         console.log('No orders found for user')
@@ -120,8 +112,16 @@ export default function UserOrdersPage() {
 
       // Transform the data to match our Order interface
       const transformedOrders: Order[] = orders.map(order => ({
-        ...order,
-        shop: order.shop[0] || { id: '', fullName: 'غير معروف', email: '' },
+        id: order.id,
+        userId: order.userId,
+        purchaseSite: order.purchaseSite,
+        purchaseLink: order.purchaseLink,
+        phoneNumber: order.phoneNumber,
+        notes: order.notes,
+        additionalInfo: order.additionalInfo,
+        status: order.status,
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
         user: order.user[0] || { id: '', fullName: 'غير معروف', email: '' }
       }))
 
@@ -220,30 +220,36 @@ export default function UserOrdersPage() {
             <TableHeader>
               <TableRow>
                 <TableHead className="text-center">رقم الطلب</TableHead>
+                <TableHead className="text-center">موقع الشراء</TableHead>
+                <TableHead className="text-center">رابط الشراء</TableHead>
+                <TableHead className="text-center">رقم الهاتف</TableHead>
                 <TableHead className="text-center">الحالة</TableHead>
-                <TableHead className="text-center">الوصف</TableHead>
-                <TableHead className="text-center">المتجر</TableHead>
                 <TableHead className="text-center">تاريخ الإنشاء</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {orders.length === 0 && !loading ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-4">
+                  <TableCell colSpan={6} className="text-center py-4">
                     لا توجد طلبات
                   </TableCell>
                 </TableRow>
               ) : (
                 orders.map((order) => (
                   <TableRow key={order.id}>
-                    <TableCell className="text-center">{order.orderNumber}</TableCell>
+                    <TableCell className="text-center">{order.id}</TableCell>
+                    <TableCell className="text-center">{order.purchaseSite}</TableCell>
+                    <TableCell className="text-center">
+                      <a href={order.purchaseLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                        {order.purchaseLink}
+                      </a>
+                    </TableCell>
+                    <TableCell className="text-center">{order.phoneNumber}</TableCell>
                     <TableCell className="text-center">
                       <span className={`px-2 py-1 rounded-full ${getStatusColor(order.status)}`}>
                         {getOrderStatusText(order.status)}
                       </span>
                     </TableCell>
-                    <TableCell className="text-center">{order.description || '-'}</TableCell>
-                    <TableCell className="text-center">{order.shop?.fullName || 'غير معروف'}</TableCell>
                     <TableCell className="text-center">{new Date(order.createdAt).toLocaleDateString('ar')}</TableCell>
                   </TableRow>
                 ))

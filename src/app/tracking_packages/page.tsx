@@ -334,17 +334,37 @@ export default function TrackingPackagesPage() {
     shopId: string
     userId: string
   }) => {
-    setPackages(packages.map(pkg => 
-      pkg.id === updatedPackage.id 
-        ? { ...pkg, ...updatedPackage }
-        : pkg
-    ))
+    setPackages(packages.map(pkg => {
+      if (pkg.id === updatedPackage.id) {
+        // Find the new user data from regularUsers
+        const newUser = regularUsers.find(user => user.id === updatedPackage.userId)
+        return {
+          ...pkg,
+          ...updatedPackage,
+          user: {
+            id: newUser?.id || '',
+            name: newUser?.fullName || 'غير معروف'
+          }
+        }
+      }
+      return pkg
+    }))
     setSelectedPackage(null)
     setIsEditModalOpen(false)
   }
 
   const getPackageStatusText = (status: string) => {
     switch (status) {
+      case 'AWAITING_PAYMENT':
+        return 'في انتظار الدفع'
+      case 'PREPARING':
+        return 'قيد التحضير'
+      case 'DELIVERING_TO_SHOP':
+        return 'قيد التوصيل للمتجر'
+      case 'IN_SHOP':
+        return 'في المتجر'
+      case 'RECEIVED':
+        return 'تم الاستلام'
       case 'PENDING':
         return 'قيد الانتظار'
       case 'IN_TRANSIT':
