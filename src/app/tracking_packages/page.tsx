@@ -135,10 +135,17 @@ export default function TrackingPackagesPage() {
   }, [status, session])
 
   useEffect(() => {
-    fetchPackages()
-    fetchShops()
-    fetchUsers()
-  }, [])
+    if (status === 'authenticated') {
+      if (session.user.role === 'ADMIN' || session.user.role === 'OWNER') {
+        setIsAdminOrOwner(true)
+        fetchPackages()
+        fetchShops()
+        fetchRegularUsers()
+      } else {
+        router.push('/')
+      }
+    }
+  }, [status, session])
 
   const checkAdminOrOwner = () => {
     if (session && session.user && session.user.role) {
@@ -163,21 +170,25 @@ export default function TrackingPackagesPage() {
     }
   }
 
-  const fetchUsers = async () => {
+  const fetchRegularUsers = async () => {
     try {
-      const response = await fetch('/api/users')
-      if (!response.ok) {
-        throw new Error('Failed to fetch users')
-      }
-      const data = await response.json()
-      const transformedUsers = data.map((user: { id: string; fullName: string }) => ({
+      const { data: users, error } = await supabase
+        .from('User')
+        .select('id, fullName, email, role')
+        .eq('role', 'REGULAR')
+
+      if (error) throw error
+
+      // Transform the data to match the User interface
+      const transformedUsers = users.map(user => ({
         id: user.id,
         name: user.fullName || 'غير معروف'
       }))
-      setUsers(transformedUsers)
+
+      setRegularUsers(transformedUsers)
     } catch (error) {
-      console.error('Error fetching users:', error)
-      setError('Failed to load users')
+      console.error('Error fetching regular users:', error)
+      setError('Failed to load regular users')
     }
   }
 
@@ -244,28 +255,6 @@ export default function TrackingPackagesPage() {
       setError('حدث خطأ أثناء جلب الطلبات')
     } finally {
       setLoading(false)
-    }
-  }
-
-  const fetchRegularUsers = async () => {
-    try {
-      const { data: users, error } = await supabase
-        .from('User')
-        .select('id, fullName, email, role')
-        .eq('role', 'REGULAR')
-
-      if (error) throw error
-
-      // Transform the data to match the User interface
-      const transformedUsers = users.map(user => ({
-        id: user.id,
-        name: user.fullName || 'غير معروف'
-      }))
-
-      setRegularUsers(transformedUsers)
-    } catch (error) {
-      console.error('Error fetching regular users:', error)
-      setError('Failed to load regular users')
     }
   }
 
@@ -346,12 +335,16 @@ export default function TrackingPackagesPage() {
     trackingNumber: string
     status: string
     description: string | null
+    shopId: string
+    userId: string
   }) => {
     setPackages(packages.map(pkg => 
       pkg.id === updatedPackage.id 
         ? { ...pkg, ...updatedPackage }
         : pkg
     ))
+    setSelectedPackage(null)
+    setIsEditModalOpen(false)
   }
 
   const getPackageStatusText = (status: string) => {
@@ -506,7 +499,7 @@ export default function TrackingPackagesPage() {
           package={selectedPackage}
           onSave={handleSavePackage}
           shops={shops}
-          users={users}
+          users={regularUsers}
         />
       )}
     </div>

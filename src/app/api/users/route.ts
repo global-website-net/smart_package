@@ -26,6 +26,7 @@ export async function GET() {
     const { data, error } = await supabaseAdmin
       .from('User')
       .select('id, fullName, email, governorate, town, phonePrefix, phoneNumber, createdAt')
+      .eq('role', 'REGULAR')
       .order('fullName', { ascending: true })
 
     if (error) {

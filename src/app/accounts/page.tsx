@@ -61,10 +61,12 @@ export default function AccountsPage() {
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ar-SA', {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('ar-SA', {
       year: 'numeric',
       month: '2-digit',
-      day: '2-digit'
+      day: '2-digit',
+      calendar: 'gregory'
     })
   }
 
@@ -152,7 +154,7 @@ export default function AccountsPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {user.phonePrefix && user.phoneNumber 
-                            ? `${user.phonePrefix} ${user.phoneNumber}`
+                            ? `${user.phonePrefix}-${user.phoneNumber}`
                             : 'غير متوفر'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
