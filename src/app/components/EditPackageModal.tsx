@@ -106,11 +106,11 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops,
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="اختر الحالة" />
               </SelectTrigger>
-              <SelectContent className="text-right" align="end">
-                <SelectItem value="PENDING" className="text-right">قيد الانتظار</SelectItem>
-                <SelectItem value="IN_TRANSIT" className="text-right">قيد الشحن</SelectItem>
-                <SelectItem value="DELIVERED" className="text-right">تم التسليم</SelectItem>
-                <SelectItem value="CANCELLED" className="text-right">ملغي</SelectItem>
+              <SelectContent>
+                <SelectItem value="PENDING">قيد الانتظار</SelectItem>
+                <SelectItem value="IN_TRANSIT">قيد الشحن</SelectItem>
+                <SelectItem value="DELIVERED">تم التسليم</SelectItem>
+                <SelectItem value="CANCELLED">ملغي</SelectItem>
               </SelectContent>
             </Select>
           </div>

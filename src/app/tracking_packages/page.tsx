@@ -155,15 +155,12 @@ export default function TrackingPackagesPage() {
 
   const fetchShops = async () => {
     try {
-      const { data: shops, error } = await supabase
-        .from('User')
-        .select('id, fullName')
-        .eq('role', 'SHOP')
-        .order('fullName', { ascending: true })
-
-      if (error) throw error
-
-      setShops(shops)
+      const response = await fetch('/api/users/shops')
+      if (!response.ok) {
+        throw new Error('Failed to fetch shops')
+      }
+      const data = await response.json()
+      setShops(data)
     } catch (error) {
       console.error('Error fetching shops:', error)
       setError('حدث خطأ أثناء جلب المتاجر')
@@ -172,15 +169,12 @@ export default function TrackingPackagesPage() {
 
   const fetchRegularUsers = async () => {
     try {
-      const { data: users, error } = await supabase
-        .from('User')
-        .select('id, fullName')
-        .eq('role', 'REGULAR')
-        .order('fullName', { ascending: true })
-
-      if (error) throw error
-
-      setRegularUsers(users)
+      const response = await fetch('/api/users/regular')
+      if (!response.ok) {
+        throw new Error('Failed to fetch users')
+      }
+      const data = await response.json()
+      setRegularUsers(data)
     } catch (error) {
       console.error('Error fetching regular users:', error)
       setError('حدث خطأ أثناء جلب المستخدمين')
