@@ -48,11 +48,13 @@ interface Package {
   updatedAt: string
   shop: {
     id: string
-    name: string
+    fullName: string
+    email: string
   }
   user: {
     id: string
-    name: string
+    fullName: string
+    email: string
   }
 }
 
@@ -284,11 +286,13 @@ export default function TrackingPackagesPage() {
           updatedAt: pkg.updatedAt,
           shop: {
             id: shopData?.id || '',
-            name: shopData?.fullName || 'غير معروف'
+            fullName: shopData?.fullName || 'غير معروف',
+            email: shopData?.email || ''
           },
           user: {
             id: userData?.id || '',
-            name: userData?.fullName || 'غير معروف'
+            fullName: userData?.fullName || 'غير معروف',
+            email: userData?.email || ''
           }
         }
       })
@@ -334,22 +338,26 @@ export default function TrackingPackagesPage() {
     shopId: string
     userId: string
   }) => {
-    setPackages(packages.map(pkg => {
-      if (pkg.id === updatedPackage.id) {
-        // Find the new user data from regularUsers
-        const newUser = regularUsers.find(user => user.id === updatedPackage.userId)
-        return {
-          ...pkg,
-          ...updatedPackage,
-          user: {
-            id: newUser?.id || '',
-            name: newUser?.fullName || 'غير معروف'
+    setPackages(prevPackages => 
+      prevPackages.map(pkg => {
+        if (pkg.id === updatedPackage.id) {
+          // Find the new user data from regularUsers array
+          const newUser = regularUsers.find(user => user.id === updatedPackage.userId)
+          
+          return {
+            ...pkg,
+            ...updatedPackage,
+            user: newUser ? {
+              id: newUser.id,
+              fullName: newUser.fullName,
+              email: newUser.email
+            } : { id: '', fullName: 'غير معروف', email: '' }
           }
         }
-      }
-      return pkg
-    }))
-    setSelectedPackage(null)
+        return pkg
+      })
+    )
+    setEditingPackage(null)
     setIsEditModalOpen(false)
   }
 
@@ -474,8 +482,8 @@ export default function TrackingPackagesPage() {
                       </span>
                     </TableCell>
                     <TableCell className="text-center">{pkg.description || '-'}</TableCell>
-                    <TableCell className="text-center">{pkg.shop.name || 'غير معروف'}</TableCell>
-                    <TableCell className="text-center">{pkg.user.name || 'غير معروف'}</TableCell>
+                    <TableCell className="text-center">{pkg.shop.fullName || 'غير معروف'}</TableCell>
+                    <TableCell className="text-center">{pkg.user.fullName || 'غير معروف'}</TableCell>
                     <TableCell className="text-center">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
                     {(session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') && (
                       <TableCell className="text-center">

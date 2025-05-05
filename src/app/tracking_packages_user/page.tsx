@@ -113,12 +113,12 @@ export default function UserPackagesPage() {
           userId,
           createdAt,
           updatedAt,
-          shop:shopId (
+          shop:User!shopId (
             id,
             fullName,
             email
           ),
-          user:userId (
+          user:User!userId (
             id,
             fullName,
             email
@@ -141,11 +141,31 @@ export default function UserPackagesPage() {
       }
 
       // Transform the data to match our Package interface
-      const transformedPackages: Package[] = userPackages.map(pkg => ({
-        ...pkg,
-        shop: pkg.shop[0] || { id: '', fullName: 'غير معروف', email: '' },
-        user: pkg.user[0] || { id: '', fullName: 'غير معروف', email: '' }
-      }))
+      const transformedPackages: Package[] = userPackages.map(pkg => {
+        const shopData = Array.isArray(pkg.shop) ? pkg.shop[0] : pkg.shop;
+        const userData = Array.isArray(pkg.user) ? pkg.user[0] : pkg.user;
+        
+        return {
+          id: pkg.id,
+          trackingNumber: pkg.trackingNumber,
+          status: pkg.status,
+          description: pkg.description,
+          shopId: pkg.shopId,
+          userId: pkg.userId,
+          createdAt: pkg.createdAt,
+          updatedAt: pkg.updatedAt,
+          shop: {
+            id: shopData?.id || '',
+            fullName: shopData?.fullName || 'غير معروف',
+            email: shopData?.email || ''
+          },
+          user: {
+            id: userData?.id || '',
+            fullName: userData?.fullName || 'غير معروف',
+            email: userData?.email || ''
+          }
+        };
+      });
 
       console.log('Transformed packages:', transformedPackages)
       setPackages(transformedPackages)

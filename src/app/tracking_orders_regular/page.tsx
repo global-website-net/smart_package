@@ -90,7 +90,7 @@ export default function UserOrdersPage() {
           status,
           createdAt,
           updatedAt,
-          user:User!userId (
+          user:User (
             id,
             fullName,
             email
@@ -111,19 +111,26 @@ export default function UserOrdersPage() {
       }
 
       // Transform the data to match our Order interface
-      const transformedOrders: Order[] = orders.map(order => ({
-        id: order.id,
-        userId: order.userId,
-        purchaseSite: order.purchaseSite,
-        purchaseLink: order.purchaseLink,
-        phoneNumber: order.phoneNumber,
-        notes: order.notes,
-        additionalInfo: order.additionalInfo,
-        status: order.status,
-        createdAt: order.createdAt,
-        updatedAt: order.updatedAt,
-        user: order.user[0] || { id: '', fullName: 'غير معروف', email: '' }
-      }))
+      const transformedOrders: Order[] = orders.map(order => {
+        const userData = Array.isArray(order.user) ? order.user[0] : order.user;
+        return {
+          id: order.id,
+          userId: order.userId,
+          purchaseSite: order.purchaseSite,
+          purchaseLink: order.purchaseLink,
+          phoneNumber: order.phoneNumber,
+          notes: order.notes,
+          additionalInfo: order.additionalInfo,
+          status: order.status,
+          createdAt: order.createdAt,
+          updatedAt: order.updatedAt,
+          user: {
+            id: userData?.id || '',
+            fullName: userData?.fullName || 'غير معروف',
+            email: userData?.email || ''
+          }
+        };
+      });
 
       console.log('Transformed orders:', transformedOrders)
       setOrders(transformedOrders)
