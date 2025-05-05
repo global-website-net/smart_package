@@ -55,8 +55,9 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
       console.log('Starting to fetch shops...')
       const { data, error } = await supabase
         .from('User')
-        .select('id, fullName, email, role')
+        .select('id, fullName, email')
         .eq('role', 'SHOP')
+        .order('fullName', { ascending: true })
 
       if (error) {
         console.error('Supabase error:', error)
@@ -66,23 +67,11 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
       console.log('Fetched shops data:', data)
       if (!data || data.length === 0) {
         console.log('No shops found in the database')
-        console.log('Query details:', {
-          table: 'User',
-          role: 'SHOP',
-          count: data?.length || 0
-        })
+        toast.error('لا توجد متاجر متاحة حالياً')
       } else {
         console.log(`Found ${data.length} shops`)
-        data.forEach(shop => {
-          console.log('Shop details:', {
-            id: shop.id,
-            fullName: shop.fullName,
-            email: shop.email,
-            role: shop.role
-          })
-        })
+        setShops(data)
       }
-      setShops(data || [])
     } catch (error) {
       console.error('Error fetching shops:', error)
       toast.error('حدث خطأ أثناء جلب المتاجر')
@@ -94,8 +83,9 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
       console.log('Starting to fetch regular users...')
       const { data, error } = await supabase
         .from('User')
-        .select('id, fullName, email, role')
+        .select('id, fullName, email')
         .eq('role', 'REGULAR')
+        .order('fullName', { ascending: true })
 
       if (error) {
         console.error('Supabase error:', error)
@@ -105,23 +95,11 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
       console.log('Fetched users data:', data)
       if (!data || data.length === 0) {
         console.log('No regular users found in the database')
-        console.log('Query details:', {
-          table: 'User',
-          role: 'REGULAR',
-          count: data?.length || 0
-        })
+        toast.error('لا توجد مستخدمين متاحين حالياً')
       } else {
         console.log(`Found ${data.length} regular users`)
-        data.forEach(user => {
-          console.log('User details:', {
-            id: user.id,
-            fullName: user.fullName,
-            email: user.email,
-            role: user.role
-          })
-        })
+        setUsers(data)
       }
-      setUsers(data || [])
     } catch (error) {
       console.error('Error fetching users:', error)
       toast.error('حدث خطأ أثناء جلب المستخدمين')
