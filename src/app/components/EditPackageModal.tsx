@@ -81,7 +81,7 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave }: Edit
             <Input
               id="trackingNumber"
               value={trackingNumber}
-              onChange={(e) => setTrackingNumber(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTrackingNumber(e.target.value)}
               className="col-span-3"
             />
           </div>
@@ -108,7 +108,7 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave }: Edit
             <Input
               id="description"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDescription(e.target.value)}
               className="col-span-3"
             />
           </div>
