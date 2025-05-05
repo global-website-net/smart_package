@@ -154,8 +154,27 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
 
       if (error) throw error
 
+      // Find the selected user and shop from their respective arrays
+      const selectedUser = users.find(user => user.id === formData.userId)
+      const selectedShop = shops.find(shop => shop.id === formData.shopId)
+      
+      // Add user and shop information to the new package
+      const packageWithDetails = {
+        ...data[0],
+        user: selectedUser ? {
+          id: selectedUser.id,
+          fullName: selectedUser.fullName,
+          email: selectedUser.email
+        } : { id: '', fullName: 'غير معروف', email: '' },
+        shop: selectedShop ? {
+          id: selectedShop.id,
+          fullName: selectedShop.fullName,
+          email: selectedShop.email
+        } : { id: '', fullName: 'غير معروف', email: '' }
+      }
+
       toast.success('تم إضافة الطرد بنجاح')
-      onSuccess(data[0])
+      onSuccess(packageWithDetails)
       onCancel()
     } catch (error) {
       console.error('Error creating package:', error)
@@ -245,11 +264,17 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
                 <SelectValue placeholder="اختر المستخدم" className="text-right" />
               </SelectTrigger>
               <SelectContent className="text-right" align="end">
-                {users.map((user) => (
-                  <SelectItem key={user.id} value={user.id} className="text-right">
-                    {user.fullName} ({user.email})
+                {users.length === 0 ? (
+                  <SelectItem value="no-users" disabled className="text-right">
+                    لا توجد مستخدمين متاحين
                   </SelectItem>
-                ))}
+                ) : (
+                  users.map((user) => (
+                    <SelectItem key={user.id} value={user.id} className="text-right">
+                      {user.fullName} ({user.email})
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </div>

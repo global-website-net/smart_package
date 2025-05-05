@@ -144,9 +144,9 @@ export default function WalletPage() {
 
             {/* Balance Amount */}
             <div className="mx-4">
-              <div className="text-4xl font-bold">
-                <span>{walletData.balance.toFixed(2)}</span>
-                <span className="mr-2">₪</span>
+              <div className="text-4xl font-bold flex items-center justify-center">
+                <span className="font-bold">{walletData.balance.toFixed(2)}</span>
+                <span className="mr-2 font-bold">₪</span>
               </div>
             </div>
 
@@ -165,7 +165,7 @@ export default function WalletPage() {
           <div className="flex flex-col items-center">
             <button
               onClick={() => setShowPaymentWizard(true)}
-              className="bg-green-500 text-white px-8 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 mb-4 font-bold"
+              className="bg-green-500 text-white px-8 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 mb-4"
             >
               إضافة رصيد
             </button>
@@ -180,9 +180,9 @@ export default function WalletPage() {
                 <div key={transaction.id} className="flex justify-between items-center border-b pb-4">
                   <div className="flex items-center gap-4">
                     <span className={`text-xl font-bold ${transaction.type === 'CREDIT' ? 'text-green-600' : 'text-red-600'}`} dir="rtl">
-                      <div className="text-lg font-bold">
-                        <span>{transaction.type === 'CREDIT' ? '+' : '-'}{transaction.amount.toFixed(2)}</span>
-                        <span className="mr-2">₪</span>
+                      <div className="text-lg font-bold flex items-center">
+                        <span className="font-bold">{transaction.type === 'CREDIT' ? '+' : '-'}{transaction.amount.toFixed(2)}</span>
+                        <span className="mr-2 font-bold">₪</span>
                       </div>
                     </span>
                   </div>

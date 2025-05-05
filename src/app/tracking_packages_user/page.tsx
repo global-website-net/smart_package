@@ -32,7 +32,8 @@ interface Package {
   updatedAt: string
   shop: {
     id: string
-    name: string
+    fullName: string
+    email: string
   }
   user: {
     id: string
@@ -75,8 +76,7 @@ export default function UserPackagesPage() {
 
       console.log('Fetching packages for user ID:', session.user.id)
 
-      // Get packages for the specific user
-      const { data: userPackages, error } = await supabase
+      const { data: packages, error } = await supabase
         .from('package')
         .select(`
           id,
@@ -91,6 +91,11 @@ export default function UserPackagesPage() {
             id,
             fullName,
             email
+          ),
+          user:User!userId (
+            id,
+            fullName,
+            email
           )
         `)
         .eq('userId', session.user.id)
@@ -101,18 +106,19 @@ export default function UserPackagesPage() {
         throw error
       }
 
-      console.log('Fetched packages:', userPackages)
+      console.log('Fetched packages:', packages)
 
-      if (!userPackages || userPackages.length === 0) {
+      if (!packages || packages.length === 0) {
         console.log('No packages found for user')
         setPackages([])
         return
       }
 
-      // Transform the data to match our Package interface
-      const transformedPackages: Package[] = userPackages.map(pkg => {
-        const shopData = Array.isArray(pkg.shop) ? pkg.shop[0] : pkg.shop;
-        
+      // Transform the data to match the Package interface
+      const transformedPackages = packages.map((pkg: any) => {
+        const shopData = Array.isArray(pkg.shop) ? pkg.shop[0] : pkg.shop
+        const userData = Array.isArray(pkg.user) ? pkg.user[0] : pkg.user
+
         return {
           id: pkg.id,
           trackingNumber: pkg.trackingNumber,
@@ -124,15 +130,16 @@ export default function UserPackagesPage() {
           updatedAt: pkg.updatedAt,
           shop: {
             id: shopData?.id || '',
-            name: shopData?.fullName || 'غير معروف'
+            fullName: shopData?.fullName || 'غير معروف',
+            email: shopData?.email || ''
           },
           user: {
-            id: session.user.id,
-            fullName: session.user.name || 'غير معروف',
-            email: session.user.email || ''
+            id: userData?.id || '',
+            fullName: userData?.fullName || 'غير معروف',
+            email: userData?.email || ''
           }
-        };
-      });
+        }
+      })
 
       console.log('Transformed packages:', transformedPackages)
       setPackages(transformedPackages)
@@ -242,7 +249,7 @@ export default function UserPackagesPage() {
                       </span>
                     </TableCell>
                     <TableCell className="text-center">{pkg.description || '-'}</TableCell>
-                    <TableCell className="text-center">{pkg.shop?.name || 'غير معروف'}</TableCell>
+                    <TableCell className="text-center">{pkg.shop?.fullName || 'غير معروف'}</TableCell>
                     <TableCell className="text-center">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
                   </TableRow>
                 ))
