@@ -1,46 +1,46 @@
+import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '../auth/auth.config'
-import prisma from '@/lib/prisma'
+import { authOptions } from '@/app/api/auth/auth.config'
+
+// Initialize Supabase admin client with service role key
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+)
 
 export async function GET() {
   try {
+    // Check if user is authenticated and is ADMIN/OWNER
     const session = await getServerSession(authOptions)
-    if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: 'غير مصرح لك بالوصول' },
-        { status: 401 }
-      )
+    if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Fetch all users with role SHOP
-    const { data: shops, error } = await supabase
-      .from('User')
-      .select('id, fullName')
-      .eq('role', 'SHOP')
-      .order('fullName', { ascending: true })
+    const { data, error } = await supabaseAdmin
+      .from('shop')
+      .select('id, name')
+      .order('name')
 
     if (error) {
       console.error('Error fetching shops:', error)
       return NextResponse.json(
-        { error: 'حدث خطأ أثناء جلب المتاجر' },
+        { error: 'Failed to fetch shops' },
         { status: 500 }
       )
     }
 
-    // Transform the data to match the expected format
-    const transformedShops = shops.map(shop => ({
-      id: shop.id,
-      fullName: shop.fullName,
-      role: 'SHOP'
-    }))
-
-    return NextResponse.json(transformedShops)
+    return NextResponse.json(data)
   } catch (error) {
-    console.error('Error in shops route:', error)
+    console.error('Error in GET /api/shops:', error)
     return NextResponse.json(
-      { error: 'حدث خطأ في الخادم' },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }

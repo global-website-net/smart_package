@@ -23,37 +23,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id, trackingNumber, status, description, shopId, userId } = await request.json()
+    const { id, status } = await request.json()
 
     const { data, error } = await supabaseAdmin
-      .from('package')
+      .from('order')
       .update({
-        trackingNumber,
         status,
-        description,
-        shopId,
-        userId,
         updatedAt: new Date().toISOString()
       })
       .eq('id', id)
-      .select(`
-        *,
-        shop:shopId (id, name),
-        user:userId (id, name)
-      `)
+      .select()
 
     if (error) {
-      console.error('Error updating package:', error)
+      console.error('Error updating order:', error)
       return NextResponse.json(
-        { error: 'Failed to update package' },
+        { error: 'Failed to update order' },
         { status: 500 }
       )
     }
 
-    console.log('Updated package:', data)
+    console.log('Updated order:', data)
     return NextResponse.json(data[0])
   } catch (error) {
-    console.error('Error in POST /api/packages/update:', error)
+    console.error('Error in POST /api/orders/update:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

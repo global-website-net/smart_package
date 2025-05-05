@@ -14,19 +14,27 @@ interface EditPackageModalProps {
     trackingNumber: string
     status: string
     description: string | null
+    shopId: string
+    userId: string
   }
   onSave: (updatedPackage: {
     id: string
     trackingNumber: string
     status: string
     description: string | null
+    shopId: string
+    userId: string
   }) => void
+  shops: Array<{ id: string; name: string }>
+  users: Array<{ id: string; name: string }>
 }
 
-export function EditPackageModal({ isOpen, onClose, package: pkg, onSave }: EditPackageModalProps) {
+export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops, users }: EditPackageModalProps) {
   const [trackingNumber, setTrackingNumber] = useState(pkg.trackingNumber)
   const [status, setStatus] = useState(pkg.status)
   const [description, setDescription] = useState(pkg.description || '')
+  const [shopId, setShopId] = useState(pkg.shopId)
+  const [userId, setUserId] = useState(pkg.userId)
   const [isSaving, setIsSaving] = useState(false)
 
   const handleSave = async () => {
@@ -42,7 +50,9 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave }: Edit
           id: pkg.id,
           trackingNumber,
           status,
-          description: description || null,
+          description,
+          shopId,
+          userId,
         }),
       })
 
@@ -54,14 +64,16 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave }: Edit
         id: pkg.id,
         trackingNumber,
         status,
-        description: description || null,
+        description,
+        shopId,
+        userId,
       })
 
-      toast.success('تم تحديث الطرد بنجاح')
+      toast.success('تم تحديث بيانات الطرد بنجاح')
       onClose()
     } catch (error) {
       console.error('Error updating package:', error)
-      toast.error('حدث خطأ أثناء تحديث الطرد')
+      toast.error('حدث خطأ أثناء تحديث بيانات الطرد')
     } finally {
       setIsSaving(false)
     }
@@ -70,7 +82,7 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave }: Edit
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
+        <DialogHeader className="text-center">
           <DialogTitle>تعديل بيانات الطرد</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -81,7 +93,7 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave }: Edit
             <Input
               id="trackingNumber"
               value={trackingNumber}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTrackingNumber(e.target.value)}
+              onChange={(e) => setTrackingNumber(e.target.value)}
               className="col-span-3"
             />
           </div>
@@ -95,8 +107,8 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave }: Edit
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="PENDING">قيد الانتظار</SelectItem>
-                <SelectItem value="PROCESSING">قيد المعالجة</SelectItem>
-                <SelectItem value="COMPLETED">مكتمل</SelectItem>
+                <SelectItem value="IN_TRANSIT">قيد الشحن</SelectItem>
+                <SelectItem value="DELIVERED">تم التسليم</SelectItem>
                 <SelectItem value="CANCELLED">ملغي</SelectItem>
               </SelectContent>
             </Select>
@@ -108,9 +120,43 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave }: Edit
             <Input
               id="description"
               value={description}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDescription(e.target.value)}
+              onChange={(e) => setDescription(e.target.value)}
               className="col-span-3"
             />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="shop" className="text-right">
+              المتجر
+            </Label>
+            <Select value={shopId} onValueChange={setShopId}>
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="اختر المتجر" />
+              </SelectTrigger>
+              <SelectContent>
+                {shops.map((shop) => (
+                  <SelectItem key={shop.id} value={shop.id}>
+                    {shop.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="user" className="text-right">
+              المستخدم
+            </Label>
+            <Select value={userId} onValueChange={setUserId}>
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="اختر المستخدم" />
+              </SelectTrigger>
+              <SelectContent>
+                {users.map((user) => (
+                  <SelectItem key={user.id} value={user.id}>
+                    {user.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
         <div className="flex justify-end gap-2">

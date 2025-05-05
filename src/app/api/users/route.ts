@@ -23,11 +23,10 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { data: users, error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from('User')
-      .select('id, fullName, email, role, createdAt, phoneNumber, governorate, town')
-      .eq('role', 'REGULAR')
-      .order('createdAt', { ascending: false })
+      .select('id, fullName as name')
+      .order('fullName')
 
     if (error) {
       console.error('Error fetching users:', error)
@@ -37,8 +36,7 @@ export async function GET() {
       )
     }
 
-    console.log('Fetched regular users:', users)
-    return NextResponse.json(users)
+    return NextResponse.json(data)
   } catch (error) {
     console.error('Error in GET /api/users:', error)
     return NextResponse.json(

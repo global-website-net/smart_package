@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { toast } from 'sonner'
 import Header from '@/app/components/Header'
 import { supabase } from '@/lib/supabase'
+import { EditOrderStatusModal } from '@/app/components/EditOrderStatusModal'
 
 interface Order {
   id: string
@@ -31,6 +32,7 @@ export default function TrackingPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -124,6 +126,10 @@ export default function TrackingPage() {
     }
   }
 
+  const handleEditStatus = (order: Order) => {
+    setEditingOrder(order)
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -170,6 +176,7 @@ export default function TrackingPage() {
                 <TableHead className="text-center">تاريخ الإنشاء</TableHead>
                 <TableHead className="text-center">ملاحظات</TableHead>
                 <TableHead className="text-center">معلومات إضافية</TableHead>
+                <TableHead className="text-center">الإجراءات</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -193,6 +200,16 @@ export default function TrackingPage() {
                     <TableCell className="text-center">{new Date(order.createdAt).toLocaleDateString('ar')}</TableCell>
                     <TableCell className="text-center">{order.notes || '-'}</TableCell>
                     <TableCell className="text-center">{order.additionalInfo || '-'}</TableCell>
+                    <TableCell className="text-center">
+                      {session?.user.role === 'ADMIN' || session?.user.role === 'OWNER' ? (
+                        <button
+                          onClick={() => handleEditStatus(order)}
+                          className="text-blue-600 hover:text-blue-900"
+                        >
+                          تعديل
+                        </button>
+                      ) : null}
+                    </TableCell>
                   </TableRow>
                 ))
               )}
@@ -200,6 +217,18 @@ export default function TrackingPage() {
           </Table>
         </div>
       </div>
+
+      {editingOrder && (
+        <EditOrderStatusModal
+          order={editingOrder}
+          isOpen={!!editingOrder}
+          onClose={() => setEditingOrder(null)}
+          onSave={() => {
+            setEditingOrder(null)
+            fetchOrders() // Refresh the orders list
+          }}
+        />
+      )}
     </div>
   )
 } 

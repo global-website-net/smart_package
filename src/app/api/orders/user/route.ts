@@ -15,45 +15,35 @@ const supabaseAdmin = createClient(
   }
 )
 
-export async function POST(request: Request) {
+export async function GET() {
   try {
-    // Check if user is authenticated and is ADMIN/OWNER
+    // Check if user is authenticated
     const session = await getServerSession(authOptions)
-    if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER')) {
+    if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id, trackingNumber, status, description, shopId, userId } = await request.json()
-
     const { data, error } = await supabaseAdmin
-      .from('package')
-      .update({
-        trackingNumber,
-        status,
-        description,
-        shopId,
-        userId,
-        updatedAt: new Date().toISOString()
-      })
-      .eq('id', id)
+      .from('order')
       .select(`
         *,
-        shop:shopId (id, name),
-        user:userId (id, name)
+        user:userId (id, name),
+        shop:shopId (id, name)
       `)
+      .eq('userId', session.user.id)
+      .order('createdAt', { ascending: false })
 
     if (error) {
-      console.error('Error updating package:', error)
+      console.error('Error fetching orders:', error)
       return NextResponse.json(
-        { error: 'Failed to update package' },
+        { error: 'Failed to fetch orders' },
         { status: 500 }
       )
     }
 
-    console.log('Updated package:', data)
-    return NextResponse.json(data[0])
+    return NextResponse.json(data)
   } catch (error) {
-    console.error('Error in POST /api/packages/update:', error)
+    console.error('Error in GET /api/orders/user:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

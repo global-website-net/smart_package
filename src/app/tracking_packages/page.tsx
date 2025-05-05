@@ -27,34 +27,26 @@ const supabase = createClient(
 
 interface User {
   id: string
-  fullName: string
-  email: string
-  role: string
+  name: string
 }
 
 interface Shop {
   id: string
-  fullName: string
-  email: string
+  name: string
 }
 
 interface Package {
   id: string
   trackingNumber: string
-  description: string | null
   status: string
-  userId: string
+  description: string | null
   shopId: string
+  userId: string
+  orderNumber: string
   createdAt: string
   updatedAt: string
-  user: {
-    fullName: string
-    email: string
-  }[]
-  shop: {
-    fullName: string
-    email: string
-  }[]
+  shop: Shop
+  user: User
 }
 
 interface Order {
@@ -83,6 +75,8 @@ export default function TrackingPackagesPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [isAdminOrOwner, setIsAdminOrOwner] = useState(false)
+  const [editingPackage, setEditingPackage] = useState<Package | null>(null)
+  const [users, setUsers] = useState<User[]>([])
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -135,6 +129,12 @@ export default function TrackingPackagesPage() {
     }
   }, [status, session])
 
+  useEffect(() => {
+    fetchPackages()
+    fetchShops()
+    fetchUsers()
+  }, [])
+
   const checkAdminOrOwner = () => {
     if (session && session.user && session.user.role) {
       setIsAdminOrOwner(session.user.role === 'ADMIN' || session.user.role === 'OWNER')
@@ -143,16 +143,35 @@ export default function TrackingPackagesPage() {
 
   const fetchShops = async () => {
     try {
-      const { data: shops, error } = await supabase
-        .from('User')
-        .select('id, fullName, email')
-        .eq('role', 'SHOP')
+      const response = await fetch('/api/shops')
+      if (!response.ok) {
+        throw new Error('Failed to fetch shops')
+      }
+      const data = await response.json()
+      const transformedShops = data.map((shop: any) => ({
+        id: shop.id,
+        name: shop.name
+      }))
+      setShops(transformedShops)
+    } catch (error) {
+      console.error('Error fetching shops:', error)
+    }
+  }
 
-      if (error) throw error
-      setShops(shops)
-    } catch (err) {
-      console.error('Error fetching shops:', err)
-      setError('حدث خطأ أثناء جلب المتاجر')
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch('/api/users')
+      if (!response.ok) {
+        throw new Error('Failed to fetch users')
+      }
+      const data = await response.json()
+      const transformedUsers = data.map((user: { id: string; name: string }) => ({
+        id: user.id,
+        name: user.name
+      }))
+      setUsers(transformedUsers)
+    } catch (error) {
+      console.error('Error fetching users:', error)
     }
   }
 
@@ -257,22 +276,25 @@ export default function TrackingPackagesPage() {
       }
 
       // Transform the data to match the Package interface
-      const transformedPackages = packages.map((pkg: any) => {
-        const userData = Array.isArray(pkg.user) ? pkg.user[0] : pkg.user
-        const shopData = Array.isArray(pkg.shop) ? pkg.shop[0] : pkg.shop
-
-        return {
-          ...pkg,
-          user: [{
-            fullName: userData?.fullName || 'غير معروف',
-            email: userData?.email || ''
-          }],
-          shop: [{
-            fullName: shopData?.fullName || 'غير معروف',
-            email: shopData?.email || ''
-          }]
+      const transformedPackages: Package[] = packages.map((pkg: any) => ({
+        id: pkg.id,
+        trackingNumber: pkg.trackingNumber,
+        status: pkg.status,
+        description: pkg.description,
+        shopId: pkg.shopId,
+        userId: pkg.userId,
+        orderNumber: pkg.orderNumber,
+        createdAt: pkg.createdAt,
+        updatedAt: pkg.updatedAt,
+        shop: {
+          id: pkg.shop?.id || '',
+          name: pkg.shop?.name || 'غير معروف'
+        },
+        user: {
+          id: pkg.user?.id || '',
+          name: pkg.user?.name || 'غير معروف'
         }
-      })
+      }))
 
       console.log('Transformed packages:', transformedPackages)
       setPackages(transformedPackages)
@@ -404,11 +426,12 @@ export default function TrackingPackagesPage() {
             <TableHeader>
               <TableRow>
                 <TableHead className="text-center">رقم التتبع</TableHead>
-                <TableHead className="text-center">الوصف</TableHead>
+                <TableHead className="text-center">رقم الطلب</TableHead>
                 <TableHead className="text-center">الحالة</TableHead>
-                <TableHead className="text-center">تاريخ الإنشاء</TableHead>
+                <TableHead className="text-center">الوصف</TableHead>
                 <TableHead className="text-center">المتجر</TableHead>
                 <TableHead className="text-center">المستخدم</TableHead>
+                <TableHead className="text-center">تاريخ الإنشاء</TableHead>
                 {(session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') && (
                   <TableHead className="text-center">الإجراءات</TableHead>
                 )}
@@ -425,15 +448,16 @@ export default function TrackingPackagesPage() {
                 packages.map((pkg) => (
                   <TableRow key={pkg.id}>
                     <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
-                    <TableCell className="text-center">{pkg.description || '-'}</TableCell>
+                    <TableCell className="text-center">{pkg.orderNumber}</TableCell>
                     <TableCell className="text-center">
                       <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
                         {getPackageStatusText(pkg.status)}
                       </span>
                     </TableCell>
+                    <TableCell className="text-center">{pkg.description || '-'}</TableCell>
+                    <TableCell className="text-center">{pkg.shop.name || 'غير معروف'}</TableCell>
+                    <TableCell className="text-center">{pkg.user.name || 'غير معروف'}</TableCell>
                     <TableCell className="text-center">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
-                    <TableCell className="text-center">{pkg.shop[0]?.fullName || 'غير معروف'}</TableCell>
-                    <TableCell className="text-center">{pkg.user[0]?.fullName || 'غير معروف'}</TableCell>
                     {(session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') && (
                       <TableCell className="text-center">
                         <div className="flex justify-center gap-4 rtl:space-x-reverse">
@@ -471,6 +495,8 @@ export default function TrackingPackagesPage() {
           onClose={() => setIsEditModalOpen(false)}
           package={selectedPackage}
           onSave={handleSavePackage}
+          shops={shops}
+          users={users}
         />
       )}
     </div>

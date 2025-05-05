@@ -69,25 +69,13 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { data: packages, error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from('package')
       .select(`
-        id,
-        trackingNumber,
-        description,
-        status,
-        userId,
-        shopId,
-        createdAt,
-        updatedAt,
-        user:User!userId (
-          fullName,
-          email
-        ),
-        shop:User!shopId (
-          fullName,
-          email
-        )
+        *,
+        shop:shopId (id, name),
+        user:userId (id, name),
+        order:orderId (orderNumber)
       `)
       .order('createdAt', { ascending: false })
 
@@ -99,8 +87,13 @@ export async function GET() {
       )
     }
 
-    console.log('Fetched packages:', packages)
-    return NextResponse.json(packages)
+    // Transform the data to include orderNumber
+    const transformedData = data.map(pkg => ({
+      ...pkg,
+      orderNumber: pkg.order?.orderNumber || '-'
+    }))
+
+    return NextResponse.json(transformedData)
   } catch (error) {
     console.error('Error in GET /api/packages:', error)
     return NextResponse.json(

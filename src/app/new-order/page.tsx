@@ -67,6 +67,10 @@ export default function NewOrder() {
     }
   }
 
+  const handleCancel = () => {
+    router.push('/tracking_orders_regular')
+  }
+
   // Redirect if not logged in or not a regular user
   if (!session?.user || session.user.role !== 'REGULAR') {
     router.push('/auth/login')
@@ -179,9 +183,8 @@ export default function NewOrder() {
                   إرسال الطلب
                 </button>
                 <button
-                  type="button"
-                  onClick={() => router.push('/tracking')}
-                  className="bg-gray-500 text-white px-8 py-3 rounded-md hover:bg-gray-600 transition-colors"
+                  onClick={handleCancel}
+                  className="bg-red-500 text-white px-6 py-3 rounded-md hover:bg-red-600 transition-colors"
                 >
                   إلغاء
                 </button>
