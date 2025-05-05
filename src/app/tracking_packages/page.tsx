@@ -216,6 +216,9 @@ export default function TrackingPackagesPage() {
           createdAt,
           updatedAt,
           orderNumber,
+          order:orderNumber (
+            totalAmount
+          ),
           user:userId (
             fullName,
             email
@@ -233,9 +236,11 @@ export default function TrackingPackagesPage() {
       const transformedPackages = packages.map(pkg => {
         const userData = pkg.user as unknown as { fullName: string; email: string } | null
         const shopData = pkg.shop as unknown as { fullName: string; email: string } | null
+        const orderData = pkg.order as unknown as { totalAmount: number } | null
 
         return {
           ...pkg,
+          totalAmount: orderData?.totalAmount || 0,
           user: [{
             fullName: userData?.fullName || 'غير معروف',
             email: userData?.email || ''
@@ -274,6 +279,9 @@ export default function TrackingPackagesPage() {
           createdAt,
           updatedAt,
           orderNumber,
+          order:orderNumber (
+            totalAmount
+          ),
           user:userId (
             fullName,
             email
@@ -292,9 +300,11 @@ export default function TrackingPackagesPage() {
       const transformedPackages = packages.map(pkg => {
         const userData = pkg.user as unknown as { fullName: string; email: string } | null
         const shopData = pkg.shop as unknown as { fullName: string; email: string } | null
+        const orderData = pkg.order as unknown as { totalAmount: number } | null
 
         return {
           ...pkg,
+          totalAmount: orderData?.totalAmount || 0,
           user: [{
             fullName: userData?.fullName || 'غير معروف',
             email: userData?.email || ''
@@ -388,9 +398,7 @@ export default function TrackingPackagesPage() {
       <div className="pt-32 pb-10">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-6">
-              {session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER' ? 'ادارة الطرود' : 'تتبع الطرود'}
-            </h1>
+            <h1 className="text-4xl font-bold mb-6">ادارة الطرود</h1>
             <div className="flex justify-center items-center">
               <div className="relative w-32 sm:w-48 md:w-64">
                 <div className="w-full h-0.5 bg-green-500"></div>
@@ -409,12 +417,19 @@ export default function TrackingPackagesPage() {
             )}
           </div>
 
+          {error && (
+            <div className="text-red-500 text-center mb-4">
+              {error}
+            </div>
+          )}
+
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="text-center">رقم التتبع</TableHead>
                 <TableHead className="text-center">الحالة</TableHead>
                 <TableHead className="text-center">الوصف</TableHead>
+                <TableHead className="text-center">المبلغ الإجمالي</TableHead>
                 <TableHead className="text-center">تاريخ الإنشاء</TableHead>
                 <TableHead className="text-center">المتجر</TableHead>
                 <TableHead className="text-center">المستخدم</TableHead>
@@ -424,38 +439,47 @@ export default function TrackingPackagesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {packages.map((pkg) => (
-                <TableRow key={pkg.id}>
-                  <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
-                  <TableCell className="text-center">
-                    <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
-                      {getPackageStatusText(pkg.status)}
-                    </span>
+              {packages.length === 0 && !loading ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-4">
+                    لا توجد طرود
                   </TableCell>
-                  <TableCell className="text-center">{pkg.description || 'لا يوجد وصف'}</TableCell>
-                  <TableCell className="text-center">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
-                  <TableCell className="text-center">{pkg.shop?.[0]?.fullName || 'غير محدد'}</TableCell>
-                  <TableCell className="text-center">{pkg.user?.[0]?.fullName || 'غير محدد'}</TableCell>
-                  {(session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') && (
-                    <TableCell className="text-center">
-                      <div className="flex justify-center gap-4 rtl:space-x-reverse">
-                        <button
-                          onClick={() => handleDelete(pkg.id)}
-                          className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors"
-                        >
-                          حذف
-                        </button>
-                        <button
-                          onClick={() => router.push(`/packages/edit/${pkg.id}`)}
-                          className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors"
-                        >
-                          تعديل
-                        </button>
-                      </div>
-                    </TableCell>
-                  )}
                 </TableRow>
-              ))}
+              ) : (
+                packages.map((pkg) => (
+                  <TableRow key={pkg.id}>
+                    <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
+                    <TableCell className="text-center">
+                      <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
+                        {getPackageStatusText(pkg.status)}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-center">{pkg.description || 'لا يوجد وصف'}</TableCell>
+                    <TableCell className="text-center">{pkg.totalAmount?.toLocaleString('ar-SA') || '0'} ريال</TableCell>
+                    <TableCell className="text-center">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
+                    <TableCell className="text-center">{pkg.shop?.[0]?.fullName || 'غير محدد'}</TableCell>
+                    <TableCell className="text-center">{pkg.user?.[0]?.fullName || 'غير محدد'}</TableCell>
+                    {(session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') && (
+                      <TableCell className="text-center">
+                        <div className="flex justify-center gap-4 rtl:space-x-reverse">
+                          <button
+                            onClick={() => handleDelete(pkg.id)}
+                            className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors"
+                          >
+                            حذف
+                          </button>
+                          <button
+                            onClick={() => router.push(`/packages/edit/${pkg.id}`)}
+                            className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors"
+                          >
+                            تعديل
+                          </button>
+                        </div>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>

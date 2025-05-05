@@ -39,7 +39,7 @@ export default function TrackingPackagesRegularPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
   const [packages, setPackages] = useState<Package[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -185,6 +185,12 @@ export default function TrackingPackagesRegularPage() {
             </div>
           </div>
 
+          {error && (
+            <div className="text-red-500 text-center mb-4">
+              {error}
+            </div>
+          )}
+
           <Table>
             <TableHeader>
               <TableRow>
@@ -197,20 +203,28 @@ export default function TrackingPackagesRegularPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {packages.map((pkg) => (
-                <TableRow key={pkg.id}>
-                  <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
-                  <TableCell className="text-center">
-                    <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
-                      {getPackageStatusText(pkg.status)}
-                    </span>
+              {packages.length === 0 && !loading ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-4">
+                    لا توجد طرود
                   </TableCell>
-                  <TableCell className="text-center">{pkg.description || 'لا يوجد وصف'}</TableCell>
-                  <TableCell className="text-center">{pkg.totalAmount?.toLocaleString('ar-SA') || '0'} ريال</TableCell>
-                  <TableCell className="text-center">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
-                  <TableCell className="text-center">{pkg.shop?.[0]?.fullName || 'غير محدد'}</TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                packages.map((pkg) => (
+                  <TableRow key={pkg.id}>
+                    <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
+                    <TableCell className="text-center">
+                      <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
+                        {getPackageStatusText(pkg.status)}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-center">{pkg.description || 'لا يوجد وصف'}</TableCell>
+                    <TableCell className="text-center">{pkg.totalAmount?.toLocaleString('ar-SA') || '0'} ريال</TableCell>
+                    <TableCell className="text-center">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
+                    <TableCell className="text-center">{pkg.shop?.[0]?.fullName || 'غير محدد'}</TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
