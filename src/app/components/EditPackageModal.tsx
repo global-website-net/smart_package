@@ -41,14 +41,12 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops,
     try {
       setIsSaving(true)
       
-      const response = await fetch('/api/packages/update', {
-        method: 'POST',
+      const response = await fetch(`/api/packages/${pkg.id}`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          id: pkg.id,
-          trackingNumber,
           status,
           description,
           shopId,
@@ -60,9 +58,11 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops,
         throw new Error('Failed to update package')
       }
 
+      const updatedPackage = await response.json()
+      
       onSave({
         id: pkg.id,
-        trackingNumber,
+        trackingNumber: pkg.trackingNumber,
         status,
         description,
         shopId,
@@ -106,11 +106,11 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops,
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="اختر الحالة" />
               </SelectTrigger>
-              <SelectContent className="text-right" align="end">
-                <SelectItem value="PENDING" className="text-right">قيد الانتظار</SelectItem>
-                <SelectItem value="IN_TRANSIT" className="text-right">قيد الشحن</SelectItem>
-                <SelectItem value="DELIVERED" className="text-right">تم التسليم</SelectItem>
-                <SelectItem value="CANCELLED" className="text-right">ملغي</SelectItem>
+              <SelectContent>
+                <SelectItem value="PENDING">قيد الانتظار</SelectItem>
+                <SelectItem value="IN_TRANSIT">قيد الشحن</SelectItem>
+                <SelectItem value="DELIVERED">تم التسليم</SelectItem>
+                <SelectItem value="CANCELLED">ملغي</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -160,13 +160,20 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops,
             </Select>
           </div>
         </div>
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>
+        <div className="flex justify-center gap-4 rtl:space-x-reverse">
+          <button
+            onClick={onClose}
+            className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+          >
             إلغاء
-          </Button>
-          <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving ? 'جاري الحفظ...' : 'حفظ'}
-          </Button>
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={isSaving}
+            className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+          >
+            {isSaving ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+          </button>
         </div>
       </DialogContent>
     </Dialog>

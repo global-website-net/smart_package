@@ -83,11 +83,11 @@ export function EditOrderStatusModal({ isOpen, onClose, order, onSave }: EditOrd
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="اختر الحالة" />
               </SelectTrigger>
-              <SelectContent className="text-right" align="end">
-                <SelectItem value="PENDING_APPROVAL" className="text-right">في انتظار الموافقة</SelectItem>
-                <SelectItem value="AWAITING_PAYMENT" className="text-right">في انتظار الدفع</SelectItem>
-                <SelectItem value="ORDERING" className="text-right">قيد الطلب</SelectItem>
-                <SelectItem value="ORDER_COMPLETED" className="text-right">تم الطلب</SelectItem>
+              <SelectContent>
+                <SelectItem value="PENDING">قيد الانتظار</SelectItem>
+                <SelectItem value="IN_TRANSIT">قيد الشحن</SelectItem>
+                <SelectItem value="DELIVERED">تم التسليم</SelectItem>
+                <SelectItem value="CANCELLED">ملغي</SelectItem>
               </SelectContent>
             </Select>
           </div>
