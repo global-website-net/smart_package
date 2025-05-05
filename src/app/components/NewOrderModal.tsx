@@ -24,8 +24,7 @@ const supabase = createClient(
 
 interface Shop {
   id: string
-  fullName: string
-  email: string
+  name: string
 }
 
 interface NewOrderModalProps {
@@ -56,9 +55,8 @@ export default function NewOrderModal({ isOpen, onClose, onSave, userId }: NewOr
   const fetchShops = async () => {
     try {
       const { data, error } = await supabase
-        .from('User')
-        .select('id, fullName, email')
-        .eq('role', 'SHOP')
+        .from('shop')
+        .select('id, name')
 
       if (error) throw error
       setShops(data || [])
@@ -143,12 +141,12 @@ export default function NewOrderModal({ isOpen, onClose, onSave, userId }: NewOr
               onValueChange={(value) => setFormData({ ...formData, purchaseSite: value })}
             >
               <SelectTrigger className="col-span-3 text-right">
-                <SelectValue placeholder="اختر موقع الشراء" className="text-right" />
+                <SelectValue placeholder="اختر موقع الشراء" className="text-right" dir="rtl" />
               </SelectTrigger>
               <SelectContent className="text-right" align="end">
                 {shops.map((shop) => (
-                  <SelectItem key={shop.id} value={shop.fullName} className="text-right">
-                    {shop.fullName}
+                  <SelectItem key={shop.id} value={shop.name} className="text-right">
+                    {shop.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -175,9 +173,10 @@ export default function NewOrderModal({ isOpen, onClose, onSave, userId }: NewOr
               id="phoneNumber"
               value={formData.phoneNumber}
               onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-              className="col-span-3"
+              className="col-span-3 text-right"
               placeholder="أدخل رقم الهاتف"
               type="tel"
+              dir="rtl"
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">

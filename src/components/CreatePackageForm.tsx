@@ -121,8 +121,8 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
   return (
     <Dialog open={true} onOpenChange={onCancel}>
       <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>إنشاء طرد جديد</DialogTitle>
+        <DialogHeader className="flex flex-col items-center justify-center">
+          <DialogTitle className="text-xl font-bold text-center w-full">إنشاء طرد جديد</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
@@ -145,15 +145,15 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
               value={formData.status}
               onValueChange={(value) => setFormData({ ...formData, status: value })}
             >
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="اختر الحالة" />
+              <SelectTrigger className="col-span-3 text-right">
+                <SelectValue placeholder="اختر الحالة" className="text-right" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="AWAITING_PAYMENT">في انتظار الدفع</SelectItem>
-                <SelectItem value="PREPARING">قيد التحضير</SelectItem>
-                <SelectItem value="DELIVERING_TO_SHOP">قيد التوصيل للمتجر</SelectItem>
-                <SelectItem value="IN_SHOP">في المتجر</SelectItem>
-                <SelectItem value="RECEIVED">تم الاستلام</SelectItem>
+              <SelectContent className="text-right" align="end">
+                <SelectItem value="AWAITING_PAYMENT" className="text-right">في انتظار الدفع</SelectItem>
+                <SelectItem value="PREPARING" className="text-right">قيد التحضير</SelectItem>
+                <SelectItem value="DELIVERING_TO_SHOP" className="text-right">قيد التوصيل للمتجر</SelectItem>
+                <SelectItem value="IN_SHOP" className="text-right">في المتجر</SelectItem>
+                <SelectItem value="RECEIVED" className="text-right">تم الاستلام</SelectItem>
               </SelectContent>
             </Select>
           </div>
