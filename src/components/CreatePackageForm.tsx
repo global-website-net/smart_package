@@ -22,12 +22,6 @@ const supabase = createClient(
   }
 )
 
-interface Shop {
-  id: string
-  fullName: string
-  email: string
-}
-
 interface User {
   id: string
   fullName: string
@@ -35,19 +29,18 @@ interface User {
 }
 
 interface CreatePackageFormProps {
-  onSuccess: (newPackage: any) => void
+  onSuccess: () => void
   onCancel: () => void
 }
 
 export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackageFormProps) {
-  const [shops, setShops] = useState<Shop[]>([])
+  const [shops, setShops] = useState<User[]>([])
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
-    trackingNumber: '',
     status: 'AWAITING_PAYMENT',
-    description: '',
     shopId: '',
+    description: '',
     userId: ''
   })
 
@@ -90,18 +83,22 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
     try {
       setLoading(true)
 
-      if (!formData.shopId || !formData.userId) {
-        toast.error('الرجاء اختيار المتجر والمستخدم')
+      if (!formData.shopId) {
+        toast.error('الرجاء اختيار المتجر')
+        return
+      }
+
+      if (!formData.userId) {
+        toast.error('الرجاء اختيار المستخدم')
         return
       }
 
       const { data, error } = await supabase
         .from('package')
         .insert([{
-          trackingNumber: formData.trackingNumber,
           status: formData.status,
-          description: formData.description,
           shopId: formData.shopId,
+          description: formData.description,
           userId: formData.userId
         }])
         .select()
@@ -109,7 +106,8 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
       if (error) throw error
 
       toast.success('تم إضافة الطرد بنجاح')
-      onSuccess(data[0])
+      onSuccess()
+      onCancel()
     } catch (error) {
       console.error('Error creating package:', error)
       toast.error('حدث خطأ أثناء إضافة الطرد')
@@ -125,18 +123,6 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
           <DialogTitle className="text-xl font-bold text-center w-full">إنشاء طرد جديد</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="trackingNumber" className="text-right">
-              رقم التتبع
-            </label>
-            <Input
-              id="trackingNumber"
-              value={formData.trackingNumber}
-              onChange={(e) => setFormData({ ...formData, trackingNumber: e.target.value })}
-              className="col-span-3"
-              placeholder="أدخل رقم التتبع"
-            />
-          </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <label htmlFor="status" className="text-right">
               الحالة
@@ -210,13 +196,20 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
             </Select>
           </div>
         </div>
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={onCancel}>
+        <div className="flex justify-center gap-4">
+          <button
+            onClick={onCancel}
+            className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+          >
             إلغاء
-          </Button>
-          <Button onClick={handleSave} disabled={loading}>
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={loading}
+            className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+          >
             {loading ? 'جاري الحفظ...' : 'حفظ'}
-          </Button>
+          </button>
         </div>
       </DialogContent>
     </Dialog>

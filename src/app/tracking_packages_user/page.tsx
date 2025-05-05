@@ -74,6 +74,8 @@ export default function UserPackagesPage() {
         throw new Error('No user ID found')
       }
 
+      console.log('Fetching packages for user ID:', session.user.id)
+
       // Get packages for the specific user
       const { data: userPackages, error } = await supabase
         .from('package')
@@ -99,6 +101,8 @@ export default function UserPackagesPage() {
         console.error('Error fetching user packages:', error)
         throw error
       }
+
+      console.log('Fetched packages:', userPackages)
 
       if (!userPackages || userPackages.length === 0) {
         console.log('No packages found for user')
@@ -132,6 +136,7 @@ export default function UserPackagesPage() {
         };
       });
 
+      console.log('Transformed packages:', transformedPackages)
       setPackages(transformedPackages)
     } catch (error) {
       console.error('Error in fetchPackages:', error)

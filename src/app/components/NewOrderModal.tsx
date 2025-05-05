@@ -48,17 +48,24 @@ export default function NewOrderModal({ isOpen, onClose, onSave, userId }: NewOr
 
   useEffect(() => {
     if (isOpen) {
+      console.log('Modal opened, fetching shops...')
       fetchShops()
     }
   }, [isOpen])
 
   const fetchShops = async () => {
     try {
+      console.log('Fetching shops...')
       const { data, error } = await supabase
         .from('shop')
         .select('id, name')
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase error:', error)
+        throw error
+      }
+      
+      console.log('Fetched shops:', data)
       setShops(data || [])
     } catch (error) {
       console.error('Error fetching shops:', error)
@@ -144,11 +151,17 @@ export default function NewOrderModal({ isOpen, onClose, onSave, userId }: NewOr
                 <SelectValue placeholder="اختر موقع الشراء" className="text-right" dir="rtl" />
               </SelectTrigger>
               <SelectContent className="text-right" align="end">
-                {shops.map((shop) => (
-                  <SelectItem key={shop.id} value={shop.name} className="text-right">
-                    {shop.name}
+                {shops.length === 0 ? (
+                  <SelectItem value="" disabled className="text-right">
+                    لا توجد متاجر متاحة
                   </SelectItem>
-                ))}
+                ) : (
+                  shops.map((shop) => (
+                    <SelectItem key={shop.id} value={shop.name} className="text-right">
+                      {shop.name}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </div>
