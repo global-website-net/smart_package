@@ -157,7 +157,9 @@ export default function Header() {
           {/* Left Side - Login/User Menu (Desktop) */}
           {!isLoginPage && (
             <div className="hidden md:flex items-center order-3">
-              {isLoggedIn ? (
+              {status === 'loading' ? (
+                <div className="w-24 h-8 bg-gray-800 rounded-md animate-pulse"></div>
+              ) : isLoggedIn ? (
                 <div className="relative">
                   <button
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}

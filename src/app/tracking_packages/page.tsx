@@ -263,22 +263,28 @@ export default function TrackingPackagesPage() {
       setLoading(true)
       setError(null)
 
-      const response = await fetch('/api/packages')
-      if (!response.ok) {
-        throw new Error('Failed to fetch packages')
-      }
-      
-      const data = await response.json()
-      console.log('Fetched packages:', data)
+      const { data: packages, error } = await supabase
+        .from('package')
+        .select(`
+          *,
+          shop:shopId (
+            id,
+            fullName
+          ),
+          user:userId (
+            id,
+            fullName
+          )
+        `)
+        .order('createdAt', { ascending: false })
 
-      if (!data || data.length === 0) {
-        console.log('No packages found in the database')
-        setPackages([])
-        return
+      if (error) {
+        console.error('Error fetching packages:', error)
+        throw error
       }
 
       // Transform the data to match the Package interface
-      const transformedPackages: Package[] = data.map((pkg: any) => ({
+      const transformedPackages: Package[] = packages.map(pkg => ({
         id: pkg.id,
         trackingNumber: pkg.trackingNumber,
         status: pkg.status,
@@ -289,15 +295,14 @@ export default function TrackingPackagesPage() {
         updatedAt: pkg.updatedAt,
         shop: {
           id: pkg.shop?.id || '',
-          name: pkg.shop?.name || 'غير معروف'
+          name: pkg.shop?.fullName || 'غير معروف'
         },
         user: {
           id: pkg.user?.id || '',
-          name: pkg.user?.name || 'غير معروف'
+          name: pkg.user?.fullName || 'غير معروف'
         }
       }))
 
-      console.log('Transformed packages:', transformedPackages)
       setPackages(transformedPackages)
     } catch (error) {
       console.error('Error in fetchPackages:', error)
