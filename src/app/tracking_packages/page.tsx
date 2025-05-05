@@ -42,11 +42,16 @@ interface Package {
   description: string | null
   shopId: string
   userId: string
-  orderNumber: string
   createdAt: string
   updatedAt: string
-  shop: Shop
-  user: User
+  shop: {
+    id: string
+    name: string
+  }
+  user: {
+    id: string
+    name: string
+  }
 }
 
 interface Order {
@@ -165,13 +170,14 @@ export default function TrackingPackagesPage() {
         throw new Error('Failed to fetch users')
       }
       const data = await response.json()
-      const transformedUsers = data.map((user: { id: string; name: string }) => ({
+      const transformedUsers = data.map((user: { id: string; fullName: string }) => ({
         id: user.id,
-        name: user.name
+        name: user.fullName || 'غير معروف'
       }))
       setUsers(transformedUsers)
     } catch (error) {
       console.error('Error fetching users:', error)
+      setError('Failed to load users')
     }
   }
 
@@ -273,24 +279,23 @@ export default function TrackingPackagesPage() {
         throw new Error('Failed to fetch packages')
       }
       
-      const packages = await response.json()
-      console.log('Fetched packages:', packages)
+      const data = await response.json()
+      console.log('Fetched packages:', data)
 
-      if (!packages || packages.length === 0) {
+      if (!data || data.length === 0) {
         console.log('No packages found in the database')
         setPackages([])
         return
       }
 
       // Transform the data to match the Package interface
-      const transformedPackages: Package[] = packages.map((pkg: any) => ({
+      const transformedPackages: Package[] = data.map((pkg: any) => ({
         id: pkg.id,
         trackingNumber: pkg.trackingNumber,
         status: pkg.status,
         description: pkg.description,
         shopId: pkg.shopId,
         userId: pkg.userId,
-        orderNumber: pkg.orderNumber,
         createdAt: pkg.createdAt,
         updatedAt: pkg.updatedAt,
         shop: {
@@ -433,7 +438,6 @@ export default function TrackingPackagesPage() {
             <TableHeader>
               <TableRow>
                 <TableHead className="text-center">رقم التتبع</TableHead>
-                <TableHead className="text-center">رقم الطلب</TableHead>
                 <TableHead className="text-center">الحالة</TableHead>
                 <TableHead className="text-center">الوصف</TableHead>
                 <TableHead className="text-center">المتجر</TableHead>
@@ -455,7 +459,6 @@ export default function TrackingPackagesPage() {
                 packages.map((pkg) => (
                   <TableRow key={pkg.id}>
                     <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
-                    <TableCell className="text-center">{pkg.orderNumber}</TableCell>
                     <TableCell className="text-center">
                       <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
                         {getPackageStatusText(pkg.status)}

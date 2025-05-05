@@ -25,8 +25,8 @@ export async function GET() {
 
     const { data, error } = await supabaseAdmin
       .from('User')
-      .select('id, fullName as name')
-      .order('fullName')
+      .select('id, fullName')
+      .order('fullName', { ascending: true })
 
     if (error) {
       console.error('Error fetching users:', error)

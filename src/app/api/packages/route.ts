@@ -74,8 +74,7 @@ export async function GET() {
       .select(`
         *,
         shop:shopId (id, name),
-        user:userId (id, name),
-        order:orderId (orderNumber)
+        user:userId (id, name)
       `)
       .order('createdAt', { ascending: false })
 
@@ -87,13 +86,7 @@ export async function GET() {
       )
     }
 
-    // Transform the data to include orderNumber
-    const transformedData = data.map(pkg => ({
-      ...pkg,
-      orderNumber: pkg.order?.orderNumber || '-'
-    }))
-
-    return NextResponse.json(transformedData)
+    return NextResponse.json(data)
   } catch (error) {
     console.error('Error in GET /api/packages:', error)
     return NextResponse.json(
