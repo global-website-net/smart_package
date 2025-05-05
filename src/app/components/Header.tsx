@@ -10,7 +10,7 @@ import { Package } from 'lucide-react'
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const pathname = usePathname()
   const isLoggedIn = !!session
   const isLoginPage = pathname === '/auth/login'
@@ -24,8 +24,8 @@ export default function Header() {
   const getMenuItems = () => {
     if (session?.user?.role === 'REGULAR') {
       return [
-        { href: '/tracking', label: 'تتبع الطلبات' },
-        { href: '/tracking_packages_regular_accounts', label: 'تتبع الطرود' },
+        { href: '/tracking_orders_regular', label: 'تتبع الطلبات' },
+        { href: '/tracking_packages_user', label: 'تتبع الطرود' },
         { href: '/wallet', label: 'المحفظة' },
         { href: '/account', label: 'الملف الشخصي' },
         { href: '/blog', label: 'بلوج' },
@@ -56,7 +56,7 @@ export default function Header() {
     if (role === 'ADMIN' || role === 'OWNER') {
       return '/tracking_packages'
     } else if (role === 'REGULAR') {
-      return '/tracking_packages_regular_accounts'
+      return '/tracking_orders_regular'
     }
     return '/'
   }

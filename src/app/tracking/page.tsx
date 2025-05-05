@@ -56,7 +56,7 @@ export default function TrackingPage() {
       setError(null)
 
       const { data: orders, error } = await supabase
-        .from('order')
+        .from('Order')
         .select(`
           id,
           orderNumber,
@@ -65,7 +65,7 @@ export default function TrackingPage() {
           createdAt,
           updatedAt,
           userId,
-          user:userId (
+          user:User!userId (
             fullName,
             email
           )
@@ -75,13 +75,16 @@ export default function TrackingPage() {
       if (error) throw error
 
       // Transform the data to match the Order interface
-      const transformedOrders = orders.map(order => ({
-        ...order,
-        user: {
-          fullName: order.user?.[0]?.fullName || 'غير معروف',
-          email: order.user?.[0]?.email || ''
+      const transformedOrders = orders.map(order => {
+        const userData = Array.isArray(order.user) ? order.user[0] : order.user
+        return {
+          ...order,
+          user: {
+            fullName: userData?.fullName || 'غير معروف',
+            email: userData?.email || ''
+          }
         }
-      }))
+      })
 
       setOrders(transformedOrders)
     } catch (error) {
@@ -121,6 +124,21 @@ export default function TrackingPage() {
       default:
         return 'bg-gray-100 text-gray-800'
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <main className="p-4 pt-24">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+            </div>
+          </div>
+        </main>
+      </div>
+    )
   }
 
   return (

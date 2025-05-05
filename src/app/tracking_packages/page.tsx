@@ -39,8 +39,6 @@ interface Package {
   shopId: string
   createdAt: string
   updatedAt: string
-  orderNumber?: string
-  totalAmount?: number
   user: {
     fullName: string
     email: string
@@ -90,8 +88,7 @@ export default function TrackingPackagesPage() {
         fetchShops()
         fetchRegularUsers()
       } else {
-        // For regular users, only fetch their packages
-        fetchUserPackages()
+        router.push('/')
       }
       checkAdminOrOwner()
     }
@@ -215,10 +212,6 @@ export default function TrackingPackagesPage() {
           shopId,
           createdAt,
           updatedAt,
-          orderNumber,
-          order:orderNumber (
-            totalAmount
-          ),
           user:userId (
             fullName,
             email
@@ -236,75 +229,9 @@ export default function TrackingPackagesPage() {
       const transformedPackages = packages.map(pkg => {
         const userData = pkg.user as unknown as { fullName: string; email: string } | null
         const shopData = pkg.shop as unknown as { fullName: string; email: string } | null
-        const orderData = pkg.order as unknown as { totalAmount: number } | null
 
         return {
           ...pkg,
-          totalAmount: orderData?.totalAmount || 0,
-          user: [{
-            fullName: userData?.fullName || 'غير معروف',
-            email: userData?.email || ''
-          }],
-          shop: [{
-            fullName: shopData?.fullName || 'غير معروف',
-            email: shopData?.email || ''
-          }]
-        }
-      })
-
-      setPackages(transformedPackages)
-    } catch (error) {
-      console.error('Error fetching packages:', error)
-      setError('حدث خطأ أثناء جلب الطرود')
-      toast.error('حدث خطأ أثناء جلب الطرود')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const fetchUserPackages = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      const { data: packages, error } = await supabase
-        .from('package')
-        .select(`
-          id,
-          trackingNumber,
-          status,
-          description,
-          userId,
-          shopId,
-          createdAt,
-          updatedAt,
-          orderNumber,
-          order:orderNumber (
-            totalAmount
-          ),
-          user:userId (
-            fullName,
-            email
-          ),
-          shop:shopId (
-            fullName,
-            email
-          )
-        `)
-        .eq('userId', session?.user?.id)
-        .order('createdAt', { ascending: false })
-
-      if (error) throw error
-
-      // Transform the data to match the Package interface
-      const transformedPackages = packages.map(pkg => {
-        const userData = pkg.user as unknown as { fullName: string; email: string } | null
-        const shopData = pkg.shop as unknown as { fullName: string; email: string } | null
-        const orderData = pkg.order as unknown as { totalAmount: number } | null
-
-        return {
-          ...pkg,
-          totalAmount: orderData?.totalAmount || 0,
           user: [{
             fullName: userData?.fullName || 'غير معروف',
             email: userData?.email || ''
@@ -429,7 +356,6 @@ export default function TrackingPackagesPage() {
                 <TableHead className="text-center">رقم التتبع</TableHead>
                 <TableHead className="text-center">الحالة</TableHead>
                 <TableHead className="text-center">الوصف</TableHead>
-                <TableHead className="text-center">المبلغ الإجمالي</TableHead>
                 <TableHead className="text-center">تاريخ الإنشاء</TableHead>
                 <TableHead className="text-center">المتجر</TableHead>
                 <TableHead className="text-center">المستخدم</TableHead>
@@ -455,7 +381,6 @@ export default function TrackingPackagesPage() {
                       </span>
                     </TableCell>
                     <TableCell className="text-center">{pkg.description || 'لا يوجد وصف'}</TableCell>
-                    <TableCell className="text-center">{pkg.totalAmount?.toLocaleString('ar-SA') || '0'} ريال</TableCell>
                     <TableCell className="text-center">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
                     <TableCell className="text-center">{pkg.shop?.[0]?.fullName || 'غير محدد'}</TableCell>
                     <TableCell className="text-center">{pkg.user?.[0]?.fullName || 'غير محدد'}</TableCell>

@@ -1,5 +1,5 @@
 -- Create Orders table
-CREATE TABLE IF NOT EXISTS "Order" (
+CREATE TABLE IF NOT EXISTS "order" (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "userId" UUID NOT NULL REFERENCES "User"("id") ON DELETE CASCADE,
   "purchaseSite" TEXT NOT NULL,
@@ -13,30 +13,30 @@ CREATE TABLE IF NOT EXISTS "Order" (
 );
 
 -- Create indexes for better performance
-CREATE INDEX IF NOT EXISTS "idx_order_user_id" ON "Order"("userId");
-CREATE INDEX IF NOT EXISTS "idx_order_status" ON "Order"("status");
+CREATE INDEX IF NOT EXISTS "idx_order_user_id" ON "order"("userId");
+CREATE INDEX IF NOT EXISTS "idx_order_status" ON "order"("status");
 
 -- Enable Row Level Security (RLS)
-ALTER TABLE "Order" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "order" ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for Order table
 CREATE POLICY "Users can view their own orders"
-  ON "Order"
+  ON "order"
   FOR SELECT
   USING (auth.uid() = "userId");
 
 CREATE POLICY "Users can create their own orders"
-  ON "Order"
+  ON "order"
   FOR INSERT
   WITH CHECK (auth.uid() = "userId");
 
 CREATE POLICY "Users can update their own orders"
-  ON "Order"
+  ON "order"
   FOR UPDATE
   USING (auth.uid() = "userId");
 
 CREATE POLICY "Users can delete their own orders"
-  ON "Order"
+  ON "order"
   FOR DELETE
   USING (auth.uid() = "userId");
 
@@ -51,6 +51,6 @@ $$ language 'plpgsql';
 
 -- Create trigger for Order table
 CREATE TRIGGER update_order_updated_at
-    BEFORE UPDATE ON "Order"
+    BEFORE UPDATE ON "order"
     FOR EACH ROW
     EXECUTE FUNCTION update_order_updated_at(); 

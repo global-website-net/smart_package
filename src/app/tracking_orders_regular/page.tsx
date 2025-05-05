@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import Header from '@/app/components/Header'
 import Link from 'next/link'
+import Header from '@/app/components/Header'
 
 interface Order {
   id: string
+  userId: string
   purchaseSite: string
   purchaseLink: string
   phoneNumber: string
@@ -15,6 +16,11 @@ interface Order {
   additionalInfo: string | null
   status: string
   createdAt: string
+  updatedAt: string
+  user: {
+    fullName: string
+    email: string
+  }
 }
 
 export default function TrackingOrdersRegular() {
@@ -43,14 +49,16 @@ export default function TrackingOrdersRegular() {
       }
     }
 
-    if (session?.user && session.user.role === 'REGULAR') {
-      fetchOrders()
+    if (session?.user) {
+      if (session.user.role === 'REGULAR') {
+        fetchOrders()
+      } else {
+        router.push('/auth/login')
+      }
     }
-  }, [session])
+  }, [session, router])
 
-  // Redirect if not regular user
   if (!session?.user || session.user.role !== 'REGULAR') {
-    router.push('/auth/login')
     return null
   }
 
