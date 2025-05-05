@@ -16,12 +16,15 @@ const supabase = createClient(
 
 interface Order {
   id: string
-  orderNumber: string
+  userId: string
+  purchaseSite: string
+  purchaseLink: string
+  phoneNumber: string
+  notes: string | null
+  additionalInfo: string | null
   status: string
-  totalAmount: number
   createdAt: string
   updatedAt: string
-  userId: string
   user: {
     fullName: string
     email: string
@@ -56,15 +59,18 @@ export default function TrackingPage() {
       setError(null)
 
       const { data: orders, error } = await supabase
-        .from('Order')
+        .from('order')
         .select(`
           id,
-          orderNumber,
+          userId,
+          purchaseSite,
+          purchaseLink,
+          phoneNumber,
+          notes,
+          additionalInfo,
           status,
-          totalAmount,
           createdAt,
           updatedAt,
-          userId,
           user:User!userId (
             fullName,
             email
@@ -100,12 +106,12 @@ export default function TrackingPage() {
     switch (status) {
       case 'PENDING':
         return 'قيد الانتظار'
-      case 'PAID':
-        return 'تم الدفع'
-      case 'CANCELLED':
-        return 'ملغي'
+      case 'PROCESSING':
+        return 'قيد المعالجة'
       case 'COMPLETED':
         return 'مكتمل'
+      case 'CANCELLED':
+        return 'ملغي'
       default:
         return status
     }
@@ -115,12 +121,12 @@ export default function TrackingPage() {
     switch (status) {
       case 'PENDING':
         return 'bg-yellow-100 text-yellow-800'
-      case 'PAID':
+      case 'PROCESSING':
         return 'bg-blue-100 text-blue-800'
-      case 'CANCELLED':
-        return 'bg-red-100 text-red-800'
       case 'COMPLETED':
         return 'bg-green-100 text-green-800'
+      case 'CANCELLED':
+        return 'bg-red-100 text-red-800'
       default:
         return 'bg-gray-100 text-gray-800'
     }
@@ -147,7 +153,7 @@ export default function TrackingPage() {
       <div className="pt-32 pb-10">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-6">ادارة الطلبات</h1>
+            <h1 className="text-4xl font-bold mb-6">إدارة الطلبات</h1>
             <div className="flex justify-center items-center">
               <div className="relative w-32 sm:w-48 md:w-64">
                 <div className="w-full h-0.5 bg-green-500"></div>
@@ -165,9 +171,10 @@ export default function TrackingPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-center">رقم الطلب</TableHead>
+                <TableHead className="text-center">موقع الشراء</TableHead>
+                <TableHead className="text-center">رابط الشراء</TableHead>
+                <TableHead className="text-center">رقم الهاتف</TableHead>
                 <TableHead className="text-center">الحالة</TableHead>
-                <TableHead className="text-center">المبلغ الإجمالي</TableHead>
                 <TableHead className="text-center">تاريخ الإنشاء</TableHead>
                 <TableHead className="text-center">المستخدم</TableHead>
               </TableRow>
@@ -175,20 +182,30 @@ export default function TrackingPage() {
             <TableBody>
               {orders.length === 0 && !loading ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-4">
+                  <TableCell colSpan={6} className="text-center py-4">
                     لا توجد طلبات
                   </TableCell>
                 </TableRow>
               ) : (
                 orders.map((order) => (
                   <TableRow key={order.id}>
-                    <TableCell className="text-center">{order.orderNumber}</TableCell>
+                    <TableCell className="text-center">{order.purchaseSite}</TableCell>
+                    <TableCell className="text-center">
+                      <a 
+                        href={order.purchaseLink} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-green-600 hover:text-green-800"
+                      >
+                        عرض الرابط
+                      </a>
+                    </TableCell>
+                    <TableCell className="text-center">{order.phoneNumber}</TableCell>
                     <TableCell className="text-center">
                       <span className={`px-2 py-1 rounded-full ${getStatusColor(order.status)}`}>
                         {getOrderStatusText(order.status)}
                       </span>
                     </TableCell>
-                    <TableCell className="text-center">{order.totalAmount.toLocaleString('ar-SA')} ريال</TableCell>
                     <TableCell className="text-center">{new Date(order.createdAt).toLocaleDateString('ar')}</TableCell>
                     <TableCell className="text-center">{order.user.fullName}</TableCell>
                   </TableRow>

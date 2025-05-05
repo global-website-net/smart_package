@@ -146,7 +146,7 @@ export default function TrackingPackagesPage() {
       // Get all packages to check which orders already have packages
       const { data: packages, error: packagesError } = await supabase
         .from('package')
-        .select('orderNumber')
+        .select('id')
 
       if (packagesError) {
         console.error('Error fetching packages:', packagesError)
@@ -154,8 +154,8 @@ export default function TrackingPackagesPage() {
       }
 
       // Filter out orders that already have packages
-      const usedOrderNumbers = new Set(packages?.map(p => p.orderNumber) || [])
-      const availableOrders = orders?.filter(order => !usedOrderNumbers.has(order.orderNumber)) || []
+      const usedOrderIds = new Set(packages?.map(p => p.id) || [])
+      const availableOrders = orders?.filter(order => !usedOrderIds.has(order.id)) || []
       
       // Transform the data to match the Order interface
       const transformedOrders = availableOrders.map(order => ({
