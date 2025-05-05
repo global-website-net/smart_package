@@ -5,12 +5,12 @@ import Link from 'next/link'
 
 export default function Packages() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
       <Header />
       
       <main className="p-4 pt-24">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
+          <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-6">أسعارنا</h1>
             <div className="flex justify-center items-center">
               <div className="relative w-32 sm:w-48 md:w-64">

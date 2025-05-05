@@ -145,8 +145,8 @@ export default function WalletPage() {
             {/* Balance Amount */}
             <div className="mx-4">
               <div className="text-4xl font-bold">
-                <span className="font-bold">{walletData.balance.toFixed(2)}</span>
-                <span className="font-bold mr-2">₪</span>
+                <span>{walletData.balance.toFixed(2)}</span>
+                <span className="mr-2">₪</span>
               </div>
             </div>
 
@@ -181,8 +181,8 @@ export default function WalletPage() {
                   <div className="flex items-center gap-4">
                     <span className={`text-xl font-bold ${transaction.type === 'CREDIT' ? 'text-green-600' : 'text-red-600'}`} dir="rtl">
                       <div className="text-lg font-bold">
-                        <span className="font-bold">{transaction.type === 'CREDIT' ? '+' : '-'}{transaction.amount.toFixed(2)}</span>
-                        <span className="font-bold mr-2">₪</span>
+                        <span>{transaction.type === 'CREDIT' ? '+' : '-'}{transaction.amount.toFixed(2)}</span>
+                        <span className="mr-2">₪</span>
                       </div>
                     </span>
                   </div>

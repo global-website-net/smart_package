@@ -134,10 +134,13 @@ export default function NewOrderModal({ isOpen, onClose, onSave, userId }: NewOr
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px]" aria-describedby="new-order-description">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-center">إضافة طلب جديد</DialogTitle>
         </DialogHeader>
+        <p id="new-order-description" className="sr-only">
+          نموذج إضافة طلب جديد
+        </p>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <label htmlFor="purchaseSite" className="text-right">
@@ -152,7 +155,7 @@ export default function NewOrderModal({ isOpen, onClose, onSave, userId }: NewOr
               </SelectTrigger>
               <SelectContent className="text-right" align="end">
                 {shops.length === 0 ? (
-                  <SelectItem value="" disabled className="text-right">
+                  <SelectItem value="no-shops" disabled className="text-right">
                     لا توجد متاجر متاحة
                   </SelectItem>
                 ) : (

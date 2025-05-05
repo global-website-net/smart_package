@@ -87,9 +87,10 @@ export default function UserPackagesPage() {
           userId,
           createdAt,
           updatedAt,
-          shop:shop!shopId (
+          shop:User!shopId (
             id,
-            name
+            fullName,
+            email
           )
         `)
         .eq('userId', session.user.id)
@@ -123,7 +124,7 @@ export default function UserPackagesPage() {
           updatedAt: pkg.updatedAt,
           shop: {
             id: shopData?.id || '',
-            name: shopData?.name || 'غير معروف'
+            name: shopData?.fullName || 'غير معروف'
           },
           user: {
             id: session.user.id,

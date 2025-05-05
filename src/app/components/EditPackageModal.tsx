@@ -80,20 +80,26 @@ export default function EditPackageModal({ isOpen, onClose, pkg, onSave, shops, 
       // Get the updated package data including user information
       const updatedPackage = await response.json()
       
-      // Find the selected user from the users array
+      // Find the selected user and shop from their respective arrays
       const selectedUser = users.find(user => user.id === formData.userId)
+      const selectedShop = shops.find(shop => shop.id === formData.shopId)
       
-      // Add user information to the updated package
-      const packageWithUser = {
+      // Add user and shop information to the updated package
+      const packageWithDetails = {
         ...updatedPackage,
         user: selectedUser ? {
           id: selectedUser.id,
           fullName: selectedUser.fullName,
           email: selectedUser.email
+        } : { id: '', fullName: 'غير معروف', email: '' },
+        shop: selectedShop ? {
+          id: selectedShop.id,
+          fullName: selectedShop.fullName,
+          email: selectedShop.email
         } : { id: '', fullName: 'غير معروف', email: '' }
       }
 
-      onSave(packageWithUser)
+      onSave(packageWithDetails)
       onClose()
       toast.success('تم تحديث بيانات الطرد بنجاح')
     } catch (error) {

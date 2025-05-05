@@ -66,8 +66,21 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
       console.log('Fetched shops data:', data)
       if (!data || data.length === 0) {
         console.log('No shops found in the database')
+        console.log('Query details:', {
+          table: 'User',
+          role: 'SHOP',
+          count: data?.length || 0
+        })
       } else {
         console.log(`Found ${data.length} shops`)
+        data.forEach(shop => {
+          console.log('Shop details:', {
+            id: shop.id,
+            fullName: shop.fullName,
+            email: shop.email,
+            role: shop.role
+          })
+        })
       }
       setShops(data || [])
     } catch (error) {
@@ -78,12 +91,36 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
 
   const fetchUsers = async () => {
     try {
+      console.log('Starting to fetch regular users...')
       const { data, error } = await supabase
         .from('User')
-        .select('id, fullName, email')
+        .select('id, fullName, email, role')
         .eq('role', 'REGULAR')
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase error:', error)
+        throw error
+      }
+
+      console.log('Fetched users data:', data)
+      if (!data || data.length === 0) {
+        console.log('No regular users found in the database')
+        console.log('Query details:', {
+          table: 'User',
+          role: 'REGULAR',
+          count: data?.length || 0
+        })
+      } else {
+        console.log(`Found ${data.length} regular users`)
+        data.forEach(user => {
+          console.log('User details:', {
+            id: user.id,
+            fullName: user.fullName,
+            email: user.email,
+            role: user.role
+          })
+        })
+      }
       setUsers(data || [])
     } catch (error) {
       console.error('Error fetching users:', error)

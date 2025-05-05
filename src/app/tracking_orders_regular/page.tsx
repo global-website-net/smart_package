@@ -74,7 +74,7 @@ export default function UserOrdersPage() {
         throw new Error('No user ID found')
       }
 
-      console.log('Fetching orders for user:', session.user.id)
+      console.log('Fetching orders for user ID:', session.user.id)
 
       // First, get the orders for the user
       const { data: orders, error } = await supabase
@@ -100,12 +100,14 @@ export default function UserOrdersPage() {
         .order('createdAt', { ascending: false })
 
       if (error) {
-        console.error('Error fetching orders:', error)
+        console.error('Supabase error:', error)
         throw error
       }
 
+      console.log('Raw orders data from Supabase:', orders)
+
       if (!orders || orders.length === 0) {
-        console.log('No orders found for user')
+        console.log('No orders found for user ID:', session.user.id)
         setOrders([])
         return
       }
@@ -113,6 +115,7 @@ export default function UserOrdersPage() {
       // Transform the data to match our Order interface
       const transformedOrders: Order[] = orders.map(order => {
         const userData = Array.isArray(order.user) ? order.user[0] : order.user;
+        console.log('Processing order:', order.id, 'with user data:', userData)
         return {
           id: order.id,
           userId: order.userId,
