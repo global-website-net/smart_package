@@ -39,10 +39,11 @@ export default function NewOrderModal({ isOpen, onClose, onSave, userId }: NewOr
   const [shops, setShops] = useState<Shop[]>([])
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
-    orderNumber: '',
-    status: 'PENDING_APPROVAL',
-    description: '',
-    shopId: '',
+    purchaseSite: '',
+    purchaseLink: '',
+    phoneNumber: '',
+    notes: '',
+    additionalInfo: '',
     userId: userId
   })
 
@@ -71,19 +72,31 @@ export default function NewOrderModal({ isOpen, onClose, onSave, userId }: NewOr
     try {
       setLoading(true)
 
-      if (!formData.shopId) {
-        toast.error('الرجاء اختيار المتجر')
+      if (!formData.purchaseSite) {
+        toast.error('الرجاء اختيار موقع الشراء')
+        return
+      }
+
+      if (!formData.purchaseLink || !isValidUrl(formData.purchaseLink)) {
+        toast.error('الرجاء إدخال رابط شراء صحيح')
+        return
+      }
+
+      if (!formData.phoneNumber || !isValidPhoneNumber(formData.phoneNumber)) {
+        toast.error('الرجاء إدخال رقم هاتف صحيح')
         return
       }
 
       const { data, error } = await supabase
         .from('order')
         .insert([{
-          orderNumber: formData.orderNumber,
-          status: formData.status,
-          description: formData.description,
-          shopId: formData.shopId,
-          userId: formData.userId
+          purchaseSite: formData.purchaseSite,
+          purchaseLink: formData.purchaseLink,
+          phoneNumber: formData.phoneNumber,
+          notes: formData.notes,
+          additionalInfo: formData.additionalInfo,
+          userId: formData.userId,
+          status: 'PENDING_APPROVAL'
         }])
         .select()
 
@@ -100,39 +113,41 @@ export default function NewOrderModal({ isOpen, onClose, onSave, userId }: NewOr
     }
   }
 
+  const isValidUrl = (url: string) => {
+    try {
+      new URL(url)
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  const isValidPhoneNumber = (phone: string) => {
+    const phoneRegex = /^[0-9]{10}$/
+    return phoneRegex.test(phone)
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>إضافة طلب جديد</DialogTitle>
+          <DialogTitle className="text-xl font-bold text-center">إضافة طلب جديد</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="orderNumber" className="text-right">
-              رقم الطلب
-            </label>
-            <Input
-              id="orderNumber"
-              value={formData.orderNumber}
-              onChange={(e) => setFormData({ ...formData, orderNumber: e.target.value })}
-              className="col-span-3"
-              placeholder="أدخل رقم الطلب"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="shopId" className="text-right">
-              المتجر
+            <label htmlFor="purchaseSite" className="text-right">
+              موقع الشراء
             </label>
             <Select
-              value={formData.shopId}
-              onValueChange={(value) => setFormData({ ...formData, shopId: value })}
+              value={formData.purchaseSite}
+              onValueChange={(value) => setFormData({ ...formData, purchaseSite: value })}
             >
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="اختر المتجر" />
+              <SelectTrigger className="col-span-3 text-right">
+                <SelectValue placeholder="اختر موقع الشراء" className="text-right" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="text-right" align="end">
                 {shops.map((shop) => (
-                  <SelectItem key={shop.id} value={shop.id}>
+                  <SelectItem key={shop.id} value={shop.fullName} className="text-right">
                     {shop.fullName}
                   </SelectItem>
                 ))}
@@ -140,25 +155,72 @@ export default function NewOrderModal({ isOpen, onClose, onSave, userId }: NewOr
             </Select>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="description" className="text-right">
-              الوصف
+            <label htmlFor="purchaseLink" className="text-right">
+              رابط الشراء
+            </label>
+            <Input
+              id="purchaseLink"
+              value={formData.purchaseLink}
+              onChange={(e) => setFormData({ ...formData, purchaseLink: e.target.value })}
+              className="col-span-3"
+              placeholder="أدخل رابط الشراء"
+              type="url"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="phoneNumber" className="text-right">
+              رقم الهاتف
+            </label>
+            <Input
+              id="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+              className="col-span-3"
+              placeholder="أدخل رقم الهاتف"
+              type="tel"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="notes" className="text-right">
+              ملاحظات
             </label>
             <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              id="notes"
+              value={formData.notes}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               className="col-span-3"
-              placeholder="أدخل وصف الطلب"
+              placeholder="أدخل الملاحظات"
+              rows={1}
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="additionalInfo" className="text-right">
+              معلومات إضافية
+            </label>
+            <Textarea
+              id="additionalInfo"
+              value={formData.additionalInfo}
+              onChange={(e) => setFormData({ ...formData, additionalInfo: e.target.value })}
+              className="col-span-3"
+              placeholder="أدخل المعلومات الإضافية"
+              rows={3}
             />
           </div>
         </div>
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>
+        <div className="flex justify-center gap-4">
+          <button
+            onClick={onClose}
+            className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+          >
             إلغاء
-          </Button>
-          <Button onClick={handleSave} disabled={loading}>
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={loading}
+            className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+          >
             {loading ? 'جاري الحفظ...' : 'حفظ'}
-          </Button>
+          </button>
         </div>
       </DialogContent>
     </Dialog>

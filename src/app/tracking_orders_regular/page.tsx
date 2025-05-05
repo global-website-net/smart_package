@@ -211,10 +211,14 @@ export default function UserOrdersPage() {
             </div>
           </div>
 
-          <div className="flex justify-end mb-4">
-            <Button onClick={handleNewOrder}>
+          <div className="flex flex-col items-center">
+            <button
+              onClick={() => setIsNewOrderModalOpen(true)}
+              className="bg-green-500 text-white px-8 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 mb-4"
+            >
               طلب جديد
-            </Button>
+            </button>
+            <div className="w-48 h-0.5 bg-green-500"></div>
           </div>
 
           {error && (

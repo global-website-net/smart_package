@@ -77,8 +77,23 @@ export default function EditPackageModal({ isOpen, onClose, pkg, onSave, shops, 
         throw new Error(errorData.error || 'حدث خطأ أثناء حفظ التغييرات')
       }
 
+      // Get the updated package data including user information
       const updatedPackage = await response.json()
-      onSave(updatedPackage)
+      
+      // Find the selected user from the users array
+      const selectedUser = users.find(user => user.id === formData.userId)
+      
+      // Add user information to the updated package
+      const packageWithUser = {
+        ...updatedPackage,
+        user: selectedUser ? {
+          id: selectedUser.id,
+          fullName: selectedUser.fullName,
+          email: selectedUser.email
+        } : { id: '', fullName: 'غير معروف', email: '' }
+      }
+
+      onSave(packageWithUser)
       onClose()
       toast.success('تم تحديث بيانات الطرد بنجاح')
     } catch (error) {

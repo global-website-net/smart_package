@@ -177,13 +177,13 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
               value={formData.shopId}
               onValueChange={(value) => setFormData({ ...formData, shopId: value })}
             >
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="اختر المتجر" />
+              <SelectTrigger className="col-span-3 text-right">
+                <SelectValue placeholder="اختر المتجر" className="text-right" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="text-right" align="end">
                 {shops.map((shop) => (
-                  <SelectItem key={shop.id} value={shop.id}>
-                    {shop.fullName}
+                  <SelectItem key={shop.id} value={shop.id} className="text-right">
+                    {shop.fullName} ({shop.email})
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -197,13 +197,13 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
               value={formData.userId}
               onValueChange={(value) => setFormData({ ...formData, userId: value })}
             >
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="اختر المستخدم" />
+              <SelectTrigger className="col-span-3 text-right">
+                <SelectValue placeholder="اختر المستخدم" className="text-right" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="text-right" align="end">
                 {users.map((user) => (
-                  <SelectItem key={user.id} value={user.id}>
-                    {user.fullName}
+                  <SelectItem key={user.id} value={user.id} className="text-right">
+                    {user.fullName} ({user.email})
                   </SelectItem>
                 ))}
               </SelectContent>

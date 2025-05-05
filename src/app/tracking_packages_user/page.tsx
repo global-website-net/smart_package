@@ -74,34 +74,7 @@ export default function UserPackagesPage() {
         throw new Error('No user ID found')
       }
 
-      console.log('Fetching packages for user:', {
-        userId: session.user.id,
-        email: session.user.email,
-        role: session.user.role
-      })
-
-      // First verify the Supabase session
-      const { data: { session: supabaseSession }, error: sessionError } = await supabase.auth.getSession()
-      console.log('Supabase session:', supabaseSession)
-
-      if (sessionError) {
-        console.error('Error getting Supabase session:', sessionError)
-        throw sessionError
-      }
-
-      // Get all packages first to verify data exists
-      const { data: allPackages, error: allPackagesError } = await supabase
-        .from('package')
-        .select('*')
-      
-      console.log('All packages in database:', allPackages)
-
-      if (allPackagesError) {
-        console.error('Error fetching all packages:', allPackagesError)
-        throw allPackagesError
-      }
-
-      // Now get packages for the specific user
+      // Get packages for the specific user
       const { data: userPackages, error } = await supabase
         .from('package')
         .select(`
@@ -117,17 +90,10 @@ export default function UserPackagesPage() {
             id,
             fullName,
             email
-          ),
-          user:User!userId (
-            id,
-            fullName,
-            email
           )
         `)
         .eq('userId', session.user.id)
         .order('createdAt', { ascending: false })
-
-      console.log('Packages for user:', userPackages)
 
       if (error) {
         console.error('Error fetching user packages:', error)
@@ -143,7 +109,6 @@ export default function UserPackagesPage() {
       // Transform the data to match our Package interface
       const transformedPackages: Package[] = userPackages.map(pkg => {
         const shopData = Array.isArray(pkg.shop) ? pkg.shop[0] : pkg.shop;
-        const userData = Array.isArray(pkg.user) ? pkg.user[0] : pkg.user;
         
         return {
           id: pkg.id,
@@ -160,14 +125,13 @@ export default function UserPackagesPage() {
             email: shopData?.email || ''
           },
           user: {
-            id: userData?.id || '',
-            fullName: userData?.fullName || 'غير معروف',
-            email: userData?.email || ''
+            id: session.user.id,
+            fullName: session.user.name || 'غير معروف',
+            email: session.user.email || ''
           }
         };
       });
 
-      console.log('Transformed packages:', transformedPackages)
       setPackages(transformedPackages)
     } catch (error) {
       console.error('Error in fetchPackages:', error)
