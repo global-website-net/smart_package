@@ -14,7 +14,14 @@ import CreatePackageForm from '@/components/CreatePackageForm'
 // Initialize Supabase client
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  }
 )
 
 interface User {
@@ -81,18 +88,50 @@ export default function TrackingPackagesPage() {
       return
     }
 
-    if (status === 'authenticated') {
-      if (session.user.role === 'ADMIN' || session.user.role === 'OWNER') {
-        fetchOrders()
-        fetchPackages()
-        fetchShops()
-        fetchRegularUsers()
-      } else {
-        router.push('/')
+    if (status === 'authenticated' && session) {
+      console.log('User authenticated:', {
+        role: session.user?.role,
+        email: session.user?.email,
+        id: session.user?.id
+      })
+
+      // Initialize Supabase with the session
+      const initializeSupabase = async () => {
+        try {
+          // First, let's verify we can access the package table directly
+          const { data: directPackages, error: directError } = await supabase
+            .from('package')
+            .select('*')
+            .limit(1)
+
+          console.log('Direct package access:', { directPackages, directError })
+
+          if (directError) {
+            console.error('Error accessing package table:', directError)
+            return
+          }
+
+          const { data: { session: supabaseSession }, error } = await supabase.auth.getSession()
+          console.log('Current Supabase session:', supabaseSession)
+          
+          if (error) {
+            console.error('Error getting Supabase session:', error)
+            return
+          }
+
+          if (session.user?.role === 'ADMIN' || session.user?.role === 'OWNER') {
+            await fetchPackages()
+          } else {
+            router.push('/')
+          }
+        } catch (error) {
+          console.error('Error initializing Supabase:', error)
+        }
       }
-      checkAdminOrOwner()
+
+      initializeSupabase()
     }
-  }, [status])
+  }, [status, session])
 
   const checkAdminOrOwner = () => {
     if (session && session.user && session.user.role) {
@@ -201,6 +240,28 @@ export default function TrackingPackagesPage() {
       setLoading(true)
       setError(null)
 
+      console.log('Starting fetchPackages...')
+
+      // First try to fetch without joins to verify basic data access
+      const { data: basicPackages, error: basicError } = await supabase
+        .from('package')
+        .select('*')
+        .order('createdAt', { ascending: false })
+
+      console.log('Basic packages fetch:', { basicPackages, basicError })
+
+      if (basicError) {
+        console.error('Basic fetch error:', basicError)
+        throw basicError
+      }
+
+      if (!basicPackages || basicPackages.length === 0) {
+        console.log('No packages found in basic fetch')
+        setPackages([])
+        return
+      }
+
+      // If basic fetch works, try with joins
       const { data: packages, error } = await supabase
         .from('package')
         .select(`
@@ -223,25 +284,26 @@ export default function TrackingPackagesPage() {
         `)
         .order('createdAt', { ascending: false })
 
+      console.log('Full packages fetch:', { packages, error })
+
       if (error) {
         console.error('Supabase error:', error)
         throw error
       }
 
-      console.log('Fetched packages:', packages)
-
       if (!packages || packages.length === 0) {
-        console.log('No packages found in the database')
+        console.log('No packages found in full fetch')
         setPackages([])
         return
       }
 
       // Transform the data to match the Package interface
       const transformedPackages = packages.map(pkg => {
+        console.log('Processing package:', pkg)
         const userData = Array.isArray(pkg.user) ? pkg.user[0] : pkg.user
         const shopData = Array.isArray(pkg.shop) ? pkg.shop[0] : pkg.shop
 
-        return {
+        const transformed = {
           ...pkg,
           user: [{
             fullName: userData?.fullName || 'غير معروف',
@@ -252,12 +314,14 @@ export default function TrackingPackagesPage() {
             email: shopData?.email || ''
           }]
         }
+        console.log('Transformed package:', transformed)
+        return transformed
       })
 
-      console.log('Transformed packages:', transformedPackages)
+      console.log('Final transformed packages:', transformedPackages)
       setPackages(transformedPackages)
     } catch (error) {
-      console.error('Error fetching packages:', error)
+      console.error('Error in fetchPackages:', error)
       setError('حدث خطأ أثناء جلب الطرود')
       toast.error('حدث خطأ أثناء جلب الطرود')
     } finally {
