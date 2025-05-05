@@ -263,6 +263,19 @@ export default function TrackingPackagesPage() {
       setLoading(true)
       setError(null)
 
+      // Initialize Supabase with the session
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+          }
+        }
+      )
+
       const { data: packages, error } = await supabase
         .from('package')
         .select(`

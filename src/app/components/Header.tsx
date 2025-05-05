@@ -158,7 +158,7 @@ export default function Header() {
           {!isLoginPage && (
             <div className="hidden md:flex items-center order-3">
               {status === 'loading' ? (
-                <div className="w-24 h-8 bg-gray-800 rounded-md animate-pulse"></div>
+                <div className="w-24 h-8 bg-black rounded-md animate-pulse"></div>
               ) : isLoggedIn ? (
                 <div className="relative">
                   <button
