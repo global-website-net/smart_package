@@ -240,70 +240,26 @@ export default function TrackingPackagesPage() {
       setLoading(true)
       setError(null)
 
-      console.log('Starting fetchPackages...')
-
-      // First try to fetch without joins to verify basic data access
-      const { data: basicPackages, error: basicError } = await supabase
-        .from('package')
-        .select('*')
-        .order('createdAt', { ascending: false })
-
-      console.log('Basic packages fetch:', { basicPackages, basicError })
-
-      if (basicError) {
-        console.error('Basic fetch error:', basicError)
-        throw basicError
+      const response = await fetch('/api/packages')
+      if (!response.ok) {
+        throw new Error('Failed to fetch packages')
       }
-
-      if (!basicPackages || basicPackages.length === 0) {
-        console.log('No packages found in basic fetch')
-        setPackages([])
-        return
-      }
-
-      // If basic fetch works, try with joins
-      const { data: packages, error } = await supabase
-        .from('package')
-        .select(`
-          id,
-          trackingNumber,
-          description,
-          status,
-          userId,
-          shopId,
-          createdAt,
-          updatedAt,
-          user:User!userId (
-            fullName,
-            email
-          ),
-          shop:User!shopId (
-            fullName,
-            email
-          )
-        `)
-        .order('createdAt', { ascending: false })
-
-      console.log('Full packages fetch:', { packages, error })
-
-      if (error) {
-        console.error('Supabase error:', error)
-        throw error
-      }
+      
+      const packages = await response.json()
+      console.log('Fetched packages:', packages)
 
       if (!packages || packages.length === 0) {
-        console.log('No packages found in full fetch')
+        console.log('No packages found in the database')
         setPackages([])
         return
       }
 
       // Transform the data to match the Package interface
-      const transformedPackages = packages.map(pkg => {
-        console.log('Processing package:', pkg)
+      const transformedPackages = packages.map((pkg: any) => {
         const userData = Array.isArray(pkg.user) ? pkg.user[0] : pkg.user
         const shopData = Array.isArray(pkg.shop) ? pkg.shop[0] : pkg.shop
 
-        const transformed = {
+        return {
           ...pkg,
           user: [{
             fullName: userData?.fullName || 'غير معروف',
@@ -314,11 +270,9 @@ export default function TrackingPackagesPage() {
             email: shopData?.email || ''
           }]
         }
-        console.log('Transformed package:', transformed)
-        return transformed
       })
 
-      console.log('Final transformed packages:', transformedPackages)
+      console.log('Transformed packages:', transformedPackages)
       setPackages(transformedPackages)
     } catch (error) {
       console.error('Error in fetchPackages:', error)
