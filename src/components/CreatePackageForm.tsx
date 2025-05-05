@@ -67,6 +67,7 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
       console.log('Fetched shops data:', data)
       if (!data || data.length === 0) {
         console.log('No shops found in the database')
+        setShops([])
         toast.error('لا توجد متاجر متاحة حالياً')
       } else {
         console.log(`Found ${data.length} shops`)
@@ -74,6 +75,7 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
       }
     } catch (error) {
       console.error('Error fetching shops:', error)
+      setShops([])
       toast.error('حدث خطأ أثناء جلب المتاجر')
     }
   }
@@ -95,6 +97,7 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
       console.log('Fetched users data:', data)
       if (!data || data.length === 0) {
         console.log('No regular users found in the database')
+        setUsers([])
         toast.error('لا توجد مستخدمين متاحين حالياً')
       } else {
         console.log(`Found ${data.length} regular users`)
@@ -102,6 +105,7 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
       }
     } catch (error) {
       console.error('Error fetching users:', error)
+      setUsers([])
       toast.error('حدث خطأ أثناء جلب المستخدمين')
     }
   }

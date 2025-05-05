@@ -59,6 +59,7 @@ export default function NewOrderModal({ isOpen, onClose, onSave, userId }: NewOr
       const { data, error } = await supabase
         .from('shop')
         .select('id, name')
+        .order('name', { ascending: true })
 
       if (error) {
         console.error('Supabase error:', error)
@@ -66,9 +67,17 @@ export default function NewOrderModal({ isOpen, onClose, onSave, userId }: NewOr
       }
       
       console.log('Fetched shops:', data)
-      setShops(data || [])
+      if (!data || data.length === 0) {
+        console.log('No shops found in the database')
+        setShops([])
+        toast.error('لا توجد متاجر متاحة حالياً')
+      } else {
+        console.log(`Found ${data.length} shops`)
+        setShops(data)
+      }
     } catch (error) {
       console.error('Error fetching shops:', error)
+      setShops([])
       toast.error('حدث خطأ أثناء جلب المتاجر')
     }
   }
@@ -203,7 +212,7 @@ export default function NewOrderModal({ isOpen, onClose, onSave, userId }: NewOr
               id="notes"
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="col-span-3"
+              className="col-span-1"
               placeholder="أدخل الملاحظات"
               rows={1}
             />

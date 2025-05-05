@@ -94,14 +94,14 @@ export default function TrackingPage() {
 
   const getOrderStatusText = (status: string) => {
     switch (status) {
+      case 'PENDING_APPROVAL':
+        return 'في انتظار الموافقة'
       case 'AWAITING_PAYMENT':
-        return 'بانتظار الدفع'
-      case 'PENDING':
-        return 'قيد الانتظار'
-      case 'PROCESSING':
-        return 'قيد المعالجة'
-      case 'COMPLETED':
-        return 'مكتمل'
+        return 'في انتظار الدفع'
+      case 'ORDERING':
+        return 'قيد الطلب'
+      case 'ORDER_COMPLETED':
+        return 'تم الطلب'
       case 'CANCELLED':
         return 'ملغي'
       default:
