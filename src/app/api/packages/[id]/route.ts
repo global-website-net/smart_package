@@ -43,22 +43,39 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Package ID is required' }, { status: 400 })
     }
 
-    const { status } = await request.json()
+    const { status, description, shopId, userId } = await request.json()
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('package')
       .update({ 
         status,
+        description,
+        shopId,
+        userId,
         updatedAt: new Date().toISOString()
       })
       .eq('id', id)
+      .select(`
+        *,
+        shop:shopId (
+          id,
+          fullName,
+          email
+        ),
+        user:userId (
+          id,
+          fullName,
+          email
+        )
+      `)
+      .single()
 
     if (error) {
       console.error('Error updating package:', error)
       return NextResponse.json({ error: 'حدث خطأ أثناء تحديث الطرد' }, { status: 500 })
     }
 
-    return NextResponse.json({ message: 'تم تحديث الطرد بنجاح' })
+    return NextResponse.json(data)
   } catch (error) {
     console.error('Error in PATCH /api/packages/[id]:', error)
     return NextResponse.json({ error: 'حدث خطأ في الخادم' }, { status: 500 })

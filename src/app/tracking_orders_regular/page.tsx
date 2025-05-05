@@ -3,26 +3,42 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import { createClient } from '@supabase/supabase-js'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { toast } from 'sonner'
 import Header from '@/app/components/Header'
+
+// Initialize Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  }
+)
 
 interface Order {
   id: string
   orderNumber: string
   status: string
-  totalAmount: number
+  description: string | null
+  shopId: string
+  userId: string
   createdAt: string
   updatedAt: string
-  userId: string
-  shopId: string
   shop: {
     id: string
-    name: string
+    fullName: string
+    email: string
   }
   user: {
     id: string
-    name: string
+    fullName: string
+    email: string
   }
 }
 
@@ -39,7 +55,7 @@ export default function UserOrdersPage() {
       return
     }
 
-    if (status === 'authenticated') {
+    if (status === 'authenticated' && session) {
       if (session.user.role !== 'REGULAR') {
         router.push('/')
         return
@@ -53,41 +69,49 @@ export default function UserOrdersPage() {
       setLoading(true)
       setError(null)
 
-      const response = await fetch('/api/orders/user')
-      if (!response.ok) {
-        throw new Error('Failed to fetch orders')
-      }
-      
-      const data = await response.json()
-      console.log('Fetched orders:', data)
+      const { data: orders, error } = await supabase
+        .from('order')
+        .select(`
+          id,
+          orderNumber,
+          status,
+          description,
+          shopId,
+          userId,
+          createdAt,
+          updatedAt,
+          shop:shopId (
+            id,
+            fullName,
+            email
+          ),
+          user:userId (
+            id,
+            fullName,
+            email
+          )
+        `)
+        .eq('userId', session?.user?.id)
+        .order('createdAt', { ascending: false })
 
-      if (!data || data.length === 0) {
-        console.log('No orders found in the database')
+      if (error) {
+        console.error('Error fetching orders:', error)
+        throw error
+      }
+
+      if (!orders || orders.length === 0) {
+        console.log('No orders found for user')
         setOrders([])
         return
       }
 
-      // Transform the data to match the Order interface
-      const transformedOrders: Order[] = data.map((order: any) => ({
-        id: order.id,
-        orderNumber: order.orderNumber,
-        status: order.status,
-        totalAmount: order.totalAmount,
-        createdAt: order.createdAt,
-        updatedAt: order.updatedAt,
-        userId: order.userId,
-        shopId: order.shopId,
-        shop: {
-          id: order.shop?.id || '',
-          name: order.shop?.name || 'غير معروف'
-        },
-        user: {
-          id: order.user?.id || '',
-          name: order.user?.name || 'غير معروف'
-        }
+      // Transform the data to match our Order interface
+      const transformedOrders: Order[] = orders.map(order => ({
+        ...order,
+        shop: order.shop[0] || { id: '', fullName: 'غير معروف', email: '' },
+        user: order.user[0] || { id: '', fullName: 'غير معروف', email: '' }
       }))
 
-      console.log('Transformed orders:', transformedOrders)
       setOrders(transformedOrders)
     } catch (error) {
       console.error('Error in fetchOrders:', error)
@@ -98,18 +122,16 @@ export default function UserOrdersPage() {
     }
   }
 
-  const getStatusText = (status: string) => {
+  const getOrderStatusText = (status: string) => {
     switch (status) {
-      case 'PENDING':
-        return 'قيد الانتظار'
-      case 'PROCESSING':
-        return 'قيد المعالجة'
-      case 'COMPLETED':
-        return 'مكتمل'
-      case 'CANCELLED':
-        return 'ملغي'
-      case 'REFUNDED':
-        return 'تم الاسترجاع'
+      case 'PENDING_APPROVAL':
+        return 'في انتظار الموافقة'
+      case 'AWAITING_PAYMENT':
+        return 'في انتظار الدفع'
+      case 'ORDERING':
+        return 'قيد الطلب'
+      case 'ORDER_COMPLETED':
+        return 'تم الطلب'
       default:
         return status
     }
@@ -117,16 +139,14 @@ export default function UserOrdersPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PENDING':
+      case 'PENDING_APPROVAL':
         return 'bg-yellow-100 text-yellow-800'
-      case 'PROCESSING':
+      case 'AWAITING_PAYMENT':
         return 'bg-blue-100 text-blue-800'
-      case 'COMPLETED':
+      case 'ORDERING':
+        return 'bg-purple-100 text-purple-800'
+      case 'ORDER_COMPLETED':
         return 'bg-green-100 text-green-800'
-      case 'CANCELLED':
-        return 'bg-red-100 text-red-800'
-      case 'REFUNDED':
-        return 'bg-orange-100 text-orange-800'
       default:
         return 'bg-gray-100 text-gray-800'
     }
@@ -173,7 +193,7 @@ export default function UserOrdersPage() {
               <TableRow>
                 <TableHead className="text-center">رقم الطلب</TableHead>
                 <TableHead className="text-center">الحالة</TableHead>
-                <TableHead className="text-center">المبلغ الإجمالي</TableHead>
+                <TableHead className="text-center">الوصف</TableHead>
                 <TableHead className="text-center">المتجر</TableHead>
                 <TableHead className="text-center">تاريخ الإنشاء</TableHead>
               </TableRow>
@@ -191,11 +211,11 @@ export default function UserOrdersPage() {
                     <TableCell className="text-center">{order.orderNumber}</TableCell>
                     <TableCell className="text-center">
                       <span className={`px-2 py-1 rounded-full ${getStatusColor(order.status)}`}>
-                        {getStatusText(order.status)}
+                        {getOrderStatusText(order.status)}
                       </span>
                     </TableCell>
-                    <TableCell className="text-center">{order.totalAmount.toLocaleString('ar')} ريال</TableCell>
-                    <TableCell className="text-center">{order.shop.name || 'غير معروف'}</TableCell>
+                    <TableCell className="text-center">{order.description || '-'}</TableCell>
+                    <TableCell className="text-center">{order.shop?.fullName || 'غير معروف'}</TableCell>
                     <TableCell className="text-center">{new Date(order.createdAt).toLocaleDateString('ar')}</TableCell>
                   </TableRow>
                 ))

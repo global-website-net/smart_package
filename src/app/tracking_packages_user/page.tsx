@@ -3,9 +3,23 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import { createClient } from '@supabase/supabase-js'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { toast } from 'sonner'
 import Header from '@/app/components/Header'
+
+// Initialize Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  }
+)
 
 interface Package {
   id: string
@@ -14,16 +28,17 @@ interface Package {
   description: string | null
   shopId: string
   userId: string
-  orderNumber: string
   createdAt: string
   updatedAt: string
   shop: {
     id: string
-    name: string
+    fullName: string
+    email: string
   }
   user: {
     id: string
-    name: string
+    fullName: string
+    email: string
   }
 }
 
@@ -40,7 +55,7 @@ export default function UserPackagesPage() {
       return
     }
 
-    if (status === 'authenticated') {
+    if (status === 'authenticated' && session) {
       if (session.user.role !== 'REGULAR') {
         router.push('/')
         return
@@ -54,42 +69,49 @@ export default function UserPackagesPage() {
       setLoading(true)
       setError(null)
 
-      const response = await fetch('/api/packages/user')
-      if (!response.ok) {
-        throw new Error('Failed to fetch packages')
-      }
-      
-      const data = await response.json()
-      console.log('Fetched packages:', data)
+      const { data: packages, error } = await supabase
+        .from('package')
+        .select(`
+          id,
+          trackingNumber,
+          status,
+          description,
+          shopId,
+          userId,
+          createdAt,
+          updatedAt,
+          shop:shopId (
+            id,
+            fullName,
+            email
+          ),
+          user:userId (
+            id,
+            fullName,
+            email
+          )
+        `)
+        .eq('userId', session?.user?.id)
+        .order('createdAt', { ascending: false })
 
-      if (!data || data.length === 0) {
-        console.log('No packages found in the database')
+      if (error) {
+        console.error('Error fetching packages:', error)
+        throw error
+      }
+
+      if (!packages || packages.length === 0) {
+        console.log('No packages found for user')
         setPackages([])
         return
       }
 
-      // Transform the data to match the Package interface
-      const transformedPackages: Package[] = data.map((pkg: any) => ({
-        id: pkg.id,
-        trackingNumber: pkg.trackingNumber,
-        status: pkg.status,
-        description: pkg.description,
-        shopId: pkg.shopId,
-        userId: pkg.userId,
-        orderNumber: pkg.orderNumber,
-        createdAt: pkg.createdAt,
-        updatedAt: pkg.updatedAt,
-        shop: {
-          id: pkg.shop?.id || '',
-          name: pkg.shop?.name || 'غير معروف'
-        },
-        user: {
-          id: pkg.user?.id || '',
-          name: pkg.user?.name || 'غير معروف'
-        }
+      // Transform the data to match our Package interface
+      const transformedPackages: Package[] = packages.map(pkg => ({
+        ...pkg,
+        shop: pkg.shop[0] || { id: '', fullName: 'غير معروف', email: '' },
+        user: pkg.user[0] || { id: '', fullName: 'غير معروف', email: '' }
       }))
 
-      console.log('Transformed packages:', transformedPackages)
       setPackages(transformedPackages)
     } catch (error) {
       console.error('Error in fetchPackages:', error)
@@ -100,18 +122,18 @@ export default function UserPackagesPage() {
     }
   }
 
-  const getStatusText = (status: string) => {
+  const getPackageStatusText = (status: string) => {
     switch (status) {
-      case 'PENDING':
-        return 'قيد الانتظار'
-      case 'IN_TRANSIT':
-        return 'قيد الشحن'
-      case 'DELIVERED':
-        return 'تم التسليم'
-      case 'CANCELLED':
-        return 'ملغي'
-      case 'RETURNED':
-        return 'تم الإرجاع'
+      case 'AWAITING_PAYMENT':
+        return 'في انتظار الدفع'
+      case 'PREPARING':
+        return 'قيد التحضير'
+      case 'DELIVERING_TO_SHOP':
+        return 'قيد التوصيل للمتجر'
+      case 'IN_SHOP':
+        return 'في المتجر'
+      case 'RECEIVED':
+        return 'تم الاستلام'
       default:
         return status
     }
@@ -119,16 +141,16 @@ export default function UserPackagesPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PENDING':
+      case 'AWAITING_PAYMENT':
         return 'bg-yellow-100 text-yellow-800'
-      case 'IN_TRANSIT':
+      case 'PREPARING':
         return 'bg-blue-100 text-blue-800'
-      case 'DELIVERED':
+      case 'DELIVERING_TO_SHOP':
+        return 'bg-purple-100 text-purple-800'
+      case 'IN_SHOP':
         return 'bg-green-100 text-green-800'
-      case 'CANCELLED':
-        return 'bg-red-100 text-red-800'
-      case 'RETURNED':
-        return 'bg-orange-100 text-orange-800'
+      case 'RECEIVED':
+        return 'bg-gray-100 text-gray-800'
       default:
         return 'bg-gray-100 text-gray-800'
     }
@@ -174,7 +196,6 @@ export default function UserPackagesPage() {
             <TableHeader>
               <TableRow>
                 <TableHead className="text-center">رقم التتبع</TableHead>
-                <TableHead className="text-center">رقم الطلب</TableHead>
                 <TableHead className="text-center">الحالة</TableHead>
                 <TableHead className="text-center">الوصف</TableHead>
                 <TableHead className="text-center">المتجر</TableHead>
@@ -184,7 +205,7 @@ export default function UserPackagesPage() {
             <TableBody>
               {packages.length === 0 && !loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4">
+                  <TableCell colSpan={5} className="text-center py-4">
                     لا توجد طرود
                   </TableCell>
                 </TableRow>
@@ -192,14 +213,13 @@ export default function UserPackagesPage() {
                 packages.map((pkg) => (
                   <TableRow key={pkg.id}>
                     <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
-                    <TableCell className="text-center">{pkg.orderNumber}</TableCell>
                     <TableCell className="text-center">
                       <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
-                        {getStatusText(pkg.status)}
+                        {getPackageStatusText(pkg.status)}
                       </span>
                     </TableCell>
                     <TableCell className="text-center">{pkg.description || '-'}</TableCell>
-                    <TableCell className="text-center">{pkg.shop.name || 'غير معروف'}</TableCell>
+                    <TableCell className="text-center">{pkg.shop?.fullName || 'غير معروف'}</TableCell>
                     <TableCell className="text-center">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
                   </TableRow>
                 ))
