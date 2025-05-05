@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { toast } from 'sonner'
 import Header from '@/app/components/Header'
 import CreatePackageForm from '@/components/CreatePackageForm'
+import { EditPackageModal } from '@/app/components/EditPackageModal'
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -78,7 +79,8 @@ export default function TrackingPackagesPage() {
   const [regularUsers, setRegularUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [editingPackage, setEditingPackage] = useState<Package | null>(null)
+  const [selectedPackage, setSelectedPackage] = useState<Package | null>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [isAdminOrOwner, setIsAdminOrOwner] = useState(false)
 
@@ -300,6 +302,24 @@ export default function TrackingPackagesPage() {
     }
   }
 
+  const handleEditClick = (pkg: Package) => {
+    setSelectedPackage(pkg)
+    setIsEditModalOpen(true)
+  }
+
+  const handleSavePackage = (updatedPackage: {
+    id: string
+    trackingNumber: string
+    status: string
+    description: string | null
+  }) => {
+    setPackages(packages.map(pkg => 
+      pkg.id === updatedPackage.id 
+        ? { ...pkg, ...updatedPackage }
+        : pkg
+    ))
+  }
+
   const getPackageStatusText = (status: string) => {
     switch (status) {
       case 'PENDING':
@@ -418,13 +438,7 @@ export default function TrackingPackagesPage() {
                       <TableCell className="text-center">
                         <div className="flex justify-center gap-4 rtl:space-x-reverse">
                           <button
-                            onClick={() => handleDelete(pkg.id)}
-                            className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors"
-                          >
-                            حذف
-                          </button>
-                          <button
-                            onClick={() => router.push(`/packages/edit/${pkg.id}`)}
+                            onClick={() => handleEditClick(pkg)}
                             className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors"
                           >
                             تعديل
@@ -451,33 +465,13 @@ export default function TrackingPackagesPage() {
         />
       )}
 
-      {/* Delete Confirmation Modal */}
-      {editingPackage && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-sm w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4">تأكيد الحذف</h3>
-            <p className="text-gray-600 mb-6">
-              هل أنت متأكد من حذف الطرد رقم {editingPackage.trackingNumber}؟
-            </p>
-            <div className="flex justify-end space-x-4 rtl:space-x-reverse">
-              <Button
-                variant="outline"
-                onClick={() => setEditingPackage(null)}
-              >
-                إلغاء
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => {
-                  handleDelete(editingPackage.id)
-                  setEditingPackage(null)
-                }}
-              >
-                حذف
-              </Button>
-            </div>
-          </div>
-        </div>
+      {selectedPackage && (
+        <EditPackageModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          package={selectedPackage}
+          onSave={handleSavePackage}
+        />
       )}
     </div>
   )

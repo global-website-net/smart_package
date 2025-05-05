@@ -52,31 +52,12 @@ export default function TrackingPage() {
       setLoading(true)
       setError(null)
 
-      const { data: orders, error } = await supabase
-        .from('order')
-        .select(`
-          id,
-          userId,
-          phoneNumber,
-          notes,
-          additionalInfo,
-          status,
-          totalAmount,
-          orderNumber,
-          createdAt,
-          updatedAt,
-          user:User!userId (
-            fullName,
-            email
-          )
-        `)
-        .order('createdAt', { ascending: false })
-
-      if (error) {
-        console.error('Supabase error:', error)
-        throw error
+      const response = await fetch('/api/orders')
+      if (!response.ok) {
+        throw new Error('Failed to fetch orders')
       }
-
+      
+      const orders = await response.json()
       console.log('Fetched orders:', orders)
 
       if (!orders || orders.length === 0) {
@@ -86,8 +67,9 @@ export default function TrackingPage() {
       }
 
       // Transform the data to match the Order interface
-      const transformedOrders = orders.map(order => {
+      const transformedOrders = orders.map((order: any) => {
         const userData = Array.isArray(order.user) ? order.user[0] : order.user
+
         return {
           ...order,
           user: {
@@ -100,7 +82,7 @@ export default function TrackingPage() {
       console.log('Transformed orders:', transformedOrders)
       setOrders(transformedOrders)
     } catch (error) {
-      console.error('Error fetching orders:', error)
+      console.error('Error in fetchOrders:', error)
       setError('حدث خطأ أثناء جلب الطلبات')
       toast.error('حدث خطأ أثناء جلب الطلبات')
     } finally {
