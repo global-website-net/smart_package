@@ -28,11 +28,13 @@ const supabase = createClient(
 interface User {
   id: string
   fullName: string
+  email: string
 }
 
 interface Shop {
   id: string
   fullName: string
+  email: string
 }
 
 interface Package {

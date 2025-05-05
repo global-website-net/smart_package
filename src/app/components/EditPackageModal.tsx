@@ -25,8 +25,8 @@ interface EditPackageModalProps {
     shopId: string
     userId: string
   }) => void
-  shops: Array<{ id: string; fullName: string }>
-  users: Array<{ id: string; fullName: string }>
+  shops: Array<{ id: string; fullName: string; email: string }>
+  users: Array<{ id: string; fullName: string; email: string }>
 }
 
 export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops, users }: EditPackageModalProps) {
@@ -106,11 +106,11 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops,
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="اختر الحالة" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="PENDING">قيد الانتظار</SelectItem>
-                <SelectItem value="IN_TRANSIT">قيد الشحن</SelectItem>
-                <SelectItem value="DELIVERED">تم التسليم</SelectItem>
-                <SelectItem value="CANCELLED">ملغي</SelectItem>
+              <SelectContent className="text-right" align="end">
+                <SelectItem value="PENDING" className="text-right">قيد الانتظار</SelectItem>
+                <SelectItem value="IN_TRANSIT" className="text-right">قيد الشحن</SelectItem>
+                <SelectItem value="DELIVERED" className="text-right">تم التسليم</SelectItem>
+                <SelectItem value="CANCELLED" className="text-right">ملغي</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -136,7 +136,7 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops,
               <SelectContent className="text-right" align="end">
                 {shops.map((shop) => (
                   <SelectItem key={shop.id} value={shop.id} className="text-right">
-                    {shop.fullName}
+                    {shop.fullName} ({shop.email})
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -153,7 +153,7 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops,
               <SelectContent className="text-right" align="end">
                 {users.map((user) => (
                   <SelectItem key={user.id} value={user.id} className="text-right">
-                    {user.fullName}
+                    {user.fullName} ({user.email})
                   </SelectItem>
                 ))}
               </SelectContent>
