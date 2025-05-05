@@ -80,9 +80,12 @@ export default function TrackingPage() {
 
       if (error) throw error
 
+      console.log('Fetched orders:', orders) // Debug log
+
       // Transform the data to match the Order interface
       const transformedOrders = orders.map(order => {
         const userData = Array.isArray(order.user) ? order.user[0] : order.user
+        console.log('Processing order:', order.id, 'User data:', userData) // Debug log
         return {
           ...order,
           user: {
@@ -92,6 +95,7 @@ export default function TrackingPage() {
         }
       })
 
+      console.log('Transformed orders:', transformedOrders) // Debug log
       setOrders(transformedOrders)
     } catch (error) {
       console.error('Error fetching orders:', error)

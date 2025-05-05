@@ -212,11 +212,11 @@ export default function TrackingPackagesPage() {
           shopId,
           createdAt,
           updatedAt,
-          user:userId (
+          user:User!userId (
             fullName,
             email
           ),
-          shop:shopId (
+          shop:User!shopId (
             fullName,
             email
           )
@@ -227,8 +227,8 @@ export default function TrackingPackagesPage() {
 
       // Transform the data to match the Package interface
       const transformedPackages = packages.map(pkg => {
-        const userData = pkg.user as unknown as { fullName: string; email: string } | null
-        const shopData = pkg.shop as unknown as { fullName: string; email: string } | null
+        const userData = Array.isArray(pkg.user) ? pkg.user[0] : pkg.user
+        const shopData = Array.isArray(pkg.shop) ? pkg.shop[0] : pkg.shop
 
         return {
           ...pkg,
