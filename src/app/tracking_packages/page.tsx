@@ -155,18 +155,24 @@ export default function TrackingPackagesPage() {
 
   const fetchShops = async () => {
     try {
-      const response = await fetch('/api/shops')
-      if (!response.ok) {
-        throw new Error('Failed to fetch shops')
-      }
-      const data = await response.json()
-      const transformedShops = data.map((shop: any) => ({
+      const { data: shops, error } = await supabase
+        .from('User')
+        .select('id, fullName')
+        .eq('role', 'SHOP')
+        .order('fullName', { ascending: true })
+
+      if (error) throw error
+
+      // Transform the data to match the Shop interface
+      const transformedShops = shops.map(shop => ({
         id: shop.id,
-        name: shop.name
+        name: shop.fullName
       }))
+
       setShops(transformedShops)
     } catch (error) {
       console.error('Error fetching shops:', error)
+      setError('حدث خطأ أثناء جلب المتاجر')
     }
   }
 
@@ -174,21 +180,22 @@ export default function TrackingPackagesPage() {
     try {
       const { data: users, error } = await supabase
         .from('User')
-        .select('id, fullName, email, role')
+        .select('id, fullName')
         .eq('role', 'REGULAR')
+        .order('fullName', { ascending: true })
 
       if (error) throw error
 
       // Transform the data to match the User interface
       const transformedUsers = users.map(user => ({
         id: user.id,
-        name: user.fullName || 'غير معروف'
+        name: user.fullName
       }))
 
       setRegularUsers(transformedUsers)
     } catch (error) {
       console.error('Error fetching regular users:', error)
-      setError('Failed to load regular users')
+      setError('حدث خطأ أثناء جلب المستخدمين')
     }
   }
 

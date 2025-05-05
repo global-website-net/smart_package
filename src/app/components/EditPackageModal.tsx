@@ -82,8 +82,8 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops,
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader className="text-center">
-          <DialogTitle>تعديل بيانات الطرد</DialogTitle>
+        <DialogHeader className="flex flex-col items-center justify-center">
+          <DialogTitle className="text-xl font-bold text-center w-full">تعديل بيانات الطرد</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
@@ -94,7 +94,8 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops,
               id="trackingNumber"
               value={trackingNumber}
               onChange={(e) => setTrackingNumber(e.target.value)}
-              className="col-span-3"
+              className="col-span-3 bg-gray-100"
+              disabled
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -105,11 +106,11 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops,
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="اختر الحالة" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="PENDING">قيد الانتظار</SelectItem>
-                <SelectItem value="IN_TRANSIT">قيد الشحن</SelectItem>
-                <SelectItem value="DELIVERED">تم التسليم</SelectItem>
-                <SelectItem value="CANCELLED">ملغي</SelectItem>
+              <SelectContent className="text-right" align="end">
+                <SelectItem value="PENDING" className="text-right">قيد الانتظار</SelectItem>
+                <SelectItem value="IN_TRANSIT" className="text-right">قيد الشحن</SelectItem>
+                <SelectItem value="DELIVERED" className="text-right">تم التسليم</SelectItem>
+                <SelectItem value="CANCELLED" className="text-right">ملغي</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -132,10 +133,10 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops,
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="اختر المتجر" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="text-right" align="end">
                 {shops.map((shop) => (
-                  <SelectItem key={shop.id} value={shop.id}>
-                    {shop.name}
+                  <SelectItem key={shop.id} value={shop.id} className="text-right">
+                    {shop.fullName}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -149,10 +150,10 @@ export function EditPackageModal({ isOpen, onClose, package: pkg, onSave, shops,
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="اختر المستخدم" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="text-right" align="end">
                 {users.map((user) => (
-                  <SelectItem key={user.id} value={user.id}>
-                    {user.name}
+                  <SelectItem key={user.id} value={user.id} className="text-right">
+                    {user.fullName}
                   </SelectItem>
                 ))}
               </SelectContent>
