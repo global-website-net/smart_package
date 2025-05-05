@@ -223,7 +223,18 @@ export default function TrackingPackagesPage() {
         `)
         .order('createdAt', { ascending: false })
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase error:', error)
+        throw error
+      }
+
+      console.log('Fetched packages:', packages)
+
+      if (!packages || packages.length === 0) {
+        console.log('No packages found in the database')
+        setPackages([])
+        return
+      }
 
       // Transform the data to match the Package interface
       const transformedPackages = packages.map(pkg => {
@@ -243,6 +254,7 @@ export default function TrackingPackagesPage() {
         }
       })
 
+      console.log('Transformed packages:', transformedPackages)
       setPackages(transformedPackages)
     } catch (error) {
       console.error('Error fetching packages:', error)

@@ -3,16 +3,10 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { createClient } from '@supabase/supabase-js'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { toast } from 'sonner'
 import Header from '@/app/components/Header'
-
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import { supabase } from '@/lib/supabase'
 
 interface Order {
   id: string
@@ -78,14 +72,22 @@ export default function TrackingPage() {
         `)
         .order('createdAt', { ascending: false })
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase error:', error)
+        throw error
+      }
 
-      console.log('Fetched orders:', orders) // Debug log
+      console.log('Fetched orders:', orders)
+
+      if (!orders || orders.length === 0) {
+        console.log('No orders found in the database')
+        setOrders([])
+        return
+      }
 
       // Transform the data to match the Order interface
       const transformedOrders = orders.map(order => {
         const userData = Array.isArray(order.user) ? order.user[0] : order.user
-        console.log('Processing order:', order.id, 'User data:', userData) // Debug log
         return {
           ...order,
           user: {
@@ -95,7 +97,7 @@ export default function TrackingPage() {
         }
       })
 
-      console.log('Transformed orders:', transformedOrders) // Debug log
+      console.log('Transformed orders:', transformedOrders)
       setOrders(transformedOrders)
     } catch (error) {
       console.error('Error fetching orders:', error)
