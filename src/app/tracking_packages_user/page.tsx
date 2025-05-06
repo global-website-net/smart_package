@@ -70,7 +70,7 @@ export default function UserPackagesPage() {
           shopId,
           createdAt,
           updatedAt,
-          user:userId (
+          User!userId (
             id,
             fullName,
             email
@@ -83,6 +83,8 @@ export default function UserPackagesPage() {
         console.error('Error fetching packages:', error)
         throw error
       }
+
+      console.log('Raw response from Supabase:', { data, error })
 
       if (!data || data.length === 0) {
         console.log('No packages found for user')
@@ -101,9 +103,9 @@ export default function UserPackagesPage() {
         createdAt: pkg.createdAt,
         updatedAt: pkg.updatedAt,
         User: {
-          id: pkg.user?.id || '',
-          fullName: pkg.user?.fullName || 'غير معروف',
-          email: pkg.user?.email || ''
+          id: pkg.User?.id || '',
+          fullName: pkg.User?.fullName || 'غير معروف',
+          email: pkg.User?.email || ''
         }
       }))
 

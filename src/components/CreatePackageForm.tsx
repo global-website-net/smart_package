@@ -51,7 +51,7 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
 
   const fetchShops = async () => {
     try {
-      console.log('Starting to fetch shops...')
+      console.log('Starting to fetch shops from User table...')
       const { data, error } = await supabase
         .from('User')
         .select('id, fullName, email')
@@ -63,13 +63,13 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
         throw error
       }
 
-      console.log('Fetched shops data:', data)
+      console.log('Fetched shops data from User table:', data)
       if (!data || data.length === 0) {
-        console.log('No shops found in the database')
+        console.log('No SHOP users found in the User table')
         setShops([])
         toast.error('لا توجد متاجر متاحة حالياً')
       } else {
-        console.log(`Found ${data.length} shops`)
+        console.log(`Found ${data.length} SHOP users`)
         setShops(data)
       }
     } catch (error) {
@@ -81,25 +81,25 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
 
   const fetchUsers = async () => {
     try {
-      console.log('Starting to fetch regular users...')
+      console.log('Starting to fetch REGULAR users from User table...')
       const { data, error } = await supabase
         .from('User')
-        .select('id, email')
+        .select('id, fullName, email')
         .eq('role', 'REGULAR')
-        .order('email', { ascending: true })
+        .order('fullName', { ascending: true })
 
       if (error) {
         console.error('Supabase error:', error)
         throw error
       }
 
-      console.log('Fetched users data:', data)
+      console.log('Fetched REGULAR users data from User table:', data)
       if (!data || data.length === 0) {
-        console.log('No regular users found in the database')
+        console.log('No REGULAR users found in the User table')
         setUsers([])
         toast.error('لا توجد مستخدمين متاحين حالياً')
       } else {
-        console.log(`Found ${data.length} regular users`)
+        console.log(`Found ${data.length} REGULAR users`)
         setUsers(data)
       }
     } catch (error) {

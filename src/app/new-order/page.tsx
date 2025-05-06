@@ -46,10 +46,10 @@ export default function NewOrder() {
 
   const fetchShops = async () => {
     try {
-      console.log('Starting to fetch shops...')
+      console.log('Starting to fetch shops from shop table...')
       const { data, error } = await supabase
         .from('shop')
-        .select('id, name')
+        .select('id, name, email')
         .order('name', { ascending: true })
 
       if (error) {
@@ -61,7 +61,7 @@ export default function NewOrder() {
       console.log('Fetched shops data:', data)
       
       if (!data || data.length === 0) {
-        console.log('No shops found in the database')
+        console.log('No shops found in the shop table')
         setShops([])
         setToastMessage('لا توجد متاجر متاحة حالياً')
         setToastType('error')
