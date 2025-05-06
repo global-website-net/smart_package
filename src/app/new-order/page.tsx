@@ -35,24 +35,31 @@ export default function NewOrder() {
 
   const fetchShops = async () => {
     try {
+      console.log('Starting to fetch shops...')
       const { data, error } = await supabase
         .from('shop')
         .select('id, name')
         .order('name', { ascending: true })
 
       if (error) {
+        console.error('Supabase error:', error)
         throw error
       }
 
+      console.log('Fetched shops data:', data)
       if (!data || data.length === 0) {
-        console.log('No shops found')
+        console.log('No shops found in the database')
+        setShops([])
+        setToastMessage('لا توجد متاجر متاحة حالياً')
+        setToastType('error')
+        setShowToast(true)
       } else {
-        console.log('Found shops:', data)
+        console.log(`Found ${data.length} shops`)
+        setShops(data)
       }
-
-      setShops(data || [])
     } catch (error) {
       console.error('Error fetching shops:', error)
+      setShops([])
       setToastMessage('حدث خطأ أثناء جلب المتاجر')
       setToastType('error')
       setShowToast(true)
@@ -146,11 +153,17 @@ export default function NewOrder() {
                   required
                 >
                   <option value="">اختر موقع الشراء</option>
-                  {shops.map((shop) => (
-                    <option key={shop.id} value={shop.name}>
-                      {shop.name}
+                  {shops.length === 0 ? (
+                    <option value="no-shops" disabled>
+                      لا توجد متاجر متاحة
                     </option>
-                  ))}
+                  ) : (
+                    shops.map((shop) => (
+                      <option key={shop.id} value={shop.name}>
+                        {shop.name}
+                      </option>
+                    ))
+                  )}
                 </select>
               </div>
 

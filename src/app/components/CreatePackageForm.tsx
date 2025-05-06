@@ -73,25 +73,31 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
 
   const fetchUsers = async () => {
     try {
+      console.log('Starting to fetch regular users...')
       const { data, error } = await supabase
         .from('User')
         .select('id, fullName, email')
         .eq('role', 'REGULAR')
+        .order('fullName', { ascending: true })
 
       if (error) {
+        console.error('Supabase error:', error)
         throw error
       }
 
+      console.log('Fetched users data:', data)
       if (!data || data.length === 0) {
-        console.log('No REGULAR users found')
+        console.log('No regular users found in the database')
+        setUsers([])
+        toast.error('لا توجد مستخدمين متاحين حالياً')
       } else {
-        console.log('Found REGULAR users:', data)
+        console.log(`Found ${data.length} regular users`)
+        setUsers(data)
       }
-
-      setUsers(data || [])
     } catch (error) {
       console.error('Error fetching users:', error)
-      setError('حدث خطأ أثناء جلب المستخدمين')
+      setUsers([])
+      toast.error('حدث خطأ أثناء جلب المستخدمين')
     }
   }
 

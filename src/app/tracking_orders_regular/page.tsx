@@ -78,7 +78,7 @@ export default function UserOrdersPage() {
           status,
           createdAt,
           updatedAt,
-          user:User (
+          user:userId (
             id,
             fullName,
             email

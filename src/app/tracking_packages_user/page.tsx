@@ -71,7 +71,7 @@ export default function UserPackagesPage() {
           shopId,
           createdAt,
           updatedAt,
-          User:userId (
+          user:userId (
             id,
             fullName,
             email
@@ -102,9 +102,9 @@ export default function UserPackagesPage() {
         createdAt: pkg.createdAt,
         updatedAt: pkg.updatedAt,
         User: {
-          id: pkg.User?.id || '',
-          fullName: pkg.User?.fullName || 'غير معروف',
-          email: pkg.User?.email || ''
+          id: pkg.user?.id || '',
+          fullName: pkg.user?.fullName || 'غير معروف',
+          email: pkg.user?.email || ''
         }
       }))
 
