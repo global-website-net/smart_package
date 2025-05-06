@@ -11,20 +11,16 @@ import Header from '@/app/components/Header'
 
 interface Order {
   id: string
-  userId: string
+  orderNumber: string
+  status: string
   purchaseSite: string
   purchaseLink: string
   phoneNumber: string
-  notes: string | null
-  additionalInfo: string | null
-  status: string
+  notes: string
+  additionalInfo: string
   createdAt: string
   updatedAt: string
-  user: {
-    id: string
-    fullName: string
-    email: string
-  }
+  userId: string
 }
 
 export default function UserOrdersPage() {
@@ -59,12 +55,11 @@ export default function UserOrdersPage() {
 
       if (!session?.user?.id) {
         console.error('No user ID found in session')
-        throw new Error('No user ID found')
+        throw new Error('User not found')
       }
 
       console.log('Fetching orders for user ID:', session.user.id)
 
-      // First, get the orders for the user
       const { data: orders, error } = await supabase
         .from('order')
         .select(`
@@ -77,18 +72,13 @@ export default function UserOrdersPage() {
           additionalInfo,
           status,
           createdAt,
-          updatedAt,
-          User!userId (
-            id,
-            fullName,
-            email
-          )
+          updatedAt
         `)
         .eq('userId', session.user.id)
         .order('createdAt', { ascending: false })
 
       if (error) {
-        console.error('Supabase error:', error)
+        console.error('Error fetching orders:', error)
         throw error
       }
 
@@ -100,35 +90,26 @@ export default function UserOrdersPage() {
         return
       }
 
-      // Transform the data to match our Order interface
-      const transformedOrders: Order[] = orders.map(order => {
-        const userData = Array.isArray(order.User) ? order.User[0] : order.User;
-        console.log('Processing order:', order.id, 'with user data:', userData)
-        return {
-          id: order.id,
-          userId: order.userId,
-          purchaseSite: order.purchaseSite,
-          purchaseLink: order.purchaseLink,
-          phoneNumber: order.phoneNumber,
-          notes: order.notes,
-          additionalInfo: order.additionalInfo,
-          status: order.status,
-          createdAt: order.createdAt,
-          updatedAt: order.updatedAt,
-          user: {
-            id: userData?.id || '',
-            fullName: userData?.fullName || 'غير معروف',
-            email: userData?.email || ''
-          }
-        };
-      });
+      // Transform the data to match the Order interface
+      const transformedOrders = orders.map(order => ({
+        id: order.id,
+        orderNumber: order.id, // Using id as orderNumber since it's not in the table
+        status: order.status,
+        purchaseSite: order.purchaseSite,
+        purchaseLink: order.purchaseLink,
+        phoneNumber: order.phoneNumber,
+        notes: order.notes,
+        additionalInfo: order.additionalInfo,
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
+        userId: order.userId
+      }))
 
       console.log('Transformed orders:', transformedOrders)
       setOrders(transformedOrders)
     } catch (error) {
       console.error('Error in fetchOrders:', error)
       setError('حدث خطأ أثناء جلب الطلبات')
-      toast.error('حدث خطأ أثناء جلب الطلبات')
     } finally {
       setLoading(false)
     }
@@ -166,6 +147,11 @@ export default function UserOrdersPage() {
 
   const handleNewOrder = () => {
     router.push('/new-order')
+  }
+
+  const handleViewDetails = (order: Order) => {
+    // Implement the logic to view order details
+    console.log('Viewing details for order:', order)
   }
 
   if (loading) {
@@ -218,36 +204,37 @@ export default function UserOrdersPage() {
               <TableRow>
                 <TableHead className="text-center">رقم الطلب</TableHead>
                 <TableHead className="text-center">موقع الشراء</TableHead>
-                <TableHead className="text-center">رابط الشراء</TableHead>
-                <TableHead className="text-center">رقم الهاتف</TableHead>
                 <TableHead className="text-center">الحالة</TableHead>
                 <TableHead className="text-center">تاريخ الإنشاء</TableHead>
+                <TableHead className="text-center">الإجراءات</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {orders.length === 0 && !loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4">
+                  <TableCell colSpan={5} className="text-center py-4">
                     لا توجد طلبات
                   </TableCell>
                 </TableRow>
               ) : (
                 orders.map((order) => (
                   <TableRow key={order.id}>
-                    <TableCell className="text-center">{order.id}</TableCell>
+                    <TableCell className="text-center">{order.orderNumber}</TableCell>
                     <TableCell className="text-center">{order.purchaseSite}</TableCell>
-                    <TableCell className="text-center">
-                      <a href={order.purchaseLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                        {order.purchaseLink}
-                      </a>
-                    </TableCell>
-                    <TableCell className="text-center">{order.phoneNumber}</TableCell>
                     <TableCell className="text-center">
                       <span className={`px-2 py-1 rounded-full ${getStatusColor(order.status)}`}>
                         {getOrderStatusText(order.status)}
                       </span>
                     </TableCell>
                     <TableCell className="text-center">{new Date(order.createdAt).toLocaleDateString('ar')}</TableCell>
+                    <TableCell className="text-center">
+                      <button
+                        onClick={() => handleViewDetails(order)}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+                      >
+                        عرض التفاصيل
+                      </button>
+                    </TableCell>
                   </TableRow>
                 ))
               )}

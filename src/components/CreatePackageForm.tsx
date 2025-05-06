@@ -28,6 +28,12 @@ interface User {
   email: string
 }
 
+interface Shop {
+  id: string
+  name: string
+  email: string
+}
+
 interface CreatePackageFormProps {
   onSuccess: (newPackage: any) => void
   onCancel: () => void
@@ -98,7 +104,7 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
       if (!data || data.length === 0) {
         console.log('No REGULAR users found in the User table')
         setUsers([])
-        toast.error('لا توجد مستخدمين متاحين حالياً')
+        toast.error('لا يوجد مستخدمين متاحين حالياً')
       } else {
         console.log(`Found ${data.length} REGULAR users`)
         setUsers(data)
@@ -215,7 +221,7 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
               onValueChange={(value) => setFormData({ ...formData, shopId: value })}
             >
               <SelectTrigger className="col-span-3 text-right">
-                <SelectValue placeholder="اختر المتجر" className="text-right" />
+                <SelectValue placeholder="اختر المتجر" className="text-right" dir="rtl" />
               </SelectTrigger>
               <SelectContent className="text-right" align="end">
                 {shops.length === 0 ? (
@@ -241,12 +247,12 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
               onValueChange={(value) => setFormData({ ...formData, userId: value })}
             >
               <SelectTrigger className="col-span-3 text-right">
-                <SelectValue placeholder="اختر المستخدم" className="text-right" />
+                <SelectValue placeholder="اختر المستخدم" className="text-right" dir="rtl" />
               </SelectTrigger>
               <SelectContent className="text-right" align="end">
                 {users.length === 0 ? (
                   <SelectItem value="no-users" disabled className="text-right">
-                    لا توجد مستخدمين متاحين
+                    لا يوجد مستخدمين متاحين
                   </SelectItem>
                 ) : (
                   users.map((user) => (

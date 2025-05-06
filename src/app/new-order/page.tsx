@@ -10,6 +10,7 @@ import { supabase } from '@/lib/supabase'
 interface Shop {
   id: string
   name: string
+  email: string
 }
 
 export default function NewOrder() {
