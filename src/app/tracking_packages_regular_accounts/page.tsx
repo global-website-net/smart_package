@@ -23,8 +23,6 @@ interface Package {
   shopId: string
   createdAt: string
   updatedAt: string
-  orderNumber?: string
-  totalAmount?: number
   user: {
     fullName: string
     email: string
@@ -66,6 +64,7 @@ export default function TrackingPackagesRegularPage() {
         .from('package')
         .select(`
           id,
+          trackingNumber,
           userId,
           shopId,
           description,
@@ -76,6 +75,11 @@ export default function TrackingPackagesRegularPage() {
             id,
             fullName,
             email
+          ),
+          shop:shopId (
+            id,
+            name,
+            email
           )
         `)
         .order('createdAt', { ascending: false })
@@ -85,18 +89,23 @@ export default function TrackingPackagesRegularPage() {
       // Transform the data to match the Package interface
       const transformedPackages = packages.map(pkg => {
         const userData = pkg.User as unknown as { fullName: string; email: string } | null
-        const shopData = pkg.shop as unknown as { fullName: string; email: string } | null
-        const orderData = pkg.order as unknown as { totalAmount: number } | null
+        const shopData = pkg.shop as unknown as { name: string; email: string } | null
 
         return {
-          ...pkg,
-          totalAmount: orderData?.totalAmount || 0,
+          id: pkg.id,
+          trackingNumber: pkg.trackingNumber,
+          status: pkg.status,
+          description: pkg.description,
+          userId: pkg.userId,
+          shopId: pkg.shopId,
+          createdAt: pkg.createdAt,
+          updatedAt: pkg.updatedAt,
           user: [{
             fullName: userData?.fullName || 'غير معروف',
             email: userData?.email || ''
           }],
           shop: [{
-            fullName: shopData?.fullName || 'غير معروف',
+            fullName: shopData?.name || 'غير معروف',
             email: shopData?.email || ''
           }]
         }
@@ -188,7 +197,6 @@ export default function TrackingPackagesRegularPage() {
                 <TableHead className="text-center">رقم التتبع</TableHead>
                 <TableHead className="text-center">الحالة</TableHead>
                 <TableHead className="text-center">الوصف</TableHead>
-                <TableHead className="text-center">المبلغ الإجمالي</TableHead>
                 <TableHead className="text-center">تاريخ الإنشاء</TableHead>
                 <TableHead className="text-center">المتجر</TableHead>
               </TableRow>
@@ -196,7 +204,7 @@ export default function TrackingPackagesRegularPage() {
             <TableBody>
               {packages.length === 0 && !loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4">
+                  <TableCell colSpan={5} className="text-center py-4">
                     لا توجد طرود
                   </TableCell>
                 </TableRow>
@@ -210,7 +218,6 @@ export default function TrackingPackagesRegularPage() {
                       </span>
                     </TableCell>
                     <TableCell className="text-center">{pkg.description || 'لا يوجد وصف'}</TableCell>
-                    <TableCell className="text-center">{pkg.totalAmount?.toLocaleString('ar-SA') || '0'} ريال</TableCell>
                     <TableCell className="text-center">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
                     <TableCell className="text-center">{pkg.shop?.[0]?.fullName || 'غير محدد'}</TableCell>
                   </TableRow>
