@@ -20,42 +20,47 @@ const supabaseAdmin = createClient(
 
 export async function POST(request: Request) {
   try {
+    // Check if user is authenticated and is ADMIN/OWNER
     const session = await getServerSession(authOptions)
-    if (!session?.user) {
+    if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const { status, shopId, description, userId } = body
+
+    // Validate required fields
+    if (!status || !shopId || !userId) {
       return NextResponse.json(
-        { error: 'غير مصرح لك بالوصول' },
-        { status: 401 }
+        { error: 'Missing required fields' },
+        { status: 400 }
       )
     }
 
-    const data = await request.json()
-    const { trackingNumber, status, shopId, description, userId } = data
-
-    const { data: packageData, error } = await supabase
+    // Insert the new package
+    const { data, error } = await supabaseAdmin
       .from('package')
-      .insert([
-        {
-          trackingNumber,
-          status,
-          description,
-          userId,
-          shopId,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
-      ])
+      .insert([{
+        status,
+        shopId,
+        description,
+        userId
+      }])
       .select()
-      .single()
 
     if (error) {
-      throw error
+      console.error('Error creating package:', error)
+      return NextResponse.json(
+        { error: 'Failed to create package' },
+        { status: 500 }
+      )
     }
 
-    return NextResponse.json(packageData)
+    return NextResponse.json(data[0])
   } catch (error) {
-    console.error('Error in package creation:', error)
+    console.error('Error in POST /api/packages:', error)
     return NextResponse.json(
-      { error: 'حدث خطأ أثناء إنشاء الشحنة' },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }

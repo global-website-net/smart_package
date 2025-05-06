@@ -125,7 +125,10 @@ export default function TrackingPackagesPage() {
           }
 
           if (session.user?.role === 'ADMIN' || session.user?.role === 'OWNER') {
+            setIsAdminOrOwner(true)
             await fetchPackages()
+            await fetchShops()
+            await fetchRegularUsers()
           } else {
             router.push('/')
           }
@@ -135,19 +138,6 @@ export default function TrackingPackagesPage() {
       }
 
       initializeSupabase()
-    }
-  }, [status, session])
-
-  useEffect(() => {
-    if (status === 'authenticated') {
-      if (session.user.role === 'ADMIN' || session.user.role === 'OWNER') {
-        setIsAdminOrOwner(true)
-        fetchPackages()
-        fetchShops()
-        fetchRegularUsers()
-      } else {
-        router.push('/')
-      }
     }
   }, [status, session])
 

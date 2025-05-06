@@ -118,17 +118,25 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
         return
       }
 
-      const { data, error } = await supabase
-        .from('package')
-        .insert([{
+      const response = await fetch('/api/packages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           status: formData.status,
           shopId: formData.shopId,
           description: formData.description,
           userId: formData.userId
-        }])
-        .select()
+        }),
+      })
 
-      if (error) throw error
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'حدث خطأ أثناء إضافة الطرد')
+      }
+
+      const data = await response.json()
 
       // Find the selected user and shop from their respective arrays
       const selectedUser = users.find(user => user.id === formData.userId)
@@ -136,7 +144,7 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
       
       // Add user and shop information to the new package
       const packageWithDetails = {
-        ...data[0],
+        ...data,
         user: selectedUser ? {
           id: selectedUser.id,
           email: selectedUser.email
@@ -152,7 +160,7 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
       onCancel()
     } catch (error) {
       console.error('Error creating package:', error)
-      toast.error('حدث خطأ أثناء إضافة الطرد')
+      toast.error(error instanceof Error ? error.message : 'حدث خطأ أثناء إضافة الطرد')
     } finally {
       setLoading(false)
     }
@@ -245,7 +253,7 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
                 ) : (
                   users.map((user) => (
                     <SelectItem key={user.id} value={user.id} className="text-right">
-                      {user.fullName}
+                      {user.email}
                     </SelectItem>
                   ))
                 )}
