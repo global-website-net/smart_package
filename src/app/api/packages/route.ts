@@ -37,14 +37,20 @@ export async function POST(request: Request) {
       )
     }
 
+    // Generate a unique tracking number
+    const trackingNumber = `PKG-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+
     // Insert the new package
     const { data, error } = await supabaseAdmin
       .from('package')
       .insert([{
+        trackingNumber,
         status,
-        shopId,
         description,
-        userId
+        shopId,
+        userId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       }])
       .select()
 

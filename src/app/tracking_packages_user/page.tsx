@@ -63,6 +63,7 @@ export default function UserPackagesPage() {
         .from('package')
         .select(`
           id,
+          trackingNumber,
           userId,
           shopId,
           description,

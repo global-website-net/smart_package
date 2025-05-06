@@ -49,6 +49,11 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
     description: '',
     userId: ''
   })
+  const [errors, setErrors] = useState({
+    shopId: false,
+    userId: false,
+    status: false
+  })
 
   useEffect(() => {
     console.log('Component mounted, fetching shops and users...')
@@ -104,17 +109,22 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
     }
   }
 
+  const validateForm = () => {
+    const newErrors = {
+      shopId: !formData.shopId,
+      userId: !formData.userId,
+      status: !formData.status
+    }
+    setErrors(newErrors)
+    return !Object.values(newErrors).some(error => error)
+  }
+
   const handleSave = async () => {
     try {
       setLoading(true)
 
-      if (!formData.shopId) {
-        toast.error('الرجاء اختيار المتجر')
-        return
-      }
-
-      if (!formData.userId) {
-        toast.error('الرجاء اختيار المستخدم')
+      if (!validateForm()) {
+        toast.error('الرجاء ملء جميع الحقول المطلوبة')
         return
       }
 
@@ -178,23 +188,31 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <label htmlFor="status" className="text-right">
-              الحالة
+              الحالة <span className="text-red-500">*</span>
             </label>
-            <Select
-              value={formData.status}
-              onValueChange={(value) => setFormData({ ...formData, status: value })}
-            >
-              <SelectTrigger className="col-span-3 text-right">
-                <SelectValue placeholder="اختر الحالة" className="text-right" />
-              </SelectTrigger>
-              <SelectContent className="text-right" align="end">
-                <SelectItem value="AWAITING_PAYMENT" className="text-right">في انتظار الدفع</SelectItem>
-                <SelectItem value="PREPARING" className="text-right">قيد التحضير</SelectItem>
-                <SelectItem value="DELIVERING_TO_SHOP" className="text-right">قيد التوصيل للمتجر</SelectItem>
-                <SelectItem value="IN_SHOP" className="text-right">في المتجر</SelectItem>
-                <SelectItem value="RECEIVED" className="text-right">تم الاستلام</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="col-span-3">
+              <Select
+                value={formData.status}
+                onValueChange={(value) => {
+                  setFormData({ ...formData, status: value })
+                  setErrors({ ...errors, status: false })
+                }}
+              >
+                <SelectTrigger className={`text-right ${errors.status ? 'border-red-500' : ''}`}>
+                  <SelectValue placeholder="اختر الحالة" className="text-right" />
+                </SelectTrigger>
+                <SelectContent className="text-right" align="end">
+                  <SelectItem value="AWAITING_PAYMENT" className="text-right">في انتظار الدفع</SelectItem>
+                  <SelectItem value="PREPARING" className="text-right">قيد التحضير</SelectItem>
+                  <SelectItem value="DELIVERING_TO_SHOP" className="text-right">قيد التوصيل للمتجر</SelectItem>
+                  <SelectItem value="IN_SHOP" className="text-right">في المتجر</SelectItem>
+                  <SelectItem value="RECEIVED" className="text-right">تم الاستلام</SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.status && (
+                <p className="text-red-500 text-sm mt-1 text-right">الحالة مطلوبة</p>
+              )}
+            </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <label htmlFor="description" className="text-right">
@@ -210,55 +228,71 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <label htmlFor="shopId" className="text-right">
-              المتجر
+              المتجر <span className="text-red-500">*</span>
             </label>
-            <Select
-              value={formData.shopId}
-              onValueChange={(value) => setFormData({ ...formData, shopId: value })}
-            >
-              <SelectTrigger className="col-span-3 text-right">
-                <SelectValue placeholder="اختر المتجر" className="text-right" dir="rtl" />
-              </SelectTrigger>
-              <SelectContent className="text-right" align="end">
-                {shops.length === 0 ? (
-                  <SelectItem value="no-shops" disabled className="text-right">
-                    لا توجد متاجر متاحة
-                  </SelectItem>
-                ) : (
-                  shops.map((shop) => (
-                    <SelectItem key={shop.id} value={shop.id} className="text-right">
-                      {shop.email}
+            <div className="col-span-3">
+              <Select
+                value={formData.shopId}
+                onValueChange={(value) => {
+                  setFormData({ ...formData, shopId: value })
+                  setErrors({ ...errors, shopId: false })
+                }}
+              >
+                <SelectTrigger className={`text-right ${errors.shopId ? 'border-red-500' : ''}`}>
+                  <SelectValue placeholder="اختر المتجر" className="text-right" dir="rtl" />
+                </SelectTrigger>
+                <SelectContent className="text-right" align="end">
+                  {shops.length === 0 ? (
+                    <SelectItem value="no-shops" disabled className="text-right">
+                      لا توجد متاجر متاحة
                     </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
+                  ) : (
+                    shops.map((shop) => (
+                      <SelectItem key={shop.id} value={shop.id} className="text-right">
+                        {shop.email}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+              {errors.shopId && (
+                <p className="text-red-500 text-sm mt-1 text-right">المتجر مطلوب</p>
+              )}
+            </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <label htmlFor="userId" className="text-right">
-              المستخدم
+              المستخدم <span className="text-red-500">*</span>
             </label>
-            <Select
-              value={formData.userId}
-              onValueChange={(value) => setFormData({ ...formData, userId: value })}
-            >
-              <SelectTrigger className="col-span-3 text-right">
-                <SelectValue placeholder="اختر المستخدم" className="text-right" dir="rtl" />
-              </SelectTrigger>
-              <SelectContent className="text-right" align="end">
-                {users.length === 0 ? (
-                  <SelectItem value="no-users" disabled className="text-right">
-                    لا يوجد مستخدمين متاحين
-                  </SelectItem>
-                ) : (
-                  users.map((user) => (
-                    <SelectItem key={user.id} value={user.id} className="text-right">
-                      {user.email}
+            <div className="col-span-3">
+              <Select
+                value={formData.userId}
+                onValueChange={(value) => {
+                  setFormData({ ...formData, userId: value })
+                  setErrors({ ...errors, userId: false })
+                }}
+              >
+                <SelectTrigger className={`text-right ${errors.userId ? 'border-red-500' : ''}`}>
+                  <SelectValue placeholder="اختر المستخدم" className="text-right" dir="rtl" />
+                </SelectTrigger>
+                <SelectContent className="text-right" align="end">
+                  {users.length === 0 ? (
+                    <SelectItem value="no-users" disabled className="text-right">
+                      لا يوجد مستخدمين متاحين
                     </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
+                  ) : (
+                    users.map((user) => (
+                      <SelectItem key={user.id} value={user.id} className="text-right">
+                        {user.email}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+              {errors.userId && (
+                <p className="text-red-500 text-sm mt-1 text-right">المستخدم مطلوب</p>
+              )}
+            </div>
           </div>
         </div>
         <div className="flex justify-center gap-4">

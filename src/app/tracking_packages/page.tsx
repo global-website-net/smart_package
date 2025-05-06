@@ -19,8 +19,8 @@ const supabase = createClient(
   {
     auth: {
       persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true
+      autoRefreshToken: false,
+      detectSessionInUrl: false
     }
   }
 )
@@ -103,27 +103,6 @@ export default function TrackingPackagesPage() {
       // Initialize Supabase with the session
       const initializeSupabase = async () => {
         try {
-          // First, let's verify we can access the package table directly
-          const { data: directPackages, error: directError } = await supabase
-            .from('package')
-            .select('*')
-            .limit(1)
-
-          console.log('Direct package access:', { directPackages, directError })
-
-          if (directError) {
-            console.error('Error accessing package table:', directError)
-            return
-          }
-
-          const { data: { session: supabaseSession }, error } = await supabase.auth.getSession()
-          console.log('Current Supabase session:', supabaseSession)
-          
-          if (error) {
-            console.error('Error getting Supabase session:', error)
-            return
-          }
-
           if (session.user?.role === 'ADMIN' || session.user?.role === 'OWNER') {
             setIsAdminOrOwner(true)
             await fetchPackages()
@@ -140,12 +119,6 @@ export default function TrackingPackagesPage() {
       initializeSupabase()
     }
   }, [status, session])
-
-  const checkAdminOrOwner = () => {
-    if (session && session.user && session.user.role) {
-      setIsAdminOrOwner(session.user.role === 'ADMIN' || session.user.role === 'OWNER')
-    }
-  }
 
   const fetchShops = async () => {
     try {
