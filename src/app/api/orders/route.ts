@@ -1,7 +1,7 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/auth.config'
+import { authOptions } from '../auth/auth.config'
+import { createClient } from '@supabase/supabase-js'
 
 // Initialize Supabase admin client with service role key
 const supabaseAdmin = createClient(
@@ -23,36 +23,32 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    let query = supabaseAdmin
+    // If user is not REGULAR, return unauthorized
+    if (session.user.role !== 'REGULAR') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { data: orders, error } = await supabaseAdmin
       .from('order')
       .select(`
         id,
+        userId,
+        purchaseSite,
+        purchaseLink,
         phoneNumber,
         notes,
         additionalInfo,
         status,
-        totalAmount,
-        orderNumber,
         createdAt,
         updatedAt,
-        userId,
-        user:User!userId (
+        User!userId (
+          id,
           fullName,
           email
         )
       `)
+      .eq('userId', session.user.id)
       .order('createdAt', { ascending: false })
-
-    // If user is REGULAR, only fetch their own orders
-    if (session.user.role === 'REGULAR') {
-      query = query.eq('userId', session.user.id)
-    }
-    // If user is not ADMIN or OWNER, return unauthorized
-    else if (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { data: orders, error } = await query
 
     if (error) {
       console.error('Error fetching orders:', error)

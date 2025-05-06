@@ -80,8 +80,8 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // If user is not ADMIN or OWNER, return unauthorized
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER') {
+    // If user is not REGULAR, return unauthorized
+    if (session.user.role !== 'REGULAR') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -92,16 +92,22 @@ export async function GET() {
         trackingNumber,
         status,
         description,
-        shopId,
         userId,
+        shopId,
         createdAt,
         updatedAt,
         User!userId (
           id,
           fullName,
           email
+        ),
+        Shop!shopId (
+          id,
+          name,
+          email
         )
       `)
+      .eq('userId', session.user.id)
       .order('createdAt', { ascending: false })
 
     if (error) {

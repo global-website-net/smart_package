@@ -236,7 +236,7 @@ export default function TrackingPackagesPage() {
       // Transform the data to match the Package interface
       const transformedPackages = packages.map((pkg: any) => {
         const shopData = Array.isArray(pkg.shop) ? pkg.shop[0] : pkg.shop
-        const userData = Array.isArray(pkg.user) ? pkg.user[0] : pkg.user
+        const userData = Array.isArray(pkg.User) ? pkg.User[0] : pkg.User
 
         return {
           id: pkg.id,
@@ -445,19 +445,17 @@ export default function TrackingPackagesPage() {
                       </span>
                     </TableCell>
                     <TableCell className="text-center">{pkg.description || '-'}</TableCell>
-                    <TableCell className="text-center">{pkg.shop.fullName || 'غير معروف'}</TableCell>
-                    <TableCell className="text-center">{pkg.user.fullName || 'غير معروف'}</TableCell>
+                    <TableCell className="text-center">{pkg.shop?.email || 'غير معروف'}</TableCell>
+                    <TableCell className="text-center">{pkg.user?.email || 'غير معروف'}</TableCell>
                     <TableCell className="text-center">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
                     {(session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') && (
                       <TableCell className="text-center">
-                        <div className="flex justify-center gap-4 rtl:space-x-reverse">
-                          <button
-                            onClick={() => handleEditClick(pkg)}
-                            className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors"
-                          >
-                            تعديل
-                          </button>
-                        </div>
+                        <Button
+                          onClick={() => handleEditClick(pkg)}
+                          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        >
+                          تعديل
+                        </Button>
                       </TableCell>
                     )}
                   </TableRow>

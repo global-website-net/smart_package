@@ -22,6 +22,10 @@ interface Package {
     fullName: string
     email: string
   }
+  Shop: {
+    id: string
+    email: string
+  }
 }
 
 export default function UserPackagesPage() {
@@ -49,42 +53,15 @@ export default function UserPackagesPage() {
   const fetchPackages = async () => {
     try {
       setLoading(true)
-      setError(null)
+      setError('')
 
-      if (!session?.user?.id) {
-        console.error('No user ID found in session')
-        throw new Error('User not found')
+      const response = await fetch('/api/packages')
+      if (!response.ok) {
+        throw new Error('Failed to fetch packages')
       }
-
-      console.log('Fetching packages for user:', session.user.id)
-
-      // Query the package table for the user's packages
-      const { data: packages, error } = await supabase
-        .from('package')
-        .select(`
-          id,
-          trackingNumber,
-          userId,
-          shopId,
-          description,
-          status,
-          createdAt,
-          updatedAt,
-          User!userId (
-            id,
-            fullName,
-            email
-          )
-        `)
-        .eq('userId', session.user.id)
-        .order('createdAt', { ascending: false })
-
-      if (error) {
-        console.error('Error fetching packages:', error)
-        throw error
-      }
-
-      console.log('Raw response from Supabase:', { data: packages, error })
+      
+      const packages = await response.json()
+      console.log('Fetched packages:', packages)
 
       if (!packages || packages.length === 0) {
         console.log('No packages found for user')
@@ -96,20 +73,17 @@ export default function UserPackagesPage() {
       const transformedPackages = packages.map((pkg: any) => ({
         id: pkg.id,
         trackingNumber: pkg.trackingNumber,
-        description: pkg.description,
         status: pkg.status,
+        description: pkg.description,
         userId: pkg.userId,
         shopId: pkg.shopId,
         createdAt: pkg.createdAt,
         updatedAt: pkg.updatedAt,
-        User: {
-          id: pkg.User?.id || '',
-          fullName: pkg.User?.fullName || 'غير معروف',
-          email: pkg.User?.email || ''
-        }
+        User: pkg.User,
+        Shop: pkg.Shop
       }))
 
-      console.log('Found packages:', transformedPackages)
+      console.log('Transformed packages:', transformedPackages)
       setPackages(transformedPackages)
     } catch (error) {
       console.error('Error in fetchPackages:', error)
@@ -216,7 +190,7 @@ export default function UserPackagesPage() {
                       </span>
                     </TableCell>
                     <TableCell className="text-center">{pkg.description || '-'}</TableCell>
-                    <TableCell className="text-center">{pkg.User?.email || 'غير معروف'}</TableCell>
+                    <TableCell className="text-center">{pkg.Shop?.email || 'غير معروف'}</TableCell>
                     <TableCell className="text-center">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
                   </TableRow>
                 ))

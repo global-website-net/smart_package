@@ -45,34 +45,38 @@ export default function TrackingOrdersRegularPage() {
       setLoading(true)
       setError('')
 
-      console.log('Fetching orders for user ID:', session?.user?.id)
+      const response = await fetch('/api/orders')
+      if (!response.ok) {
+        throw new Error('Failed to fetch orders')
+      }
+      
+      const orders = await response.json()
+      console.log('Fetched orders:', orders)
 
-      const { data: orders, error: ordersError } = await supabase
-        .from('order')
-        .select(`
-          id,
-          userId,
-          purchaseSite,
-          purchaseLink,
-          phoneNumber,
-          notes,
-          additionalInfo,
-          status,
-          createdAt,
-          updatedAt
-        `)
-        .eq('userId', session?.user?.id)
-        .order('createdAt', { ascending: false })
-
-      if (ordersError) {
-        console.error('Error fetching orders:', ordersError)
-        throw ordersError
+      if (!orders || orders.length === 0) {
+        console.log('No orders found for user')
+        setOrders([])
+        return
       }
 
-      console.log('Fetched orders:', orders)
-      setOrders(orders || [])
-    } catch (err) {
-      console.error('Error in fetchOrders:', err)
+      // Transform the data to match the Order interface
+      const transformedOrders = orders.map((order: any) => ({
+        id: order.id,
+        userId: order.userId,
+        purchaseSite: order.purchaseSite,
+        purchaseLink: order.purchaseLink,
+        phoneNumber: order.phoneNumber,
+        notes: order.notes,
+        additionalInfo: order.additionalInfo,
+        status: order.status,
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt
+      }))
+
+      console.log('Transformed orders:', transformedOrders)
+      setOrders(transformedOrders)
+    } catch (error) {
+      console.error('Error in fetchOrders:', error)
       setError('حدث خطأ أثناء جلب الطلبات')
     } finally {
       setLoading(false)
