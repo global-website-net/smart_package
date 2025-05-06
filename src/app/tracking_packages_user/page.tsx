@@ -51,13 +51,12 @@ export default function UserPackagesPage() {
       setLoading(true)
       setError(null)
 
-      // Get the current user's ID
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
+      if (!session?.user?.id) {
+        console.error('No user ID found in session')
         throw new Error('User not found')
       }
 
-      console.log('Fetching packages for user:', user.id)
+      console.log('Fetching packages for user:', session.user.id)
 
       // Query the package table for the user's packages
       const { data, error } = await supabase
@@ -77,7 +76,7 @@ export default function UserPackagesPage() {
             email
           )
         `)
-        .eq('userId', user.id)
+        .eq('userId', session.user.id)
         .order('createdAt', { ascending: false })
 
       if (error) {

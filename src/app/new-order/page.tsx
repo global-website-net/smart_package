@@ -13,7 +13,7 @@ interface Shop {
 }
 
 export default function NewOrder() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const router = useRouter()
   const [shops, setShops] = useState<Shop[]>([])
   
@@ -30,8 +30,19 @@ export default function NewOrder() {
   const [toastType, setToastType] = useState<'success' | 'error'>('success')
 
   useEffect(() => {
-    fetchShops()
-  }, [])
+    if (status === 'unauthenticated') {
+      router.push('/auth/login')
+      return
+    }
+
+    if (status === 'authenticated') {
+      if (session.user.role !== 'REGULAR') {
+        router.push('/')
+        return
+      }
+      fetchShops()
+    }
+  }, [status, session])
 
   const fetchShops = async () => {
     try {
@@ -46,7 +57,9 @@ export default function NewOrder() {
         throw error
       }
 
+      console.log('Raw response from Supabase:', { data, error })
       console.log('Fetched shops data:', data)
+      
       if (!data || data.length === 0) {
         console.log('No shops found in the database')
         setShops([])
@@ -54,7 +67,7 @@ export default function NewOrder() {
         setToastType('error')
         setShowToast(true)
       } else {
-        console.log(`Found ${data.length} shops`)
+        console.log(`Found ${data.length} shops:`, data.map(shop => shop.name))
         setShops(data)
       }
     } catch (error) {
@@ -115,10 +128,20 @@ export default function NewOrder() {
     router.push('/tracking_orders_regular')
   }
 
-  // Redirect if not logged in or not a regular user
-  if (!session?.user || session.user.role !== 'REGULAR') {
-    router.push('/auth/login')
-    return null
+  // Add loading state
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="pt-20 pb-10">
+          <div className="max-w-4xl mx-auto px-4">
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

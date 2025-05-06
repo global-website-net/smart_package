@@ -24,7 +24,6 @@ const supabase = createClient(
 
 interface User {
   id: string
-  fullName: string
   email: string
 }
 
@@ -85,9 +84,9 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
       console.log('Starting to fetch regular users...')
       const { data, error } = await supabase
         .from('User')
-        .select('id, fullName, email')
+        .select('id, email')
         .eq('role', 'REGULAR')
-        .order('fullName', { ascending: true })
+        .order('email', { ascending: true })
 
       if (error) {
         console.error('Supabase error:', error)
@@ -145,14 +144,12 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
         ...data[0],
         user: selectedUser ? {
           id: selectedUser.id,
-          fullName: selectedUser.fullName,
           email: selectedUser.email
-        } : { id: '', fullName: 'غير معروف', email: '' },
+        } : { id: '', email: '' },
         shop: selectedShop ? {
           id: selectedShop.id,
-          fullName: selectedShop.fullName,
           email: selectedShop.email
-        } : { id: '', fullName: 'غير معروف', email: '' }
+        } : { id: '', email: '' }
       }
 
       toast.success('تم إضافة الطرد بنجاح')
@@ -227,7 +224,7 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
                 ) : (
                   shops.map((shop) => (
                     <SelectItem key={shop.id} value={shop.id} className="text-right">
-                      {shop.fullName} ({shop.email})
+                      {shop.email}
                     </SelectItem>
                   ))
                 )}
@@ -253,7 +250,7 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
                 ) : (
                   users.map((user) => (
                     <SelectItem key={user.id} value={user.id} className="text-right">
-                      {user.fullName} ({user.email})
+                      {user.email}
                     </SelectItem>
                   ))
                 )}
