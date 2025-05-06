@@ -78,7 +78,7 @@ export default function UserOrdersPage() {
           status,
           createdAt,
           updatedAt,
-          user:userId (
+          User!userId (
             id,
             fullName,
             email
@@ -102,7 +102,7 @@ export default function UserOrdersPage() {
 
       // Transform the data to match our Order interface
       const transformedOrders: Order[] = orders.map(order => {
-        const userData = Array.isArray(order.user) ? order.user[0] : order.user;
+        const userData = Array.isArray(order.User) ? order.User[0] : order.User;
         console.log('Processing order:', order.id, 'with user data:', userData)
         return {
           id: order.id,

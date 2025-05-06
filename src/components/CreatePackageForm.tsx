@@ -51,7 +51,7 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
 
   const fetchShops = async () => {
     try {
-      console.log('Starting to fetch shops from User table...')
+      console.log('Starting to fetch SHOP users from User table...')
       const { data, error } = await supabase
         .from('User')
         .select('id, fullName, email')
@@ -63,7 +63,7 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
         throw error
       }
 
-      console.log('Fetched shops data from User table:', data)
+      console.log('Fetched SHOP users data:', data)
       if (!data || data.length === 0) {
         console.log('No SHOP users found in the User table')
         setShops([])
@@ -93,7 +93,7 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
         throw error
       }
 
-      console.log('Fetched REGULAR users data from User table:', data)
+      console.log('Fetched REGULAR users data:', data)
       if (!data || data.length === 0) {
         console.log('No REGULAR users found in the User table')
         setUsers([])
