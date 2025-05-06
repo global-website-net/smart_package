@@ -11,18 +11,13 @@ import Header from '@/app/components/Header'
 interface Package {
   id: string
   trackingNumber: string
-  status: string
   description: string | null
-  shopId: string
+  status: string
   userId: string
+  shopId: string
   createdAt: string
   updatedAt: string
-  shop: {
-    id: string
-    fullName: string
-    email: string
-  }
-  user: {
+  User: {
     id: string
     fullName: string
     email: string
@@ -56,79 +51,68 @@ export default function UserPackagesPage() {
       setLoading(true)
       setError(null)
 
-      if (!session?.user?.id) {
-        console.error('No user ID found in session')
-        throw new Error('No user ID found')
+      // Get the current user's ID
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('User not found')
       }
 
-      console.log('Fetching packages for user ID:', session.user.id)
+      console.log('Fetching packages for user:', user.id)
 
-      const { data: packages, error } = await supabase
-        .from('order')
+      // Query the package table for the user's packages
+      const { data, error } = await supabase
+        .from('package')
         .select(`
           id,
           trackingNumber,
-          status,
           description,
-          shopId,
+          status,
           userId,
+          shopId,
           createdAt,
           updatedAt,
-          shop:shopId (
-            id,
-            fullName,
-            email
-          ),
-          user:userId (
+          User:userId (
             id,
             fullName,
             email
           )
         `)
-        .eq('userId', session.user.id)
+        .eq('userId', user.id)
         .order('createdAt', { ascending: false })
 
       if (error) {
-        console.error('Error fetching user packages:', error)
+        console.error('Error fetching packages:', error)
         throw error
       }
 
-      console.log('Fetched packages:', packages)
-
-      if (!packages || packages.length === 0) {
+      if (!data || data.length === 0) {
         console.log('No packages found for user')
         setPackages([])
         return
       }
 
       // Transform the data to match the Package interface
-      const transformedPackages = packages.map((pkg: any) => ({
+      const transformedPackages = data.map((pkg: any) => ({
         id: pkg.id,
         trackingNumber: pkg.trackingNumber,
-        status: pkg.status,
         description: pkg.description,
-        shopId: pkg.shopId,
+        status: pkg.status,
         userId: pkg.userId,
+        shopId: pkg.shopId,
         createdAt: pkg.createdAt,
         updatedAt: pkg.updatedAt,
-        shop: {
-          id: pkg.shop?.id || '',
-          fullName: pkg.shop?.fullName || 'غير معروف',
-          email: pkg.shop?.email || ''
-        },
-        user: {
-          id: pkg.user?.id || '',
-          fullName: pkg.user?.fullName || 'غير معروف',
-          email: pkg.user?.email || ''
+        User: {
+          id: pkg.User?.id || '',
+          fullName: pkg.User?.fullName || 'غير معروف',
+          email: pkg.User?.email || ''
         }
       }))
 
-      console.log('Transformed packages:', transformedPackages)
+      console.log('Found packages:', transformedPackages)
       setPackages(transformedPackages)
     } catch (error) {
       console.error('Error in fetchPackages:', error)
       setError('حدث خطأ أثناء جلب الطرود')
-      toast.error('حدث خطأ أثناء جلب الطرود')
     } finally {
       setLoading(false)
     }
@@ -231,7 +215,7 @@ export default function UserPackagesPage() {
                       </span>
                     </TableCell>
                     <TableCell className="text-center">{pkg.description || '-'}</TableCell>
-                    <TableCell className="text-center">{pkg.shop?.email || 'غير معروف'}</TableCell>
+                    <TableCell className="text-center">{pkg.User?.email || 'غير معروف'}</TableCell>
                     <TableCell className="text-center">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
                   </TableRow>
                 ))

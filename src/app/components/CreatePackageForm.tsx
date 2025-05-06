@@ -66,6 +66,12 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
         throw error
       }
 
+      if (!data || data.length === 0) {
+        console.log('No SHOP users found')
+      } else {
+        console.log('Found SHOP users:', data)
+      }
+
       setShops(data || [])
     } catch (error) {
       console.error('Error fetching shops:', error)
@@ -76,12 +82,18 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
   const fetchUsers = async () => {
     try {
       const { data, error } = await supabase
-        .from('User')
+        .from('user')
         .select('id, fullName, email')
         .eq('role', 'REGULAR')
 
       if (error) {
         throw error
+      }
+
+      if (!data || data.length === 0) {
+        console.log('No REGULAR users found')
+      } else {
+        console.log('Found REGULAR users:', data)
       }
 
       setUsers(data || [])

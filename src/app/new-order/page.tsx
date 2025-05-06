@@ -44,6 +44,12 @@ export default function NewOrder() {
         throw error
       }
 
+      if (!data || data.length === 0) {
+        console.log('No shops found')
+      } else {
+        console.log('Found shops:', data)
+      }
+
       setShops(data || [])
     } catch (error) {
       console.error('Error fetching shops:', error)
