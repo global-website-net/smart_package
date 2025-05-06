@@ -23,12 +23,8 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // If user is not REGULAR, return unauthorized
-    if (session.user.role !== 'REGULAR') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { data: orders, error } = await supabaseAdmin
+    // Initialize the query
+    let query = supabaseAdmin
       .from('order')
       .select(`
         id,
@@ -47,8 +43,18 @@ export async function GET() {
           email
         )
       `)
-      .eq('userId', session.user.id)
       .order('createdAt', { ascending: false })
+
+    // If user is REGULAR, only show their orders
+    if (session.user.role === 'REGULAR') {
+      query = query.eq('userId', session.user.id)
+    }
+    // If user is not ADMIN or OWNER, return unauthorized
+    else if (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { data: orders, error } = await query
 
     if (error) {
       console.error('Error fetching orders:', error)
