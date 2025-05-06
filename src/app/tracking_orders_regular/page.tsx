@@ -3,25 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabase'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import Header from '@/app/components/Header'
-import NewOrderModal from '@/app/components/NewOrderModal'
-
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true
-    }
-  }
-)
 
 interface Order {
   id: string
@@ -47,7 +33,6 @@ export default function UserOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [isNewOrderModalOpen, setIsNewOrderModalOpen] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -60,7 +45,10 @@ export default function UserOrdersPage() {
         router.push('/')
         return
       }
-      fetchOrders()
+      // Only fetch orders once when the component mounts
+      if (orders.length === 0) {
+        fetchOrders()
+      }
     }
   }, [status, session])
 
@@ -177,11 +165,7 @@ export default function UserOrdersPage() {
   }
 
   const handleNewOrder = () => {
-    setIsNewOrderModalOpen(true)
-  }
-
-  const handleOrderSaved = () => {
-    fetchOrders() // Refresh the orders list
+    router.push('/new-order')
   }
 
   if (loading) {
@@ -216,7 +200,7 @@ export default function UserOrdersPage() {
 
           <div className="flex flex-col items-center">
             <button
-              onClick={() => setIsNewOrderModalOpen(true)}
+              onClick={handleNewOrder}
               className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
             >
               طلب جديد
@@ -271,13 +255,6 @@ export default function UserOrdersPage() {
           </Table>
         </div>
       </div>
-
-      <NewOrderModal
-        isOpen={isNewOrderModalOpen}
-        onClose={() => setIsNewOrderModalOpen(false)}
-        onSave={handleOrderSaved}
-        userId={session?.user?.id || ''}
-      />
     </div>
   )
 } 

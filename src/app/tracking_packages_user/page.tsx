@@ -3,23 +3,10 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabase'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { toast } from 'sonner'
 import Header from '@/app/components/Header'
-
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true
-    }
-  }
-)
 
 interface Package {
   id: string
@@ -77,7 +64,7 @@ export default function UserPackagesPage() {
       console.log('Fetching packages for user ID:', session.user.id)
 
       const { data: packages, error } = await supabase
-        .from('package')
+        .from('order')
         .select(`
           id,
           trackingNumber,
@@ -149,16 +136,16 @@ export default function UserPackagesPage() {
 
   const getPackageStatusText = (status: string) => {
     switch (status) {
-      case 'AWAITING_PAYMENT':
-        return 'في انتظار الدفع'
-      case 'PREPARING':
-        return 'قيد التحضير'
-      case 'DELIVERING_TO_SHOP':
-        return 'قيد التوصيل للمتجر'
-      case 'IN_SHOP':
-        return 'في المتجر'
-      case 'RECEIVED':
-        return 'تم الاستلام'
+      case 'PENDING':
+        return 'قيد الانتظار'
+      case 'PROCESSING':
+        return 'قيد المعالجة'
+      case 'SHIPPED':
+        return 'تم الشحن'
+      case 'DELIVERED':
+        return 'تم التسليم'
+      case 'CANCELLED':
+        return 'ملغي'
       default:
         return status
     }
@@ -166,16 +153,16 @@ export default function UserPackagesPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'AWAITING_PAYMENT':
+      case 'PENDING':
         return 'bg-yellow-100 text-yellow-800'
-      case 'PREPARING':
+      case 'PROCESSING':
         return 'bg-blue-100 text-blue-800'
-      case 'DELIVERING_TO_SHOP':
+      case 'SHIPPED':
         return 'bg-purple-100 text-purple-800'
-      case 'IN_SHOP':
+      case 'DELIVERED':
         return 'bg-green-100 text-green-800'
-      case 'RECEIVED':
-        return 'bg-gray-100 text-gray-800'
+      case 'CANCELLED':
+        return 'bg-red-100 text-red-800'
       default:
         return 'bg-gray-100 text-gray-800'
     }
@@ -244,7 +231,7 @@ export default function UserPackagesPage() {
                       </span>
                     </TableCell>
                     <TableCell className="text-center">{pkg.description || '-'}</TableCell>
-                    <TableCell className="text-center">{pkg.shop?.fullName || 'غير معروف'}</TableCell>
+                    <TableCell className="text-center">{pkg.shop?.email || 'غير معروف'}</TableCell>
                     <TableCell className="text-center">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
                   </TableRow>
                 ))

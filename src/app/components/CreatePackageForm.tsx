@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase'
+import { toast } from 'sonner'
 
 interface Shop {
   id: string
@@ -49,12 +51,16 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
 
   const fetchShops = async () => {
     try {
-      const response = await fetch('/api/users/shops')
-      if (!response.ok) {
-        throw new Error('Failed to fetch shops')
+      const { data, error } = await supabase
+        .from('User')
+        .select('id, fullName, email')
+        .eq('role', 'SHOP')
+
+      if (error) {
+        throw error
       }
-      const data = await response.json()
-      setShops(data)
+
+      setShops(data || [])
     } catch (error) {
       console.error('Error fetching shops:', error)
       setError('حدث خطأ أثناء جلب المتاجر')
@@ -63,12 +69,16 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('/api/users/regular')
-      if (!response.ok) {
-        throw new Error('Failed to fetch users')
+      const { data, error } = await supabase
+        .from('User')
+        .select('id, fullName, email')
+        .eq('role', 'REGULAR')
+
+      if (error) {
+        throw error
       }
-      const data = await response.json()
-      setUsers(data)
+
+      setUsers(data || [])
     } catch (error) {
       console.error('Error fetching users:', error)
       setError('حدث خطأ أثناء جلب المستخدمين')
@@ -81,17 +91,28 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
     setError('')
 
     try {
-      const response = await fetch('/api/packages/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      })
+      // Insert the new order into the order table
+      const { data, error } = await supabase
+        .from('order')
+        .insert([
+          {
+            trackingNumber: formData.trackingNumber,
+            status: formData.status,
+            shopId: formData.shopId,
+            description: formData.description,
+            userId: formData.userId,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }
+        ])
+        .select()
 
-      if (!response.ok) {
-        throw new Error('Failed to create package')
+      if (error) {
+        throw error
       }
+
+      // Show success message
+      toast.success('تم إنشاء الطرد بنجاح')
 
       // Reset form and close modal
       setFormData({
@@ -104,7 +125,9 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
       setIsOpen(false)
       onPackageCreated()
     } catch (error) {
+      console.error('Error creating package:', error)
       setError('حدث خطأ أثناء إنشاء الشحنة')
+      toast.error('حدث خطأ أثناء إنشاء الشحنة')
     } finally {
       setIsSubmitting(false)
     }
@@ -177,7 +200,7 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
                   <option value="">اختر المتجر</option>
                   {shops.map((shop) => (
                     <option key={shop.id} value={shop.id}>
-                      {shop.fullName}
+                      {shop.email}
                     </option>
                   ))}
                 </select>
@@ -210,26 +233,26 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
                   <option value="">اختر المستخدم</option>
                   {users.map((user) => (
                     <option key={user.id} value={user.id}>
-                      {user.fullName} ({user.email})
+                      {user.email}
                     </option>
                   ))}
                 </select>
               </div>
 
-              <div className="flex justify-center space-x-4 rtl:space-x-reverse mt-6">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
-                >
-                  {isSubmitting ? 'جاري الإضافة...' : 'حفظ'}
-                </button>
+              <div className="flex justify-end space-x-2">
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="bg-white text-gray-700 border border-gray-300 px-6 py-2 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                 >
                   إلغاء
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 text-white bg-green-500 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
+                >
+                  {isSubmitting ? 'جاري الحفظ...' : 'حفظ'}
                 </button>
               </div>
             </form>
