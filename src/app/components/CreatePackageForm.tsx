@@ -22,13 +22,9 @@ interface CreatePackageFormProps {
 
 interface FormData {
   userId: string;
-  purchaseSite: string;
-  purchaseLink: string;
-  phoneNumber: string;
-  notes: string;
-  additionalInfo: string;
-  status: string;
   shopId: string;
+  description: string;
+  status: string;
 }
 
 export default function CreatePackageForm({ onPackageCreated }: CreatePackageFormProps) {
@@ -39,13 +35,9 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
   const [users, setUsers] = useState<User[]>([])
   const [formData, setFormData] = useState<FormData>({
     userId: '',
-    purchaseSite: '',
-    purchaseLink: '',
-    phoneNumber: '',
-    notes: '',
-    additionalInfo: '',
-    status: 'PENDING',
-    shopId: ''
+    shopId: '',
+    description: '',
+    status: 'PENDING'
   })
 
   useEffect(() => {
@@ -82,7 +74,7 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
   const fetchUsers = async () => {
     try {
       const { data, error } = await supabase
-        .from('user')
+        .from('User')
         .select('id, fullName, email')
         .eq('role', 'REGULAR')
 
@@ -109,18 +101,18 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
     setError('')
 
     try {
-      // Insert the new order into the order table
+      // Generate a unique tracking number
+      const trackingNumber = `TRK${Date.now()}`
+
+      // Insert the new package into the package table
       const { data, error } = await supabase
-        .from('order')
+        .from('package')
         .insert([
           {
-            userId: formData.userId,
-            purchaseSite: formData.purchaseSite,
-            purchaseLink: formData.purchaseLink,
-            phoneNumber: formData.phoneNumber,
-            notes: formData.notes,
-            additionalInfo: formData.additionalInfo,
+            trackingNumber: trackingNumber,
+            description: formData.description,
             status: formData.status,
+            userId: formData.userId,
             shopId: formData.shopId,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
@@ -133,25 +125,21 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
       }
 
       // Show success message
-      toast.success('تم إنشاء الطلب بنجاح')
+      toast.success('تم إنشاء الطرد بنجاح')
 
       // Reset form and close modal
       setFormData({
         userId: '',
-        purchaseSite: '',
-        purchaseLink: '',
-        phoneNumber: '',
-        notes: '',
-        additionalInfo: '',
-        status: 'PENDING',
-        shopId: ''
+        shopId: '',
+        description: '',
+        status: 'PENDING'
       })
       setIsOpen(false)
       onPackageCreated()
     } catch (error) {
-      console.error('Error creating order:', error)
-      setError('حدث خطأ أثناء إنشاء الطلب')
-      toast.error('حدث خطأ أثناء إنشاء الطلب')
+      console.error('Error creating package:', error)
+      setError('حدث خطأ أثناء إنشاء الطرد')
+      toast.error('حدث خطأ أثناء إنشاء الطرد')
     } finally {
       setIsSubmitting(false)
     }
@@ -179,74 +167,6 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="purchaseSite" className="block text-sm font-medium text-gray-700 mb-1">
-                  موقع الشراء
-                </label>
-                <input
-                  type="text"
-                  id="purchaseSite"
-                  value={formData.purchaseSite}
-                  onChange={(e) => setFormData({ ...formData, purchaseSite: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="purchaseLink" className="block text-sm font-medium text-gray-700 mb-1">
-                  رابط الشراء
-                </label>
-                <input
-                  type="text"
-                  id="purchaseLink"
-                  value={formData.purchaseLink}
-                  onChange={(e) => setFormData({ ...formData, purchaseLink: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                  رقم الهاتف
-                </label>
-                <input
-                  type="tel"
-                  id="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
-                  ملاحظات
-                </label>
-                <textarea
-                  id="notes"
-                  value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  rows={3}
-                />
-              </div>
-
-              <div>
-                <label htmlFor="additionalInfo" className="block text-sm font-medium text-gray-700 mb-1">
-                  معلومات إضافية
-                </label>
-                <textarea
-                  id="additionalInfo"
-                  value={formData.additionalInfo}
-                  onChange={(e) => setFormData({ ...formData, additionalInfo: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  rows={3}
-                />
-              </div>
-
-              <div>
                 <label htmlFor="shopId" className="block text-sm font-medium text-gray-700 mb-1">
                   المتجر
                 </label>
@@ -258,11 +178,17 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
                   required
                 >
                   <option value="">اختر المتجر</option>
-                  {shops.map((shop) => (
-                    <option key={shop.id} value={shop.id}>
-                      {shop.email}
+                  {shops.length === 0 ? (
+                    <option value="no-shops" disabled>
+                      لا توجد متاجر متاحة
                     </option>
-                  ))}
+                  ) : (
+                    shops.map((shop) => (
+                      <option key={shop.id} value={shop.id}>
+                        {shop.email}
+                      </option>
+                    ))
+                  )}
                 </select>
               </div>
 
@@ -278,11 +204,48 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
                   required
                 >
                   <option value="">اختر المستخدم</option>
-                  {users.map((user) => (
-                    <option key={user.id} value={user.id}>
-                      {user.email}
+                  {users.length === 0 ? (
+                    <option value="no-users" disabled>
+                      لا توجد مستخدمين متاحين
                     </option>
-                  ))}
+                  ) : (
+                    users.map((user) => (
+                      <option key={user.id} value={user.id}>
+                        {user.email}
+                      </option>
+                    ))
+                  )}
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                  الوصف
+                </label>
+                <textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
+                  الحالة
+                </label>
+                <select
+                  id="status"
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                >
+                  <option value="PENDING">معلق</option>
+                  <option value="IN_TRANSIT">في الطريد</option>
+                  <option value="DELIVERED">مسلم</option>
+                  <option value="CANCELLED">ملغي</option>
                 </select>
               </div>
 
