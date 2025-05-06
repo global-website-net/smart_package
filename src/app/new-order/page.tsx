@@ -59,6 +59,8 @@ export default function NewOrder() {
 
       console.log('Raw response from Supabase:', { data, error })
       console.log('Fetched shops data:', data)
+      console.log('Number of shops found:', data?.length)
+      console.log('Shop names:', data?.map(shop => shop.name))
       
       if (!data || data.length === 0) {
         console.log('No shops found in the shop table')

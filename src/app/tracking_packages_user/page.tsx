@@ -59,15 +59,14 @@ export default function UserPackagesPage() {
       console.log('Fetching packages for user:', session.user.id)
 
       // Query the package table for the user's packages
-      const { data, error } = await supabase
+      const { data: packages, error } = await supabase
         .from('package')
         .select(`
           id,
-          trackingNumber,
-          description,
-          status,
           userId,
           shopId,
+          description,
+          status,
           createdAt,
           updatedAt,
           User!userId (
@@ -84,16 +83,16 @@ export default function UserPackagesPage() {
         throw error
       }
 
-      console.log('Raw response from Supabase:', { data, error })
+      console.log('Raw response from Supabase:', { data: packages, error })
 
-      if (!data || data.length === 0) {
+      if (!packages || packages.length === 0) {
         console.log('No packages found for user')
         setPackages([])
         return
       }
 
       // Transform the data to match the Package interface
-      const transformedPackages = data.map((pkg: any) => ({
+      const transformedPackages = packages.map((pkg: any) => ({
         id: pkg.id,
         trackingNumber: pkg.trackingNumber,
         description: pkg.description,

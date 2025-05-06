@@ -85,13 +85,10 @@ export async function GET() {
         userId,
         createdAt,
         updatedAt,
-        shop:shopId (
+        User!userId (
           id,
-          fullName
-        ),
-        user:userId (
-          id,
-          fullName
+          fullName,
+          email
         )
       `)
       .order('createdAt', { ascending: false })

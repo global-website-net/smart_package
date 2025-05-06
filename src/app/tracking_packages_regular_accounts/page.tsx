@@ -66,34 +66,25 @@ export default function TrackingPackagesRegularPage() {
         .from('package')
         .select(`
           id,
-          trackingNumber,
-          status,
-          description,
           userId,
           shopId,
+          description,
+          status,
           createdAt,
           updatedAt,
-          orderNumber,
-          order:orderNumber (
-            totalAmount
-          ),
-          user:userId (
-            fullName,
-            email
-          ),
-          shop:shopId (
+          User!userId (
+            id,
             fullName,
             email
           )
         `)
-        .eq('userId', session?.user?.id)
         .order('createdAt', { ascending: false })
 
       if (error) throw error
 
       // Transform the data to match the Package interface
       const transformedPackages = packages.map(pkg => {
-        const userData = pkg.user as unknown as { fullName: string; email: string } | null
+        const userData = pkg.User as unknown as { fullName: string; email: string } | null
         const shopData = pkg.shop as unknown as { fullName: string; email: string } | null
         const orderData = pkg.order as unknown as { totalAmount: number } | null
 

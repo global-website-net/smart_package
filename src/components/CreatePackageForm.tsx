@@ -24,6 +24,7 @@ const supabase = createClient(
 
 interface User {
   id: string
+  fullName: string
   email: string
 }
 
@@ -224,7 +225,7 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
                 ) : (
                   shops.map((shop) => (
                     <SelectItem key={shop.id} value={shop.id} className="text-right">
-                      {shop.email}
+                      {shop.fullName}
                     </SelectItem>
                   ))
                 )}
@@ -250,7 +251,7 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
                 ) : (
                   users.map((user) => (
                     <SelectItem key={user.id} value={user.id} className="text-right">
-                      {user.email}
+                      {user.fullName}
                     </SelectItem>
                   ))
                 )}
