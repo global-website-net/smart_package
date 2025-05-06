@@ -58,21 +58,15 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
 
   const fetchShops = async () => {
     try {
-      console.log('Starting to fetch SHOP users from User table...')
-      const { data, error } = await supabase
-        .from('User')
-        .select('id, fullName, email')
-        .eq('role', 'SHOP')
-        .order('fullName', { ascending: true })
-
-      if (error) {
-        console.error('Supabase error:', error)
-        throw error
+      console.log('Starting to fetch SHOP users from API...')
+      const response = await fetch('/api/users/shops')
+      if (!response.ok) {
+        throw new Error('Failed to fetch shops')
       }
-
+      const data = await response.json()
       console.log('Fetched SHOP users data:', data)
       if (!data || data.length === 0) {
-        console.log('No SHOP users found in the User table')
+        console.log('No SHOP users found')
         setShops([])
         toast.error('لا توجد متاجر متاحة حالياً')
       } else {
@@ -88,23 +82,15 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
 
   const fetchUsers = async () => {
     try {
-      console.log('Starting to fetch REGULAR users from User table...')
-      const { data, error } = await supabase
-        .from('User')
-        .select('id, fullName, email')
-        .eq('role', 'REGULAR')
-        .order('fullName', { ascending: true })
-
-      if (error) {
-        console.error('Supabase error:', error)
-        throw error
+      console.log('Starting to fetch REGULAR users from API...')
+      const response = await fetch('/api/users/regular')
+      if (!response.ok) {
+        throw new Error('Failed to fetch users')
       }
-
-      console.log('Raw Supabase response:', { data, error })
+      const data = await response.json()
       console.log('Fetched REGULAR users data:', data)
-      
       if (!data || data.length === 0) {
-        console.log('No REGULAR users found in the User table')
+        console.log('No REGULAR users found')
         setUsers([])
         toast.error('لا يوجد مستخدمين متاحين حالياً')
       } else {

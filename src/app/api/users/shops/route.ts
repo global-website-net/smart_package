@@ -18,9 +18,9 @@ export async function GET() {
     // Fetch all users with SHOP role
     const { data, error } = await supabaseAdmin
       .from('User')
-      .select('id, email')
+      .select('id, fullName, email')
       .eq('role', 'SHOP')
-      .order('email', { ascending: true })
+      .order('fullName', { ascending: true })
 
     if (error) {
       console.error('Error fetching shop users:', error)
