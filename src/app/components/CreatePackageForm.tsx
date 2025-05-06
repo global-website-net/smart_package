@@ -21,11 +21,14 @@ interface CreatePackageFormProps {
 }
 
 interface FormData {
-  trackingNumber: string;
+  userId: string;
+  purchaseSite: string;
+  purchaseLink: string;
+  phoneNumber: string;
+  notes: string;
+  additionalInfo: string;
   status: string;
   shopId: string;
-  description: string;
-  userId: string;
 }
 
 export default function CreatePackageForm({ onPackageCreated }: CreatePackageFormProps) {
@@ -35,11 +38,14 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
   const [shops, setShops] = useState<Shop[]>([])
   const [users, setUsers] = useState<User[]>([])
   const [formData, setFormData] = useState<FormData>({
-    trackingNumber: '',
-    status: 'PENDING',
-    shopId: '',
-    description: '',
     userId: '',
+    purchaseSite: '',
+    purchaseLink: '',
+    phoneNumber: '',
+    notes: '',
+    additionalInfo: '',
+    status: 'PENDING',
+    shopId: ''
   })
 
   useEffect(() => {
@@ -96,11 +102,14 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
         .from('order')
         .insert([
           {
-            trackingNumber: formData.trackingNumber,
+            userId: formData.userId,
+            purchaseSite: formData.purchaseSite,
+            purchaseLink: formData.purchaseLink,
+            phoneNumber: formData.phoneNumber,
+            notes: formData.notes,
+            additionalInfo: formData.additionalInfo,
             status: formData.status,
             shopId: formData.shopId,
-            description: formData.description,
-            userId: formData.userId,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
           }
@@ -112,22 +121,25 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
       }
 
       // Show success message
-      toast.success('تم إنشاء الطرد بنجاح')
+      toast.success('تم إنشاء الطلب بنجاح')
 
       // Reset form and close modal
       setFormData({
-        trackingNumber: '',
-        status: 'PENDING',
-        shopId: '',
-        description: '',
         userId: '',
+        purchaseSite: '',
+        purchaseLink: '',
+        phoneNumber: '',
+        notes: '',
+        additionalInfo: '',
+        status: 'PENDING',
+        shopId: ''
       })
       setIsOpen(false)
       onPackageCreated()
     } catch (error) {
-      console.error('Error creating package:', error)
-      setError('حدث خطأ أثناء إنشاء الشحنة')
-      toast.error('حدث خطأ أثناء إنشاء الشحنة')
+      console.error('Error creating order:', error)
+      setError('حدث خطأ أثناء إنشاء الطلب')
+      toast.error('حدث خطأ أثناء إنشاء الطلب')
     } finally {
       setIsSubmitting(false)
     }
@@ -139,13 +151,13 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
         onClick={() => setIsOpen(true)}
         className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 mb-4"
       >
-        إضافة شحنة جديدة
+        إضافة طلب جديد
       </button>
 
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4">إضافة شحنة جديدة</h2>
+            <h2 className="text-xl font-bold mb-4">إضافة طلب جديد</h2>
             
             {error && (
               <div className="bg-red-50 text-red-800 p-4 rounded-md mb-4">
@@ -155,35 +167,71 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="trackingNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                  رقم التتبع
+                <label htmlFor="purchaseSite" className="block text-sm font-medium text-gray-700 mb-1">
+                  موقع الشراء
                 </label>
                 <input
                   type="text"
-                  id="trackingNumber"
-                  value={formData.trackingNumber}
-                  onChange={(e) => setFormData({ ...formData, trackingNumber: e.target.value })}
+                  id="purchaseSite"
+                  value={formData.purchaseSite}
+                  onChange={(e) => setFormData({ ...formData, purchaseSite: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                 />
               </div>
 
               <div>
-                <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                  الحالة
+                <label htmlFor="purchaseLink" className="block text-sm font-medium text-gray-700 mb-1">
+                  رابط الشراء
                 </label>
-                <select
-                  id="status"
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                <input
+                  type="text"
+                  id="purchaseLink"
+                  value={formData.purchaseLink}
+                  onChange={(e) => setFormData({ ...formData, purchaseLink: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                >
-                  <option value="PENDING">قيد الانتظار</option>
-                  <option value="PROCESSING">قيد المعالجة</option>
-                  <option value="SHIPPED">تم الشحن</option>
-                  <option value="DELIVERED">تم التسليم</option>
-                  <option value="CANCELLED">ملغي</option>
-                </select>
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                  رقم الهاتف
+                </label>
+                <input
+                  type="tel"
+                  id="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
+                  ملاحظات
+                </label>
+                <textarea
+                  id="notes"
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="additionalInfo" className="block text-sm font-medium text-gray-700 mb-1">
+                  معلومات إضافية
+                </label>
+                <textarea
+                  id="additionalInfo"
+                  value={formData.additionalInfo}
+                  onChange={(e) => setFormData({ ...formData, additionalInfo: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  rows={3}
+                />
               </div>
 
               <div>
@@ -204,19 +252,6 @@ export default function CreatePackageForm({ onPackageCreated }: CreatePackageFor
                     </option>
                   ))}
                 </select>
-              </div>
-
-              <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                  الوصف
-                </label>
-                <input
-                  type="text"
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
               </div>
 
               <div>

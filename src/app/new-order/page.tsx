@@ -1,14 +1,21 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Header from '@/app/components/Header'
 import Toast from '@/app/components/Toast'
+import { supabase } from '@/lib/supabase'
+
+interface Shop {
+  id: string
+  name: string
+}
 
 export default function NewOrder() {
   const { data: session } = useSession()
   const router = useRouter()
+  const [shops, setShops] = useState<Shop[]>([])
   
   const [formData, setFormData] = useState({
     purchaseSite: '',
@@ -22,7 +29,31 @@ export default function NewOrder() {
   const [toastMessage, setToastMessage] = useState('')
   const [toastType, setToastType] = useState<'success' | 'error'>('success')
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  useEffect(() => {
+    fetchShops()
+  }, [])
+
+  const fetchShops = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('shop')
+        .select('id, name')
+        .order('name', { ascending: true })
+
+      if (error) {
+        throw error
+      }
+
+      setShops(data || [])
+    } catch (error) {
+      console.error('Error fetching shops:', error)
+      setToastMessage('حدث خطأ أثناء جلب المتاجر')
+      setToastType('error')
+      setShowToast(true)
+    }
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
@@ -99,15 +130,22 @@ export default function NewOrder() {
                 <label htmlFor="purchaseSite" className="block text-gray-700 text-right mb-2">
                   موقع الشراء
                 </label>
-                <input
-                  type="text"
+                <select
                   id="purchaseSite"
                   name="purchaseSite"
                   value={formData.purchaseSite}
                   onChange={handleInputChange}
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                   dir="rtl"
-                />
+                  required
+                >
+                  <option value="">اختر موقع الشراء</option>
+                  {shops.map((shop) => (
+                    <option key={shop.id} value={shop.name}>
+                      {shop.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Purchase Link */}
@@ -184,7 +222,7 @@ export default function NewOrder() {
                 </button>
                 <button
                   onClick={handleCancel}
-                  className="bg-red-500 text-white px-6 py-3 rounded-md hover:bg-red-600 transition-colors"
+                  className="bg-gray-500 text-white px-6 py-3 rounded-md hover:bg-gray-600 transition-colors"
                 >
                   إلغاء
                 </button>
