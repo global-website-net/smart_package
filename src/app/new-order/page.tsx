@@ -6,11 +6,20 @@ import { useRouter } from 'next/navigation'
 import Header from '@/app/components/Header'
 import Toast from '@/app/components/Toast'
 import { supabase } from '@/lib/supabase'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 
 interface Shop {
   id: string
   name: string
-  email: string
+}
+
+interface NewOrderFormData {
+  purchaseSite: string
+  purchaseLink: string
+  phoneNumber: string
+  notes: string
+  additionalInfo: string
+  shopId: string
 }
 
 export default function NewOrder() {
@@ -18,12 +27,13 @@ export default function NewOrder() {
   const router = useRouter()
   const [shops, setShops] = useState<Shop[]>([])
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<NewOrderFormData>({
     purchaseSite: '',
     purchaseLink: '',
     phoneNumber: '',
     notes: '',
-    additionalInfo: ''
+    additionalInfo: '',
+    shopId: ''
   })
 
   const [showToast, setShowToast] = useState(false)
@@ -50,7 +60,7 @@ export default function NewOrder() {
       console.log('Starting to fetch shops from shop table...')
       const { data, error } = await supabase
         .from('shop')
-        .select('id, name, email')
+        .select('id, name')
         .order('name', { ascending: true })
 
       if (error) {
@@ -60,9 +70,9 @@ export default function NewOrder() {
 
       console.log('Raw response from Supabase:', { data, error })
       console.log('Fetched shops data:', data)
-      console.log('Number of shops found:', data?.length)
-      console.log('Shop names:', data?.map(shop => shop.name))
-      
+      console.log('Number of shops found:', data?.length || 0)
+      console.log('Shop names:', data?.map(shop => shop.name) || [])
+
       if (!data || data.length === 0) {
         console.log('No shops found in the shop table')
         setShops([])
@@ -70,7 +80,7 @@ export default function NewOrder() {
         setToastType('error')
         setShowToast(true)
       } else {
-        console.log(`Found ${data.length} shops:`, data.map(shop => shop.name))
+        console.log(`Found ${data.length} shops`)
         setShops(data)
       }
     } catch (error) {
@@ -117,7 +127,8 @@ export default function NewOrder() {
         purchaseLink: '',
         phoneNumber: '',
         notes: '',
-        additionalInfo: ''
+        additionalInfo: '',
+        shopId: ''
       })
     } catch (error) {
       console.error('Error submitting order:', error)
@@ -165,32 +176,31 @@ export default function NewOrder() {
           <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6">
             <div className="space-y-6">
               {/* Purchase Site */}
-              <div>
-                <label htmlFor="purchaseSite" className="block text-gray-700 text-right mb-2">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="shopId" className="text-right">
                   موقع الشراء
                 </label>
-                <select
-                  id="purchaseSite"
-                  name="purchaseSite"
-                  value={formData.purchaseSite}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  dir="rtl"
-                  required
+                <Select
+                  value={formData.shopId}
+                  onValueChange={(value) => setFormData({ ...formData, shopId: value })}
                 >
-                  <option value="">اختر موقع الشراء</option>
-                  {shops.length === 0 ? (
-                    <option value="no-shops" disabled>
-                      لا توجد متاجر متاحة
-                    </option>
-                  ) : (
-                    shops.map((shop) => (
-                      <option key={shop.id} value={shop.name}>
-                        {shop.name}
-                      </option>
-                    ))
-                  )}
-                </select>
+                  <SelectTrigger className="col-span-3 text-right">
+                    <SelectValue placeholder="اختر المتجر" className="text-right" dir="rtl" />
+                  </SelectTrigger>
+                  <SelectContent className="text-right" align="end">
+                    {shops.length === 0 ? (
+                      <SelectItem value="no-shops" disabled className="text-right">
+                        لا توجد متاجر متاحة
+                      </SelectItem>
+                    ) : (
+                      shops.map((shop) => (
+                        <SelectItem key={shop.id} value={shop.id} className="text-right">
+                          {shop.name}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Purchase Link */}

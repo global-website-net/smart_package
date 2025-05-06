@@ -100,7 +100,9 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
         throw error
       }
 
+      console.log('Raw Supabase response:', { data, error })
       console.log('Fetched REGULAR users data:', data)
+      
       if (!data || data.length === 0) {
         console.log('No REGULAR users found in the User table')
         setUsers([])
@@ -231,7 +233,7 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
                 ) : (
                   shops.map((shop) => (
                     <SelectItem key={shop.id} value={shop.id} className="text-right">
-                      {shop.fullName}
+                      {shop.email}
                     </SelectItem>
                   ))
                 )}

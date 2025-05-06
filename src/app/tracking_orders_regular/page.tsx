@@ -21,6 +21,13 @@ interface Order {
   createdAt: string
   updatedAt: string
   userId: string
+  shop: {
+    id: string
+    name: string
+    email: string
+    createdAt: string
+    updatedAt: string
+  }
 }
 
 export default function UserOrdersPage() {
@@ -72,7 +79,14 @@ export default function UserOrdersPage() {
           additionalInfo,
           status,
           createdAt,
-          updatedAt
+          updatedAt,
+          shop:shop (
+            id,
+            name,
+            email,
+            createdAt,
+            updatedAt
+          )
         `)
         .eq('userId', session.user.id)
         .order('createdAt', { ascending: false })
@@ -102,7 +116,8 @@ export default function UserOrdersPage() {
         additionalInfo: order.additionalInfo,
         createdAt: order.createdAt,
         updatedAt: order.updatedAt,
-        userId: order.userId
+        userId: order.userId,
+        shop: order.shop?.[0] || null
       }))
 
       console.log('Transformed orders:', transformedOrders)
