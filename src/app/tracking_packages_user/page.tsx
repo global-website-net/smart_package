@@ -22,16 +22,11 @@ interface Package {
   description: string | null
   status: string
   userId: string
-  shopId: string
   createdAt: string
   updatedAt: string
   User: {
     id: string
     fullName: string
-    email: string
-  }
-  Shop: {
-    id: string
     email: string
   }
 }
@@ -100,11 +95,9 @@ export default function UserPackagesPage() {
         status: pkg.status,
         description: pkg.description,
         userId: pkg.userId,
-        shopId: pkg.shopId,
         createdAt: pkg.createdAt,
         updatedAt: pkg.updatedAt,
-        User: pkg.User,
-        Shop: pkg.Shop
+        User: pkg.User
       }))
 
       console.log('Transformed packages:', transformedPackages)
@@ -124,7 +117,7 @@ export default function UserPackagesPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ shopId }),
+        body: JSON.stringify({ userId: shopId }),
       })
 
       if (!response.ok) {
@@ -134,7 +127,11 @@ export default function UserPackagesPage() {
       // Update the local state
       setPackages(packages.map(pkg => 
         pkg.id === packageId 
-          ? { ...pkg, shopId, Shop: shops.find(shop => shop.id === shopId) || pkg.Shop }
+          ? { 
+              ...pkg, 
+              userId: shopId,
+              User: shops.find(shop => shop.id === shopId) || pkg.User 
+            }
           : pkg
       ))
 
@@ -241,11 +238,13 @@ export default function UserPackagesPage() {
                     <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
                     <TableCell className="text-center">
                       <Select
-                        value={pkg.shopId}
+                        value={pkg.userId}
                         onValueChange={(value) => handleShopChange(pkg.id, value)}
                       >
                         <SelectTrigger className="w-[200px]">
-                          <SelectValue placeholder="اختر المتجر" />
+                          <SelectValue placeholder="اختر المتجر">
+                            {pkg.User?.fullName || 'غير محدد'}
+                          </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
                           {shops.map((shop) => (

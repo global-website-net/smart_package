@@ -53,7 +53,7 @@ export async function PATCH(
       return NextResponse.json({ message: 'غير مصرح' }, { status: 401 })
     }
 
-    const { shopId } = await request.json()
+    const { userId } = await request.json()
 
     // Verify the package belongs to the user
     const { data: packageData, error: packageError } = await supabaseAdmin
@@ -73,10 +73,10 @@ export async function PATCH(
       )
     }
 
-    // Update the package's shop
+    // Update the package's shop (userId)
     const { error: updateError } = await supabaseAdmin
       .from('package')
-      .update({ shopId })
+      .update({ userId })
       .eq('id', params.id)
 
     if (updateError) {
