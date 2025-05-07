@@ -86,6 +86,8 @@ export default function TrackingPackagesPage() {
   const [users, setUsers] = useState<User[]>([])
   const [selectedUser, setSelectedUser] = useState<UserOption | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedShop, setSelectedShop] = useState<UserOption | null>(null)
+  const [description, setDescription] = useState('')
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -116,6 +118,7 @@ export default function TrackingPackagesPage() {
       setLoading(true)
       setError('')
 
+      console.log('Fetching packages...')
       const { data, error } = await supabase
         .from('package')
         .select(`
@@ -140,7 +143,12 @@ export default function TrackingPackagesPage() {
         `)
         .order('createdAt', { ascending: false })
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase error:', error)
+        throw error
+      }
+
+      console.log('Raw package data:', data)
 
       // Transform the data to match the Package interface
       const transformedPackages = (data || []).map(pkg => ({
@@ -164,6 +172,7 @@ export default function TrackingPackagesPage() {
         }
       }))
 
+      console.log('Transformed packages:', transformedPackages)
       setPackages(transformedPackages)
     } catch (err) {
       console.error('Error fetching packages:', err)
@@ -393,8 +402,32 @@ export default function TrackingPackagesPage() {
     }
   }
 
+  // Function to load shops with search
+  const loadShops = async (inputValue: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('User')
+        .select('id, fullName, email')
+        .eq('role', 'SHOP')
+        .or(`fullName.ilike.%${inputValue}%,email.ilike.%${inputValue}%`)
+        .limit(10)
+        .order('fullName')
+
+      if (error) throw error
+
+      return data.map(shop => ({
+        value: shop.id,
+        label: `${shop.fullName} (${shop.email})`,
+        ...shop
+      }))
+    } catch (error) {
+      console.error('Error loading shops:', error)
+      return []
+    }
+  }
+
   const handleCreatePackage = async () => {
-    if (!selectedUser) return
+    if (!selectedUser || !selectedShop) return
 
     try {
       // Generate a unique tracking number
@@ -406,8 +439,9 @@ export default function TrackingPackagesPage() {
           {
             trackingNumber,
             status: 'PENDING',
-            description: '',
+            description: description,
             userId: selectedUser.id,
+            shopId: selectedShop.id,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
           }
@@ -426,6 +460,8 @@ export default function TrackingPackagesPage() {
       setPackages([data, ...packages])
       setIsModalOpen(false)
       setSelectedUser(null)
+      setSelectedShop(null)
+      setDescription('')
       toast.success('تم إنشاء الطرد بنجاح')
     } catch (error) {
       console.error('Error creating package:', error)
@@ -573,11 +609,43 @@ export default function TrackingPackagesPage() {
                   loadingMessage={() => "جاري التحميل..."}
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  المتجر
+                </label>
+                <AsyncSelect
+                  cacheOptions
+                  defaultOptions
+                  value={selectedShop}
+                  onChange={(selected: UserOption | null) => setSelectedShop(selected)}
+                  loadOptions={loadShops}
+                  placeholder="اختر المتجر..."
+                  className="w-full"
+                  classNamePrefix="select"
+                  isRtl
+                  noOptionsMessage={() => "لا توجد نتائج"}
+                  loadingMessage={() => "جاري التحميل..."}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  الوصف
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  rows={3}
+                  placeholder="أدخل وصف الطرد..."
+                />
+              </div>
               <div className="flex justify-end gap-4 mt-6">
                 <Button
                   onClick={() => {
                     setIsModalOpen(false)
                     setSelectedUser(null)
+                    setSelectedShop(null)
+                    setDescription('')
                   }}
                   variant="outline"
                 >
@@ -585,7 +653,7 @@ export default function TrackingPackagesPage() {
                 </Button>
                 <Button
                   onClick={handleCreatePackage}
-                  disabled={!selectedUser}
+                  disabled={!selectedUser || !selectedShop}
                   className="bg-green-500 hover:bg-green-600"
                 >
                   إنشاء
