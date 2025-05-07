@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 import Header from '@/app/components/Header'
 import CreatePackageForm from '@/components/CreatePackageForm'
 import EditPackageModal from '@/app/components/EditPackageModal'
+import { Badge } from '@/components/ui/badge'
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -68,6 +69,21 @@ interface Order {
   user: {
     fullName: string
     email: string
+  }
+}
+
+function getStatusVariant(status: string) {
+  switch (status) {
+    case 'PENDING':
+      return 'secondary'
+    case 'IN_TRANSIT':
+      return 'info'
+    case 'DELIVERED':
+      return 'success'
+    case 'CANCELLED':
+      return 'destructive'
+    default:
+      return 'default'
   }
 }
 
@@ -417,37 +433,37 @@ export default function TrackingPackagesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-center">رقم التتبع</TableHead>
-                <TableHead className="text-center">الحالة</TableHead>
-                <TableHead className="text-center">الوصف</TableHead>
-                <TableHead className="text-center">المتجر</TableHead>
-                <TableHead className="text-center">تاريخ الإنشاء</TableHead>
-                {(session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') && (
-                  <TableHead className="text-center">الإجراءات</TableHead>
-                )}
+                <TableHead className="text-right">رقم التتبع</TableHead>
+                <TableHead className="text-right">الحالة</TableHead>
+                <TableHead className="text-right">الوصف</TableHead>
+                <TableHead className="text-right">المتجر</TableHead>
+                <TableHead className="text-right">المستخدم</TableHead>
+                <TableHead className="text-right">تاريخ الإنشاء</TableHead>
+                {isAdminOrOwner && <TableHead className="text-right">الإجراءات</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
-              {packages.length === 0 && !loading ? (
+              {packages.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4">
-                    لا توجد طرود
+                  <TableCell colSpan={isAdminOrOwner ? 7 : 6} className="text-center py-8">
+                    لا توجد طلبات متابعة حالياً
                   </TableCell>
                 </TableRow>
               ) : (
                 packages.map((pkg) => (
                   <TableRow key={pkg.id}>
-                    <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
-                    <TableCell className="text-center">
-                      <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
+                    <TableCell className="text-right">{pkg.trackingNumber}</TableCell>
+                    <TableCell className="text-right">
+                      <Badge variant={getStatusVariant(pkg.status)}>
                         {getPackageStatusText(pkg.status)}
-                      </span>
+                      </Badge>
                     </TableCell>
-                    <TableCell className="text-center">{pkg.description || '-'}</TableCell>
-                    <TableCell className="text-center">{pkg.shop?.email || 'غير معروف'}</TableCell>
-                    <TableCell className="text-center">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
-                    {(session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') && (
-                      <TableCell className="text-center">
+                    <TableCell className="text-right">{pkg.description || '-'}</TableCell>
+                    <TableCell className="text-right">{pkg.shop?.email || 'غير معروف'}</TableCell>
+                    <TableCell className="text-right">{pkg.user?.email || '-'}</TableCell>
+                    <TableCell className="text-right">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
+                    {isAdminOrOwner && (
+                      <TableCell className="text-right">
                         <Button
                           onClick={() => handleEditClick(pkg)}
                           className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"

@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import Header from '@/app/components/Header'
+import PaymentModal from '@/app/components/PaymentModal'
 
 interface Order {
   id: string
@@ -29,6 +30,8 @@ export default function TrackingOrdersRegularPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -87,6 +90,14 @@ export default function TrackingOrdersRegularPage() {
 
   const getOrderStatusText = (status: string) => {
     switch (status) {
+      case 'AWAITING_PAYMENT':
+        return 'في انتظار الدفع'
+      case 'PENDING_APPROVAL':
+        return 'في انتظار الموافقة'
+      case 'ORDERING':
+        return 'قيد الطلب'
+      case 'ORDER_COMPLETED':
+        return 'تم الطلب'
       case 'PENDING':
         return 'قيد الانتظار'
       case 'IN_TRANSIT':
@@ -126,6 +137,21 @@ export default function TrackingOrdersRegularPage() {
   const handleViewDetails = (order: Order) => {
     // Implement the logic to view order details
     console.log('Viewing details for order:', order)
+  }
+
+  const handlePaymentClick = (order: Order) => {
+    setSelectedOrder(order)
+    setIsPaymentModalOpen(true)
+  }
+
+  const handlePaymentComplete = () => {
+    // Update the order status in the local state
+    setOrders(orders.map(order => 
+      order.id === selectedOrder?.id 
+        ? { ...order, status: 'ORDERING' }
+        : order
+    ))
+    setSelectedOrder(null)
   }
 
   if (loading) {
@@ -184,12 +210,13 @@ export default function TrackingOrdersRegularPage() {
                 <TableHead className="text-center">ملاحظات</TableHead>
                 <TableHead className="text-center">معلومات إضافية</TableHead>
                 <TableHead className="text-center">تاريخ الإنشاء</TableHead>
+                <TableHead className="text-center">الإجراءات</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {orders.length === 0 && !loading ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-4">
+                  <TableCell colSpan={9} className="text-center py-4">
                     لا توجد طلبات
                   </TableCell>
                 </TableRow>
@@ -212,6 +239,16 @@ export default function TrackingOrdersRegularPage() {
                     <TableCell className="text-center">{order.notes || '-'}</TableCell>
                     <TableCell className="text-center">{order.additionalInfo || '-'}</TableCell>
                     <TableCell className="text-center">{new Date(order.createdAt).toLocaleDateString('ar')}</TableCell>
+                    <TableCell className="text-center">
+                      {order.status === 'AWAITING_PAYMENT' && (
+                        <Button
+                          onClick={() => handlePaymentClick(order)}
+                          className="bg-green-500 hover:bg-green-600 text-white"
+                        >
+                          دفع
+                        </Button>
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))
               )}
@@ -219,6 +256,19 @@ export default function TrackingOrdersRegularPage() {
           </Table>
         </div>
       </div>
+
+      {selectedOrder && (
+        <PaymentModal
+          isOpen={isPaymentModalOpen}
+          onClose={() => {
+            setIsPaymentModalOpen(false)
+            setSelectedOrder(null)
+          }}
+          amount={selectedOrder.totalAmount}
+          orderId={selectedOrder.id}
+          onPaymentComplete={handlePaymentComplete}
+        />
+      )}
     </div>
   )
 } 

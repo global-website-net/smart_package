@@ -43,58 +43,50 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-export async function PATCH(request: NextRequest) {
+export async function PATCH(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const session = await getServerSession()
+    if (!session?.user) {
+      return NextResponse.json({ message: 'غير مصرح' }, { status: 401 })
     }
 
-    const id = request.url.split('/').pop()
-    if (!id) {
-      return NextResponse.json({ error: 'Package ID is required' }, { status: 400 })
-    }
+    const { shopId } = await request.json()
 
-    // Get the request body
-    const body = await request.json()
-    const { trackingNumber, status, description, shopId, userId } = body
-
-    // First check if the package exists
-    const { data: existingPackage, error: checkError } = await supabaseAdmin
+    // Verify the package belongs to the user
+    const { data: packageData, error: packageError } = await supabaseAdmin
       .from('package')
-      .select('id')
-      .eq('id', id)
+      .select('userId')
+      .eq('id', params.id)
       .single()
 
-    if (checkError || !existingPackage) {
-      console.error('Package not found:', id)
-      return NextResponse.json({ error: 'Package not found' }, { status: 404 })
+    if (packageError) {
+      throw new Error('فشل في جلب بيانات الطرد')
     }
 
-    // Update the package
-    const { data, error } = await supabaseAdmin
+    if (packageData.userId !== session.user.id) {
+      return NextResponse.json(
+        { message: 'غير مصرح بتعديل هذا الطرد' },
+        { status: 403 }
+      )
+    }
+
+    // Update the package's shop
+    const { error: updateError } = await supabaseAdmin
       .from('package')
-      .update({
-        trackingNumber,
-        status,
-        description,
-        shopId,
-        userId,
-        updatedAt: new Date().toISOString()
-      })
-      .eq('id', id)
-      .select()
+      .update({ shopId })
+      .eq('id', params.id)
 
-    if (error) {
-      console.error('Error updating package:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+    if (updateError) {
+      throw new Error('فشل في تحديث المتجر')
     }
 
-    return NextResponse.json(data[0])
-  } catch (error) {
-    console.error('Error in PATCH /api/packages/[id]:', error)
+    return NextResponse.json({ message: 'تم تحديث المتجر بنجاح' })
+  } catch (error: any) {
     return NextResponse.json(
-      { error: 'Internal Server Error' },
+      { message: error.message || 'حدث خطأ أثناء تحديث المتجر' },
       { status: 500 }
     )
   }

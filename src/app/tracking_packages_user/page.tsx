@@ -5,8 +5,16 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { supabase } from '@/lib/supabase'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
 import Header from '@/app/components/Header'
+
+interface Shop {
+  id: string
+  fullName: string
+  email: string
+}
 
 interface Package {
   id: string
@@ -32,6 +40,7 @@ export default function UserPackagesPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
   const [packages, setPackages] = useState<Package[]>([])
+  const [shops, setShops] = useState<Shop[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -47,8 +56,23 @@ export default function UserPackagesPage() {
         return
       }
       fetchPackages()
+      fetchShops()
     }
   }, [status, session])
+
+  const fetchShops = async () => {
+    try {
+      const response = await fetch('/api/users/shops')
+      if (!response.ok) {
+        throw new Error('Failed to fetch shops')
+      }
+      const data = await response.json()
+      setShops(data)
+    } catch (error) {
+      console.error('Error fetching shops:', error)
+      toast.error('حدث خطأ أثناء جلب المتاجر')
+    }
+  }
 
   const fetchPackages = async () => {
     try {
@@ -93,18 +117,56 @@ export default function UserPackagesPage() {
     }
   }
 
-  const getPackageStatusText = (status: string) => {
+  const handleShopChange = async (packageId: string, shopId: string) => {
+    try {
+      const response = await fetch(`/api/packages/${packageId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ shopId }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update package')
+      }
+
+      // Update the local state
+      setPackages(packages.map(pkg => 
+        pkg.id === packageId 
+          ? { ...pkg, shopId, Shop: shops.find(shop => shop.id === shopId) || pkg.Shop }
+          : pkg
+      ))
+
+      toast.success('تم تحديث المتجر بنجاح')
+    } catch (error) {
+      console.error('Error updating package:', error)
+      toast.error('حدث خطأ أثناء تحديث المتجر')
+    }
+  }
+
+  const getStatusText = (status: string) => {
     switch (status) {
+      case 'AWAITING_PAYMENT':
+        return 'في انتظار الدفع'
+      case 'PREPARING':
+        return 'قيد التحضير'
+      case 'DELIVERING_TO_SHOP':
+        return 'قيد التوصيل للمتجر'
+      case 'IN_SHOP':
+        return 'في المتجر'
+      case 'RECEIVED':
+        return 'تم الاستلام'
       case 'PENDING':
         return 'قيد الانتظار'
-      case 'PROCESSING':
-        return 'قيد المعالجة'
-      case 'SHIPPED':
-        return 'تم الشحن'
+      case 'IN_TRANSIT':
+        return 'قيد الشحن'
       case 'DELIVERED':
         return 'تم التسليم'
       case 'CANCELLED':
         return 'ملغي'
+      case 'RETURNED':
+        return 'تم الإرجاع'
       default:
         return status
     }
@@ -114,14 +176,14 @@ export default function UserPackagesPage() {
     switch (status) {
       case 'PENDING':
         return 'bg-yellow-100 text-yellow-800'
-      case 'PROCESSING':
+      case 'IN_TRANSIT':
         return 'bg-blue-100 text-blue-800'
-      case 'SHIPPED':
-        return 'bg-purple-100 text-purple-800'
       case 'DELIVERED':
         return 'bg-green-100 text-green-800'
       case 'CANCELLED':
         return 'bg-red-100 text-red-800'
+      case 'RETURNED':
+        return 'bg-orange-100 text-orange-800'
       default:
         return 'bg-gray-100 text-gray-800'
     }
@@ -145,20 +207,12 @@ export default function UserPackagesPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="pt-32 pb-10">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-6">تتبع الطرود</h1>
-            <div className="flex justify-center items-center">
-              <div className="relative w-32 sm:w-48 md:w-64">
-                <div className="w-full h-0.5 bg-green-500"></div>
-                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
-              </div>
-            </div>
-          </div>
-
+      <main className="p-4 pt-24">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-2xl font-bold mb-6 text-right">تتبع الطرود</h1>
+          
           {error && (
-            <div className="text-red-500 text-center mb-4">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
               {error}
             </div>
           )}
@@ -167,16 +221,17 @@ export default function UserPackagesPage() {
             <TableHeader>
               <TableRow>
                 <TableHead className="text-center">رقم التتبع</TableHead>
+                <TableHead className="text-center">المتجر</TableHead>
                 <TableHead className="text-center">الحالة</TableHead>
                 <TableHead className="text-center">الوصف</TableHead>
-                <TableHead className="text-center">المتجر</TableHead>
                 <TableHead className="text-center">تاريخ الإنشاء</TableHead>
+                <TableHead className="text-center">آخر تحديث</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {packages.length === 0 && !loading ? (
+              {packages.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-4">
+                  <TableCell colSpan={6} className="text-center py-4">
                     لا توجد طرود
                   </TableCell>
                 </TableRow>
@@ -185,20 +240,41 @@ export default function UserPackagesPage() {
                   <TableRow key={pkg.id}>
                     <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
                     <TableCell className="text-center">
+                      <Select
+                        value={pkg.shopId}
+                        onValueChange={(value) => handleShopChange(pkg.id, value)}
+                      >
+                        <SelectTrigger className="w-[200px]">
+                          <SelectValue placeholder="اختر المتجر" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {shops.map((shop) => (
+                            <SelectItem key={shop.id} value={shop.id}>
+                              {shop.fullName}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell className="text-center">
                       <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
-                        {getPackageStatusText(pkg.status)}
+                        {getStatusText(pkg.status)}
                       </span>
                     </TableCell>
                     <TableCell className="text-center">{pkg.description || '-'}</TableCell>
-                    <TableCell className="text-center">{pkg.Shop?.email || 'غير معروف'}</TableCell>
-                    <TableCell className="text-center">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
+                    <TableCell className="text-center">
+                      {new Date(pkg.createdAt).toLocaleDateString('ar')}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {new Date(pkg.updatedAt).toLocaleDateString('ar')}
+                    </TableCell>
                   </TableRow>
                 ))
               )}
             </TableBody>
           </Table>
         </div>
-      </div>
+      </main>
     </div>
   )
 } 
