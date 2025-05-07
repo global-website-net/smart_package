@@ -3,7 +3,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
 import { createClient } from '@supabase/supabase-js'
 import prisma from '@/lib/prisma'
-import { validatePassword, SESSION_TIMEOUT, MAX_LOGIN_ATTEMPTS, LOGIN_ATTEMPT_WINDOW } from '@/lib/security'
+import { verifyPassword, SESSION_TIMEOUT, MAX_LOGIN_ATTEMPTS, LOGIN_ATTEMPT_WINDOW } from '@/lib/security'
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -123,8 +123,8 @@ export const authOptions: NextAuthOptions = {
             throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
           }
 
-          // Validate password
-          const isValid = await validatePassword(credentials.password, user.password)
+          // Verify password
+          const isValid = await verifyPassword(credentials.password, user.password)
           if (!isValid) {
             // Increment failed login attempts
             const currentAttempts = loginAttempts.get(credentials.email) || { count: 0, timestamp: Date.now() }
