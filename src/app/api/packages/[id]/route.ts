@@ -43,14 +43,19 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest) {
   try {
     const session = await getServerSession()
     if (!session?.user) {
       return NextResponse.json({ message: 'غير مصرح' }, { status: 401 })
+    }
+
+    const id = request.url.split('/').pop()
+    if (!id) {
+      return NextResponse.json(
+        { message: 'معرف الطرد مطلوب' },
+        { status: 400 }
+      )
     }
 
     const { userId } = await request.json()
@@ -59,7 +64,7 @@ export async function PATCH(
     const { data: packageData, error: packageError } = await supabaseAdmin
       .from('package')
       .select('userId')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (packageError) {
@@ -77,7 +82,7 @@ export async function PATCH(
     const { error: updateError } = await supabaseAdmin
       .from('package')
       .update({ userId })
-      .eq('id', params.id)
+      .eq('id', id)
 
     if (updateError) {
       throw new Error('فشل في تحديث المتجر')
