@@ -203,7 +203,7 @@ export default function AccountsPage() {
               </div>
 
               {/* Pagination Controls */}
-              <div className="mt-4 flex justify-center items-center space-x-4">
+              <div className="mt-4 flex justify-center items-center gap-4">
                 <Button
                   variant="outline"
                   onClick={handlePreviousPage}
@@ -213,9 +213,11 @@ export default function AccountsPage() {
                   <ChevronRight className="h-4 w-4 ml-1" />
                   السابق
                 </Button>
-                <span className="text-sm text-gray-600">
-                  الصفحة {currentPage} من {pagination.totalPages}
-                </span>
+                <div className="min-w-[120px] text-center">
+                  <span className="text-sm text-gray-600">
+                    الصفحة {currentPage} من {pagination.totalPages}
+                  </span>
+                </div>
                 <Button
                   variant="outline"
                   onClick={handleNextPage}

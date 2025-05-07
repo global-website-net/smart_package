@@ -421,7 +421,6 @@ export default function TrackingPackagesPage() {
                 <TableHead className="text-center">الحالة</TableHead>
                 <TableHead className="text-center">الوصف</TableHead>
                 <TableHead className="text-center">المتجر</TableHead>
-                <TableHead className="text-center">المستخدم</TableHead>
                 <TableHead className="text-center">تاريخ الإنشاء</TableHead>
                 {(session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') && (
                   <TableHead className="text-center">الإجراءات</TableHead>
@@ -431,7 +430,7 @@ export default function TrackingPackagesPage() {
             <TableBody>
               {packages.length === 0 && !loading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-4">
+                  <TableCell colSpan={6} className="text-center py-4">
                     لا توجد طرود
                   </TableCell>
                 </TableRow>
@@ -446,7 +445,6 @@ export default function TrackingPackagesPage() {
                     </TableCell>
                     <TableCell className="text-center">{pkg.description || '-'}</TableCell>
                     <TableCell className="text-center">{pkg.shop?.email || 'غير معروف'}</TableCell>
-                    <TableCell className="text-center">{pkg.user?.email || 'غير معروف'}</TableCell>
                     <TableCell className="text-center">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
                     {(session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') && (
                       <TableCell className="text-center">

@@ -99,13 +99,44 @@ export default function NewOrder() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    // Validate required fields
+    if (!formData.shopId) {
+      setToastMessage('الرجاء اختيار موقع الشراء')
+      setToastType('error')
+      setShowToast(true)
+      return
+    }
+
+    if (!formData.purchaseLink) {
+      setToastMessage('الرجاء إدخال رابط الشراء')
+      setToastType('error')
+      setShowToast(true)
+      return
+    }
+
+    if (!formData.phoneNumber) {
+      setToastMessage('الرجاء إدخال رقم الهاتف')
+      setToastType('error')
+      setShowToast(true)
+      return
+    }
+
     try {
+      // Get the shop name from the selected shop ID
+      const selectedShop = shops.find(shop => shop.id === formData.shopId)
+      if (!selectedShop) {
+        throw new Error('لم يتم العثور على المتجر المحدد')
+      }
+
       const response = await fetch('/api/orders/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          purchaseSite: selectedShop.name // Map shopId to purchaseSite using the shop name
+        }),
       })
 
       const data = await response.json()
