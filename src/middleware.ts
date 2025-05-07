@@ -4,12 +4,20 @@ import { getToken } from 'next-auth/jwt'
 import { Ratelimit } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
 
-// Create a new ratelimiter that allows 10 requests per 10 seconds
-const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(10, '10 s'),
-  analytics: true,
-})
+// Initialize rate limiter only if Redis credentials are available
+let ratelimit: Ratelimit | null = null
+
+try {
+  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+    ratelimit = new Ratelimit({
+      redis: Redis.fromEnv(),
+      limiter: Ratelimit.slidingWindow(10, '10 s'),
+      analytics: true,
+    })
+  }
+} catch (error) {
+  console.warn('Failed to initialize Redis rate limiter:', error)
+}
 
 export async function middleware(request: NextRequest) {
   try {
@@ -47,9 +55,6 @@ export async function middleware(request: NextRequest) {
     const forwardedFor = request.headers.get('x-forwarded-for')
     const ip = forwardedFor ? forwardedFor.split(',')[0] : '127.0.0.1'
     
-    // Rate limit the request
-    const { success, limit, reset, remaining } = await ratelimit.limit(ip)
-    
     // Add security headers
     const response = NextResponse.next()
     
@@ -65,16 +70,26 @@ export async function middleware(request: NextRequest) {
       "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co;"
     )
 
-    // If rate limit is exceeded, return 429 Too Many Requests
-    if (!success) {
-      return new NextResponse('Too Many Requests', {
-        status: 429,
-        headers: {
-          'X-RateLimit-Limit': limit.toString(),
-          'X-RateLimit-Remaining': remaining.toString(),
-          'X-RateLimit-Reset': reset.toString(),
-        },
-      })
+    // Apply rate limiting only if Redis is available
+    if (ratelimit) {
+      try {
+        const { success, limit, reset, remaining } = await ratelimit.limit(ip)
+        
+        // If rate limit is exceeded, return 429 Too Many Requests
+        if (!success) {
+          return new NextResponse('Too Many Requests', {
+            status: 429,
+            headers: {
+              'X-RateLimit-Limit': limit.toString(),
+              'X-RateLimit-Remaining': remaining.toString(),
+              'X-RateLimit-Reset': reset.toString(),
+            },
+          })
+        }
+      } catch (error) {
+        console.warn('Rate limiting failed:', error)
+        // Continue without rate limiting if it fails
+      }
     }
 
     return response
