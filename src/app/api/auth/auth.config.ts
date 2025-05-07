@@ -121,7 +121,7 @@ export const authOptions: NextAuthOptions = {
             .single()
 
           if (userError || !user) {
-            // Increment failed login attempts
+            // Only increment failed login attempts if user doesn't exist
             const currentAttempts = loginAttempts.get(credentials.email) || { count: 0, timestamp: Date.now() }
             loginAttempts.set(credentials.email, {
               count: currentAttempts.count + 1,
@@ -137,7 +137,7 @@ export const authOptions: NextAuthOptions = {
           })
 
           if (authError || !authData.user) {
-            // Increment failed login attempts
+            // Only increment failed login attempts if password is incorrect
             const currentAttempts = loginAttempts.get(credentials.email) || { count: 0, timestamp: Date.now() }
             loginAttempts.set(credentials.email, {
               count: currentAttempts.count + 1,
