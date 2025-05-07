@@ -92,11 +92,7 @@ export default function AccountsPage() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
-    return date.toLocaleDateString('ar-SA', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
+    return date.toISOString().split('T')[0]
   }
 
   if (loading) {
