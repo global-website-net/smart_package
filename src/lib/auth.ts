@@ -1,5 +1,5 @@
 import { randomBytes } from 'crypto'
-import { NextAuthOptions } from 'next-auth'
+import { NextAuthOptions, DefaultSession } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { createClient } from '@supabase/supabase-js'
 
@@ -18,7 +18,15 @@ declare module 'next-auth' {
   }
 
   interface Session {
-    user: User
+    user: {
+      id: string
+      role: UserRole
+      fullName: string
+      governorate: string
+      town: string
+      phonePrefix: string
+      phoneNumber: string
+    } & DefaultSession['user']
   }
 }
 
