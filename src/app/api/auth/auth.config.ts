@@ -61,17 +61,24 @@ declare module 'next-auth' {
     phoneNumber: string
   }
 
-  interface Session extends DefaultSession {
-    user: User & DefaultSession['user']
+  interface Session {
+    user: {
+      id: string
+      role: UserRole
+      fullName: string
+      governorate: string
+      town: string
+      phonePrefix: string
+      phoneNumber: string
+    } & DefaultSession['user']
   }
 }
 
 declare module 'next-auth/jwt' {
   interface JWT {
     id: string
-    email: string
-    fullName: string
     role: UserRole
+    fullName: string
     governorate: string
     town: string
     phonePrefix: string
@@ -169,11 +176,11 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.role = user.role
         token.id = user.id
-        token.fullName = (user as ExtendedUser).fullName
-        token.governorate = (user as ExtendedUser).governorate
-        token.town = (user as ExtendedUser).town
-        token.phonePrefix = (user as ExtendedUser).phonePrefix
-        token.phoneNumber = (user as ExtendedUser).phoneNumber
+        token.fullName = user.fullName
+        token.governorate = user.governorate
+        token.town = user.town
+        token.phonePrefix = user.phonePrefix
+        token.phoneNumber = user.phoneNumber
       }
       return token
     },
