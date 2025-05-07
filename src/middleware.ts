@@ -41,8 +41,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url))
   }
 
-  // Get the IP address of the request
-  const ip = request.ip ?? '127.0.0.1'
+  // Get the IP address from headers
+  const forwardedFor = request.headers.get('x-forwarded-for')
+  const ip = forwardedFor ? forwardedFor.split(',')[0] : '127.0.0.1'
   
   // Rate limit the request
   const { success, limit, reset, remaining } = await ratelimit.limit(ip)
