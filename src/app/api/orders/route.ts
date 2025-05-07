@@ -35,9 +35,10 @@ export async function GET() {
         notes,
         additionalInfo,
         status,
+        totalAmount,
         createdAt,
         updatedAt,
-        User!userId (
+        User!Order_userId_fkey (
           id,
           fullName,
           email

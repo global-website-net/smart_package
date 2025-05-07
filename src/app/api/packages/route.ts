@@ -92,12 +92,12 @@ export async function GET() {
         shopId,
         createdAt,
         updatedAt,
-        User (
+        User!Package_userId_fkey (
           id,
           fullName,
           email
         ),
-        Shop (
+        Shop!Package_shopId_fkey (
           id,
           name,
           email

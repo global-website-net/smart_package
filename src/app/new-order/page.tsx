@@ -57,24 +57,20 @@ export default function NewOrder() {
 
   const fetchShops = async () => {
     try {
-      console.log('Starting to fetch shops from shop table...')
-      const { data, error } = await supabase
-        .from('shop')
-        .select('id, name')
-        .order('name', { ascending: true })
-
-      if (error) {
-        console.error('Supabase error:', error)
-        throw error
+      console.log('Starting to fetch shops...')
+      const response = await fetch('/api/shops/list')
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch shops')
       }
 
-      console.log('Raw response from Supabase:', { data, error })
+      const data = await response.json()
       console.log('Fetched shops data:', data)
       console.log('Number of shops found:', data?.length || 0)
-      console.log('Shop names:', data?.map(shop => shop.name) || [])
+      console.log('Shop names:', data?.map((shop: { id: string; name: string }) => shop.name) || [])
 
       if (!data || data.length === 0) {
-        console.log('No shops found in the shop table')
+        console.log('No shops found')
         setShops([])
         setToastMessage('لا توجد متاجر متاحة حالياً')
         setToastType('error')

@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Header from '@/app/components/Header'
+import { Button } from '@/components/ui/button'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface User {
   id: string
@@ -13,7 +15,15 @@ interface User {
   town: string | null
   phonePrefix: string | null
   phoneNumber: string | null
+  role: string
   createdAt: string
+}
+
+interface PaginationInfo {
+  total: number
+  page: number
+  limit: number
+  totalPages: number
 }
 
 export default function AccountsPage() {
@@ -22,6 +32,13 @@ export default function AccountsPage() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pagination, setPagination] = useState<PaginationInfo>({
+    total: 0,
+    page: 1,
+    limit: 30,
+    totalPages: 1
+  })
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -36,22 +53,23 @@ export default function AccountsPage() {
         return
       }
 
-      fetchUsers()
+      fetchUsers(currentPage)
     }
-  }, [status])
+  }, [status, currentPage])
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (page: number) => {
     try {
       setLoading(true)
       setError('')
 
-      const response = await fetch('/api/users')
+      const response = await fetch(`/api/users?page=${page}`)
       if (!response.ok) {
         throw new Error('Failed to fetch users')
       }
       
-      const users = await response.json()
-      setUsers(users || [])
+      const data = await response.json()
+      setUsers(data.users || [])
+      setPagination(data.pagination)
     } catch (error) {
       console.error('Error fetching users:', error)
       setError('حدث خطأ أثناء جلب الحسابات')
@@ -60,9 +78,21 @@ export default function AccountsPage() {
     }
   }
 
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1)
+    }
+  }
+
+  const handleNextPage = () => {
+    if (currentPage < pagination.totalPages) {
+      setCurrentPage(currentPage + 1)
+    }
+  }
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString('ar-SA', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit'
@@ -111,60 +141,95 @@ export default function AccountsPage() {
               <p className="text-gray-600 text-lg">لا توجد حسابات حتى الآن</p>
             </div>
           ) : (
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        الاسم الكامل
-                      </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        البريد الإلكتروني
-                      </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        المحافظة
-                      </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        المدينة
-                      </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        رقم الهاتف
-                      </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        تاريخ التسجيل
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {users.map((user) => (
-                      <tr key={user.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user.fullName}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user.email}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user.governorate || 'غير متوفر'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user.town || 'غير متوفر'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user.phonePrefix && user.phoneNumber 
-                            ? `${user.phonePrefix.substring(1)}-${user.phoneNumber}`
-                            : 'غير متوفر'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {formatDate(user.createdAt)}
-                        </td>
+            <>
+              <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          الاسم الكامل
+                        </th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          البريد الإلكتروني
+                        </th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          المحافظة
+                        </th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          المدينة
+                        </th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          رقم الهاتف
+                        </th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          الدور
+                        </th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          تاريخ التسجيل
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {users.map((user) => (
+                        <tr key={user.id}>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {user.fullName}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {user.email}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {user.governorate || 'غير متوفر'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {user.town || 'غير متوفر'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {user.phonePrefix && user.phoneNumber 
+                              ? `${user.phonePrefix.substring(1)}-${user.phoneNumber}`
+                              : 'غير متوفر'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {user.role === 'ADMIN' ? 'مدير' : 
+                             user.role === 'OWNER' ? 'مالك' : 
+                             user.role === 'REGULAR' ? 'مستخدم' : user.role}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {formatDate(user.createdAt)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
+
+              {/* Pagination Controls */}
+              <div className="mt-4 flex justify-center items-center space-x-4">
+                <Button
+                  variant="outline"
+                  onClick={handlePreviousPage}
+                  disabled={currentPage === 1}
+                  className="flex items-center"
+                >
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                  السابق
+                </Button>
+                <span className="text-sm text-gray-600">
+                  الصفحة {currentPage} من {pagination.totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  onClick={handleNextPage}
+                  disabled={currentPage === pagination.totalPages}
+                  className="flex items-center"
+                >
+                  التالي
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                </Button>
+              </div>
+            </>
           )}
         </div>
       </main>

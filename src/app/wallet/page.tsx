@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Header from '@/app/components/Header'
 import PaymentWizard from '@/components/PaymentWizard'
+import BalanceDisplay from '@/components/BalanceDisplay'
 
 interface WalletTransaction {
   id: string
@@ -144,10 +145,7 @@ export default function WalletPage() {
 
             {/* Balance Amount */}
             <div className="mx-4">
-              <div className="text-4xl font-bold flex items-center justify-center">
-                <span className="font-bold">{walletData.balance.toFixed(2)}</span>
-                <span className="mr-2 font-bold">₪</span>
-              </div>
+              <BalanceDisplay amount={walletData.balance} />
             </div>
 
             {/* Right Side Arrows */}
@@ -179,11 +177,8 @@ export default function WalletPage() {
               {walletData.transactions.map((transaction) => (
                 <div key={transaction.id} className="flex justify-between items-center border-b pb-4">
                   <div className="flex items-center gap-4">
-                    <span className={`text-xl font-bold ${transaction.type === 'CREDIT' ? 'text-green-600' : 'text-red-600'}`} dir="rtl">
-                      <div className="text-lg font-bold flex items-center">
-                        <span className="font-bold">{transaction.type === 'CREDIT' ? '+' : '-'}{transaction.amount.toFixed(2)}</span>
-                        <span className="mr-2 font-bold">₪</span>
-                      </div>
+                    <span className={`text-xl ${transaction.type === 'CREDIT' ? 'text-green-600' : 'text-red-600'}`} dir="rtl">
+                      <BalanceDisplay amount={transaction.amount} className="text-lg" />
                     </span>
                   </div>
                   <div className="flex items-center gap-2">

@@ -18,6 +18,7 @@ interface Order {
   notes: string | null
   additionalInfo: string | null
   status: string
+  totalAmount: number
   createdAt: string
   updatedAt: string
 }
@@ -69,6 +70,7 @@ export default function TrackingOrdersRegularPage() {
         notes: order.notes,
         additionalInfo: order.additionalInfo,
         status: order.status,
+        totalAmount: order.totalAmount,
         createdAt: order.createdAt,
         updatedAt: order.updatedAt
       }))
@@ -177,6 +179,7 @@ export default function TrackingOrdersRegularPage() {
                 <TableHead className="text-center">موقع الشراء</TableHead>
                 <TableHead className="text-center">رابط الشراء</TableHead>
                 <TableHead className="text-center">رقم الهاتف</TableHead>
+                <TableHead className="text-center">المبلغ الإجمالي</TableHead>
                 <TableHead className="text-center">الحالة</TableHead>
                 <TableHead className="text-center">ملاحظات</TableHead>
                 <TableHead className="text-center">معلومات إضافية</TableHead>
@@ -186,7 +189,7 @@ export default function TrackingOrdersRegularPage() {
             <TableBody>
               {orders.length === 0 && !loading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-4">
+                  <TableCell colSpan={8} className="text-center py-4">
                     لا توجد طلبات
                   </TableCell>
                 </TableRow>
@@ -200,6 +203,7 @@ export default function TrackingOrdersRegularPage() {
                       </a>
                     </TableCell>
                     <TableCell className="text-center">{order.phoneNumber}</TableCell>
+                    <TableCell className="text-center">{order.totalAmount ? `$${order.totalAmount.toFixed(2)}` : '-'}</TableCell>
                     <TableCell className="text-center">
                       <span className={`px-2 py-1 rounded-full ${getStatusColor(order.status)}`}>
                         {getOrderStatusText(order.status)}
