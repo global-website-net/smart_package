@@ -38,6 +38,7 @@ export async function GET(request: Request) {
     const { count } = await supabaseAdmin
       .from('User')
       .select('*', { count: 'exact', head: true })
+      .in('role', ['REGULAR', 'SHOP'])
 
     // Get paginated users
     const { data: users, error } = await supabaseAdmin
@@ -53,6 +54,7 @@ export async function GET(request: Request) {
         role,
         createdAt
       `)
+      .in('role', ['REGULAR', 'SHOP'])
       .order('createdAt', { ascending: false })
       .range(offset, offset + limit - 1)
 

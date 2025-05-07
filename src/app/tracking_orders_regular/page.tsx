@@ -203,7 +203,7 @@ export default function TrackingOrdersRegularPage() {
                       </a>
                     </TableCell>
                     <TableCell className="text-center">{order.phoneNumber}</TableCell>
-                    <TableCell className="text-center">{order.totalAmount ? `$${order.totalAmount.toFixed(2)}` : '-'}</TableCell>
+                    <TableCell className="text-center">{order.totalAmount ? `₪${order.totalAmount.toFixed(2)}` : '-'}</TableCell>
                     <TableCell className="text-center">
                       <span className={`px-2 py-1 rounded-full ${getStatusColor(order.status)}`}>
                         {getOrderStatusText(order.status)}

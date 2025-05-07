@@ -94,8 +94,8 @@ export default function AccountsPage() {
     const date = new Date(dateString)
     return date.toLocaleDateString('ar-SA', {
       year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
+      month: 'long',
+      day: 'numeric'
     })
   }
 
@@ -193,7 +193,8 @@ export default function AccountsPage() {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {user.role === 'ADMIN' ? 'مدير' : 
                              user.role === 'OWNER' ? 'مالك' : 
-                             user.role === 'REGULAR' ? 'مستخدم' : user.role}
+                             user.role === 'REGULAR' ? 'مستخدم' : 
+                             user.role === 'SHOP' ? 'متجر' : user.role}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {formatDate(user.createdAt)}

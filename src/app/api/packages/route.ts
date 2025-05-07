@@ -97,9 +97,9 @@ export async function GET() {
           fullName,
           email
         ),
-        Shop!Package_shopId_fkey (
+        User!Package_shopId_fkey (
           id,
-          name,
+          fullName,
           email
         )
       `)
