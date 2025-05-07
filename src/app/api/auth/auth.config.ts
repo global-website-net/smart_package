@@ -130,9 +130,13 @@ export const authOptions: NextAuthOptions = {
             throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
           }
 
-          // Verify password
-          const isValid = await verifyPassword(credentials.password, user.password)
-          if (!isValid) {
+          // Verify password using Supabase Auth
+          const { data: authData, error: authError } = await supabaseAdmin.auth.signInWithPassword({
+            email: credentials.email,
+            password: credentials.password
+          })
+
+          if (authError || !authData.user) {
             // Increment failed login attempts
             const currentAttempts = loginAttempts.get(credentials.email) || { count: 0, timestamp: Date.now() }
             loginAttempts.set(credentials.email, {
