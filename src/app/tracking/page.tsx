@@ -74,6 +74,7 @@ export default function TrackingPage() {
 
         return {
           ...order,
+          orderNumber: order.orderNumber,
           user: {
             fullName: userData?.fullName || 'غير معروف',
             email: userData?.email || ''

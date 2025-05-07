@@ -169,30 +169,30 @@ export default function AccountsPage() {
                     <tbody className="bg-white divide-y divide-gray-200">
                       {users.map((user) => (
                         <tr key={user.id}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                             {user.fullName}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                             {user.email}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                             {user.governorate || 'غير متوفر'}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                             {user.town || 'غير متوفر'}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                             {user.phonePrefix && user.phoneNumber 
                               ? `${user.phonePrefix.substring(1)}-${user.phoneNumber}`
                               : 'غير متوفر'}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                             {user.role === 'ADMIN' ? 'مدير' : 
                              user.role === 'OWNER' ? 'مالك' : 
                              user.role === 'REGULAR' ? 'مستخدم' : 
                              user.role === 'SHOP' ? 'متجر' : user.role}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                             {formatDate(user.createdAt)}
                           </td>
                         </tr>

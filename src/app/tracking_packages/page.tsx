@@ -12,6 +12,7 @@ import Header from '@/app/components/Header'
 import CreatePackageForm from '@/components/CreatePackageForm'
 import EditPackageModal from '@/app/components/EditPackageModal'
 import { Badge } from '@/components/ui/badge'
+import AsyncSelect from 'react-select/async'
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -26,6 +27,18 @@ const supabase = createClient(
   }
 )
 
+// Initialize Supabase admin client
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+)
+
 interface User {
   id: string
   fullName: string
@@ -33,6 +46,14 @@ interface User {
 }
 
 interface Shop {
+  id: string
+  fullName: string
+  email: string
+}
+
+interface UserOption {
+  value: string
+  label: string
   id: string
   fullName: string
   email: string
@@ -102,6 +123,8 @@ export default function TrackingPackagesPage() {
   const [isAdminOrOwner, setIsAdminOrOwner] = useState(false)
   const [editingPackage, setEditingPackage] = useState<Package | null>(null)
   const [users, setUsers] = useState<User[]>([])
+  const [selectedUser, setSelectedUser] = useState<UserOption | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -384,6 +407,69 @@ export default function TrackingPackagesPage() {
     }
   }
 
+  // Function to load users with search
+  const loadUsers = async (inputValue: string) => {
+    try {
+      const { data, error } = await supabaseAdmin
+        .from('User')
+        .select('id, fullName, email')
+        .or(`fullName.ilike.%${inputValue}%,email.ilike.%${inputValue}%`)
+        .limit(10)
+        .order('fullName')
+
+      if (error) throw error
+
+      return data.map(user => ({
+        value: user.id,
+        label: `${user.fullName} (${user.email})`,
+        ...user
+      }))
+    } catch (error) {
+      console.error('Error loading users:', error)
+      return []
+    }
+  }
+
+  const handleCreatePackage = async () => {
+    if (!selectedUser) return
+
+    try {
+      // Generate a unique tracking number
+      const trackingNumber = `TRK-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+
+      const { data, error } = await supabase
+        .from('package')
+        .insert([
+          {
+            trackingNumber,
+            status: 'PENDING',
+            description: '',
+            userId: selectedUser.id,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }
+        ])
+        .select(`
+          *,
+          user:User (
+            fullName,
+            email
+          )
+        `)
+        .single()
+
+      if (error) throw error
+
+      setPackages([data, ...packages])
+      setIsModalOpen(false)
+      setSelectedUser(null)
+      toast.success('تم إنشاء الطرد بنجاح')
+    } catch (error) {
+      console.error('Error creating package:', error)
+      toast.error('حدث خطأ أثناء إنشاء الطرد')
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -415,7 +501,7 @@ export default function TrackingPackagesPage() {
             {(session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER') && (
               <div className="mt-6">
                 <Button
-                  onClick={() => setShowCreateForm(true)}
+                  onClick={() => setIsModalOpen(true)}
                   className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                 >
                   إضافة طرد جديد
@@ -480,15 +566,46 @@ export default function TrackingPackagesPage() {
         </div>
       </div>
 
-      {/* Create Package Modal */}
-      {showCreateForm && (
-        <CreatePackageForm
-          onSuccess={(newPackage) => {
-            setPackages([newPackage, ...packages])
-            setShowCreateForm(false)
-          }}
-          onCancel={() => setShowCreateForm(false)}
-        />
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg w-full max-w-md">
+            <h2 className="text-2xl font-bold mb-4">إنشاء طرد جديد</h2>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                المستخدم
+              </label>
+              <AsyncSelect<UserOption>
+                cacheOptions
+                defaultOptions
+                loadOptions={loadUsers}
+                onChange={(selected) => setSelectedUser(selected)}
+                placeholder="ابحث عن مستخدم..."
+                noOptionsMessage={() => "لا توجد نتائج"}
+                loadingMessage={() => "جاري البحث..."}
+                className="w-full"
+                classNamePrefix="select"
+                isRtl={true}
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 mt-4">
+              <Button
+                onClick={() => setIsModalOpen(false)}
+                className="bg-gray-500 hover:bg-gray-600 text-white"
+              >
+                إلغاء
+              </Button>
+              <Button
+                onClick={handleCreatePackage}
+                className="bg-green-500 hover:bg-green-600 text-white"
+                disabled={!selectedUser}
+              >
+                إنشاء
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
 
       {isEditModalOpen && selectedPackage && (
