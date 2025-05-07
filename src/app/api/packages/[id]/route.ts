@@ -44,7 +44,7 @@ export async function DELETE(request: NextRequest) {
 }
 
 export async function PATCH(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
