@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
@@ -13,26 +13,6 @@ interface PaymentModalProps {
 
 export default function PaymentModal({ isOpen, onClose, amount, orderId, onPaymentComplete }: PaymentModalProps) {
   const [loading, setLoading] = useState(false)
-  const [walletBalance, setWalletBalance] = useState<number | null>(null)
-
-  useEffect(() => {
-    const fetchWalletBalance = async () => {
-      try {
-        const response = await fetch('/api/wallet')
-        if (!response.ok) {
-          throw new Error('Failed to fetch wallet balance')
-        }
-        const data = await response.json()
-        setWalletBalance(data.balance)
-      } catch (error) {
-        console.error('Error fetching wallet balance:', error)
-      }
-    }
-
-    if (isOpen) {
-      fetchWalletBalance()
-    }
-  }, [isOpen])
 
   const handlePayment = async () => {
     try {
@@ -70,9 +50,9 @@ export default function PaymentModal({ isOpen, onClose, amount, orderId, onPayme
       toast.success(result.message || 'تم الدفع بنجاح')
       onPaymentComplete()
       onClose()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Payment error:', error)
-      toast.error(error.message || 'حدث خطأ أثناء معالجة الدفع')
+      toast.error(error instanceof Error ? error.message : 'حدث خطأ أثناء معالجة الدفع')
     } finally {
       setLoading(false)
     }
@@ -88,17 +68,6 @@ export default function PaymentModal({ isOpen, onClose, amount, orderId, onPayme
           <div className="text-center mb-6">
             <p className="text-lg mb-2">المبلغ المطلوب:</p>
             <p className="text-2xl font-bold text-green-600">₪{amount.toFixed(2)}</p>
-            {walletBalance !== null && (
-              <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-600 mb-1">رصيد المحفظة الحالي:</p>
-                <p className="text-lg font-semibold text-gray-800">₪{walletBalance.toFixed(2)}</p>
-                {walletBalance < amount && (
-                  <p className="text-sm text-red-600 mt-2">
-                    رصيد المحفظة غير كافٍ. يرجى شحن المحفظة أولاً
-                  </p>
-                )}
-              </div>
-            )}
           </div>
           <div className="flex justify-center gap-4">
             <Button
@@ -110,7 +79,7 @@ export default function PaymentModal({ isOpen, onClose, amount, orderId, onPayme
             </Button>
             <Button
               onClick={handlePayment}
-              disabled={loading || (walletBalance !== null && walletBalance < amount)}
+              disabled={loading}
               className="bg-green-500 hover:bg-green-600 px-6"
             >
               {loading ? 'جاري المعالجة...' : 'دفع'}

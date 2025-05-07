@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -14,38 +14,7 @@ import EditPackageModal from '@/app/components/EditPackageModal'
 import { Badge } from '@/components/ui/badge'
 import AsyncSelect from 'react-select/async'
 
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: false,
-      detectSessionInUrl: false
-    }
-  }
-)
-
-// Initialize Supabase admin client
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  }
-)
-
 interface User {
-  id: string
-  fullName: string
-  email: string
-}
-
-interface Shop {
   id: string
   fullName: string
   email: string
@@ -64,16 +33,16 @@ interface Package {
   trackingNumber: string
   status: string
   description: string | null
-  shopId: string
   userId: string
+  shopId: string
   createdAt: string
   updatedAt: string
-  shop: {
+  user: {
     id: string
     fullName: string
     email: string
   }
-  user: {
+  shop: {
     id: string
     fullName: string
     email: string
@@ -88,24 +57,16 @@ interface Order {
   updatedAt: string
   userId: string
   user: {
+    id: string
     fullName: string
     email: string
   }
 }
 
-function getStatusVariant(status: string) {
-  switch (status) {
-    case 'PENDING':
-      return 'secondary'
-    case 'IN_TRANSIT':
-      return 'info'
-    case 'DELIVERED':
-      return 'success'
-    case 'CANCELLED':
-      return 'destructive'
-    default:
-      return 'default'
-  }
+interface Shop {
+  id: string
+  fullName: string
+  email: string
 }
 
 export default function TrackingPackagesPage() {
@@ -139,50 +100,109 @@ export default function TrackingPackagesPage() {
         id: session.user?.id
       })
 
-      // Initialize Supabase with the session
-      const initializeSupabase = async () => {
-        try {
-          if (session.user?.role === 'ADMIN' || session.user?.role === 'OWNER') {
-            setIsAdminOrOwner(true)
-            await fetchPackages()
-            await fetchShops()
-            await fetchRegularUsers()
-          } else {
-            router.push('/')
-          }
-        } catch (error) {
-          console.error('Error initializing Supabase:', error)
-        }
+      if (session.user?.role === 'ADMIN' || session.user?.role === 'OWNER') {
+        setIsAdminOrOwner(true)
+        fetchPackages()
+        fetchShops()
+        fetchRegularUsers()
+      } else {
+        router.push('/')
       }
-
-      initializeSupabase()
     }
   }, [status, session])
 
+  const fetchPackages = async () => {
+    try {
+      setLoading(true)
+      setError('')
+
+      const { data, error } = await supabase
+        .from('package')
+        .select(`
+          id,
+          trackingNumber,
+          status,
+          description,
+          userId,
+          shopId,
+          createdAt,
+          updatedAt,
+          user:User!userId (
+            id,
+            fullName,
+            email
+          ),
+          shop:User!shopId (
+            id,
+            fullName,
+            email
+          )
+        `)
+        .order('createdAt', { ascending: false })
+
+      if (error) throw error
+
+      // Transform the data to match the Package interface
+      const transformedPackages = (data || []).map(pkg => ({
+        id: pkg.id,
+        trackingNumber: pkg.trackingNumber,
+        status: pkg.status,
+        description: pkg.description,
+        userId: pkg.userId,
+        shopId: pkg.shopId,
+        createdAt: pkg.createdAt,
+        updatedAt: pkg.updatedAt,
+        user: {
+          id: pkg.user[0]?.id || '',
+          fullName: pkg.user[0]?.fullName || 'غير معروف',
+          email: pkg.user[0]?.email || ''
+        },
+        shop: {
+          id: pkg.shop[0]?.id || '',
+          fullName: pkg.shop[0]?.fullName || 'غير معروف',
+          email: pkg.shop[0]?.email || ''
+        }
+      }))
+
+      setPackages(transformedPackages)
+    } catch (err) {
+      console.error('Error fetching packages:', err)
+      setError('حدث خطأ أثناء جلب الطرود')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const fetchShops = async () => {
     try {
-      const response = await fetch('/api/users/shops')
-      if (!response.ok) {
-        throw new Error('Failed to fetch shops')
-      }
-      const data = await response.json()
-      setShops(data)
-    } catch (error) {
-      console.error('Error fetching shops:', error)
+      const { data, error } = await supabase
+        .from('User')
+        .select('id, fullName, email')
+        .eq('role', 'SHOP')
+        .order('fullName')
+
+      if (error) throw error
+
+      setShops(data || [])
+    } catch (err) {
+      console.error('Error fetching shops:', err)
       setError('حدث خطأ أثناء جلب المتاجر')
     }
   }
 
   const fetchRegularUsers = async () => {
     try {
-      const response = await fetch('/api/users/regular')
-      if (!response.ok) {
-        throw new Error('Failed to fetch users')
-      }
-      const data = await response.json()
-      setRegularUsers(data)
-    } catch (error) {
-      console.error('Error fetching regular users:', error)
+      const { data, error } = await supabase
+        .from('User')
+        .select('id, fullName, email')
+        .eq('role', 'REGULAR')
+        .order('fullName')
+
+      if (error) throw error
+
+      setRegularUsers(data || [])
+    } catch (err) {
+      console.error('Error fetching regular users:', err)
       setError('حدث خطأ أثناء جلب المستخدمين')
     }
   }
@@ -248,63 +268,6 @@ export default function TrackingPackagesPage() {
     } catch (err) {
       console.error('Error fetching orders:', err)
       setError('حدث خطأ أثناء جلب الطلبات')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const fetchPackages = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      const response = await fetch('/api/packages')
-      if (!response.ok) {
-        throw new Error('Failed to fetch packages')
-      }
-      
-      const packages = await response.json()
-      console.log('Fetched packages:', packages)
-
-      if (!packages || packages.length === 0) {
-        console.log('No packages found in the database')
-        setPackages([])
-        return
-      }
-
-      // Transform the data to match the Package interface
-      const transformedPackages = packages.map((pkg: any) => {
-        const shopData = Array.isArray(pkg.shop) ? pkg.shop[0] : pkg.shop
-        const userData = Array.isArray(pkg.User) ? pkg.User[0] : pkg.User
-
-        return {
-          id: pkg.id,
-          trackingNumber: pkg.trackingNumber,
-          status: pkg.status,
-          description: pkg.description,
-          shopId: pkg.shopId,
-          userId: pkg.userId,
-          createdAt: pkg.createdAt,
-          updatedAt: pkg.updatedAt,
-          shop: {
-            id: shopData?.id || '',
-            fullName: shopData?.fullName || 'غير معروف',
-            email: shopData?.email || ''
-          },
-          user: {
-            id: userData?.id || '',
-            fullName: userData?.fullName || 'غير معروف',
-            email: userData?.email || ''
-          }
-        }
-      })
-
-      console.log('Transformed packages:', transformedPackages)
-      setPackages(transformedPackages)
-    } catch (error) {
-      console.error('Error in fetchPackages:', error)
-      setError('حدث خطأ أثناء جلب الطرود')
-      toast.error('حدث خطأ أثناء جلب الطرود')
     } finally {
       setLoading(false)
     }
@@ -410,7 +373,7 @@ export default function TrackingPackagesPage() {
   // Function to load users with search
   const loadUsers = async (inputValue: string) => {
     try {
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await supabase
         .from('User')
         .select('id, fullName, email')
         .or(`fullName.ilike.%${inputValue}%,email.ilike.%${inputValue}%`)
@@ -516,118 +479,121 @@ export default function TrackingPackagesPage() {
             </div>
           )}
 
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-right">رقم التتبع</TableHead>
-                <TableHead className="text-right">الحالة</TableHead>
-                <TableHead className="text-right">الوصف</TableHead>
-                <TableHead className="text-right">المتجر</TableHead>
-                <TableHead className="text-right">المستخدم</TableHead>
-                <TableHead className="text-right">تاريخ الإنشاء</TableHead>
-                {isAdminOrOwner && <TableHead className="text-right">الإجراءات</TableHead>}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {packages.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={isAdminOrOwner ? 7 : 6} className="text-center py-8">
-                    لا توجد طلبات متابعة حالياً
-                  </TableCell>
-                </TableRow>
-              ) : (
-                packages.map((pkg) => (
-                  <TableRow key={pkg.id}>
-                    <TableCell className="text-right">{pkg.trackingNumber}</TableCell>
-                    <TableCell className="text-right">
-                      <Badge variant={getStatusVariant(pkg.status)}>
-                        {getPackageStatusText(pkg.status)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">{pkg.description || '-'}</TableCell>
-                    <TableCell className="text-right">{pkg.shop?.email || 'غير معروف'}</TableCell>
-                    <TableCell className="text-right">{pkg.user?.email || '-'}</TableCell>
-                    <TableCell className="text-right">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
-                    {isAdminOrOwner && (
-                      <TableCell className="text-right">
-                        <Button
-                          onClick={() => handleEditClick(pkg)}
-                          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                        >
-                          تعديل
-                        </Button>
-                      </TableCell>
-                    )}
+          <Card>
+            <CardHeader>
+              <CardTitle>الطرود</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-center">رقم التتبع</TableHead>
+                    <TableHead className="text-center">المستخدم</TableHead>
+                    <TableHead className="text-center">المتجر</TableHead>
+                    <TableHead className="text-center">الحالة</TableHead>
+                    <TableHead className="text-center">تاريخ الإنشاء</TableHead>
+                    <TableHead className="text-center">الإجراءات</TableHead>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                </TableHeader>
+                <TableBody>
+                  {packages.map((pkg) => (
+                    <TableRow key={pkg.id}>
+                      <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
+                      <TableCell className="text-center">{pkg.user.fullName}</TableCell>
+                      <TableCell className="text-center">{pkg.shop.fullName}</TableCell>
+                      <TableCell className="text-center">
+                        <Badge className={getStatusColor(pkg.status)}>
+                          {getPackageStatusText(pkg.status)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {new Date(pkg.createdAt).toLocaleDateString('ar-SA')}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex justify-center gap-2">
+                          <Button
+                            onClick={() => handleEditClick(pkg)}
+                            variant="outline"
+                            size="sm"
+                          >
+                            تعديل
+                          </Button>
+                          <Button
+                            onClick={() => handleDelete(pkg.id)}
+                            variant="destructive"
+                            size="sm"
+                          >
+                            حذف
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         </div>
       </div>
-
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg w-full max-w-md">
-            <h2 className="text-2xl font-bold mb-4">إنشاء طرد جديد</h2>
-            
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                المستخدم
-              </label>
-              <AsyncSelect<UserOption>
-                cacheOptions
-                defaultOptions
-                loadOptions={loadUsers}
-                onChange={(selected) => setSelectedUser(selected)}
-                placeholder="ابحث عن مستخدم..."
-                noOptionsMessage={() => "لا توجد نتائج"}
-                loadingMessage={() => "جاري البحث..."}
-                className="w-full"
-                classNamePrefix="select"
-                isRtl={true}
-              />
-            </div>
-
-            <div className="flex justify-end gap-2 mt-4">
-              <Button
-                onClick={() => setIsModalOpen(false)}
-                className="bg-gray-500 hover:bg-gray-600 text-white"
-              >
-                إلغاء
-              </Button>
-              <Button
-                onClick={handleCreatePackage}
-                className="bg-green-500 hover:bg-green-600 text-white"
-                disabled={!selectedUser}
-              >
-                إنشاء
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {isEditModalOpen && selectedPackage && (
         <EditPackageModal
           isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          pkg={selectedPackage}
-          onSave={(updatedPackage) => {
-            setPackages(packages.map(pkg => 
-              pkg.id === updatedPackage.id ? {
-                ...pkg,
-                trackingNumber: updatedPackage.trackingNumber,
-                status: updatedPackage.status,
-                description: updatedPackage.description,
-                shopId: updatedPackage.shopId,
-                userId: updatedPackage.userId
-              } : pkg
-            ))
+          onClose={() => {
+            setIsEditModalOpen(false)
+            setSelectedPackage(null)
           }}
+          pkg={selectedPackage}
           shops={shops}
           users={regularUsers}
+          onSave={handleSavePackage}
         />
+      )}
+
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h2 className="text-xl font-bold mb-6 text-center">إضافة طرد جديد</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  المستخدم
+                </label>
+                <AsyncSelect
+                  cacheOptions
+                  defaultOptions
+                  value={selectedUser}
+                  onChange={(selected: UserOption | null) => setSelectedUser(selected)}
+                  loadOptions={loadUsers}
+                  placeholder="اختر المستخدم..."
+                  className="w-full"
+                  classNamePrefix="select"
+                  isRtl
+                  noOptionsMessage={() => "لا توجد نتائج"}
+                  loadingMessage={() => "جاري التحميل..."}
+                />
+              </div>
+              <div className="flex justify-end gap-4 mt-6">
+                <Button
+                  onClick={() => {
+                    setIsModalOpen(false)
+                    setSelectedUser(null)
+                  }}
+                  variant="outline"
+                >
+                  إلغاء
+                </Button>
+                <Button
+                  onClick={handleCreatePackage}
+                  disabled={!selectedUser}
+                  className="bg-green-500 hover:bg-green-600"
+                >
+                  إنشاء
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
