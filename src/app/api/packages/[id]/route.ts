@@ -17,15 +17,9 @@ const supabaseAdmin = createClient(
 
 export const dynamic = 'force-dynamic'
 
-type RouteContext = {
-  params: {
-    id: string
-  }
-}
-
 export async function DELETE(
   request: NextRequest,
-  { params }: RouteContext
+  { params }: { params: { id: string } }
 ) {
   try {
     // Check if user is authenticated and is ADMIN/OWNER
