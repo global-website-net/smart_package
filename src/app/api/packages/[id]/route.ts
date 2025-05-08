@@ -17,10 +17,7 @@ const supabaseAdmin = createClient(
 
 export const dynamic = 'force-dynamic'
 
-export async function DELETE(
-  request: NextRequest,
-  context: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest) {
   try {
     // Check if user is authenticated and is ADMIN/OWNER
     const session = await getServerSession(authOptions)
@@ -28,7 +25,13 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = context.params
+    const id = request.url.split('/').pop()
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Package ID is required' },
+        { status: 400 }
+      )
+    }
 
     // Delete the package
     const { error } = await supabaseAdmin
