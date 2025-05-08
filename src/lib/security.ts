@@ -49,8 +49,8 @@ export function isValidEmail(email: string): boolean {
 export const SESSION_TIMEOUT = 24 * 60 * 60 * 1000 // 24 hours
 
 // Maximum login attempts
-export const MAX_LOGIN_ATTEMPTS = 5
-export const LOGIN_ATTEMPT_WINDOW = 15 * 60 * 1000 // 15 minutes
+export const MAX_LOGIN_ATTEMPTS = 10
+export const LOGIN_ATTEMPT_WINDOW = 5 * 60 * 1000 // 5 minutes
 
 // Password requirements
 export const PASSWORD_REQUIREMENTS = {

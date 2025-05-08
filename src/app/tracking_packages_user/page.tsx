@@ -53,10 +53,11 @@ export default function UserPackagesPage() {
         router.push('/')
         return
       }
+      // Fetch data only once when component mounts or session changes
       fetchPackages()
       fetchShops()
     }
-  }, [status, session])
+  }, [status, session]) // Only depend on status and session changes
 
   const fetchShops = async () => {
     try {
@@ -119,15 +120,25 @@ export default function UserPackagesPage() {
     try {
       setLoading(true)
       const { error } = await supabase
-        .from('Package')
+        .from('package')
         .update({ shopId })
         .eq('id', selectedPackageId)
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase error:', error)
+        throw new Error(error.message)
+      }
 
-      // Refresh packages
-      fetchPackages()
+      // Update local state
+      setPackages(packages.map(pkg => 
+        pkg.id === selectedPackageId 
+          ? { ...pkg, shopId } 
+          : pkg
+      ))
+
       toast.success('تم تحديث المتجر بنجاح')
+      setIsShopEditOpen(false)
+      setSelectedPackageId(null)
     } catch (error) {
       console.error('Error updating shop:', error)
       toast.error('حدث خطأ أثناء تحديث المتجر')
@@ -219,11 +230,11 @@ export default function UserPackagesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-center">رقم التتبع</TableHead>
-                <TableHead className="text-center">المتجر</TableHead>
-                <TableHead className="text-center">الحالة</TableHead>
-                <TableHead className="text-center">الوصف</TableHead>
-                <TableHead className="text-center">تاريخ الإنشاء</TableHead>
+                <TableHead className="text-center font-bold text-lg">رقم التتبع</TableHead>
+                <TableHead className="text-center font-bold text-lg">المتجر</TableHead>
+                <TableHead className="text-center font-bold text-lg">الحالة</TableHead>
+                <TableHead className="text-center font-bold text-lg">الوصف</TableHead>
+                <TableHead className="text-center font-bold text-lg">تاريخ الإنشاء</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

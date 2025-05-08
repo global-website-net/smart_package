@@ -167,7 +167,6 @@ export default function WalletPage() {
             >
               إضافة رصيد
             </button>
-            <div className="w-48 h-0.5 bg-green-500"></div>
           </div>
 
           {/* Transaction History */}

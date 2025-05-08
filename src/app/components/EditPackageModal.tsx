@@ -128,13 +128,19 @@ export default function EditPackageModal({ isOpen, onClose, pkg, onSave, shops, 
   // Function to load shops with search
   const loadShops = async (inputValue: string) => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('User')
         .select('id, fullName, email')
         .eq('role', 'SHOP')
-        .or(`fullName.ilike.%${inputValue}%,email.ilike.%${inputValue}%`)
         .limit(10)
         .order('fullName')
+
+      // Only add search condition if there's an input value
+      if (inputValue) {
+        query = query.or(`fullName.ilike.%${inputValue}%,email.ilike.%${inputValue}%`)
+      }
+
+      const { data, error } = await query
 
       if (error) throw error
 

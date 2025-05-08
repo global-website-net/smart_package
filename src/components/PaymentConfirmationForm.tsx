@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { createClient } from '@supabase/supabase-js'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -29,48 +30,46 @@ export default function PaymentConfirmationForm({
   const [error, setError] = useState<string | null>(null)
   const [walletBalance, setWalletBalance] = useState<number | null>(null)
   const router = useRouter()
+  const { data: session, status } = useSession()
 
   useEffect(() => {
-    const fetchWalletBalance = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return
-
-        const { data: wallet, error: walletError } = await supabase
-          .from('wallet')
-          .select('balance')
-          .eq('userId', user.id)
-          .single()
-
-        if (walletError) {
-          console.error('Error fetching wallet balance:', walletError)
-          return
-        }
-
-        setWalletBalance(wallet?.balance || 0)
-      } catch (err) {
-        console.error('Error in fetchWalletBalance:', err)
-      }
+    if (status === 'authenticated' && session?.user?.id) {
+      fetchWalletBalance()
     }
+  }, [status, session])
 
-    fetchWalletBalance()
-  }, [])
+  const fetchWalletBalance = async () => {
+    try {
+      const { data: wallet, error: walletError } = await supabase
+        .from('wallet')
+        .select('balance')
+        .eq('userId', session?.user?.id)
+        .single()
+
+      if (walletError) {
+        throw new Error('حدث خطأ أثناء جلب رصيد المحفظة')
+      }
+
+      setWalletBalance(wallet?.balance || 0)
+    } catch (err) {
+      console.error('Error fetching wallet balance:', err)
+      setError('حدث خطأ أثناء جلب رصيد المحفظة')
+    }
+  }
 
   const handleConfirmPayment = async () => {
     try {
       setLoading(true)
       setError(null)
 
-      // Get current user's wallet balance
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
+      if (status !== 'authenticated' || !session?.user?.id) {
         throw new Error('يجب تسجيل الدخول أولاً')
       }
 
       const { data: wallet, error: walletError } = await supabase
         .from('wallet')
         .select('balance')
-        .eq('userId', user.id)
+        .eq('userId', session.user.id)
         .single()
 
       if (walletError) {
@@ -102,7 +101,7 @@ export default function PaymentConfirmationForm({
       const { error: updateWalletError } = await supabase
         .from('wallet')
         .update({ balance: newBalance })
-        .eq('userId', user.id)
+        .eq('userId', session.user.id)
 
       if (updateWalletError) {
         throw new Error('حدث خطأ أثناء تحديث رصيد المحفظة')
@@ -112,7 +111,7 @@ export default function PaymentConfirmationForm({
       const { error: transactionError } = await supabase
         .from('wallet_transaction')
         .insert({
-          userId: user.id,
+          userId: session.user.id,
           amount: -totalAmount,
           type: 'PAYMENT',
           description: `دفع مقابل الطلب رقم ${orderId}`,
@@ -164,16 +163,16 @@ export default function PaymentConfirmationForm({
             )}
             <div className="flex justify-center space-x-4 rtl:space-x-reverse">
               <Button
-                variant="outline"
                 onClick={onCancel}
                 disabled={loading}
+                className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
               >
                 إلغاء
               </Button>
               <Button
                 onClick={handleConfirmPayment}
                 disabled={loading}
-                className="bg-green-500 hover:bg-green-600"
+                className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
               >
                 {loading ? 'جاري المعالجة...' : 'تأكيد الدفع'}
               </Button>

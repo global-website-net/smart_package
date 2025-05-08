@@ -72,16 +72,16 @@ export default function ShopEditWizard({
             </div>
             <div className="flex justify-center gap-4">
               <Button
-                variant="outline"
                 onClick={onClose}
                 disabled={loading}
+                className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
               >
                 إلغاء
               </Button>
               <Button
                 onClick={handleSave}
                 disabled={loading}
-                className="bg-green-500 hover:bg-green-600"
+                className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
               >
                 {loading ? 'جاري الحفظ...' : 'حفظ'}
               </Button>
