@@ -20,6 +20,7 @@ interface Order {
   additionalInfo: string | null
   status: string
   totalAmount: number
+  orderNumber: string
   createdAt: string
   updatedAt: string
 }
@@ -74,6 +75,7 @@ export default function TrackingOrdersRegularPage() {
         additionalInfo: order.additionalInfo,
         status: order.status,
         totalAmount: order.totalAmount,
+        orderNumber: order.orderNumber,
         createdAt: order.createdAt,
         updatedAt: order.updatedAt
       }))

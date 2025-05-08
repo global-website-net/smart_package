@@ -16,8 +16,9 @@ if (!supabaseUrl || !supabaseAnonKey || !nextAuthSecret) {
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    autoRefreshToken: false,
-    persistSession: false
+    autoRefreshToken: true,
+    persistSession: true,
+    storageKey: 'supabase.auth.token'
   }
 })
 
@@ -27,8 +28,9 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
   {
     auth: {
-      autoRefreshToken: false,
-      persistSession: false
+      autoRefreshToken: true,
+      persistSession: true,
+      storageKey: 'supabase.auth.token'
     }
   }
 )

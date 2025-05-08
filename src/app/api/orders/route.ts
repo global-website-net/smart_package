@@ -36,6 +36,7 @@ export async function GET() {
         additionalInfo,
         status,
         totalAmount,
+        orderNumber,
         createdAt,
         updatedAt,
         User!Order_userId_fkey (

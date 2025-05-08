@@ -128,23 +128,19 @@ export default function EditPackageModal({ isOpen, onClose, pkg, onSave, shops, 
   // Function to load shops with search
   const loadShops = async (inputValue: string) => {
     try {
-      let query = supabase
-        .from('User')
-        .select('id, fullName, email')
-        .eq('role', 'SHOP')
-        .limit(10)
-        .order('fullName')
-
-      // Only add search condition if there's an input value
-      if (inputValue) {
-        query = query.or(`fullName.ilike.%${inputValue}%,email.ilike.%${inputValue}%`)
+      const response = await fetch('/api/users/shops')
+      if (!response.ok) {
+        throw new Error('Failed to fetch shops')
       }
+      const data = await response.json()
+      
+      // Filter the shops based on input value
+      const filteredShops = data.filter((shop: any) => 
+        shop.fullName.toLowerCase().includes(inputValue.toLowerCase()) ||
+        shop.email.toLowerCase().includes(inputValue.toLowerCase())
+      )
 
-      const { data, error } = await query
-
-      if (error) throw error
-
-      return data.map(shop => ({
+      return filteredShops.map((shop: any) => ({
         value: shop.id,
         label: `${shop.fullName} (${shop.email})`,
         ...shop
@@ -280,7 +276,7 @@ export default function EditPackageModal({ isOpen, onClose, pkg, onSave, shops, 
           </div>
         </div>
         <div className="flex justify-center gap-4 rtl:space-x-reverse">
-          <button
+        "حفظ"     <button
             onClick={onClose}
             className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
           >

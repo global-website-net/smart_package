@@ -32,12 +32,6 @@ export default function PaymentConfirmationForm({
   const router = useRouter()
   const { data: session, status } = useSession()
 
-  useEffect(() => {
-    if (status === 'authenticated' && session?.user?.id) {
-      fetchWalletBalance()
-    }
-  }, [status, session])
-
   const fetchWalletBalance = async () => {
     try {
       const { data: wallet, error: walletError } = await supabase
@@ -51,9 +45,11 @@ export default function PaymentConfirmationForm({
       }
 
       setWalletBalance(wallet?.balance || 0)
+      return wallet?.balance || 0
     } catch (err) {
       console.error('Error fetching wallet balance:', err)
       setError('حدث خطأ أثناء جلب رصيد المحفظة')
+      return null
     }
   }
 
@@ -66,17 +62,13 @@ export default function PaymentConfirmationForm({
         throw new Error('يجب تسجيل الدخول أولاً')
       }
 
-      const { data: wallet, error: walletError } = await supabase
-        .from('wallet')
-        .select('balance')
-        .eq('userId', session.user.id)
-        .single()
-
-      if (walletError) {
-        throw new Error('حدث خطأ أثناء التحقق من رصيد المحفظة')
+      // Fetch wallet balance first
+      const balance = await fetchWalletBalance()
+      if (balance === null) {
+        return // Error already set by fetchWalletBalance
       }
 
-      if (!wallet || wallet.balance < totalAmount) {
+      if (balance < totalAmount) {
         setError('رصيد المحفظة غير كافٍ. يرجى شحن المحفظة أولاً')
         return
       }
@@ -97,7 +89,7 @@ export default function PaymentConfirmationForm({
       }
 
       // Update wallet balance
-      const newBalance = wallet.balance - totalAmount
+      const newBalance = balance - totalAmount
       const { error: updateWalletError } = await supabase
         .from('wallet')
         .update({ balance: newBalance })
@@ -153,15 +145,19 @@ export default function PaymentConfirmationForm({
         <CardContent>
           <div className="space-y-4">
             <div className="text-center">
-              <p className="text-lg font-semibold">المبلغ المطلوب: {totalAmount.toLocaleString('ar-SA')} ريال</p>
-              <p className="text-sm text-gray-600 mt-2">رصيد المحفظة الحالي: {walletBalance?.toLocaleString('ar-SA') || '0'} ريال</p>
+              <p className="text-lg font-semibold">المبلغ المطلوب: {totalAmount.toLocaleString('ar-SA')} Shekels</p>
+              <p className="text-sm text-gray-600 mt-2">
+                {walletBalance !== null 
+                  ? `رصيد المحفظة الحالي: ${walletBalance.toLocaleString('ar-SA')} Shekels`
+                  : 'انقر على تأكيد الدفع للتحقق من الرصيد'}
+              </p>
             </div>
             {error && (
               <div className="text-red-500 text-center">
                 {error}
               </div>
             )}
-            <div className="flex justify-center space-x-4 rtl:space-x-reverse">
+            <div className="flex justify-center space-x-8 rtl:space-x-reverse">
               <Button
                 onClick={onCancel}
                 disabled={loading}

@@ -93,16 +93,20 @@ export default function UserPackagesPage() {
       }
 
       // Transform the data to match the Package interface
-      const transformedPackages = packages.map((pkg: any) => ({
-        id: pkg.id,
-        trackingNumber: pkg.trackingNumber,
-        status: pkg.status,
-        description: pkg.description,
-        userId: pkg.userId,
-        createdAt: pkg.createdAt,
-        updatedAt: pkg.updatedAt,
-        User: pkg.User
-      }))
+      const transformedPackages = packages.map((pkg: any) => {
+        const shopData = Array.isArray(pkg.shop) ? pkg.shop[0] : pkg.shop
+        return {
+          id: pkg.id,
+          trackingNumber: pkg.trackingNumber,
+          status: pkg.status,
+          description: pkg.description,
+          shopId: pkg.shopId,
+          userId: pkg.userId,
+          createdAt: pkg.createdAt,
+          updatedAt: pkg.updatedAt,
+          User: shopData || { fullName: 'غير محدد', email: '' }
+        }
+      })
 
       console.log('Transformed packages:', transformedPackages)
       setPackages(transformedPackages)
