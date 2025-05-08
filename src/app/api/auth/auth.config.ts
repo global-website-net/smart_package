@@ -2,7 +2,6 @@ import { NextAuthOptions, User, DefaultSession } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
 import { createClient } from '@supabase/supabase-js'
-import prisma from '@/lib/prisma'
 import { verifyPassword, SESSION_TIMEOUT, MAX_LOGIN_ATTEMPTS, LOGIN_ATTEMPT_WINDOW } from '@/lib/security'
 
 // Initialize Supabase client
@@ -35,35 +34,12 @@ const supabaseAdmin = createClient(
   }
 )
 
-// Store login attempts
-const loginAttempts = new Map<string, { count: number; timestamp: number }>()
-
 // Define UserRole type
 type UserRole = 'REGULAR' | 'SHOP' | 'ADMIN' | 'OWNER'
 
-// Extend the User type
-interface ExtendedUser extends User {
-  role: UserRole
-  fullName: string
-  governorate: string
-  town: string
-  phonePrefix: string
-  phoneNumber: string
-}
-
-// Extend the built-in types for Next Auth
+// Extend the built-in session types
 declare module 'next-auth' {
-  interface User {
-    id: string
-    role: UserRole
-    fullName: string
-    governorate: string
-    town: string
-    phonePrefix: string
-    phoneNumber: string
-  }
-
-  interface Session {
+  interface Session extends DefaultSession {
     user: {
       id: string
       role: UserRole
@@ -76,42 +52,17 @@ declare module 'next-auth' {
   }
 }
 
-declare module 'next-auth/jwt' {
-  interface JWT {
-    id: string
-    role: UserRole
-    fullName: string
-    governorate: string
-    town: string
-    phonePrefix: string
-    phoneNumber: string
-  }
-}
-
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        email: { label: 'Email', type: 'email' },
+        email: { label: 'Email', type: 'text' },
         password: { label: 'Password', type: 'password' }
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error('الرجاء إدخال البريد الإلكتروني وكلمة المرور')
-        }
-
-        // Check for too many login attempts
-        const attempts = loginAttempts.get(credentials.email)
-        if (attempts) {
-          if (attempts.count >= MAX_LOGIN_ATTEMPTS) {
-            const timeLeft = attempts.timestamp + LOGIN_ATTEMPT_WINDOW - Date.now()
-            if (timeLeft > 0) {
-              throw new Error(`تم تجاوز عدد محاولات تسجيل الدخول. يرجى المحاولة بعد ${Math.ceil(timeLeft / 60000)} دقائق`)
-            }
-            // Reset attempts if window has passed
-            loginAttempts.delete(credentials.email)
-          }
         }
 
         try {
@@ -123,12 +74,6 @@ export const authOptions: NextAuthOptions = {
             .single()
 
           if (userError || !user) {
-            // Increment failed login attempts
-            const currentAttempts = loginAttempts.get(credentials.email) || { count: 0, timestamp: Date.now() }
-            loginAttempts.set(credentials.email, {
-              count: currentAttempts.count + 1,
-              timestamp: currentAttempts.timestamp
-            })
             throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
           }
 
@@ -139,17 +84,21 @@ export const authOptions: NextAuthOptions = {
           })
 
           if (authError || !authData.user) {
-            // Increment failed login attempts
-            const currentAttempts = loginAttempts.get(credentials.email) || { count: 0, timestamp: Date.now() }
-            loginAttempts.set(credentials.email, {
-              count: currentAttempts.count + 1,
-              timestamp: currentAttempts.timestamp
-            })
             throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
           }
 
-          // Reset login attempts on successful login
-          loginAttempts.delete(credentials.email)
+          // Clear any existing sessions for this user
+          await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
+          
+          // Create a new session using the regular client
+          const { data: newSession, error: sessionError } = await supabase.auth.signInWithPassword({
+            email: credentials.email,
+            password: credentials.password
+          })
+
+          if (sessionError) {
+            throw new Error('حدث خطأ أثناء إنشاء الجلسة')
+          }
 
           return {
             id: user.id,
@@ -161,10 +110,10 @@ export const authOptions: NextAuthOptions = {
             town: user.town,
             phonePrefix: user.phonePrefix,
             phoneNumber: user.phoneNumber
-          } as ExtendedUser
+          }
         } catch (error) {
-          console.error('Auth error:', error)
-          throw error
+          console.error('Authentication error:', error)
+          throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
         }
       }
     }),

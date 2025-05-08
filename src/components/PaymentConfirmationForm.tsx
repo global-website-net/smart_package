@@ -13,6 +13,10 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
+interface WalletData {
+  balance: number;
+}
+
 interface PaymentConfirmationFormProps {
   orderId: string
   totalAmount: number
@@ -32,20 +36,22 @@ export default function PaymentConfirmationForm({
   const router = useRouter()
   const { data: session, status } = useSession()
 
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user?.id) {
+      fetchWalletBalance()
+    }
+  }, [status, session])
+
   const fetchWalletBalance = async () => {
     try {
-      const { data: wallet, error: walletError } = await supabase
+      const { data, error } = await supabase
         .from('wallet')
         .select('balance')
         .eq('userId', session?.user?.id)
         .single()
 
-      if (walletError) {
-        throw new Error('حدث خطأ أثناء جلب رصيد المحفظة')
-      }
-
-      setWalletBalance(wallet?.balance || 0)
-      return wallet?.balance || 0
+      if (error) throw error
+      setWalletBalance((data as WalletData)?.balance ?? 0)
     } catch (err) {
       console.error('Error fetching wallet balance:', err)
       setError('حدث خطأ أثناء جلب رصيد المحفظة')
@@ -138,34 +144,23 @@ export default function PaymentConfirmationForm({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <Card className="w-full max-w-md mx-4">
+      <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-center">تأكيد الدفع</CardTitle>
+          <CardTitle className="text-center text-xl font-bold">تأكيد الدفع</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="text-center">
-              <p className="text-lg font-semibold">المبلغ المطلوب: {totalAmount.toLocaleString('ar-SA')} شيكل</p>
-              <p className="text-sm text-gray-500 mt-1">سيتم خصم المبلغ من رصيد محفظتك</p>
-              <p className="text-sm text-gray-600 mt-2">
-                {walletBalance !== null 
-                  ? `رصيد المحفظة الحالي: ${walletBalance.toLocaleString('ar-SA')} شيكل`
-                  : 'انقر على تأكيد الدفع للتحقق من الرصيد'}
-              </p>
+              <p className="text-lg font-semibold mb-2">المبلغ المطلوب: ₪{totalAmount.toFixed(2)}</p>
+              <p className="text-gray-600">رصيد المحفظة الحالي: ₪{(walletBalance ?? 0).toFixed(2)}</p>
             </div>
-            <div className="bg-yellow-50 p-4 rounded-md border border-yellow-200">
-              <h3 className="text-yellow-800 font-medium mb-2">ملاحظة هامة:</h3>
-              <ul className="text-yellow-700 text-sm space-y-1 list-disc list-inside">
-                <li>تأكد من وجود رصيد كافٍ في محفظتك قبل تأكيد الدفع</li>
-                <li>سيتم خصم المبلغ مباشرة من رصيد محفظتك</li>
-                <li>يمكنك شحن المحفظة من صفحة المحفظة إذا كان الرصيد غير كافٍ</li>
-              </ul>
-            </div>
+
             {error && (
-              <div className="text-red-500 text-center">
+              <div className="bg-red-50 text-red-800 p-3 rounded-md text-center">
                 {error}
               </div>
             )}
+
             <div className="flex justify-center gap-4 rtl:space-x-reverse">
               <Button
                 onClick={onCancel}

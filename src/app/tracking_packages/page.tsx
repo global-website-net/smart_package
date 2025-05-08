@@ -321,12 +321,31 @@ export default function TrackingPackagesPage() {
     description: string | null
     shopId: string
     userId: string
+    user?: {
+      id: string
+      fullName: string
+      email: string
+    }
+    shop?: {
+      id: string
+      fullName: string
+      email: string
+    }
   }) => {
     setPackages(prevPackages => 
       prevPackages.map(pkg => {
         if (pkg.id === updatedPackage.id) {
-          // Find the new user data from regularUsers array
+          // If the updated package includes user and shop data, use it
+          if (updatedPackage.user && updatedPackage.shop) {
+            return {
+              ...pkg,
+              ...updatedPackage
+            }
+          }
+          
+          // Otherwise, find the data from our local arrays
           const newUser = regularUsers.find(user => user.id === updatedPackage.userId)
+          const newShop = shops.find(shop => shop.id === updatedPackage.shopId)
           
           return {
             ...pkg,
@@ -335,6 +354,11 @@ export default function TrackingPackagesPage() {
               id: newUser.id,
               fullName: newUser.fullName,
               email: newUser.email
+            } : { id: '', fullName: 'غير معروف', email: '' },
+            shop: newShop ? {
+              id: newShop.id,
+              fullName: newShop.fullName,
+              email: newShop.email
             } : { id: '', fullName: 'غير معروف', email: '' }
           }
         }

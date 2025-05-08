@@ -50,19 +50,21 @@ export default function DeletePackageWizard({ isOpen, onClose, onConfirm, packag
           <p className="text-sm text-red-600 mb-6">لا يمكن التراجع عن هذا الإجراء</p>
         </div>
         <div className="flex justify-center gap-4 rtl:space-x-reverse">
-          <button
+          <Button
             onClick={onClose}
-            className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+            variant="secondary"
+            className="bg-gray-500 text-white hover:bg-gray-600"
           >
             إلغاء
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleDelete}
             disabled={loading}
-            className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+            variant="destructive"
+            className="bg-red-500 text-white hover:bg-red-600"
           >
             {loading ? 'جاري الحذف...' : 'حذف'}
-          </button>
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

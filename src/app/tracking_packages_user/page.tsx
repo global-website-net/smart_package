@@ -183,15 +183,15 @@ export default function UserPackagesPage() {
       case 'PENDING':
         return 'bg-yellow-100 text-yellow-800'
       case 'IN_TRANSIT':
-        return 'bg-blue-100 text-blue-800'
+        return 'bg-yellow-100 text-yellow-800'
       case 'DELIVERED':
-        return 'bg-green-100 text-green-800'
+        return 'bg-yellow-100 text-yellow-800'
       case 'CANCELLED':
-        return 'bg-red-100 text-red-800'
+        return 'bg-yellow-100 text-yellow-800'
       case 'RETURNED':
-        return 'bg-orange-100 text-orange-800'
+        return 'bg-yellow-100 text-yellow-800'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-yellow-100 text-yellow-800'
     }
   }
 
@@ -213,8 +213,8 @@ export default function UserPackagesPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="pt-32 pb-10">
-        <div className="max-w-7xl mx-auto px-4">
+      <main className="p-4 pt-24">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-6">تتبع الطرود</h1>
             <div className="flex justify-center items-center">
@@ -224,9 +224,9 @@ export default function UserPackagesPage() {
               </div>
             </div>
           </div>
-          
+
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <div className="bg-red-50 text-red-800 p-4 rounded-md mb-6">
               {error}
             </div>
           )}
@@ -283,7 +283,7 @@ export default function UserPackagesPage() {
             </TableBody>
           </Table>
         </div>
-      </div>
+      </main>
 
       <ShopEditWizard
         isOpen={isShopEditOpen}
