@@ -14,7 +14,32 @@ export const supabase = createClient(
     auth: {
       autoRefreshToken: true,
       persistSession: true,
-      storageKey: 'supabase.auth.token'
+      detectSessionInUrl: true,
+      storageKey: 'supabase.auth.token',
+      storage: {
+        getItem: (key) => {
+          try {
+            const value = localStorage.getItem(key)
+            return value ? JSON.parse(value) : null
+          } catch (error) {
+            return null
+          }
+        },
+        setItem: (key, value) => {
+          try {
+            localStorage.setItem(key, JSON.stringify(value))
+          } catch (error) {
+            console.error('Error storing auth token:', error)
+          }
+        },
+        removeItem: (key) => {
+          try {
+            localStorage.removeItem(key)
+          } catch (error) {
+            console.error('Error removing auth token:', error)
+          }
+        }
+      }
     }
   }
 )
@@ -25,7 +50,32 @@ export const supabaseAdmin = process.env.SUPABASE_SERVICE_ROLE_KEY
       auth: {
         autoRefreshToken: true,
         persistSession: true,
-        storageKey: 'supabase.auth.token'
+        detectSessionInUrl: true,
+        storageKey: 'supabase.auth.token',
+        storage: {
+          getItem: (key) => {
+            try {
+              const value = localStorage.getItem(key)
+              return value ? JSON.parse(value) : null
+            } catch (error) {
+              return null
+            }
+          },
+          setItem: (key, value) => {
+            try {
+              localStorage.setItem(key, JSON.stringify(value))
+            } catch (error) {
+              console.error('Error storing auth token:', error)
+            }
+          },
+          removeItem: (key) => {
+            try {
+              localStorage.removeItem(key)
+            } catch (error) {
+              console.error('Error removing auth token:', error)
+            }
+          }
+        }
       }
     })
   : null

@@ -278,7 +278,7 @@ export default function EditPackageModal({ isOpen, onClose, pkg, onSave, shops, 
           </div>
         </div>
         <div className="flex justify-center gap-4 rtl:space-x-reverse">
-        "حفظ"     <button
+          <button
             onClick={onClose}
             className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
           >

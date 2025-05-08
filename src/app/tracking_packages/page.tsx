@@ -374,15 +374,15 @@ export default function TrackingPackagesPage() {
       case 'PENDING':
         return 'bg-yellow-100 text-yellow-800'
       case 'IN_TRANSIT':
-        return 'bg-blue-100 text-blue-800'
+        return 'bg-yellow-100 text-yellow-800'
       case 'DELIVERED':
-        return 'bg-green-100 text-green-800'
+        return 'bg-yellow-100 text-yellow-800'
       case 'CANCELLED':
-        return 'bg-red-100 text-red-800'
+        return 'bg-yellow-100 text-yellow-800'
       case 'RETURNED':
-        return 'bg-orange-100 text-orange-800'
+        return 'bg-yellow-100 text-yellow-800'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-yellow-100 text-yellow-800'
     }
   }
 
@@ -435,13 +435,13 @@ export default function TrackingPackagesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-center font-bold text-lg">رقم التتبع</TableHead>
-                <TableHead className="text-center font-bold text-lg">الحالة</TableHead>
-                <TableHead className="text-center font-bold text-lg">الوصف</TableHead>
-                <TableHead className="text-center font-bold text-lg">المتجر</TableHead>
-                <TableHead className="text-center font-bold text-lg">المستخدم</TableHead>
-                <TableHead className="text-center font-bold text-lg">تاريخ الإنشاء</TableHead>
-                {isAdminOrOwner && <TableHead className="text-center font-bold text-lg">الإجراءات</TableHead>}
+                <TableHead className="text-right font-bold text-lg">رقم التتبع</TableHead>
+                <TableHead className="text-right font-bold text-lg">الحالة</TableHead>
+                <TableHead className="text-right font-bold text-lg">الوصف</TableHead>
+                <TableHead className="text-right font-bold text-lg">المتجر</TableHead>
+                <TableHead className="text-right font-bold text-lg">المستخدم</TableHead>
+                <TableHead className="text-right font-bold text-lg">تاريخ الإنشاء</TableHead>
+                {isAdminOrOwner && <TableHead className="text-right font-bold text-lg">الإجراءات</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>

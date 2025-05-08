@@ -153,12 +153,20 @@ export default function PaymentConfirmationForm({
                   : 'انقر على تأكيد الدفع للتحقق من الرصيد'}
               </p>
             </div>
+            <div className="bg-yellow-50 p-4 rounded-md border border-yellow-200">
+              <h3 className="text-yellow-800 font-medium mb-2">ملاحظة هامة:</h3>
+              <ul className="text-yellow-700 text-sm space-y-1 list-disc list-inside">
+                <li>تأكد من وجود رصيد كافٍ في محفظتك قبل تأكيد الدفع</li>
+                <li>سيتم خصم المبلغ مباشرة من رصيد محفظتك</li>
+                <li>يمكنك شحن المحفظة من صفحة المحفظة إذا كان الرصيد غير كافٍ</li>
+              </ul>
+            </div>
             {error && (
               <div className="text-red-500 text-center">
                 {error}
               </div>
             )}
-            <div className="flex justify-center space-x-16 rtl:space-x-reverse">
+            <div className="flex justify-center gap-4 rtl:space-x-reverse">
               <Button
                 onClick={onCancel}
                 disabled={loading}

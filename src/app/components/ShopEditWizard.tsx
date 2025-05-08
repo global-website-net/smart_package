@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
+import AsyncSelect from 'react-select/async'
 
 interface Shop {
   id: string
@@ -31,44 +31,76 @@ export default function ShopEditWizard({
   const [loading, setLoading] = useState(false)
 
   const handleSave = async () => {
+    if (!selectedShopId) {
+      toast.error('الرجاء اختيار المتجر')
+      return
+    }
+
     try {
       setLoading(true)
       onSave(selectedShopId)
-      toast.success('تم تحديث المتجر بنجاح')
-      onClose()
     } catch (error) {
-      console.error('Error updating shop:', error)
-      toast.error('حدث خطأ أثناء تحديث المتجر')
+      console.error('Error saving shop:', error)
+      toast.error('حدث خطأ أثناء حفظ المتجر')
     } finally {
       setLoading(false)
     }
   }
 
+  // Function to load shops with search
+  const loadShops = async (inputValue: string) => {
+    try {
+      const response = await fetch('/api/users/shops')
+      if (!response.ok) {
+        throw new Error('Failed to fetch shops')
+      }
+      const data = await response.json()
+      
+      // Filter the shops based on input value
+      const filteredShops = data.filter((shop: any) => 
+        shop.fullName.toLowerCase().includes(inputValue.toLowerCase()) ||
+        shop.email.toLowerCase().includes(inputValue.toLowerCase())
+      )
+
+      return filteredShops.map((shop: any) => ({
+        value: shop.id,
+        label: `${shop.fullName} (${shop.email})`,
+        ...shop
+      }))
+    } catch (error) {
+      console.error('Error loading shops:', error)
+      return []
+    }
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-center">تعديل المتجر</DialogTitle>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader className="flex flex-col items-center justify-center">
+          <DialogTitle className="text-xl font-bold text-center w-full">تعديل المتجر</DialogTitle>
         </DialogHeader>
         <div className="py-6">
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">اختر المتجر</label>
-              <Select
-                value={selectedShopId}
-                onValueChange={setSelectedShopId}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="اختر المتجر" />
-                </SelectTrigger>
-                <SelectContent>
-                  {shops.map((shop) => (
-                    <SelectItem key={shop.id} value={shop.id}>
-                      {shop.fullName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <label className="text-sm font-medium text-right block">اختر المتجر</label>
+              <AsyncSelect
+                cacheOptions
+                defaultOptions
+                value={selectedShopId ? {
+                  value: selectedShopId,
+                  label: shops.find(shop => shop.id === selectedShopId) 
+                    ? `${shops.find(shop => shop.id === selectedShopId)?.fullName} (${shops.find(shop => shop.id === selectedShopId)?.email})`
+                    : 'جاري التحميل...'
+                } : null}
+                onChange={(selected: any) => setSelectedShopId(selected?.value || '')}
+                loadOptions={loadShops}
+                placeholder="اختر المتجر..."
+                className="w-full"
+                classNamePrefix="select"
+                isRtl
+                noOptionsMessage={() => "لا توجد نتائج"}
+                loadingMessage={() => "جاري التحميل..."}
+              />
             </div>
             <div className="flex justify-center gap-4">
               <Button
