@@ -52,7 +52,20 @@ export async function POST(request: Request) {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }])
-      .select()
+      .select(`
+        *,
+        user:userId (
+          id,
+          fullName,
+          email
+        ),
+        shop:shopId (
+          id,
+          fullName,
+          email
+        )
+      `)
+      .single()
 
     if (error) {
       console.error('Error creating package:', error)
@@ -62,7 +75,7 @@ export async function POST(request: Request) {
       )
     }
 
-    return NextResponse.json(data[0])
+    return NextResponse.json(data)
   } catch (error) {
     console.error('Error in POST /api/packages:', error)
     return NextResponse.json(

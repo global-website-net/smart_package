@@ -12,6 +12,7 @@ import Header from '@/app/components/Header'
 import CreatePackageForm from '@/components/CreatePackageForm'
 import EditPackageModal from '@/app/components/EditPackageModal'
 import { Badge } from '@/components/ui/badge'
+import DeletePackageWizard from '@/app/components/DeletePackageWizard'
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -104,6 +105,8 @@ export default function TrackingPackagesPage() {
   const [isAdminOrOwner, setIsAdminOrOwner] = useState(false)
   const [editingPackage, setEditingPackage] = useState<Package | null>(null)
   const [users, setUsers] = useState<User[]>([])
+  const [isDeleteWizardOpen, setIsDeleteWizardOpen] = useState(false)
+  const [selectedPackageForDelete, setSelectedPackageForDelete] = useState<Package | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -386,6 +389,17 @@ export default function TrackingPackagesPage() {
     }
   }
 
+  const handleDeleteClick = (pkg: Package) => {
+    setSelectedPackageForDelete(pkg)
+    setIsDeleteWizardOpen(true)
+  }
+
+  const handleDeleteConfirm = () => {
+    if (selectedPackageForDelete) {
+      setPackages(packages.filter(pkg => pkg.id !== selectedPackageForDelete.id))
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -468,12 +482,20 @@ export default function TrackingPackagesPage() {
                     <TableCell className="text-center">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
                     {isAdminOrOwner && (
                       <TableCell className="text-center">
-                        <Button
-                          onClick={() => handleEditClick(pkg)}
-                          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                        >
-                          تعديل
-                        </Button>
+                        <div className="flex justify-center gap-2">
+                          <Button
+                            onClick={() => handleEditClick(pkg)}
+                            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                          >
+                            تعديل
+                          </Button>
+                          <Button
+                            onClick={() => handleDeleteClick(pkg)}
+                            className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                          >
+                            حذف
+                          </Button>
+                        </div>
                       </TableCell>
                     )}
                   </TableRow>
@@ -514,6 +536,19 @@ export default function TrackingPackagesPage() {
           }}
           shops={shops}
           users={regularUsers}
+        />
+      )}
+
+      {selectedPackageForDelete && (
+        <DeletePackageWizard
+          isOpen={isDeleteWizardOpen}
+          onClose={() => {
+            setIsDeleteWizardOpen(false)
+            setSelectedPackageForDelete(null)
+          }}
+          onConfirm={handleDeleteConfirm}
+          packageId={selectedPackageForDelete.id}
+          trackingNumber={selectedPackageForDelete.trackingNumber}
         />
       )}
     </div>

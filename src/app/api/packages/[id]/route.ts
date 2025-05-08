@@ -17,15 +17,20 @@ const supabaseAdmin = createClient(
 
 export const dynamic = 'force-dynamic'
 
-export async function DELETE(request: NextRequest) {
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
+    // Check if user is authenticated and is ADMIN/OWNER
     const session = await getServerSession(authOptions)
-    if (!session) {
+    if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'OWNER')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const id = request.url.split('/').pop()
+    const { id } = params
 
+    // Delete the package
     const { error } = await supabaseAdmin
       .from('package')
       .delete()
@@ -33,13 +38,19 @@ export async function DELETE(request: NextRequest) {
 
     if (error) {
       console.error('Error deleting package:', error)
-      return NextResponse.json({ error: 'Failed to delete package' }, { status: 500 })
+      return NextResponse.json(
+        { error: 'Failed to delete package' },
+        { status: 500 }
+      )
     }
 
-    return NextResponse.json({ message: 'Package deleted successfully' })
+    return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error in DELETE /api/packages/[id]:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }
 
@@ -58,40 +69,43 @@ export async function PATCH(request: NextRequest) {
       )
     }
 
-    const { userId } = await request.json()
+    const { trackingNumber, status, description, shopId, userId } = await request.json()
 
-    // Verify the package belongs to the user
-    const { data: packageData, error: packageError } = await supabaseAdmin
+    // Update the package with all fields
+    const { data, error: updateError } = await supabaseAdmin
       .from('package')
-      .select('userId')
+      .update({
+        trackingNumber,
+        status,
+        description,
+        shopId,
+        userId,
+        updatedAt: new Date().toISOString()
+      })
       .eq('id', id)
+      .select(`
+        *,
+        user:userId (
+          id,
+          fullName,
+          email
+        ),
+        shop:shopId (
+          id,
+          fullName,
+          email
+        )
+      `)
       .single()
 
-    if (packageError) {
-      throw new Error('فشل في جلب بيانات الطرد')
-    }
-
-    if (packageData.userId !== session.user.id) {
-      return NextResponse.json(
-        { message: 'غير مصرح بتعديل هذا الطرد' },
-        { status: 403 }
-      )
-    }
-
-    // Update the package's shop (userId)
-    const { error: updateError } = await supabaseAdmin
-      .from('package')
-      .update({ userId })
-      .eq('id', id)
-
     if (updateError) {
-      throw new Error('فشل في تحديث المتجر')
+      throw new Error('فشل في تحديث بيانات الطرد')
     }
 
-    return NextResponse.json({ message: 'تم تحديث المتجر بنجاح' })
+    return NextResponse.json(data)
   } catch (error: any) {
     return NextResponse.json(
-      { message: error.message || 'حدث خطأ أثناء تحديث المتجر' },
+      { message: error.message || 'حدث خطأ أثناء تحديث بيانات الطرد' },
       { status: 500 }
     )
   }

@@ -214,7 +214,7 @@ export default function AccountsPage() {
                   السابق
                 </Button>
                 <div className="min-w-[120px] text-center">
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm font-bold text-gray-600">
                     الصفحة {currentPage} من {pagination.totalPages}
                   </span>
                 </div>
