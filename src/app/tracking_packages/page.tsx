@@ -254,7 +254,7 @@ export default function TrackingPackagesPage() {
       // Transform the data to match the Package interface
       const transformedPackages = packages.map((pkg: any) => {
         const shopData = Array.isArray(pkg.shop) ? pkg.shop[0] : pkg.shop
-        const userData = Array.isArray(pkg.User) ? pkg.User[0] : pkg.User
+        const userData = Array.isArray(pkg.user) ? pkg.user[0] : pkg.user
 
         return {
           id: pkg.id,
@@ -404,8 +404,8 @@ export default function TrackingPackagesPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="pt-32 pb-10">
-        <div className="max-w-7xl mx-auto px-4">
+      <main className="p-4 pt-24">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-6">إدارة الطرود</h1>
             <div className="flex justify-center items-center">
@@ -427,7 +427,7 @@ export default function TrackingPackagesPage() {
           </div>
 
           {error && (
-            <div className="text-red-500 text-center mb-4">
+            <div className="bg-red-50 text-red-800 p-4 rounded-md mb-6">
               {error}
             </div>
           )}
@@ -435,13 +435,13 @@ export default function TrackingPackagesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-right font-bold text-lg">رقم التتبع</TableHead>
-                <TableHead className="text-right font-bold text-lg">الحالة</TableHead>
-                <TableHead className="text-right font-bold text-lg">الوصف</TableHead>
-                <TableHead className="text-right font-bold text-lg">المتجر</TableHead>
-                <TableHead className="text-right font-bold text-lg">المستخدم</TableHead>
-                <TableHead className="text-right font-bold text-lg">تاريخ الإنشاء</TableHead>
-                {isAdminOrOwner && <TableHead className="text-right font-bold text-lg">الإجراءات</TableHead>}
+                <TableHead className="text-center font-bold text-lg">رقم التتبع</TableHead>
+                <TableHead className="text-center font-bold text-lg">الحالة</TableHead>
+                <TableHead className="text-center font-bold text-lg">الوصف</TableHead>
+                <TableHead className="text-center font-bold text-lg">المتجر</TableHead>
+                <TableHead className="text-center font-bold text-lg">المستخدم</TableHead>
+                <TableHead className="text-center font-bold text-lg">تاريخ الإنشاء</TableHead>
+                {isAdminOrOwner && <TableHead className="text-center font-bold text-lg">الإجراءات</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -454,18 +454,20 @@ export default function TrackingPackagesPage() {
               ) : (
                 packages.map((pkg) => (
                   <TableRow key={pkg.id}>
-                    <TableCell className="text-right">{pkg.trackingNumber}</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
+                    <TableCell className="text-center">
                       <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
                         {getPackageStatusText(pkg.status)}
                       </span>
                     </TableCell>
-                    <TableCell className="text-right">{pkg.description || '-'}</TableCell>
-                    <TableCell className="text-right">{pkg.shop?.email || 'غير معروف'}</TableCell>
-                    <TableCell className="text-right">{pkg.user?.email || '-'}</TableCell>
-                    <TableCell className="text-right">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
+                    <TableCell className="text-center">{pkg.description || '-'}</TableCell>
+                    <TableCell className="text-center">{pkg.shop?.email || 'غير معروف'}</TableCell>
+                    <TableCell className="text-center">
+                      {pkg.user?.fullName ? `${pkg.user.fullName} (${pkg.user.email})` : 'غير معروف'}
+                    </TableCell>
+                    <TableCell className="text-center">{new Date(pkg.createdAt).toLocaleDateString('ar')}</TableCell>
                     {isAdminOrOwner && (
-                      <TableCell className="text-right">
+                      <TableCell className="text-center">
                         <Button
                           onClick={() => handleEditClick(pkg)}
                           className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -480,7 +482,7 @@ export default function TrackingPackagesPage() {
             </TableBody>
           </Table>
         </div>
-      </div>
+      </main>
 
       {/* Create Package Modal */}
       {showCreateForm && (

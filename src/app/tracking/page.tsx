@@ -148,8 +148,8 @@ export default function TrackingPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="pt-32 pb-10">
-        <div className="max-w-7xl mx-auto px-4">
+      <main className="p-4 pt-24">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-6">إدارة الطلبات</h1>
             <div className="flex justify-center items-center">
@@ -161,7 +161,7 @@ export default function TrackingPage() {
           </div>
 
           {error && (
-            <div className="text-red-500 text-center mb-4">
+            <div className="bg-red-50 text-red-800 p-4 rounded-md mb-6">
               {error}
             </div>
           )}
@@ -216,7 +216,7 @@ export default function TrackingPage() {
             </TableBody>
           </Table>
         </div>
-      </div>
+      </main>
 
       {editingOrder && (
         <EditOrderStatusModal

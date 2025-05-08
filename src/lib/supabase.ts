@@ -15,13 +15,13 @@ export const supabase = createClient(
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
-      storageKey: 'supabase.auth.token',
       storage: {
         getItem: (key) => {
           try {
             const value = localStorage.getItem(key)
             return value ? JSON.parse(value) : null
           } catch (error) {
+            console.error('Error reading auth token:', error)
             return null
           }
         },
@@ -51,13 +51,13 @@ export const supabaseAdmin = process.env.SUPABASE_SERVICE_ROLE_KEY
         autoRefreshToken: true,
         persistSession: true,
         detectSessionInUrl: true,
-        storageKey: 'supabase.auth.token',
         storage: {
           getItem: (key) => {
             try {
               const value = localStorage.getItem(key)
               return value ? JSON.parse(value) : null
             } catch (error) {
+              console.error('Error reading auth token:', error)
               return null
             }
           },
