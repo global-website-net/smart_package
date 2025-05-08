@@ -82,6 +82,8 @@ function getStatusVariant(status: string) {
       return 'success'
     case 'CANCELLED':
       return 'destructive'
+    case 'RETURNED':
+      return 'secondary'
     default:
       return 'default'
   }
@@ -433,13 +435,13 @@ export default function TrackingPackagesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-right">رقم التتبع</TableHead>
-                <TableHead className="text-right">الحالة</TableHead>
-                <TableHead className="text-right">الوصف</TableHead>
-                <TableHead className="text-right">المتجر</TableHead>
-                <TableHead className="text-right">المستخدم</TableHead>
-                <TableHead className="text-right">تاريخ الإنشاء</TableHead>
-                {isAdminOrOwner && <TableHead className="text-right">الإجراءات</TableHead>}
+                <TableHead className="text-center font-bold text-lg">رقم التتبع</TableHead>
+                <TableHead className="text-center font-bold text-lg">الحالة</TableHead>
+                <TableHead className="text-center font-bold text-lg">الوصف</TableHead>
+                <TableHead className="text-center font-bold text-lg">المتجر</TableHead>
+                <TableHead className="text-center font-bold text-lg">المستخدم</TableHead>
+                <TableHead className="text-center font-bold text-lg">تاريخ الإنشاء</TableHead>
+                {isAdminOrOwner && <TableHead className="text-center font-bold text-lg">الإجراءات</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -454,9 +456,9 @@ export default function TrackingPackagesPage() {
                   <TableRow key={pkg.id}>
                     <TableCell className="text-right">{pkg.trackingNumber}</TableCell>
                     <TableCell className="text-right">
-                      <Badge variant={getStatusVariant(pkg.status)}>
+                      <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
                         {getPackageStatusText(pkg.status)}
-                      </Badge>
+                      </span>
                     </TableCell>
                     <TableCell className="text-right">{pkg.description || '-'}</TableCell>
                     <TableCell className="text-right">{pkg.shop?.email || 'غير معروف'}</TableCell>

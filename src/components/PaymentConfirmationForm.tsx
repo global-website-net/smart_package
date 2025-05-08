@@ -145,10 +145,11 @@ export default function PaymentConfirmationForm({
         <CardContent>
           <div className="space-y-4">
             <div className="text-center">
-              <p className="text-lg font-semibold">المبلغ المطلوب: {totalAmount.toLocaleString('ar-SA')} Shekels</p>
+              <p className="text-lg font-semibold">المبلغ المطلوب: {totalAmount.toLocaleString('ar-SA')} شيكل</p>
+              <p className="text-sm text-gray-500 mt-1">سيتم خصم المبلغ من رصيد محفظتك</p>
               <p className="text-sm text-gray-600 mt-2">
                 {walletBalance !== null 
-                  ? `رصيد المحفظة الحالي: ${walletBalance.toLocaleString('ar-SA')} Shekels`
+                  ? `رصيد المحفظة الحالي: ${walletBalance.toLocaleString('ar-SA')} شيكل`
                   : 'انقر على تأكيد الدفع للتحقق من الرصيد'}
               </p>
             </div>
@@ -157,7 +158,7 @@ export default function PaymentConfirmationForm({
                 {error}
               </div>
             )}
-            <div className="flex justify-center space-x-8 rtl:space-x-reverse">
+            <div className="flex justify-center space-x-16 rtl:space-x-reverse">
               <Button
                 onClick={onCancel}
                 disabled={loading}

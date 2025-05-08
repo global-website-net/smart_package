@@ -113,17 +113,19 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
   // Function to load users with search
   const loadUsers = async (inputValue: string) => {
     try {
-      const { data, error } = await supabase
-        .from('User')
-        .select('id, fullName, email')
-        .eq('role', 'REGULAR')
-        .or(`fullName.ilike.%${inputValue}%,email.ilike.%${inputValue}%`)
-        .limit(10)
-        .order('fullName')
+      const response = await fetch('/api/users/regular')
+      if (!response.ok) {
+        throw new Error('Failed to fetch users')
+      }
+      const data = await response.json()
+      
+      // Filter the users based on input value
+      const filteredUsers = data.filter((user: any) => 
+        user.fullName.toLowerCase().includes(inputValue.toLowerCase()) ||
+        user.email.toLowerCase().includes(inputValue.toLowerCase())
+      )
 
-      if (error) throw error
-
-      return data.map(user => ({
+      return filteredUsers.map((user: any) => ({
         value: user.id,
         label: `${user.fullName} (${user.email})`,
         ...user
@@ -137,23 +139,19 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
   // Function to load shops with search
   const loadShops = async (inputValue: string) => {
     try {
-      let query = supabase
-        .from('User')
-        .select('id, fullName, email')
-        .eq('role', 'SHOP')
-        .limit(10)
-        .order('fullName')
-
-      // Only add search condition if there's an input value
-      if (inputValue) {
-        query = query.or(`fullName.ilike.%${inputValue}%,email.ilike.%${inputValue}%`)
+      const response = await fetch('/api/users/shops')
+      if (!response.ok) {
+        throw new Error('Failed to fetch shops')
       }
+      const data = await response.json()
+      
+      // Filter the shops based on input value
+      const filteredShops = data.filter((shop: any) => 
+        shop.fullName.toLowerCase().includes(inputValue.toLowerCase()) ||
+        shop.email.toLowerCase().includes(inputValue.toLowerCase())
+      )
 
-      const { data, error } = await query
-
-      if (error) throw error
-
-      return data.map(shop => ({
+      return filteredShops.map((shop: any) => ({
         value: shop.id,
         label: `${shop.fullName} (${shop.email})`,
         ...shop

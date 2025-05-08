@@ -154,17 +154,19 @@ export default function EditPackageModal({ isOpen, onClose, pkg, onSave, shops, 
   // Function to load users with search
   const loadUsers = async (inputValue: string) => {
     try {
-      const { data, error } = await supabase
-        .from('User')
-        .select('id, fullName, email')
-        .eq('role', 'REGULAR')
-        .or(`fullName.ilike.%${inputValue}%,email.ilike.%${inputValue}%`)
-        .limit(10)
-        .order('fullName')
+      const response = await fetch('/api/users/regular')
+      if (!response.ok) {
+        throw new Error('Failed to fetch users')
+      }
+      const data = await response.json()
+      
+      // Filter the users based on input value
+      const filteredUsers = data.filter((user: any) => 
+        user.fullName.toLowerCase().includes(inputValue.toLowerCase()) ||
+        user.email.toLowerCase().includes(inputValue.toLowerCase())
+      )
 
-      if (error) throw error
-
-      return data.map(user => ({
+      return filteredUsers.map((user: any) => ({
         value: user.id,
         label: `${user.fullName} (${user.email})`,
         ...user
