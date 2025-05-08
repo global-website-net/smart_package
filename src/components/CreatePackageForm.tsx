@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
 import { createClient } from '@supabase/supabase-js'
+import AsyncSelect from 'react-select/async'
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -106,6 +107,54 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
       console.error('Error fetching users:', error)
       setUsers([])
       toast.error('حدث خطأ أثناء جلب المستخدمين')
+    }
+  }
+
+  // Function to load users with search
+  const loadUsers = async (inputValue: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('User')
+        .select('id, fullName, email')
+        .eq('role', 'REGULAR')
+        .or(`fullName.ilike.%${inputValue}%,email.ilike.%${inputValue}%`)
+        .limit(10)
+        .order('fullName')
+
+      if (error) throw error
+
+      return data.map(user => ({
+        value: user.id,
+        label: `${user.fullName} (${user.email})`,
+        ...user
+      }))
+    } catch (error) {
+      console.error('Error loading users:', error)
+      return []
+    }
+  }
+
+  // Function to load shops with search
+  const loadShops = async (inputValue: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('User')
+        .select('id, fullName, email')
+        .eq('role', 'SHOP')
+        .or(`fullName.ilike.%${inputValue}%,email.ilike.%${inputValue}%`)
+        .limit(10)
+        .order('fullName')
+
+      if (error) throw error
+
+      return data.map(shop => ({
+        value: shop.id,
+        label: `${shop.fullName} (${shop.email})`,
+        ...shop
+      }))
+    } catch (error) {
+      console.error('Error loading shops:', error)
+      return []
     }
   }
 
@@ -231,30 +280,27 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
               المتجر <span className="text-red-500">*</span>
             </label>
             <div className="col-span-3">
-              <Select
-                value={formData.shopId}
-                onValueChange={(value) => {
-                  setFormData({ ...formData, shopId: value })
+              <AsyncSelect
+                cacheOptions
+                defaultOptions
+                value={formData.shopId ? {
+                  value: formData.shopId,
+                  label: shops.find(shop => shop.id === formData.shopId) 
+                    ? `${shops.find(shop => shop.id === formData.shopId)?.fullName} (${shops.find(shop => shop.id === formData.shopId)?.email})`
+                    : 'جاري التحميل...'
+                } : null}
+                onChange={(selected: any) => {
+                  setFormData({ ...formData, shopId: selected?.value || '' })
                   setErrors({ ...errors, shopId: false })
                 }}
-              >
-                <SelectTrigger className={`text-right ${errors.shopId ? 'border-red-500' : ''}`}>
-                  <SelectValue placeholder="اختر المتجر" className="text-right" dir="rtl" />
-                </SelectTrigger>
-                <SelectContent className="text-right" align="end">
-                  {shops.length === 0 ? (
-                    <SelectItem value="no-shops" disabled className="text-right">
-                      لا توجد متاجر متاحة
-                    </SelectItem>
-                  ) : (
-                    shops.map((shop) => (
-                      <SelectItem key={shop.id} value={shop.id} className="text-right">
-                        {shop.email}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
+                loadOptions={loadShops}
+                placeholder="اختر المتجر..."
+                className="w-full"
+                classNamePrefix="select"
+                isRtl
+                noOptionsMessage={() => "لا توجد نتائج"}
+                loadingMessage={() => "جاري التحميل..."}
+              />
               {errors.shopId && (
                 <p className="text-red-500 text-sm mt-1 text-right">المتجر مطلوب</p>
               )}
@@ -265,30 +311,27 @@ export default function CreatePackageForm({ onSuccess, onCancel }: CreatePackage
               المستخدم <span className="text-red-500">*</span>
             </label>
             <div className="col-span-3">
-              <Select
-                value={formData.userId}
-                onValueChange={(value) => {
-                  setFormData({ ...formData, userId: value })
+              <AsyncSelect
+                cacheOptions
+                defaultOptions
+                value={formData.userId ? {
+                  value: formData.userId,
+                  label: users.find(user => user.id === formData.userId) 
+                    ? `${users.find(user => user.id === formData.userId)?.fullName} (${users.find(user => user.id === formData.userId)?.email})`
+                    : 'جاري التحميل...'
+                } : null}
+                onChange={(selected: any) => {
+                  setFormData({ ...formData, userId: selected?.value || '' })
                   setErrors({ ...errors, userId: false })
                 }}
-              >
-                <SelectTrigger className={`text-right ${errors.userId ? 'border-red-500' : ''}`}>
-                  <SelectValue placeholder="اختر المستخدم" className="text-right" dir="rtl" />
-                </SelectTrigger>
-                <SelectContent className="text-right" align="end">
-                  {users.length === 0 ? (
-                    <SelectItem value="no-users" disabled className="text-right">
-                      لا يوجد مستخدمين متاحين
-                    </SelectItem>
-                  ) : (
-                    users.map((user) => (
-                      <SelectItem key={user.id} value={user.id} className="text-right">
-                        {user.email}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
+                loadOptions={loadUsers}
+                placeholder="اختر المستخدم..."
+                className="w-full"
+                classNamePrefix="select"
+                isRtl
+                noOptionsMessage={() => "لا توجد نتائج"}
+                loadingMessage={() => "جاري التحميل..."}
+              />
               {errors.userId && (
                 <p className="text-red-500 text-sm mt-1 text-right">المستخدم مطلوب</p>
               )}

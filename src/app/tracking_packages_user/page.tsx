@@ -6,9 +6,11 @@ import { useSession } from 'next-auth/react'
 import { supabase } from '@/lib/supabase'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
 import Header from '@/app/components/Header'
+import ShopEditWizard from '@/app/components/ShopEditWizard'
+import { Card } from '@/components/ui/card'
+import { Store } from 'lucide-react'
 
 interface Shop {
   id: string
@@ -19,16 +21,13 @@ interface Shop {
 interface Package {
   id: string
   trackingNumber: string
-  description: string | null
   status: string
+  shopId: string
+  description: string | null
   userId: string
   createdAt: string
   updatedAt: string
-  User: {
-    id: string
-    fullName: string
-    email: string
-  }
+  User: Shop
 }
 
 export default function UserPackagesPage() {
@@ -38,6 +37,10 @@ export default function UserPackagesPage() {
   const [shops, setShops] = useState<Shop[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [editingPackage, setEditingPackage] = useState<Package | null>(null)
+  const [isShopEditWizardOpen, setIsShopEditWizardOpen] = useState(false)
+  const [isShopEditOpen, setIsShopEditOpen] = useState(false)
+  const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -110,35 +113,26 @@ export default function UserPackagesPage() {
     }
   }
 
-  const handleShopChange = async (packageId: string, shopId: string) => {
+  const handleShopChange = async (shopId: string) => {
+    if (!selectedPackageId) return
+
     try {
-      const response = await fetch(`/api/packages/${packageId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId: shopId }),
-      })
+      setLoading(true)
+      const { error } = await supabase
+        .from('Package')
+        .update({ shopId })
+        .eq('id', selectedPackageId)
 
-      if (!response.ok) {
-        throw new Error('Failed to update package')
-      }
+      if (error) throw error
 
-      // Update the local state
-      setPackages(packages.map(pkg => 
-        pkg.id === packageId 
-          ? { 
-              ...pkg, 
-              userId: shopId,
-              User: shops.find(shop => shop.id === shopId) || pkg.User 
-            }
-          : pkg
-      ))
-
+      // Refresh packages
+      fetchPackages()
       toast.success('تم تحديث المتجر بنجاح')
     } catch (error) {
-      console.error('Error updating package:', error)
+      console.error('Error updating shop:', error)
       toast.error('حدث خطأ أثناء تحديث المتجر')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -204,9 +198,17 @@ export default function UserPackagesPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <main className="p-4 pt-24">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl font-bold mb-6 text-right">تتبع الطرود</h1>
+      <div className="pt-32 pb-10">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold mb-6">تتبع الطرود</h1>
+            <div className="flex justify-center items-center">
+              <div className="relative w-32 sm:w-48 md:w-64">
+                <div className="w-full h-0.5 bg-green-500"></div>
+                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
+              </div>
+            </div>
+          </div>
           
           {error && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -222,13 +224,12 @@ export default function UserPackagesPage() {
                 <TableHead className="text-center">الحالة</TableHead>
                 <TableHead className="text-center">الوصف</TableHead>
                 <TableHead className="text-center">تاريخ الإنشاء</TableHead>
-                <TableHead className="text-center">آخر تحديث</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {packages.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4">
+                  <TableCell colSpan={5} className="text-center py-4">
                     لا توجد طرود
                   </TableCell>
                 </TableRow>
@@ -237,23 +238,19 @@ export default function UserPackagesPage() {
                   <TableRow key={pkg.id}>
                     <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
                     <TableCell className="text-center">
-                      <Select
-                        value={pkg.userId}
-                        onValueChange={(value) => handleShopChange(pkg.id, value)}
-                      >
-                        <SelectTrigger className="w-[200px]">
-                          <SelectValue placeholder="اختر المتجر">
-                            {pkg.User?.fullName || 'غير محدد'}
-                          </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          {shops.map((shop) => (
-                            <SelectItem key={shop.id} value={shop.id}>
-                              {shop.fullName}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="flex items-center justify-center gap-2">
+                        <span>{pkg.User?.fullName || 'غير محدد'}</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedPackageId(pkg.id)
+                            setIsShopEditOpen(true)
+                          }}
+                        >
+                          تعديل
+                        </Button>
+                      </div>
                     </TableCell>
                     <TableCell className="text-center">
                       <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
@@ -264,16 +261,24 @@ export default function UserPackagesPage() {
                     <TableCell className="text-center">
                       {new Date(pkg.createdAt).toLocaleDateString('ar')}
                     </TableCell>
-                    <TableCell className="text-center">
-                      {new Date(pkg.updatedAt).toLocaleDateString('ar')}
-                    </TableCell>
                   </TableRow>
                 ))
               )}
             </TableBody>
           </Table>
         </div>
-      </main>
+      </div>
+
+      <ShopEditWizard
+        isOpen={isShopEditOpen}
+        onClose={() => {
+          setIsShopEditOpen(false)
+          setSelectedPackageId(null)
+        }}
+        currentShopId={selectedPackageId ? packages.find(p => p.id === selectedPackageId)?.shopId || '' : ''}
+        shops={shops}
+        onSave={handleShopChange}
+      />
     </div>
   )
 } 

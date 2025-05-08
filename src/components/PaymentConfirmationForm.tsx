@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { createClient } from '@supabase/supabase-js'
@@ -27,7 +27,34 @@ export default function PaymentConfirmationForm({
 }: PaymentConfirmationFormProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [walletBalance, setWalletBalance] = useState<number | null>(null)
   const router = useRouter()
+
+  useEffect(() => {
+    const fetchWalletBalance = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        const { data: wallet, error: walletError } = await supabase
+          .from('wallet')
+          .select('balance')
+          .eq('userId', user.id)
+          .single()
+
+        if (walletError) {
+          console.error('Error fetching wallet balance:', walletError)
+          return
+        }
+
+        setWalletBalance(wallet?.balance || 0)
+      } catch (err) {
+        console.error('Error in fetchWalletBalance:', err)
+      }
+    }
+
+    fetchWalletBalance()
+  }, [])
 
   const handleConfirmPayment = async () => {
     try {
@@ -66,7 +93,7 @@ export default function PaymentConfirmationForm({
         throw new Error('حدث خطأ أثناء التحقق من حالة الطلب')
       }
 
-      if (order.status !== 'PENDING') {
+      if (order.status !== 'AWAITING_PAYMENT') {
         throw new Error('لا يمكن دفع هذا الطلب')
       }
 
@@ -99,7 +126,7 @@ export default function PaymentConfirmationForm({
       // Update order status
       const { error: updateOrderError } = await supabase
         .from('order')
-        .update({ status: 'PAID' })
+        .update({ status: 'ORDERING' })
         .eq('id', orderId)
 
       if (updateOrderError) {
@@ -128,6 +155,7 @@ export default function PaymentConfirmationForm({
           <div className="space-y-4">
             <div className="text-center">
               <p className="text-lg font-semibold">المبلغ المطلوب: {totalAmount.toLocaleString('ar-SA')} ريال</p>
+              <p className="text-sm text-gray-600 mt-2">رصيد المحفظة الحالي: {walletBalance?.toLocaleString('ar-SA') || '0'} ريال</p>
             </div>
             {error && (
               <div className="text-red-500 text-center">

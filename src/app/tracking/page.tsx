@@ -169,14 +169,14 @@ export default function TrackingPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-center">رقم الطلب</TableHead>
-                <TableHead className="text-center">رقم الهاتف</TableHead>
-                <TableHead className="text-center">المبلغ</TableHead>
-                <TableHead className="text-center">الحالة</TableHead>
-                <TableHead className="text-center">تاريخ الإنشاء</TableHead>
-                <TableHead className="text-center">ملاحظات</TableHead>
-                <TableHead className="text-center">معلومات إضافية</TableHead>
-                <TableHead className="text-center">الإجراءات</TableHead>
+                <TableHead className="text-center text-base font-bold">رقم الطلب</TableHead>
+                <TableHead className="text-center text-base font-bold">رقم الهاتف</TableHead>
+                <TableHead className="text-center text-base font-bold">المبلغ</TableHead>
+                <TableHead className="text-center text-base font-bold">الحالة</TableHead>
+                <TableHead className="text-center text-base font-bold">تاريخ الإنشاء</TableHead>
+                <TableHead className="text-center text-base font-bold">ملاحظات</TableHead>
+                <TableHead className="text-center text-base font-bold">معلومات إضافية</TableHead>
+                <TableHead className="text-center text-base font-bold">الإجراءات</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

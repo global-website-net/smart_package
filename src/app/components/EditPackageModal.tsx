@@ -7,6 +7,21 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
+import AsyncSelect from 'react-select/async'
+import { createClient } from '@supabase/supabase-js'
+
+// Initialize Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  }
+)
 
 interface EditPackageModalProps {
   isOpen: boolean
@@ -110,6 +125,54 @@ export default function EditPackageModal({ isOpen, onClose, pkg, onSave, shops, 
     }
   }
 
+  // Function to load shops with search
+  const loadShops = async (inputValue: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('User')
+        .select('id, fullName, email')
+        .eq('role', 'SHOP')
+        .or(`fullName.ilike.%${inputValue}%,email.ilike.%${inputValue}%`)
+        .limit(10)
+        .order('fullName')
+
+      if (error) throw error
+
+      return data.map(shop => ({
+        value: shop.id,
+        label: `${shop.fullName} (${shop.email})`,
+        ...shop
+      }))
+    } catch (error) {
+      console.error('Error loading shops:', error)
+      return []
+    }
+  }
+
+  // Function to load users with search
+  const loadUsers = async (inputValue: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('User')
+        .select('id, fullName, email')
+        .eq('role', 'REGULAR')
+        .or(`fullName.ilike.%${inputValue}%,email.ilike.%${inputValue}%`)
+        .limit(10)
+        .order('fullName')
+
+      if (error) throw error
+
+      return data.map(user => ({
+        value: user.id,
+        label: `${user.fullName} (${user.email})`,
+        ...user
+      }))
+    } catch (error) {
+      console.error('Error loading users:', error)
+      return []
+    }
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
@@ -163,35 +226,51 @@ export default function EditPackageModal({ isOpen, onClose, pkg, onSave, shops, 
             <Label htmlFor="shop" className="text-right">
               المتجر
             </Label>
-            <Select value={formData.shopId} onValueChange={(value) => setFormData({ ...formData, shopId: value })}>
-              <SelectTrigger className="col-span-3 text-right">
-                <SelectValue placeholder="اختر المتجر" className="text-right" />
-              </SelectTrigger>
-              <SelectContent className="text-right" align="end">
-                {shops.map((shop) => (
-                  <SelectItem key={shop.id} value={shop.id} className="text-right">
-                    {shop.fullName} ({shop.email})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="col-span-3">
+              <AsyncSelect
+                cacheOptions
+                defaultOptions
+                value={formData.shopId ? {
+                  value: formData.shopId,
+                  label: shops.find(shop => shop.id === formData.shopId) 
+                    ? `${shops.find(shop => shop.id === formData.shopId)?.fullName} (${shops.find(shop => shop.id === formData.shopId)?.email})`
+                    : 'جاري التحميل...'
+                } : null}
+                onChange={(selected: any) => setFormData({ ...formData, shopId: selected?.value || '' })}
+                loadOptions={loadShops}
+                placeholder="اختر المتجر..."
+                className="w-full"
+                classNamePrefix="select"
+                isRtl
+                noOptionsMessage={() => "لا توجد نتائج"}
+                loadingMessage={() => "جاري التحميل..."}
+              />
+            </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="user" className="text-right">
               المستخدم
             </Label>
-            <Select value={formData.userId} onValueChange={(value) => setFormData({ ...formData, userId: value })}>
-              <SelectTrigger className="col-span-3 text-right">
-                <SelectValue placeholder="اختر المستخدم" className="text-right" />
-              </SelectTrigger>
-              <SelectContent className="text-right" align="end">
-                {users.map((user) => (
-                  <SelectItem key={user.id} value={user.id} className="text-right">
-                    {user.fullName} ({user.email})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="col-span-3">
+              <AsyncSelect
+                cacheOptions
+                defaultOptions
+                value={formData.userId ? {
+                  value: formData.userId,
+                  label: users.find(user => user.id === formData.userId) 
+                    ? `${users.find(user => user.id === formData.userId)?.fullName} (${users.find(user => user.id === formData.userId)?.email})`
+                    : 'جاري التحميل...'
+                } : null}
+                onChange={(selected: any) => setFormData({ ...formData, userId: selected?.value || '' })}
+                loadOptions={loadUsers}
+                placeholder="اختر المستخدم..."
+                className="w-full"
+                classNamePrefix="select"
+                isRtl
+                noOptionsMessage={() => "لا توجد نتائج"}
+                loadingMessage={() => "جاري التحميل..."}
+              />
+            </div>
           </div>
         </div>
         <div className="flex justify-center gap-4 rtl:space-x-reverse">
