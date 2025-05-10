@@ -25,7 +25,7 @@ export async function GET() {
     const { data: wallet, error: walletError } = await supabase
       .from('wallet')
       .select('*')
-      .eq('userid', session.user.id)
+      .eq('userId', session.user.id)
       .single()
 
     if (walletError) {
@@ -106,7 +106,7 @@ export async function POST(request: Request) {
     const { data: wallet, error: walletError } = await supabase
       .from('wallet')
       .select('*')
-      .eq('userid', session.user.id)
+      .eq('userId', session.user.id)
       .single()
 
     if (walletError) {

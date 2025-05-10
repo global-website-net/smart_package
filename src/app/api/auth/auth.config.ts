@@ -73,7 +73,12 @@ export const authOptions: NextAuthOptions = {
             .ilike('email', credentials.email)
             .single()
 
-          if (userError || !user) {
+          if (userError) {
+            console.error('User table error:', userError)
+            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
+          }
+          if (!user) {
+            console.error('User not found in User table:', credentials.email)
             throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
           }
 
@@ -83,7 +88,12 @@ export const authOptions: NextAuthOptions = {
             password: credentials.password
           })
 
-          if (authError || !authData.user) {
+          if (authError) {
+            console.error('Supabase Auth error:', authError)
+            throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
+          }
+          if (!authData.user) {
+            console.error('User not found in Supabase Auth:', credentials.email)
             throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
           }
 
@@ -94,6 +104,7 @@ export const authOptions: NextAuthOptions = {
           })
 
           if (sessionError) {
+            console.error('Session creation error:', sessionError)
             throw new Error('حدث خطأ أثناء إنشاء الجلسة')
           }
 
