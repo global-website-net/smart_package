@@ -87,9 +87,6 @@ export const authOptions: NextAuthOptions = {
             throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
           }
 
-          // Clear any existing sessions for this user
-          await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
-          
           // Create a new session using the regular client
           const { data: newSession, error: sessionError } = await supabase.auth.signInWithPassword({
             email: credentials.email,
