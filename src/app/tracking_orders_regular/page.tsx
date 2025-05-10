@@ -186,7 +186,7 @@ export default function TrackingOrdersRegularPage() {
             </div>
           </div>
 
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center -mt-4 mb-6">
             <button
               onClick={handleNewOrder}
               className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"

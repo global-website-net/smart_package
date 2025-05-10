@@ -30,40 +30,34 @@ function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
     setError('')
+    setLoading(true)
 
     try {
       // Clear any existing sessions first
-      await signIn('credentials', {
-        redirect: false,
-        email: '',
-        password: ''
-      })
+      await signIn('credentials', { redirect: false, email: '', password: '' })
 
       const result = await signIn('credentials', {
+        redirect: false,
         email,
         password,
-        redirect: false,
       })
 
       if (result?.error) {
+        console.error('Login error:', result.error)
         setError('البريد الإلكتروني أو كلمة المرور غير صحيحة')
         return
       }
 
-      // Save or clear credentials based on remember me checkbox
       if (rememberMe) {
         localStorage.setItem('rememberedEmail', email)
-        localStorage.setItem('rememberedPassword', password)
       } else {
         localStorage.removeItem('rememberedEmail')
-        localStorage.removeItem('rememberedPassword')
       }
 
-      router.push(redirectUrl)
-    } catch (err) {
-      console.error('Login error:', err)
+      router.push('/')
+    } catch (error) {
+      console.error('Login error:', error)
       setError('حدث خطأ أثناء تسجيل الدخول')
     } finally {
       setLoading(false)

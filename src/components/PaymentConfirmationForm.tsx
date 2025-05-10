@@ -50,7 +50,31 @@ export default function PaymentConfirmationForm({
         .eq('userId', session?.user?.id)
         .single()
 
-      if (error) throw error
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // No wallet exists, create one with 0 balance
+          const { data: newWallet, error: createError } = await supabase
+            .from('wallet')
+            .insert([
+              {
+                userId: session?.user?.id,
+                balance: 0,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+              }
+            ])
+            .select()
+            .single()
+
+          if (createError) {
+            throw createError
+          }
+
+          setWalletBalance(0)
+          return
+        }
+        throw error
+      }
       setWalletBalance((data as WalletData)?.balance ?? 0)
     } catch (err) {
       console.error('Error fetching wallet balance:', err)

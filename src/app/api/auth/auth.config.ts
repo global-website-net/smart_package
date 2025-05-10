@@ -123,7 +123,7 @@ export const authOptions: NextAuthOptions = {
             phoneNumber: user.phoneNumber
           }
         } catch (error) {
-          console.error('Authentication error:', error)
+          console.error('Auth error:', error)
           throw error
         }
       }

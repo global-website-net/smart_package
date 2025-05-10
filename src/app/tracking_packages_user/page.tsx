@@ -125,7 +125,10 @@ export default function UserPackagesPage() {
       setLoading(true)
       const { error } = await supabase
         .from('package')
-        .update({ shopId })
+        .update({ 
+          shopId,
+          updatedAt: new Date().toISOString()
+        })
         .eq('id', selectedPackageId)
 
       if (error) {
@@ -133,12 +136,8 @@ export default function UserPackagesPage() {
         throw new Error(error.message)
       }
 
-      // Update local state
-      setPackages(packages.map(pkg => 
-        pkg.id === selectedPackageId 
-          ? { ...pkg, shopId } 
-          : pkg
-      ))
+      // Refresh the packages list to get updated data
+      await fetchPackages()
 
       toast.success('تم تحديث المتجر بنجاح')
       setIsShopEditOpen(false)

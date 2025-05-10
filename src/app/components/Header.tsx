@@ -40,8 +40,8 @@ export default function Header() {
       ]
     } else if (session?.user?.role === 'SHOP') {
       return [
-        { href: '/shop/orders', label: 'الطلبات' },
         { href: '/shop/packages', label: 'الطرود' },
+        { href: '/account', label: 'الملف الشخصي' },
       ]
     } else {
       // Default menu items for non-logged-in users
