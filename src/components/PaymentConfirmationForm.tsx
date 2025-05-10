@@ -69,12 +69,19 @@ export default function PaymentConfirmationForm({
       }
 
       // Fetch wallet balance first
-      const balance = await fetchWalletBalance()
-      if (balance === null) {
-        return // Error already set by fetchWalletBalance
+      const { data, error: balanceError } = await supabase
+        .from('wallet')
+        .select('balance')
+        .eq('userId', session.user.id)
+        .single()
+
+      if (balanceError) {
+        throw new Error('حدث خطأ أثناء جلب رصيد المحفظة')
       }
 
-      if (balance < totalAmount) {
+      const currentBalance = (data as WalletData)?.balance ?? 0
+
+      if (currentBalance < totalAmount) {
         setError('رصيد المحفظة غير كافٍ. يرجى شحن المحفظة أولاً')
         return
       }
@@ -95,7 +102,7 @@ export default function PaymentConfirmationForm({
       }
 
       // Update wallet balance
-      const newBalance = balance - totalAmount
+      const newBalance = currentBalance - totalAmount
       const { error: updateWalletError } = await supabase
         .from('wallet')
         .update({ balance: newBalance })
