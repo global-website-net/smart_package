@@ -35,10 +35,10 @@ export async function GET() {
           .from('wallet')
           .insert([
             {
-              userid: session.user.id,
+              userId: session.user.id,
               balance: 0,
-              createdat: new Date().toISOString(),
-              updatedat: new Date().toISOString()
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
             }
           ])
           .select()
@@ -60,8 +60,8 @@ export async function GET() {
     const { data: transactions, error: transactionsError } = await supabase
       .from('wallettransaction')
       .select('*')
-      .eq('walletid', wallet.id)
-      .order('createdat', { ascending: false })
+      .eq('walletId', wallet.id)
+      .order('createdAt', { ascending: false })
 
     if (transactionsError) {
       throw transactionsError
@@ -130,11 +130,11 @@ export async function POST(request: Request) {
       .from('wallettransaction')
       .insert([
         {
-          walletid: wallet.id,
+          walletId: wallet.id,
           amount,
           type,
           reason,
-          createdat: new Date().toISOString()
+          createdAt: new Date().toISOString()
         }
       ])
       .select()
@@ -149,7 +149,7 @@ export async function POST(request: Request) {
       .from('wallet')
       .update({ 
         balance: newBalance,
-        updatedat: new Date().toISOString()
+        updatedAt: new Date().toISOString()
       })
       .eq('id', wallet.id)
 

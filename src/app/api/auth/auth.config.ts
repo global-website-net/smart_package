@@ -66,6 +66,10 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
+          // Clear any existing sessions first
+          await supabase.auth.signOut()
+          await supabaseAdmin.auth.signOut()
+
           // Get user from database
           const { data: user, error: userError } = await supabaseAdmin
             .from('User')
@@ -111,7 +115,6 @@ export const authOptions: NextAuthOptions = {
           return {
             id: user.id,
             email: user.email,
-            name: user.fullName,
             role: user.role,
             fullName: user.fullName,
             governorate: user.governorate,
@@ -121,7 +124,7 @@ export const authOptions: NextAuthOptions = {
           }
         } catch (error) {
           console.error('Authentication error:', error)
-          throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
+          throw error
         }
       }
     }),
@@ -160,9 +163,17 @@ export const authOptions: NextAuthOptions = {
       return session
     }
   },
+  events: {
+    async signOut() {
+      // Clear Supabase session on NextAuth signout
+      await supabase.auth.signOut()
+      await supabaseAdmin.auth.signOut()
+    }
+  },
   pages: {
     signIn: '/auth/login',
     error: '/auth/error'
   },
-  secret: process.env.NEXTAUTH_SECRET
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === 'development'
 } 

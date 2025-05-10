@@ -47,7 +47,7 @@ export default function DeletePackageWizard({ isOpen, onClose, onConfirm, packag
         </DialogHeader>
         <div className="py-4 text-center">
           <p className="mb-4">هل أنت متأكد من حذف الطرد رقم {trackingNumber}؟</p>
-          <p className="text-sm text-red-600 mb-6">لا يمكن التراجع عن هذا الإجراء</p>
+          <p className="text-sm text-red-600 mb-6 font-bold">لا يمكن التراجع عن هذا الإجراء</p>
         </div>
         <div className="flex justify-center gap-4 rtl:space-x-reverse">
           <Button

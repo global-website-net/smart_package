@@ -142,7 +142,11 @@ export default function TrackingOrders() {
                             {order.status === 'PENDING' ? 'قيد الانتظار' :
                              order.status === 'PROCESSING' ? 'قيد المعالجة' :
                              order.status === 'COMPLETED' ? 'مكتمل' :
-                             'ملغي'}
+                             order.status === 'CANCELLED' ? 'ملغي' :
+                             order.status === 'IN_TRANSIT' ? 'قيد الشحن' :
+                             order.status === 'DELIVERED' ? 'تم التسليم' :
+                             order.status === 'RETURNED' ? 'تم الإرجاع' :
+                             order.status}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

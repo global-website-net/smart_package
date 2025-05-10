@@ -34,6 +34,13 @@ function LoginForm() {
     setError('')
 
     try {
+      // Clear any existing sessions first
+      await signIn('credentials', {
+        redirect: false,
+        email: '',
+        password: ''
+      })
+
       const result = await signIn('credentials', {
         email,
         password,
@@ -56,6 +63,7 @@ function LoginForm() {
 
       router.push(redirectUrl)
     } catch (err) {
+      console.error('Login error:', err)
       setError('حدث خطأ أثناء تسجيل الدخول')
     } finally {
       setLoading(false)

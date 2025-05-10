@@ -20,6 +20,27 @@ interface PackageData {
   history: PackageHistoryItem[]
 }
 
+const getStatusText = (status: string) => {
+  switch (status) {
+    case 'PENDING':
+      return 'قيد الانتظار'
+    case 'IN_TRANSIT':
+      return 'قيد الشحن'
+    case 'DELIVERED':
+      return 'تم التسليم'
+    case 'CANCELLED':
+      return 'ملغي'
+    case 'RETURNED':
+      return 'تم الإرجاع'
+    case 'PROCESSING':
+      return 'قيد المعالجة'
+    case 'COMPLETED':
+      return 'مكتمل'
+    default:
+      return status
+  }
+}
+
 export default function TrackPage() {
   const [trackingNumber, setTrackingNumber] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -116,7 +137,7 @@ export default function TrackPage() {
                 
                 <div>
                   <p className="text-sm text-gray-500">الحالة</p>
-                  <p className="font-medium">{packageData.status}</p>
+                  <p className="font-medium">{getStatusText(packageData.status)}</p>
                 </div>
                 
                 <div>
@@ -136,7 +157,7 @@ export default function TrackPage() {
                   <div className="space-y-3">
                     {packageData.history.map((item: PackageHistoryItem, index: number) => (
                       <div key={index} className="border-r-2 border-green-500 pr-4 pb-3">
-                        <p className="font-medium">{item.status}</p>
+                        <p className="font-medium">{getStatusText(item.status)}</p>
                         <p className="text-sm text-gray-600">{item.location}</p>
                         <p className="text-xs text-gray-500">{new Date(item.timestamp).toLocaleString('ar-SA')}</p>
                       </div>

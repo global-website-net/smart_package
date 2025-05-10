@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   const { packageId, shopId } = await request.json()
   const { data, error } = await supabase
     .from('package')
-    .update({ shopId })
+    .update({ shopid: shopId })
     .eq('id', packageId)
     .select()
     .single()
@@ -19,5 +19,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json({ shop: data ? data.shopId : null })
+  return NextResponse.json({ shop: data ? data.shopid : null })
 } 
