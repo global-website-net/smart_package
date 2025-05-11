@@ -235,6 +235,12 @@ export default function TrackingOrdersRegularPage() {
     }
   }
 
+  const filteredOrders = orders.filter(order => {
+    const matchesPurchaseSite = purchaseSiteFilter === '' || order.purchaseSite.includes(purchaseSiteFilter)
+    const matchesStatus = statusFilter === 'ALL' || statusFilter === '' || order.status === statusFilter
+    return matchesPurchaseSite && matchesStatus
+  })
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -298,7 +304,7 @@ export default function TrackingOrdersRegularPage() {
                   <SelectValue placeholder="كل الحالات" className="text-right" />
                 </SelectTrigger>
                 <SelectContent className="text-right" align="end">
-                  <SelectItem value="">كل الحالات</SelectItem>
+                  <SelectItem value="ALL">كل الحالات</SelectItem>
                   <SelectItem value="AWAITING_PAYMENT">في انتظار الدفع</SelectItem>
                   <SelectItem value="PENDING_APPROVAL">في انتظار الموافقة</SelectItem>
                   <SelectItem value="ORDERING">قيد الطلب</SelectItem>
@@ -328,14 +334,14 @@ export default function TrackingOrdersRegularPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {orders.length === 0 && !loading ? (
+              {filteredOrders.length === 0 && !loading ? (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-4">
                     لا توجد طلبات
                   </TableCell>
                 </TableRow>
               ) : (
-                orders.map((order) => (
+                filteredOrders.map((order) => (
                   <TableRow key={order.id}>
                     <TableCell className="text-center">{order.purchaseSite}</TableCell>
                     <TableCell className="text-center">

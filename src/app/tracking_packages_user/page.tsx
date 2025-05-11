@@ -259,8 +259,8 @@ export default function UserPackagesPage() {
 
   const filteredPackages = packages.filter(pkg => {
     const matchesTrackingNumber = trackingNumberFilter === '' || pkg.trackingNumber.includes(trackingNumberFilter)
-    const matchesShop = shopFilter === '' || pkg.shopId === shopFilter
-    const matchesStatus = statusFilter === '' || pkg.status === statusFilter
+    const matchesShop = shopFilter === 'ALL' || shopFilter === '' || pkg.shopId === shopFilter
+    const matchesStatus = statusFilter === 'ALL' || statusFilter === '' || pkg.status === statusFilter
     return matchesTrackingNumber && matchesShop && matchesStatus
   })
 
@@ -303,7 +303,7 @@ export default function UserPackagesPage() {
                   <SelectValue placeholder="كل المتاجر" className="text-right" />
                 </SelectTrigger>
                 <SelectContent className="text-right" align="end">
-                  <SelectItem value="">كل المتاجر</SelectItem>
+                  <SelectItem value="ALL">كل المتاجر</SelectItem>
                   {shops.map(shop => (
                     <SelectItem key={shop.id} value={shop.id}>
                       {shop.fullName}
@@ -319,7 +319,7 @@ export default function UserPackagesPage() {
                   <SelectValue placeholder="كل الحالات" className="text-right" />
                 </SelectTrigger>
                 <SelectContent className="text-right" align="end">
-                  <SelectItem value="">كل الحالات</SelectItem>
+                  <SelectItem value="ALL">كل الحالات</SelectItem>
                   <SelectItem value="AWAITING_PAYMENT">في انتظار الدفع</SelectItem>
                   <SelectItem value="PREPARING">قيد التحضير</SelectItem>
                   <SelectItem value="DELIVERING_TO_SHOP">قيد التوصيل للمتجر</SelectItem>
