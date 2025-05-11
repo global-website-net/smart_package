@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import Header from '@/app/components/Header'
 import ShopEditWizard from '@/app/components/ShopEditWizard'
+import { Edit2 } from 'lucide-react'
 
 interface Shop {
   id: string
@@ -28,6 +29,18 @@ interface Package {
   User: Shop
 }
 
+// Add a hook to detect mobile
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 640)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+  return isMobile
+}
+
 export default function UserPackagesPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
@@ -38,6 +51,8 @@ export default function UserPackagesPage() {
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null)
   const [isShopEditOpen, setIsShopEditOpen] = useState(false)
   const [updating, setUpdating] = useState(false)
+  const isMobile = useIsMobile()
+  const canEditShop = false // Set to true if editing shop is allowed for user
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -218,6 +233,10 @@ export default function UserPackagesPage() {
     }
   }
 
+  const handleEditShop = (pkg: any) => {
+    // Implement shop edit logic here if needed
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -254,45 +273,85 @@ export default function UserPackagesPage() {
             </div>
           )}
 
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-center font-bold text-lg">رقم التتبع</TableHead>
-                <TableHead className="text-center font-bold text-lg">المتجر</TableHead>
-                <TableHead className="text-center font-bold text-lg">الحالة</TableHead>
-                <TableHead className="text-center font-bold text-lg">الوصف</TableHead>
-                <TableHead className="text-center font-bold text-lg">تاريخ الإنشاء</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          {/* Mobile Card Layout */}
+          {isMobile ? (
+            <div className="flex flex-col gap-6">
               {packages.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-4">
-                    لا توجد طرود
-                  </TableCell>
-                </TableRow>
-              ) :
-                packages.map((pkg) => (
-                  <TableRow key={pkg.id}>
-                    <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <span>{pkg.User?.fullName || 'غير محدد'}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
-                        {getStatusText(pkg.status)}
+                <div className="text-center py-8">لا توجد طرود</div>
+              ) : (
+                packages.map((pkg, idx) => (
+                  <div key={pkg.id} className="bg-white rounded-xl shadow p-6 flex flex-col items-center border border-gray-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="font-bold text-lg">طرد</span>
+                      <span className="font-bold text-lg">#{String(idx + 1).padStart(3, '0')}</span>
+                    </div>
+                    <div className="mb-2 text-gray-600 text-sm">رقم التتبع: <span className="font-mono">{pkg.trackingNumber}</span></div>
+                    <div className="my-4">
+                      {/* Generic package icon */}
+                      <svg width="64" height="64" fill="none" viewBox="0 0 24 24"><rect width="100%" height="100%" rx="8" fill="#F3F4F6"/><path d="M3 7l9-4 9 4M4 8v8a2 2 0 001 1.73l7 4.2a2 2 0 002 0l7-4.2A2 2 0 0020 16V8M4 8l8 4.5M20 8l-8 4.5" stroke="#222" strokeWidth="1.5" strokeLinejoin="round"/></svg>
+                    </div>
+                    <div className="mb-2">
+                      <span className={`px-3 py-1 rounded-full text-sm font-semibold ${pkg.status === 'RECEIVED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                        {pkg.status === 'RECEIVED' ? 'تم الاستلام' : pkg.status === 'AWAITING_PAYMENT' ? 'في انتظار الدفع' : pkg.status}
                       </span>
-                    </TableCell>
-                    <TableCell className="text-center">{pkg.description || '-'}</TableCell>
-                    <TableCell className="text-center">
-                      {new Date(pkg.createdAt).toLocaleDateString('ar')}
+                    </div>
+                    <div className="mb-2 text-gray-500 text-sm">تاريخ الإنشاء: {new Date(pkg.createdAt).toLocaleDateString('ar')}</div>
+                    {/* Edit shop button if allowed */}
+                    {canEditShop && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-2 flex items-center gap-1"
+                        onClick={() => handleEditShop(pkg)}
+                      >
+                        <Edit2 className="w-4 h-4" /> تعديل المتجر
+                      </Button>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-center font-bold text-lg">رقم التتبع</TableHead>
+                  <TableHead className="text-center font-bold text-lg">المتجر</TableHead>
+                  <TableHead className="text-center font-bold text-lg">الحالة</TableHead>
+                  <TableHead className="text-center font-bold text-lg">الوصف</TableHead>
+                  <TableHead className="text-center font-bold text-lg">تاريخ الإنشاء</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {packages.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-4">
+                      لا توجد طرود
                     </TableCell>
                   </TableRow>
-                ))}
-            </TableBody>
-          </Table>
+                ) :
+                  packages.map((pkg) => (
+                    <TableRow key={pkg.id}>
+                      <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <span>{pkg.User?.fullName || 'غير محدد'}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
+                          {getStatusText(pkg.status)}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-center">{pkg.description || '-'}</TableCell>
+                      <TableCell className="text-center">
+                        {new Date(pkg.createdAt).toLocaleDateString('ar')}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          )}
         </div>
       </main>
 
