@@ -96,7 +96,7 @@ export default function ShopPackagesPage() {
             fullName,
             email
           ),
-          shop:shopId (
+          shop:User!shopId (
             id,
             fullName,
             email
