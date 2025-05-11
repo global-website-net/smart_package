@@ -189,7 +189,14 @@ export default function TrackingOrdersRegularPage() {
 
         if (createError) {
           console.error('Error creating wallet:', createError)
+          if (createError.code === '42501') {
+            throw new Error('ليس لديك صلاحية لإنشاء محفظة')
+          }
           throw new Error('حدث خطأ أثناء إنشاء المحفظة')
+        }
+
+        if (!newWallet) {
+          throw new Error('فشل في إنشاء المحفظة')
         }
 
         walletId = newWallet.id

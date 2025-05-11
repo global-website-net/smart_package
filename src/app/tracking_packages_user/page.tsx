@@ -9,8 +9,6 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import Header from '@/app/components/Header'
 import ShopEditWizard from '@/app/components/ShopEditWizard'
-import { Card } from '@/components/ui/card'
-import { Store } from 'lucide-react'
 
 interface Shop {
   id: string
@@ -37,10 +35,8 @@ export default function UserPackagesPage() {
   const [shops, setShops] = useState<Shop[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [editingPackage, setEditingPackage] = useState<Package | null>(null)
-  const [isShopEditWizardOpen, setIsShopEditWizardOpen] = useState(false)
-  const [isShopEditOpen, setIsShopEditOpen] = useState(false)
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null)
+  const [isShopEditOpen, setIsShopEditOpen] = useState(false)
   const [updating, setUpdating] = useState(false)
 
   useEffect(() => {
@@ -54,11 +50,10 @@ export default function UserPackagesPage() {
         router.push('/')
         return
       }
-      // Fetch data only once when component mounts or session changes
       fetchPackages()
       fetchShops()
     }
-  }, [status, session]) // Only depend on status and session changes
+  }, [status, session])
 
   const fetchShops = async () => {
     try {
@@ -140,32 +135,24 @@ export default function UserPackagesPage() {
         throw new Error('حدث خطأ أثناء تحديث المتجر')
       }
 
-      // Update the local state with the new shop
-      const updatedPackage = {
-        ...packages.find(pkg => pkg.id === selectedPackageId) || {
-          id: selectedPackageId,
-          trackingNumber: '',
-          status: '',
-          shopId: newShopId,
-          description: null,
-          userId: '',
-          createdAt: '',
-          updatedAt: '',
-          User: {
-            id: newShopId,
-            fullName: 'غير معروف',
-            email: ''
-          }
-        },
-        shopId: newShopId
+      // Get the updated shop data
+      const selectedShop = shops.find(shop => shop.id === newShopId)
+      if (!selectedShop) {
+        throw new Error('لم يتم العثور على بيانات المتجر')
       }
 
+      // Update the local state with the new shop
       setPackages(packages.map(pkg => 
-        pkg.id === selectedPackageId ? updatedPackage : pkg
+        pkg.id === selectedPackageId 
+          ? { 
+              ...pkg, 
+              shopId: newShopId,
+              User: selectedShop
+            }
+          : pkg
       ))
 
       toast.success('تم تحديث المتجر بنجاح')
-
       setIsShopEditOpen(false)
       setSelectedPackageId(null)
     } catch (error) {
@@ -175,6 +162,10 @@ export default function UserPackagesPage() {
     } finally {
       setUpdating(false)
     }
+  }
+
+  const handleViewDetails = (pkg: Package) => {
+    console.log('Viewing details for package:', pkg)
   }
 
   const getStatusText = (status: string) => {
@@ -265,12 +256,13 @@ export default function UserPackagesPage() {
                 <TableHead className="text-center font-bold text-lg">الحالة</TableHead>
                 <TableHead className="text-center font-bold text-lg">الوصف</TableHead>
                 <TableHead className="text-center font-bold text-lg">تاريخ الإنشاء</TableHead>
+                <TableHead className="text-center font-bold text-lg">الإجراءات</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {packages.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-4">
+                  <TableCell colSpan={6} className="text-center py-4">
                     لا توجد طرود
                   </TableCell>
                 </TableRow>
@@ -302,6 +294,14 @@ export default function UserPackagesPage() {
                     <TableCell className="text-center">{pkg.description || '-'}</TableCell>
                     <TableCell className="text-center">
                       {new Date(pkg.createdAt).toLocaleDateString('ar')}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Button
+                        onClick={() => handleViewDetails(pkg)}
+                        className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                      >
+                        عرض التفاصيل
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))

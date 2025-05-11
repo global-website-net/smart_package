@@ -1,174 +1,130 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { createClient } from '@supabase/supabase-js'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { useToast } from '@/components/ui/use-toast'
-import { Loader2 } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 import Header from '@/app/components/Header'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface Package {
   id: string
   trackingNumber: string
   status: string
-  description: string | null
   shopId: string
+  description: string | null
   userId: string
   createdAt: string
   updatedAt: string
-  user: {
-    fullName: string
-    email: string
-  }
-  shop: {
-    fullName: string
-    email: string
-  }
 }
 
-const STATUS_OPTIONS = [
-  { value: 'RECEIVED', label: 'تم الاستلام' }
-]
-
 export default function ShopPackagesPage() {
-  const { data: session } = useSession()
+  const router = useRouter()
+  const { data: session, status } = useSession()
   const [packages, setPackages] = useState<Package[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [updating, setUpdating] = useState(false)
-  const { toast } = useToast()
-  const [error, setError] = useState<string | null>(null)
-
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
 
   useEffect(() => {
-    if (session?.user?.role === 'SHOP') {
+    if (status === 'unauthenticated') {
+      router.push('/auth/login')
+      return
+    }
+
+    if (status === 'authenticated' && session) {
+      if (session.user.role !== 'SHOP') {
+        router.push('/')
+        return
+      }
       fetchPackages()
     }
-  }, [session])
+  }, [status, session])
 
   const fetchPackages = async () => {
     try {
       setLoading(true)
-      setError(null)
+      setError('')
 
-      // Get packages for the current shop user
-      const { data: packages, error } = await supabase
+      const { data, error: fetchError } = await supabase
         .from('package')
-        .select(`
-          *,
-          user:userId (
-            id,
-            fullName,
-            email
-          ),
-          shop:shopId (
-            id,
-            fullName,
-            email
-          )
-        `)
+        .select('*')
         .eq('shopId', session?.user?.id)
         .order('createdAt', { ascending: false })
 
-      if (error) {
-        console.error('Error fetching packages:', error)
-        throw error
+      if (fetchError) {
+        console.error('Error fetching packages:', fetchError)
+        throw new Error('Failed to fetch packages')
       }
 
-      console.log('Fetched packages for shop:', packages)
+      console.log('Fetched packages:', data) // Debug log
 
-      if (!packages || packages.length === 0) {
-        console.log('No packages found for this shop')
+      if (!data || data.length === 0) {
+        console.log('No packages found for shop:', session?.user?.id) // Debug log
         setPackages([])
         return
       }
 
-      // Transform the data to match the Package interface
-      const transformedPackages = packages.map((pkg: any) => {
-        const shopData = Array.isArray(pkg.shop) ? pkg.shop[0] : pkg.shop
-        const userData = Array.isArray(pkg.user) ? pkg.user[0] : pkg.user
-
-        return {
-          id: pkg.id,
-          trackingNumber: pkg.trackingNumber,
-          status: pkg.status,
-          description: pkg.description,
-          shopId: pkg.shopId,
-          userId: pkg.userId,
-          createdAt: pkg.createdAt,
-          updatedAt: pkg.updatedAt,
-          shop: {
-            id: shopData?.id || '',
-            fullName: shopData?.fullName || 'غير معروف',
-            email: shopData?.email || ''
-          },
-          user: {
-            id: userData?.id || '',
-            fullName: userData?.fullName || 'غير معروف',
-            email: userData?.email || ''
-          }
-        }
-      })
-
-      console.log('Transformed packages:', transformedPackages)
-      setPackages(transformedPackages)
+      setPackages(data)
     } catch (error) {
       console.error('Error in fetchPackages:', error)
       setError('حدث خطأ أثناء جلب الطرود')
-      toast({
-        title: 'خطأ',
-        description: 'حدث خطأ أثناء جلب الطرود',
-        variant: 'destructive'
-      })
+      toast.error('حدث خطأ أثناء جلب الطرود')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleUpdate = async () => {
+  const handleStatusChange = async (newStatus: string) => {
     if (!selectedPackage) return
 
     try {
       setUpdating(true)
-      const { error } = await supabase
+      setError(null)
+
+      const { error: updateError } = await supabase
         .from('package')
         .update({ 
-          status: selectedPackage.status,
+          status: newStatus,
           updatedAt: new Date().toISOString()
         })
         .eq('id', selectedPackage.id)
 
-      if (error) throw error
+      if (updateError) {
+        throw new Error('حدث خطأ أثناء تحديث حالة الطرد')
+      }
 
       setPackages(packages.map(pkg => 
-        pkg.id === selectedPackage.id ? selectedPackage : pkg
+        pkg.id === selectedPackage.id 
+          ? { ...pkg, status: newStatus }
+          : pkg
       ))
 
-      toast({
-        title: 'تم التحديث',
-        description: 'تم تحديث حالة الطرد بنجاح'
-      })
+      toast.success('تم تحديث حالة الطرد بنجاح')
       setIsEditDialogOpen(false)
+      setSelectedPackage(null)
     } catch (error) {
-      console.error('Error updating package:', error)
-      toast({
-        title: 'خطأ',
-        description: 'حدث خطأ أثناء تحديث الطرد',
-        variant: 'destructive'
-      })
+      console.error('Error in handleStatusChange:', error)
+      setError(error instanceof Error ? error.message : 'حدث خطأ أثناء تحديث حالة الطرد')
+      toast.error(error instanceof Error ? error.message : 'حدث خطأ أثناء تحديث حالة الطرد')
     } finally {
       setUpdating(false)
     }
@@ -206,15 +162,15 @@ export default function ShopPackagesPage() {
       case 'PENDING':
         return 'bg-yellow-100 text-yellow-800'
       case 'IN_TRANSIT':
-        return 'bg-blue-100 text-blue-800'
+        return 'bg-yellow-100 text-yellow-800'
       case 'DELIVERED':
-        return 'bg-green-100 text-green-800'
+        return 'bg-yellow-100 text-yellow-800'
       case 'CANCELLED':
-        return 'bg-red-100 text-red-800'
+        return 'bg-yellow-100 text-yellow-800'
       case 'RETURNED':
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-yellow-100 text-yellow-800'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-yellow-100 text-yellow-800'
     }
   }
 
@@ -239,7 +195,7 @@ export default function ShopPackagesPage() {
       <main className="p-4 pt-24">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-6">إدارة الطرود</h1>
+            <h1 className="text-4xl font-bold mb-6">الطرود</h1>
             <div className="flex justify-center items-center">
               <div className="relative w-32 sm:w-48 md:w-64">
                 <div className="w-full h-0.5 bg-green-500"></div>
@@ -248,14 +204,18 @@ export default function ShopPackagesPage() {
             </div>
           </div>
 
+          {error && (
+            <div className="bg-red-50 text-red-800 p-4 rounded-md mb-6">
+              {error}
+            </div>
+          )}
+
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="text-center font-bold text-lg">رقم التتبع</TableHead>
                 <TableHead className="text-center font-bold text-lg">الحالة</TableHead>
                 <TableHead className="text-center font-bold text-lg">الوصف</TableHead>
-                <TableHead className="text-center font-bold text-lg">المتجر</TableHead>
-                <TableHead className="text-center font-bold text-lg">المستخدم</TableHead>
                 <TableHead className="text-center font-bold text-lg">تاريخ الإنشاء</TableHead>
                 <TableHead className="text-center font-bold text-lg">الإجراءات</TableHead>
               </TableRow>
@@ -263,7 +223,7 @@ export default function ShopPackagesPage() {
             <TableBody>
               {packages.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-4">
+                  <TableCell colSpan={5} className="text-center py-4">
                     لا توجد طرود
                   </TableCell>
                 </TableRow>
@@ -277,15 +237,11 @@ export default function ShopPackagesPage() {
                       </span>
                     </TableCell>
                     <TableCell className="text-center">{pkg.description || '-'}</TableCell>
-                    <TableCell className="text-center">{pkg.shop?.fullName || 'غير محدد'}</TableCell>
-                    <TableCell className="text-center">{pkg.user?.fullName || 'غير محدد'}</TableCell>
                     <TableCell className="text-center">
                       {new Date(pkg.createdAt).toLocaleDateString('ar')}
                     </TableCell>
                     <TableCell className="text-center">
                       <Button
-                        variant="outline"
-                        size="sm"
                         onClick={() => {
                           setSelectedPackage(pkg)
                           setIsEditDialogOpen(true)
@@ -308,56 +264,44 @@ export default function ShopPackagesPage() {
           <DialogHeader>
             <DialogTitle>تعديل بيانات الطرد</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>رقم التتبع</Label>
-              <Input
-                value={selectedPackage?.trackingNumber}
-                disabled
-                className="bg-gray-100"
-              />
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label className="text-right">رقم التتبع</label>
+              <div className="col-span-3">
+                <input
+                  type="text"
+                  value={selectedPackage?.trackingNumber || ''}
+                  disabled
+                  className="w-full p-2 border rounded-md bg-gray-100"
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>الحالة</Label>
-              <Select
-                value={selectedPackage?.status}
-                onValueChange={(value) => setSelectedPackage(prev => prev ? { ...prev, status: value } : null)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="اختر الحالة" />
-                </SelectTrigger>
-                <SelectContent>
-                  {STATUS_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setIsEditDialogOpen(false)}
-                disabled={updating}
-              >
-                إلغاء
-              </Button>
-              <Button
-                onClick={handleUpdate}
-                disabled={updating}
-              >
-                {updating ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    جاري الحفظ...
-                  </>
-                ) : (
-                  'حفظ التغييرات'
-                )}
-              </Button>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label className="text-right">الحالة</label>
+              <div className="col-span-3">
+                <Select
+                  value={selectedPackage?.status}
+                  onValueChange={handleStatusChange}
+                  disabled={updating}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="اختر الحالة" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="RECEIVED">تم الاستلام</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
+          <DialogFooter>
+            <Button
+              onClick={() => setIsEditDialogOpen(false)}
+              className="bg-gray-500 text-white hover:bg-gray-600"
+            >
+              إلغاء
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

@@ -3,9 +3,16 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/auth.config'
 import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
+// Create Supabase client with service role key for admin operations
+const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
+// Create Supabase client with anon key for RLS operations
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
 export async function GET() {
@@ -21,7 +28,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Get wallet data
+    // Get wallet data using the anon key client (respects RLS)
     const { data: wallet, error: walletError } = await supabase
       .from('wallet')
       .select('*')
@@ -29,9 +36,9 @@ export async function GET() {
       .single()
 
     if (walletError) {
-      // If wallet doesn't exist, create one
+      // If wallet doesn't exist, create one using admin client
       if (walletError.code === 'PGRST116') {
-        const { data: newWallet, error: createError } = await supabase
+        const { data: newWallet, error: createError } = await supabaseAdmin
           .from('wallet')
           .insert([
             {
@@ -65,7 +72,7 @@ export async function GET() {
       )
     }
 
-    // Get wallet transactions
+    // Get wallet transactions using the anon key client
     const { data: transactions, error: transactionsError } = await supabase
       .from('wallettransaction')
       .select('*')
@@ -115,7 +122,7 @@ export async function POST(request: Request) {
       )
     }
 
-    // Get wallet
+    // Get wallet using the anon key client
     const { data: wallet, error: walletError } = await supabase
       .from('wallet')
       .select('*')
@@ -142,8 +149,8 @@ export async function POST(request: Request) {
       )
     }
 
-    // Start a transaction
-    const { data: transaction, error: transactionError } = await supabase
+    // Start a transaction using the admin client
+    const { data: transaction, error: transactionError } = await supabaseAdmin
       .from('wallettransaction')
       .insert([
         {
@@ -165,8 +172,8 @@ export async function POST(request: Request) {
       )
     }
 
-    // Update wallet balance
-    const { error: updateError } = await supabase
+    // Update wallet balance using the admin client
+    const { error: updateError } = await supabaseAdmin
       .from('wallet')
       .update({ 
         balance: newBalance,
