@@ -37,27 +37,32 @@ function LoginForm() {
       // Clear any existing sessions first
       await signIn('credentials', { redirect: false, email: '', password: '' })
 
+      // Attempt to sign in with credentials
       const result = await signIn('credentials', {
         redirect: false,
         email,
         password,
+        rememberMe
       })
 
       if (result?.error) {
-        console.error('Login error:', result.error)
-        setError('البريد الإلكتروني أو كلمة المرور غير صحيحة')
+        setError(result.error)
         return
       }
 
+      // If remember me is checked, save credentials
       if (rememberMe) {
         localStorage.setItem('rememberedEmail', email)
+        localStorage.setItem('rememberedPassword', password)
       } else {
         localStorage.removeItem('rememberedEmail')
+        localStorage.removeItem('rememberedPassword')
       }
 
+      // Redirect to appropriate page based on role
       router.push('/')
-    } catch (error) {
-      console.error('Login error:', error)
+    } catch (err) {
+      console.error('Login error:', err)
       setError('حدث خطأ أثناء تسجيل الدخول')
     } finally {
       setLoading(false)

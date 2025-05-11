@@ -112,6 +112,7 @@ export const authOptions: NextAuthOptions = {
             throw new Error('حدث خطأ أثناء إنشاء الجلسة')
           }
 
+          // Return user data
           return {
             id: user.id,
             email: user.email,

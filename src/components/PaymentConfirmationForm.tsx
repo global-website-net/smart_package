@@ -44,10 +44,16 @@ export default function PaymentConfirmationForm({
 
   const fetchWalletBalance = async () => {
     try {
+      // First check if user is authenticated
+      if (!session?.user?.id) {
+        throw new Error('يجب تسجيل الدخول أولاً')
+      }
+
+      // Get user's wallet
       const { data, error } = await supabase
         .from('wallet')
         .select('balance')
-        .eq('userId', session?.user?.id)
+        .eq('userId', session.user.id)
         .single()
 
       if (error) {
@@ -57,7 +63,7 @@ export default function PaymentConfirmationForm({
             .from('wallet')
             .insert([
               {
-                userId: session?.user?.id,
+                userId: session.user.id,
                 balance: 0,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
@@ -67,18 +73,20 @@ export default function PaymentConfirmationForm({
             .single()
 
           if (createError) {
-            throw createError
+            console.error('Error creating wallet:', createError)
+            throw new Error('حدث خطأ أثناء إنشاء المحفظة')
           }
 
           setWalletBalance(0)
           return
         }
-        throw error
+        console.error('Error fetching wallet:', error)
+        throw new Error('حدث خطأ أثناء جلب رصيد المحفظة')
       }
       setWalletBalance((data as WalletData)?.balance ?? 0)
     } catch (err) {
       console.error('Error fetching wallet balance:', err)
-      setError('حدث خطأ أثناء جلب رصيد المحفظة')
+      setError(err instanceof Error ? err.message : 'حدث خطأ أثناء جلب رصيد المحفظة')
       return null
     }
   }
@@ -174,12 +182,21 @@ export default function PaymentConfirmationForm({
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      onClick={(e) => {
+        // Prevent closing when clicking the overlay
+        e.stopPropagation()
+      }}
+    >
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-center text-xl font-bold">تأكيد الدفع</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent aria-describedby="payment-description">
+          <div id="payment-description" className="sr-only">
+            نموذج تأكيد الدفع يوضح المبلغ المطلوب ورصيد المحفظة الحالي
+          </div>
           <div className="space-y-4">
             <div className="text-center">
               <p className="text-lg font-semibold mb-2">المبلغ المطلوب: ₪{totalAmount.toFixed(2)}</p>
