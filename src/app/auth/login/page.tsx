@@ -5,6 +5,7 @@ import { signIn, signOut } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Header from '../../components/Header'
+import { Eye, EyeOff } from 'lucide-react'
 
 function LoginForm() {
   const router = useRouter()
@@ -13,6 +14,7 @@ function LoginForm() {
   const [rememberMe, setRememberMe] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const searchParams = useSearchParams()
   const callbackUrl = searchParams?.get('callbackUrl')
   const redirectUrl = callbackUrl || '/'
@@ -34,15 +36,13 @@ function LoginForm() {
     setLoading(true)
 
     try {
-      // Clear any existing sessions first
+      // Clear any existing sessions
       await signOut({ redirect: false })
 
-      // Attempt to sign in with credentials
       const result = await signIn('credentials', {
-        redirect: false,
         email,
         password,
-        rememberMe
+        redirect: false,
       })
 
       if (result?.error) {
@@ -50,7 +50,7 @@ function LoginForm() {
         return
       }
 
-      // If remember me is checked, save credentials
+      // Handle remember me
       if (rememberMe) {
         localStorage.setItem('rememberedEmail', email)
         localStorage.setItem('rememberedPassword', password)
@@ -59,10 +59,9 @@ function LoginForm() {
         localStorage.removeItem('rememberedPassword')
       }
 
-      // Redirect to appropriate page based on role
-      router.push('/')
-    } catch (err) {
-      console.error('Login error:', err)
+      router.push(redirectUrl)
+    } catch (error) {
+      console.error('Login error:', error)
       setError('حدث خطأ أثناء تسجيل الدخول')
     } finally {
       setLoading(false)
@@ -109,14 +108,14 @@ function LoginForm() {
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
-              <div>
+              <div className="relative">
                 <label htmlFor="password" className="sr-only">
                   كلمة المرور
                 </label>
                 <input
                   id="password"
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   required
                   className="appearance-none rounded-b-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
@@ -124,6 +123,17 @@ function LoginForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 hover:text-gray-700"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
               </div>
             </div>
 
@@ -174,9 +184,10 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="text-lg text-gray-600">جاري التحميل...</div>
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="flex items-center justify-center h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
         </div>
       </div>
     }>

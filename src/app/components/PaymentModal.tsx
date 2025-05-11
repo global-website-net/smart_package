@@ -1,5 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import PaymentConfirmationForm from '@/components/PaymentConfirmationForm'
+import { Button } from '@/components/ui/button'
+import { X } from 'lucide-react'
 
 interface PaymentModalProps {
   isOpen: boolean
@@ -11,10 +13,20 @@ interface PaymentModalProps {
 
 export default function PaymentModal({ isOpen, onClose, amount, orderId, onPaymentComplete }: PaymentModalProps) {
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={() => {}}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-center">تأكيد الدفع</DialogTitle>
+          <div className="flex justify-between items-center">
+            <DialogTitle className="text-xl font-bold text-center">تأكيد الدفع</DialogTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="h-8 w-8 p-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </DialogHeader>
         <PaymentConfirmationForm
           orderId={orderId}

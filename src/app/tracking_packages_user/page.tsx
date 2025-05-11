@@ -136,8 +136,14 @@ export default function UserPackagesPage() {
         throw new Error(error.message)
       }
 
-      // Refresh the packages list to get updated data
-      await fetchPackages()
+      // Update the local state to reflect the change
+      setPackages(prevPackages => 
+        prevPackages.map(pkg => 
+          pkg.id === selectedPackageId 
+            ? { ...pkg, shopId } 
+            : pkg
+        )
+      )
 
       toast.success('تم تحديث المتجر بنجاح')
       setIsShopEditOpen(false)

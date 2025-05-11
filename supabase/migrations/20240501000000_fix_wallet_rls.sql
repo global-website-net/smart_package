@@ -1,6 +1,7 @@
 -- Drop existing wallet policies
 DROP POLICY IF EXISTS "Users can view their own wallet" ON "wallet";
 DROP POLICY IF EXISTS "Users can update their own wallet" ON "wallet";
+DROP POLICY IF EXISTS "Users can create their own wallet" ON "wallet";
 
 -- Create new policies for wallet table
 CREATE POLICY "Users can view their own wallet"

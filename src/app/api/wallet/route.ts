@@ -45,7 +45,11 @@ export async function GET() {
           .single()
 
         if (createError) {
-          throw createError
+          console.error('Error creating wallet:', createError)
+          return NextResponse.json(
+            { error: 'حدث خطأ أثناء إنشاء المحفظة' },
+            { status: 500 }
+          )
         }
 
         return NextResponse.json({
@@ -53,7 +57,12 @@ export async function GET() {
           transactions: []
         })
       }
-      throw walletError
+      
+      console.error('Error fetching wallet:', walletError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء جلب بيانات المحفظة' },
+        { status: 500 }
+      )
     }
 
     // Get wallet transactions
@@ -64,7 +73,11 @@ export async function GET() {
       .order('createdAt', { ascending: false })
 
     if (transactionsError) {
-      throw transactionsError
+      console.error('Error fetching transactions:', transactionsError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء جلب المعاملات' },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({
@@ -72,9 +85,9 @@ export async function GET() {
       transactions: transactions || []
     })
   } catch (error) {
-    console.error('Error fetching wallet:', error)
+    console.error('Unexpected error:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch wallet data' },
+      { error: 'حدث خطأ غير متوقع' },
       { status: 500 }
     )
   }
@@ -110,7 +123,11 @@ export async function POST(request: Request) {
       .single()
 
     if (walletError) {
-      throw walletError
+      console.error('Error fetching wallet:', walletError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء جلب بيانات المحفظة' },
+        { status: 500 }
+      )
     }
 
     // Calculate new balance
@@ -120,7 +137,7 @@ export async function POST(request: Request) {
 
     if (newBalance < 0) {
       return NextResponse.json(
-        { error: 'Insufficient balance' },
+        { error: 'رصيد غير كافي' },
         { status: 400 }
       )
     }
@@ -141,7 +158,11 @@ export async function POST(request: Request) {
       .single()
 
     if (transactionError) {
-      throw transactionError
+      console.error('Error creating transaction:', transactionError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء إنشاء المعاملة' },
+        { status: 500 }
+      )
     }
 
     // Update wallet balance
@@ -154,7 +175,11 @@ export async function POST(request: Request) {
       .eq('id', wallet.id)
 
     if (updateError) {
-      throw updateError
+      console.error('Error updating wallet:', updateError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء تحديث رصيد المحفظة' },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({
@@ -162,9 +187,9 @@ export async function POST(request: Request) {
       transaction
     })
   } catch (error) {
-    console.error('Error processing wallet transaction:', error)
+    console.error('Unexpected error:', error)
     return NextResponse.json(
-      { error: 'Failed to process transaction' },
+      { error: 'حدث خطأ غير متوقع' },
       { status: 500 }
     )
   }
