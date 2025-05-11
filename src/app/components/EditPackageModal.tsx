@@ -41,6 +41,16 @@ interface EditPackageModalProps {
     description: string | null
     shopId: string
     userId: string
+    shop: {
+      id: string
+      fullName: string
+      email: string
+    }
+    user: {
+      id: string
+      fullName: string
+      email: string
+    }
   }) => void
   shops: Array<{ id: string; fullName: string; email: string }>
   users: Array<{ id: string; fullName: string; email: string }>

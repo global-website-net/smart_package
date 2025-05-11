@@ -17,7 +17,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useToast } from '@/components/ui/use-toast'
 import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react'
 
 // Initialize Supabase client
@@ -117,7 +116,6 @@ export default function TrackingPackagesPage() {
   const [users, setUsers] = useState<User[]>([])
   const [isDeleteWizardOpen, setIsDeleteWizardOpen] = useState(false)
   const [selectedPackageForDelete, setSelectedPackageForDelete] = useState<Package | null>(null)
-  const { toast } = useToast()
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 20
   const [updating, setUpdating] = useState(false)
@@ -300,11 +298,7 @@ export default function TrackingPackagesPage() {
     } catch (error) {
       console.error('Error in fetchPackages:', error)
       setError('حدث خطأ أثناء جلب الطرود')
-      toast({
-        title: 'خطأ',
-        description: 'حدث خطأ أثناء جلب الطرود',
-        variant: 'destructive'
-      })
+      toast.error('حدث خطأ أثناء جلب الطرود')
     } finally {
       setLoading(false)
     }
@@ -319,18 +313,11 @@ export default function TrackingPackagesPage() {
 
       if (error) throw error
 
-      toast({
-        title: 'تم الحذف',
-        description: 'تم حذف الطرد بنجاح'
-      })
+      toast.success('تم الحذف')
       setPackages(packages.filter(pkg => pkg.id !== id))
     } catch (error) {
       console.error('Error deleting package:', error)
-      toast({
-        title: 'خطأ',
-        description: 'حدث خطأ أثناء حذف الطرد',
-        variant: 'destructive'
-      })
+      toast.error('حدث خطأ أثناء حذف الطرد')
     }
   }
 
@@ -486,18 +473,11 @@ export default function TrackingPackagesPage() {
         pkg.id === selectedPackage.id ? selectedPackage : pkg
       ))
 
-      toast({
-        title: 'تم التحديث',
-        description: 'تم تحديث حالة الطرد بنجاح'
-      })
+      toast.success('تم التحديث')
       setIsEditModalOpen(false)
     } catch (error) {
       console.error('Error updating package:', error)
-      toast({
-        title: 'خطأ',
-        description: 'حدث خطأ أثناء تحديث الطرد',
-        variant: 'destructive'
-      })
+      toast.error('حدث خطأ أثناء تحديث الطرد')
     } finally {
       setUpdating(false)
     }
@@ -650,19 +630,27 @@ export default function TrackingPackagesPage() {
       {isEditModalOpen && selectedPackage && (
         <EditPackageModal
           isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
+          onClose={() => {
+            setIsEditModalOpen(false)
+            setSelectedPackage(null)
+          }}
           pkg={selectedPackage}
           onSave={(updatedPackage) => {
             setPackages(packages.map(pkg => 
-              pkg.id === updatedPackage.id ? {
-                ...pkg,
-                trackingNumber: updatedPackage.trackingNumber,
-                status: updatedPackage.status,
-                description: updatedPackage.description,
-                shopId: updatedPackage.shopId,
-                userId: updatedPackage.userId
-              } : pkg
+              pkg.id === updatedPackage.id 
+                ? {
+                    ...pkg,
+                    trackingNumber: updatedPackage.trackingNumber,
+                    status: updatedPackage.status,
+                    description: updatedPackage.description,
+                    shopId: updatedPackage.shopId,
+                    userId: updatedPackage.userId,
+                    shop: updatedPackage.shop,
+                    user: updatedPackage.user
+                  }
+                : pkg
             ))
+            toast.success('تم تحديث بيانات الطرد بنجاح')
           }}
           shops={shops}
           users={regularUsers}
