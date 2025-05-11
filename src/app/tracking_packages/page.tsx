@@ -119,6 +119,10 @@ export default function TrackingPackagesPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 20
   const [updating, setUpdating] = useState(false)
+  const [trackingNumberFilter, setTrackingNumberFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
+  const [shopFilter, setShopFilter] = useState('')
+  const [userFilter, setUserFilter] = useState('')
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -437,10 +441,17 @@ export default function TrackingPackagesPage() {
   }
 
   // Calculate pagination
-  const totalPages = Math.ceil(packages.length / itemsPerPage)
+  const filteredPackages = packages.filter(pkg => {
+    const matchesTrackingNumber = trackingNumberFilter === '' || pkg.trackingNumber.includes(trackingNumberFilter)
+    const matchesStatus = statusFilter === '' || pkg.status === statusFilter
+    const matchesShop = shopFilter === '' || pkg.shopId === shopFilter
+    const matchesUser = userFilter === '' || pkg.userId === userFilter
+    return matchesTrackingNumber && matchesStatus && matchesShop && matchesUser
+  })
+  const totalPages = Math.ceil(filteredPackages.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
-  const currentPackages = packages.slice(startIndex, endIndex)
+  const currentPackages = filteredPackages.slice(startIndex, endIndex)
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
@@ -528,6 +539,67 @@ export default function TrackingPackagesPage() {
               {error}
             </div>
           )}
+
+          {/* Filters */}
+          <div className="flex flex-col md:flex-row gap-4 mb-6 items-center justify-between">
+            <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+              <Input
+                type="text"
+                placeholder="ابحث برقم التتبع"
+                className="w-full md:w-64 text-right"
+                value={trackingNumberFilter}
+                onChange={e => setTrackingNumberFilter(e.target.value)}
+              />
+              <Select
+                value={statusFilter}
+                onValueChange={setStatusFilter}
+              >
+                <SelectTrigger className="w-full md:w-48 text-right">
+                  <SelectValue placeholder="كل الحالات" className="text-right" />
+                </SelectTrigger>
+                <SelectContent className="text-right" align="end">
+                  <SelectItem value="">كل الحالات</SelectItem>
+                  <SelectItem value="PENDING">قيد الانتظار</SelectItem>
+                  <SelectItem value="IN_TRANSIT">قيد الشحن</SelectItem>
+                  <SelectItem value="DELIVERED">تم التسليم</SelectItem>
+                  <SelectItem value="CANCELLED">ملغي</SelectItem>
+                  <SelectItem value="RETURNED">تم الإرجاع</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select
+                value={shopFilter}
+                onValueChange={setShopFilter}
+              >
+                <SelectTrigger className="w-full md:w-48 text-right">
+                  <SelectValue placeholder="كل المتاجر" className="text-right" />
+                </SelectTrigger>
+                <SelectContent className="text-right" align="end">
+                  <SelectItem value="">كل المتاجر</SelectItem>
+                  {shops.map(shop => (
+                    <SelectItem key={shop.id} value={shop.id}>
+                      {shop.fullName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={userFilter}
+                onValueChange={setUserFilter}
+              >
+                <SelectTrigger className="w-full md:w-48 text-right">
+                  <SelectValue placeholder="كل المستخدمين" className="text-right" />
+                </SelectTrigger>
+                <SelectContent className="text-right" align="end">
+                  <SelectItem value="">كل المستخدمين</SelectItem>
+                  {regularUsers.map(user => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.fullName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
           <Table>
             <TableHeader>

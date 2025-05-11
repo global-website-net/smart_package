@@ -65,6 +65,7 @@ export default function ShopPackagesPage() {
         router.push('/')
         return
       }
+      console.log('SHOP session.user.id:', session.user.id)
       fetchPackages()
     }
   }, [status, session])

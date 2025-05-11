@@ -10,6 +10,8 @@ import { toast } from 'sonner'
 import Header from '@/app/components/Header'
 import ShopEditWizard from '@/app/components/ShopEditWizard'
 import { Edit2 } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 interface Shop {
   id: string
@@ -51,6 +53,9 @@ export default function UserPackagesPage() {
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null)
   const [isShopEditOpen, setIsShopEditOpen] = useState(false)
   const [updating, setUpdating] = useState(false)
+  const [trackingNumberFilter, setTrackingNumberFilter] = useState('')
+  const [shopFilter, setShopFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
   const isMobile = useIsMobile()
   const canEditShop = true // Set to true to show the edit shop button
 
@@ -252,6 +257,13 @@ export default function UserPackagesPage() {
     )
   }
 
+  const filteredPackages = packages.filter(pkg => {
+    const matchesTrackingNumber = trackingNumberFilter === '' || pkg.trackingNumber.includes(trackingNumberFilter)
+    const matchesShop = shopFilter === '' || pkg.shopId === shopFilter
+    const matchesStatus = statusFilter === '' || pkg.status === statusFilter
+    return matchesTrackingNumber && matchesShop && matchesStatus
+  })
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -273,13 +285,63 @@ export default function UserPackagesPage() {
             </div>
           )}
 
+          {/* Filters */}
+          <div className="flex flex-col md:flex-row gap-4 mb-6 items-center justify-between">
+            <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+              <Input
+                type="text"
+                placeholder="ابحث برقم التتبع"
+                className="w-full md:w-64 text-right"
+                value={trackingNumberFilter}
+                onChange={e => setTrackingNumberFilter(e.target.value)}
+              />
+              <Select
+                value={shopFilter}
+                onValueChange={setShopFilter}
+              >
+                <SelectTrigger className="w-full md:w-48 text-right">
+                  <SelectValue placeholder="كل المتاجر" className="text-right" />
+                </SelectTrigger>
+                <SelectContent className="text-right" align="end">
+                  <SelectItem value="">كل المتاجر</SelectItem>
+                  {shops.map(shop => (
+                    <SelectItem key={shop.id} value={shop.id}>
+                      {shop.fullName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={statusFilter}
+                onValueChange={setStatusFilter}
+              >
+                <SelectTrigger className="w-full md:w-48 text-right">
+                  <SelectValue placeholder="كل الحالات" className="text-right" />
+                </SelectTrigger>
+                <SelectContent className="text-right" align="end">
+                  <SelectItem value="">كل الحالات</SelectItem>
+                  <SelectItem value="AWAITING_PAYMENT">في انتظار الدفع</SelectItem>
+                  <SelectItem value="PREPARING">قيد التحضير</SelectItem>
+                  <SelectItem value="DELIVERING_TO_SHOP">قيد التوصيل للمتجر</SelectItem>
+                  <SelectItem value="IN_SHOP">في المتجر</SelectItem>
+                  <SelectItem value="RECEIVED">تم الاستلام</SelectItem>
+                  <SelectItem value="PENDING">قيد الانتظار</SelectItem>
+                  <SelectItem value="IN_TRANSIT">قيد الشحن</SelectItem>
+                  <SelectItem value="DELIVERED">تم التسليم</SelectItem>
+                  <SelectItem value="CANCELLED">ملغي</SelectItem>
+                  <SelectItem value="RETURNED">تم الإرجاع</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           {/* Mobile Card Layout */}
           {isMobile ? (
             <div className="flex flex-col gap-6">
-              {packages.length === 0 ? (
+              {filteredPackages.length === 0 ? (
                 <div className="text-center py-8">لا توجد طرود</div>
               ) : (
-                packages.map((pkg, idx) => (
+                filteredPackages.map((pkg, idx) => (
                   <div key={pkg.id} className="bg-white rounded-xl shadow p-6 flex flex-col items-center border border-gray-200">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="font-bold text-lg">طرد</span>
@@ -323,19 +385,30 @@ export default function UserPackagesPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {packages.length === 0 ? (
+                {filteredPackages.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-4">
                       لا توجد طرود
                     </TableCell>
                   </TableRow>
                 ) :
-                  packages.map((pkg) => (
+                  filteredPackages.map((pkg) => (
                     <TableRow key={pkg.id}>
                       <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
                       <TableCell className="text-center">
                         <div className="flex items-center justify-center gap-2">
                           <span>{pkg.User?.fullName || 'غير محدد'}</span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="ml-2"
+                            onClick={() => {
+                              setSelectedPackageId(pkg.id)
+                              setIsShopEditOpen(true)
+                            }}
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
                         </div>
                       </TableCell>
                       <TableCell className="text-center">

@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import Header from '@/app/components/Header'
 import PaymentModal from '@/app/components/PaymentModal'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 interface Order {
   id: string
@@ -33,6 +35,8 @@ export default function TrackingOrdersRegularPage() {
   const [error, setError] = useState<string | null>(null)
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
+  const [purchaseSiteFilter, setPurchaseSiteFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -271,10 +275,43 @@ export default function TrackingOrdersRegularPage() {
           </div>
 
           {error && (
-            <div className="text-red-500 text-center mb-4">
+            <div className="bg-red-50 text-red-800 p-4 rounded-md mb-6">
               {error}
             </div>
           )}
+
+          {/* Filters */}
+          <div className="flex flex-col md:flex-row gap-4 mb-6 items-center justify-between">
+            <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+              <Input
+                type="text"
+                placeholder="ابحث بموقع الشراء"
+                className="w-full md:w-64 text-right"
+                value={purchaseSiteFilter}
+                onChange={e => setPurchaseSiteFilter(e.target.value)}
+              />
+              <Select
+                value={statusFilter}
+                onValueChange={setStatusFilter}
+              >
+                <SelectTrigger className="w-full md:w-48 text-right">
+                  <SelectValue placeholder="كل الحالات" className="text-right" />
+                </SelectTrigger>
+                <SelectContent className="text-right" align="end">
+                  <SelectItem value="">كل الحالات</SelectItem>
+                  <SelectItem value="AWAITING_PAYMENT">في انتظار الدفع</SelectItem>
+                  <SelectItem value="PENDING_APPROVAL">في انتظار الموافقة</SelectItem>
+                  <SelectItem value="ORDERING">قيد الطلب</SelectItem>
+                  <SelectItem value="ORDER_COMPLETED">تم الطلب</SelectItem>
+                  <SelectItem value="PENDING">قيد الانتظار</SelectItem>
+                  <SelectItem value="IN_TRANSIT">قيد الشحن</SelectItem>
+                  <SelectItem value="DELIVERED">تم التسليم</SelectItem>
+                  <SelectItem value="CANCELLED">ملغي</SelectItem>
+                  <SelectItem value="RETURNED">تم الإرجاع</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
           <Table>
             <TableHeader>

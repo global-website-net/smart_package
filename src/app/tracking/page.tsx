@@ -73,6 +73,8 @@ export default function TrackingPage() {
   const { toast } = useToast()
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 20
+  const [orderNumberFilter, setOrderNumberFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -272,10 +274,15 @@ export default function TrackingPage() {
   }
 
   // Calculate pagination
-  const totalPages = Math.ceil(orders.length / itemsPerPage)
+  const filteredOrders = orders.filter(order => {
+    const matchesOrderNumber = orderNumberFilter === '' || order.orderNumber.includes(orderNumberFilter)
+    const matchesStatus = statusFilter === '' || order.status === statusFilter
+    return matchesOrderNumber && matchesStatus
+  })
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
-  const currentOrders = orders.slice(startIndex, endIndex)
+  const currentOrders = filteredOrders.slice(startIndex, endIndex)
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
@@ -324,6 +331,35 @@ export default function TrackingPage() {
               {error}
             </div>
           )}
+
+          {/* Filters */}
+          <div className="flex flex-col md:flex-row gap-4 mb-6 items-center justify-between">
+            <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+              <Input
+                type="text"
+                placeholder="ابحث برقم الطلب"
+                className="w-full md:w-64 text-right"
+                value={orderNumberFilter}
+                onChange={e => setOrderNumberFilter(e.target.value)}
+              />
+              <Select
+                value={statusFilter}
+                onValueChange={setStatusFilter}
+              >
+                <SelectTrigger className="w-full md:w-48 text-right">
+                  <SelectValue placeholder="كل الحالات" className="text-right" />
+                </SelectTrigger>
+                <SelectContent className="text-right" align="end">
+                  <SelectItem value="">كل الحالات</SelectItem>
+                  <SelectItem value="PENDING_APPROVAL">في انتظار الموافقة</SelectItem>
+                  <SelectItem value="AWAITING_PAYMENT">في انتظار الدفع</SelectItem>
+                  <SelectItem value="ORDERING">قيد الطلب</SelectItem>
+                  <SelectItem value="ORDER_COMPLETED">تم الطلب</SelectItem>
+                  <SelectItem value="CANCELLED">ملغي</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
           <Table>
             <TableHeader>
