@@ -443,9 +443,9 @@ export default function TrackingPackagesPage() {
   // Calculate pagination
   const filteredPackages = packages.filter(pkg => {
     const matchesTrackingNumber = trackingNumberFilter === '' || pkg.trackingNumber.includes(trackingNumberFilter)
-    const matchesStatus = statusFilter === '' || pkg.status === statusFilter
-    const matchesShop = shopFilter === '' || pkg.shopId === shopFilter
-    const matchesUser = userFilter === '' || pkg.userId === userFilter
+    const matchesStatus = statusFilter === 'ALL' || statusFilter === '' || pkg.status === statusFilter
+    const matchesShop = shopFilter === 'ALL' || shopFilter === '' || pkg.shopId === shopFilter
+    const matchesUser = userFilter === 'ALL' || userFilter === '' || pkg.userId === userFilter
     return matchesTrackingNumber && matchesStatus && matchesShop && matchesUser
   })
   const totalPages = Math.ceil(filteredPackages.length / itemsPerPage)
@@ -558,7 +558,7 @@ export default function TrackingPackagesPage() {
                   <SelectValue placeholder="كل الحالات" className="text-right" />
                 </SelectTrigger>
                 <SelectContent className="text-right" align="end">
-                  <SelectItem value="">كل الحالات</SelectItem>
+                  <SelectItem value="ALL">كل الحالات</SelectItem>
                   <SelectItem value="PENDING">قيد الانتظار</SelectItem>
                   <SelectItem value="IN_TRANSIT">قيد الشحن</SelectItem>
                   <SelectItem value="DELIVERED">تم التسليم</SelectItem>
@@ -574,7 +574,7 @@ export default function TrackingPackagesPage() {
                   <SelectValue placeholder="كل المتاجر" className="text-right" />
                 </SelectTrigger>
                 <SelectContent className="text-right" align="end">
-                  <SelectItem value="">كل المتاجر</SelectItem>
+                  <SelectItem value="ALL">كل المتاجر</SelectItem>
                   {shops.map(shop => (
                     <SelectItem key={shop.id} value={shop.id}>
                       {shop.fullName}
@@ -590,7 +590,7 @@ export default function TrackingPackagesPage() {
                   <SelectValue placeholder="كل المستخدمين" className="text-right" />
                 </SelectTrigger>
                 <SelectContent className="text-right" align="end">
-                  <SelectItem value="">كل المستخدمين</SelectItem>
+                  <SelectItem value="ALL">كل المستخدمين</SelectItem>
                   {regularUsers.map(user => (
                     <SelectItem key={user.id} value={user.id}>
                       {user.fullName}
