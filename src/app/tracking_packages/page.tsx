@@ -541,64 +541,62 @@ export default function TrackingPackagesPage() {
           )}
 
           {/* Filters */}
-          <div className="flex flex-col md:flex-row gap-4 mb-6 items-center justify-between">
-            <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-              <Input
-                type="text"
-                placeholder="ابحث برقم التتبع"
-                className="w-full md:w-64 text-right"
-                value={trackingNumberFilter}
-                onChange={e => setTrackingNumberFilter(e.target.value)}
-              />
-              <Select
-                value={statusFilter}
-                onValueChange={setStatusFilter}
-              >
-                <SelectTrigger className="w-full md:w-48 text-right">
-                  <SelectValue placeholder="كل الحالات" className="text-right" />
-                </SelectTrigger>
-                <SelectContent className="text-right" align="end">
-                  <SelectItem value="ALL">كل الحالات</SelectItem>
-                  <SelectItem value="PENDING">قيد الانتظار</SelectItem>
-                  <SelectItem value="IN_TRANSIT">قيد الشحن</SelectItem>
-                  <SelectItem value="DELIVERED">تم التسليم</SelectItem>
-                  <SelectItem value="CANCELLED">ملغي</SelectItem>
-                  <SelectItem value="RETURNED">تم الإرجاع</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select
-                value={shopFilter}
-                onValueChange={setShopFilter}
-              >
-                <SelectTrigger className="w-full md:w-48 text-right">
-                  <SelectValue placeholder="كل المتاجر" className="text-right" />
-                </SelectTrigger>
-                <SelectContent className="text-right" align="end">
-                  <SelectItem value="ALL">كل المتاجر</SelectItem>
-                  {shops.map(shop => (
-                    <SelectItem key={shop.id} value={shop.id}>
-                      {shop.fullName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select
-                value={userFilter}
-                onValueChange={setUserFilter}
-              >
-                <SelectTrigger className="w-full md:w-48 text-right">
-                  <SelectValue placeholder="كل المستخدمين" className="text-right" />
-                </SelectTrigger>
-                <SelectContent className="text-right" align="end">
-                  <SelectItem value="ALL">كل المستخدمين</SelectItem>
-                  {regularUsers.map(user => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.fullName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="flex flex-col sm:flex-row gap-4 mb-4 items-center justify-center">
+            <Input
+              type="text"
+              placeholder="ابحث برقم التتبع"
+              className="w-full md:w-64 text-right"
+              value={trackingNumberFilter}
+              onChange={e => setTrackingNumberFilter(e.target.value)}
+            />
+            <Select
+              value={statusFilter}
+              onValueChange={setStatusFilter}
+            >
+              <SelectTrigger className="w-full md:w-48 text-right">
+                <SelectValue placeholder="كل الحالات" className="text-right" />
+              </SelectTrigger>
+              <SelectContent className="text-right" align="end">
+                <SelectItem value="ALL">كل الحالات</SelectItem>
+                <SelectItem value="AWAITING_PAYMENT">في انتظار الدفع</SelectItem>
+                <SelectItem value="PREPARING">قيد التحضير</SelectItem>
+                <SelectItem value="DELIVERING_TO_SHOP">قيد التوصيل للمتجر</SelectItem>
+                <SelectItem value="IN_SHOP">في المتجر</SelectItem>
+                <SelectItem value="RECEIVED">تم الاستلام</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select
+              value={shopFilter}
+              onValueChange={setShopFilter}
+            >
+              <SelectTrigger className="w-full md:w-48 text-right">
+                <SelectValue placeholder="كل المتاجر" className="text-right" />
+              </SelectTrigger>
+              <SelectContent className="text-right" align="end">
+                <SelectItem value="ALL">كل المتاجر</SelectItem>
+                {shops.map(shop => (
+                  <SelectItem key={shop.id} value={shop.id}>
+                    {shop.fullName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={userFilter}
+              onValueChange={setUserFilter}
+            >
+              <SelectTrigger className="w-full md:w-48 text-right">
+                <SelectValue placeholder="كل المستخدمين" className="text-right" />
+              </SelectTrigger>
+              <SelectContent className="text-right" align="end">
+                <SelectItem value="ALL">كل المستخدمين</SelectItem>
+                {regularUsers.map(user => (
+                  <SelectItem key={user.id} value={user.id}>
+                    {user.fullName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <Table>
@@ -630,7 +628,7 @@ export default function TrackingPackagesPage() {
                       </span>
                     </TableCell>
                     <TableCell className="text-center">{pkg.description || '-'}</TableCell>
-                    <TableCell className="text-center">{pkg.shop?.email || 'غير معروف'}</TableCell>
+                    <TableCell className="text-center">{pkg.shop?.fullName ? `${pkg.shop.fullName} (${pkg.shop.email})` : 'غير معروف'}</TableCell>
                     <TableCell className="text-center">
                       {pkg.user?.fullName ? `${pkg.user.fullName} (${pkg.user.email})` : 'غير معروف'}
                     </TableCell>

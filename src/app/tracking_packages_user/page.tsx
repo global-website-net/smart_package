@@ -286,53 +286,46 @@ export default function UserPackagesPage() {
           )}
 
           {/* Filters */}
-          <div className="flex flex-col md:flex-row gap-4 mb-6 items-center justify-between">
-            <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-              <Input
-                type="text"
-                placeholder="ابحث برقم التتبع"
-                className="w-full md:w-64 text-right"
-                value={trackingNumberFilter}
-                onChange={e => setTrackingNumberFilter(e.target.value)}
-              />
-              <Select
-                value={shopFilter}
-                onValueChange={setShopFilter}
-              >
-                <SelectTrigger className="w-full md:w-48 text-right">
-                  <SelectValue placeholder="كل المتاجر" className="text-right" />
-                </SelectTrigger>
-                <SelectContent className="text-right" align="end">
-                  <SelectItem value="ALL">كل المتاجر</SelectItem>
-                  {shops.map(shop => (
-                    <SelectItem key={shop.id} value={shop.id}>
-                      {shop.fullName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select
-                value={statusFilter}
-                onValueChange={setStatusFilter}
-              >
-                <SelectTrigger className="w-full md:w-48 text-right">
-                  <SelectValue placeholder="كل الحالات" className="text-right" />
-                </SelectTrigger>
-                <SelectContent className="text-right" align="end">
-                  <SelectItem value="ALL">كل الحالات</SelectItem>
-                  <SelectItem value="AWAITING_PAYMENT">في انتظار الدفع</SelectItem>
-                  <SelectItem value="PREPARING">قيد التحضير</SelectItem>
-                  <SelectItem value="DELIVERING_TO_SHOP">قيد التوصيل للمتجر</SelectItem>
-                  <SelectItem value="IN_SHOP">في المتجر</SelectItem>
-                  <SelectItem value="RECEIVED">تم الاستلام</SelectItem>
-                  <SelectItem value="PENDING">قيد الانتظار</SelectItem>
-                  <SelectItem value="IN_TRANSIT">قيد الشحن</SelectItem>
-                  <SelectItem value="DELIVERED">تم التسليم</SelectItem>
-                  <SelectItem value="CANCELLED">ملغي</SelectItem>
-                  <SelectItem value="RETURNED">تم الإرجاع</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="flex flex-col sm:flex-row gap-4 mb-4 items-center justify-center">
+            <Input
+              type="text"
+              placeholder="ابحث برقم التتبع"
+              className="w-full md:w-64 text-right"
+              value={trackingNumberFilter}
+              onChange={e => setTrackingNumberFilter(e.target.value)}
+            />
+            <Select
+              value={shopFilter}
+              onValueChange={setShopFilter}
+            >
+              <SelectTrigger className="w-full md:w-48 text-right">
+                <SelectValue placeholder="كل المتاجر" className="text-right" />
+              </SelectTrigger>
+              <SelectContent className="text-right" align="end">
+                <SelectItem value="ALL">كل المتاجر</SelectItem>
+                {shops.map(shop => (
+                  <SelectItem key={shop.id} value={shop.id}>
+                    {shop.fullName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={statusFilter}
+              onValueChange={setStatusFilter}
+            >
+              <SelectTrigger className="w-full md:w-48 text-right">
+                <SelectValue placeholder="كل الحالات" className="text-right" />
+              </SelectTrigger>
+              <SelectContent className="text-right" align="end">
+                <SelectItem value="ALL">كل الحالات</SelectItem>
+                <SelectItem value="AWAITING_PAYMENT">في انتظار الدفع</SelectItem>
+                <SelectItem value="PREPARING">قيد التحضير</SelectItem>
+                <SelectItem value="DELIVERING_TO_SHOP">قيد التوصيل للمتجر</SelectItem>
+                <SelectItem value="IN_SHOP">في المتجر</SelectItem>
+                <SelectItem value="RECEIVED">تم الاستلام</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Mobile Card Layout */}
@@ -399,15 +392,13 @@ export default function UserPackagesPage() {
                         <div className="flex items-center justify-center gap-2">
                           <span>{pkg.User?.fullName || 'غير محدد'}</span>
                           <Button
-                            variant="outline"
-                            size="sm"
-                            className="ml-2"
+                            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                             onClick={() => {
                               setSelectedPackageId(pkg.id)
                               setIsShopEditOpen(true)
                             }}
                           >
-                            <Edit2 className="w-4 h-4" />
+                            تعديل
                           </Button>
                         </div>
                       </TableCell>

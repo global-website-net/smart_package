@@ -259,7 +259,7 @@ export default function ShopPackagesPage() {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>تعديل بيانات الطرد</DialogTitle>
+            <DialogTitle className="text-center w-full">تعديل بيانات الطرد</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
@@ -292,12 +292,21 @@ export default function ShopPackagesPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button
-              onClick={() => setIsEditDialogOpen(false)}
-              className="bg-gray-500 text-white hover:bg-gray-600"
-            >
-              إلغاء
-            </Button>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => setIsEditDialogOpen(false)}
+                className="bg-gray-500 text-white px-8 py-3 rounded-md hover:bg-gray-600 transition-colors"
+              >
+                إلغاء
+              </button>
+              <button
+                onClick={() => selectedPackage && handleStatusChange(selectedPackage.status)}
+                disabled={updating}
+                className="bg-green-500 text-white px-8 py-3 rounded-md hover:bg-green-600 transition-colors"
+              >
+                {updating ? 'جاري الحفظ...' : 'حفظ'}
+              </button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
