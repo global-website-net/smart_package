@@ -133,7 +133,11 @@ export default function TrackingPage() {
     } catch (error) {
       console.error('Error in fetchOrders:', error)
       setError('حدث خطأ أثناء جلب الطلبات')
-      toast.error('حدث خطأ أثناء جلب الطلبات')
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ أثناء جلب الطلبات',
+        variant: 'destructive'
+      })
     } finally {
       setLoading(false)
     }
