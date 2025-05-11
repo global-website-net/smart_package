@@ -32,6 +32,16 @@ interface Package {
   userId: string
   createdAt: string
   updatedAt: string
+  user: {
+    id: string
+    fullName: string
+    email: string
+  } | null
+  shop: {
+    id: string
+    name: string
+    email: string
+  } | null
 }
 
 export default function ShopPackagesPage() {
@@ -64,9 +74,30 @@ export default function ShopPackagesPage() {
       setLoading(true)
       setError('')
 
+      console.log('Fetching packages for shop ID:', session?.user?.id)
+
       const { data, error: fetchError } = await supabase
         .from('package')
-        .select('*')
+        .select(`
+          id,
+          trackingNumber,
+          status,
+          description,
+          shopId,
+          userId,
+          createdAt,
+          updatedAt,
+          user:User!userId (
+            id,
+            fullName,
+            email
+          ),
+          shop:shopId (
+            id,
+            name,
+            email
+          )
+        `)
         .eq('shopId', session?.user?.id)
         .order('createdAt', { ascending: false })
 
@@ -75,15 +106,29 @@ export default function ShopPackagesPage() {
         throw new Error('Failed to fetch packages')
       }
 
-      console.log('Fetched packages:', data) // Debug log
+      console.log('Fetched packages for shop:', data)
 
       if (!data || data.length === 0) {
-        console.log('No packages found for shop:', session?.user?.id) // Debug log
+        console.log('No packages found for shop:', session?.user?.id)
         setPackages([])
         return
       }
 
-      setPackages(data)
+      // Transform the data to match our Package interface
+      const transformedData = data.map((pkg: any) => ({
+        id: pkg.id,
+        trackingNumber: pkg.trackingNumber,
+        status: pkg.status,
+        description: pkg.description,
+        shopId: pkg.shopId,
+        userId: pkg.userId,
+        createdAt: pkg.createdAt,
+        updatedAt: pkg.updatedAt,
+        user: pkg.user?.[0] || null,
+        shop: pkg.shop?.[0] || null
+      }))
+
+      setPackages(transformedData)
     } catch (error) {
       console.error('Error in fetchPackages:', error)
       setError('حدث خطأ أثناء جلب الطرود')

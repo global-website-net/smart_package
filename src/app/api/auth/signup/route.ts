@@ -92,6 +92,29 @@ export async function POST(request: Request) {
         )
       }
 
+      // Create wallet for the new user
+      const { error: walletError } = await supabaseAdmin
+        .from('wallet')
+        .insert([
+          {
+            userId: authUser.user.id,
+            balance: 0,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }
+        ])
+
+      if (walletError) {
+        // If wallet creation fails, delete both the auth user and database user
+        await supabaseAdmin.auth.admin.deleteUser(authUser.user.id)
+        await supabaseAdmin.from('User').delete().eq('id', authUser.user.id)
+        console.error('Error creating wallet:', walletError)
+        return NextResponse.json(
+          { error: 'حدث خطأ أثناء إنشاء المحفظة' },
+          { status: 500 }
+        )
+      }
+
       return NextResponse.json({
         success: true,
         message: 'تم إنشاء الحساب بنجاح',

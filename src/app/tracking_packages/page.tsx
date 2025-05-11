@@ -681,64 +681,6 @@ export default function TrackingPackagesPage() {
           trackingNumber={selectedPackageForDelete.trackingNumber}
         />
       )}
-
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>تعديل بيانات الطرد</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>رقم التتبع</Label>
-              <Input
-                value={selectedPackage?.trackingNumber}
-                disabled
-                className="bg-gray-100"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>الحالة</Label>
-              <Select
-                value={selectedPackage?.status}
-                onValueChange={(value) => setSelectedPackage(prev => prev ? { ...prev, status: value } : null)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="اختر الحالة" />
-                </SelectTrigger>
-                <SelectContent>
-                  {STATUS_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setIsEditModalOpen(false)}
-                disabled={updating}
-              >
-                إلغاء
-              </Button>
-              <Button
-                onClick={handleUpdate}
-                disabled={updating}
-              >
-                {updating ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    جاري الحفظ...
-                  </>
-                ) : (
-                  'حفظ التغييرات'
-                )}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 } 

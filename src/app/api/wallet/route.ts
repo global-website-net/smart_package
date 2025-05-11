@@ -3,16 +3,10 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/auth.config'
 import { createClient } from '@supabase/supabase-js'
 
-// Create Supabase client with service role key for admin operations
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
-// Create Supabase client with anon key for RLS operations
+// Create a single Supabase client instance with service role key
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
 export async function GET() {
@@ -28,7 +22,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Get wallet data using the anon key client (respects RLS)
+    // Get wallet data
     const { data: wallet, error: walletError } = await supabase
       .from('wallet')
       .select('*')
@@ -36,9 +30,9 @@ export async function GET() {
       .single()
 
     if (walletError) {
-      // If wallet doesn't exist, create one using admin client
+      // If wallet doesn't exist, create one
       if (walletError.code === 'PGRST116') {
-        const { data: newWallet, error: createError } = await supabaseAdmin
+        const { data: newWallet, error: createError } = await supabase
           .from('wallet')
           .insert([
             {
@@ -72,7 +66,7 @@ export async function GET() {
       )
     }
 
-    // Get wallet transactions using the anon key client
+    // Get wallet transactions
     const { data: transactions, error: transactionsError } = await supabase
       .from('wallettransaction')
       .select('*')
@@ -122,19 +116,46 @@ export async function POST(request: Request) {
       )
     }
 
-    // Get wallet using the anon key client
-    const { data: wallet, error: walletError } = await supabase
+    // Get wallet
+    let { data: wallet, error: walletError } = await supabase
       .from('wallet')
       .select('*')
       .eq('userId', session.user.id)
       .single()
 
     if (walletError) {
-      console.error('Error fetching wallet:', walletError)
-      return NextResponse.json(
-        { error: 'حدث خطأ أثناء جلب بيانات المحفظة' },
-        { status: 500 }
-      )
+      // If wallet doesn't exist, create one
+      if (walletError.code === 'PGRST116') {
+        const { data: newWallet, error: createError } = await supabase
+          .from('wallet')
+          .insert([
+            {
+              userId: session.user.id,
+              balance: 0,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            }
+          ])
+          .select()
+          .single()
+
+        if (createError) {
+          console.error('Error creating wallet:', createError)
+          return NextResponse.json(
+            { error: 'حدث خطأ أثناء إنشاء المحفظة' },
+            { status: 500 }
+          )
+        }
+
+        // Use the newly created wallet
+        wallet = newWallet
+      } else {
+        console.error('Error fetching wallet:', walletError)
+        return NextResponse.json(
+          { error: 'حدث خطأ أثناء جلب بيانات المحفظة' },
+          { status: 500 }
+        )
+      }
     }
 
     // Calculate new balance
@@ -149,8 +170,8 @@ export async function POST(request: Request) {
       )
     }
 
-    // Start a transaction using the admin client
-    const { data: transaction, error: transactionError } = await supabaseAdmin
+    // Start a transaction
+    const { data: transaction, error: transactionError } = await supabase
       .from('wallettransaction')
       .insert([
         {
@@ -172,8 +193,8 @@ export async function POST(request: Request) {
       )
     }
 
-    // Update wallet balance using the admin client
-    const { error: updateError } = await supabaseAdmin
+    // Update wallet balance
+    const { error: updateError } = await supabase
       .from('wallet')
       .update({ 
         balance: newBalance,
