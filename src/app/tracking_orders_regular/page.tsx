@@ -164,7 +164,7 @@ export default function TrackingOrdersRegularPage() {
       // First check if wallet exists
       const { data: existingWallet, error: fetchError } = await supabase
         .from('wallet')
-        .select('balance')
+        .select('id, balance')
         .eq('userId', session?.user?.id)
         .single()
 
@@ -186,7 +186,7 @@ export default function TrackingOrdersRegularPage() {
               updatedAt: new Date().toISOString()
             }
           ])
-          .select()
+          .select('id')
           .single()
 
         if (createError) {
