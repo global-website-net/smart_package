@@ -120,6 +120,7 @@ export default function TrackingPackagesPage() {
   const { toast } = useToast()
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 20
+  const [updating, setUpdating] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -501,8 +502,6 @@ export default function TrackingPackagesPage() {
       setUpdating(false)
     }
   }
-
-  const updating = false
 
   if (loading) {
     return (
