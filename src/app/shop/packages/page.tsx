@@ -22,6 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import ShopEditWizard from '@/app/components/ShopEditWizard'
+import { Filter } from 'lucide-react'
 
 interface Package {
   id: string
@@ -53,6 +55,14 @@ export default function ShopPackagesPage() {
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [updating, setUpdating] = useState(false)
+  const [editStatus, setEditStatus] = useState<string | undefined>(undefined)
+  const [shops, setShops] = useState<{id: string, name: string, email: string, fullName: string}[]>([])
+  const [isShopEditOpen, setIsShopEditOpen] = useState(false)
+  const [selectedShopPackageId, setSelectedShopPackageId] = useState<string | null>(null)
+  const [showMobileFilters, setShowMobileFilters] = useState(false)
+  const [trackingNumberFilter, setTrackingNumberFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState('ALL')
+  const [descriptionFilter, setDescriptionFilter] = useState('')
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -67,6 +77,7 @@ export default function ShopPackagesPage() {
       }
       console.log('SHOP session.user.id:', session.user.id)
       fetchPackages()
+      fetchShops()
     }
   }, [status, session])
 
@@ -87,6 +98,20 @@ export default function ShopPackagesPage() {
       toast.error('حدث خطأ أثناء جلب الطرود')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchShops = async () => {
+    try {
+      const response = await fetch('/api/users/shops')
+      if (!response.ok) throw new Error('Failed to fetch shops')
+      const data = await response.json()
+      setShops(data.map((shop: any) => ({
+        ...shop,
+        fullName: shop.fullName || shop.name || ''
+      })))
+    } catch (error) {
+      toast.error('حدث خطأ أثناء جلب المتاجر')
     }
   }
 
@@ -120,6 +145,44 @@ export default function ShopPackagesPage() {
       setSelectedPackage(null)
     } catch (error) {
       console.error('Error in handleStatusChange:', error)
+      setError(error instanceof Error ? error.message : 'حدث خطأ أثناء تحديث حالة الطرد')
+      toast.error(error instanceof Error ? error.message : 'حدث خطأ أثناء تحديث حالة الطرد')
+    } finally {
+      setUpdating(false)
+    }
+  }
+
+  const openEditDialog = (pkg: Package) => {
+    setSelectedPackage(pkg)
+    setEditStatus(pkg.status)
+    setIsEditDialogOpen(true)
+  }
+
+  const handleSaveStatus = async () => {
+    if (!selectedPackage || !editStatus) return
+    try {
+      setUpdating(true)
+      setError(null)
+      const { error: updateError } = await supabase
+        .from('package')
+        .update({ 
+          status: editStatus,
+          updatedAt: new Date().toISOString()
+        })
+        .eq('id', selectedPackage.id)
+      if (updateError) {
+        throw new Error('حدث خطأ أثناء تحديث حالة الطرد')
+      }
+      setPackages(packages.map(pkg => 
+        pkg.id === selectedPackage.id 
+          ? { ...pkg, status: editStatus }
+          : pkg
+      ))
+      toast.success('تم تحديث حالة الطرد بنجاح')
+      setIsEditDialogOpen(false)
+      setSelectedPackage(null)
+    } catch (error) {
+      console.error('Error in handleSaveStatus:', error)
       setError(error instanceof Error ? error.message : 'حدث خطأ أثناء تحديث حالة الطرد')
       toast.error(error instanceof Error ? error.message : 'حدث خطأ أثناء تحديث حالة الطرد')
     } finally {
@@ -168,6 +231,32 @@ export default function ShopPackagesPage() {
         return 'bg-yellow-100 text-yellow-800'
       default:
         return 'bg-yellow-100 text-yellow-800'
+    }
+  }
+
+  const handleShopChange = async (newShopId: string) => {
+    if (!selectedShopPackageId) return
+    try {
+      setUpdating(true)
+      setError(null)
+      const { error: updateError } = await supabase
+        .from('package')
+        .update({ shopId: newShopId, updatedAt: new Date().toISOString() })
+        .eq('id', selectedShopPackageId)
+      if (updateError) throw new Error('حدث خطأ أثناء تحديث المتجر')
+      setPackages(packages.map(pkg =>
+        pkg.id === selectedShopPackageId
+          ? { ...pkg, shopId: newShopId, shop: shops.find(s => s.id === newShopId) || pkg.shop }
+          : pkg
+      ))
+      toast.success('تم تحديث المتجر بنجاح')
+      setIsShopEditOpen(false)
+      setSelectedShopPackageId(null)
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'حدث خطأ أثناء تحديث المتجر')
+      toast.error(error instanceof Error ? error.message : 'حدث خطأ أثناء تحديث المتجر')
+    } finally {
+      setUpdating(false)
     }
   }
 
@@ -239,10 +328,7 @@ export default function ShopPackagesPage() {
                     </TableCell>
                     <TableCell className="text-center">
                       <Button
-                        onClick={() => {
-                          setSelectedPackage(pkg)
-                          setIsEditDialogOpen(true)
-                        }}
+                        onClick={() => openEditDialog(pkg)}
                         className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                       >
                         تعديل
@@ -253,6 +339,132 @@ export default function ShopPackagesPage() {
               )}
             </TableBody>
           </Table>
+
+          {/* Mobile Card Layout */}
+          {typeof window !== 'undefined' && window.innerWidth <= 640 ? (
+            <div className="flex flex-col gap-6">
+              {/* Mobile Filters Icon */}
+              <div className="flex justify-end mb-4">
+                <button
+                  className="p-2 rounded-full border border-gray-300 bg-white shadow"
+                  onClick={() => setShowMobileFilters(v => !v)}
+                  aria-label="عرض الفلاتر"
+                >
+                  <Filter className="w-7 h-7" />
+                </button>
+              </div>
+              {showMobileFilters && (
+                <div className="flex flex-col gap-3 mb-4 p-4 bg-white rounded-lg shadow border border-gray-200">
+                  <input
+                    type="text"
+                    placeholder="ابحث برقم التتبع"
+                    className="w-full md:w-64 text-right p-2 border rounded"
+                    value={trackingNumberFilter}
+                    onChange={e => setTrackingNumberFilter(e.target.value)}
+                  />
+                  <select
+                    className="w-full md:w-48 text-right p-2 border rounded"
+                    value={statusFilter}
+                    onChange={e => setStatusFilter(e.target.value)}
+                  >
+                    <option value="ALL">كل الحالات</option>
+                    <option value="AWAITING_PAYMENT">في انتظار الدفع</option>
+                    <option value="PREPARING">قيد التحضير</option>
+                    <option value="DELIVERING_TO_SHOP">قيد التوصيل للمتجر</option>
+                    <option value="IN_SHOP">في المتجر</option>
+                    <option value="RECEIVED">تم الاستلام</option>
+                  </select>
+                  <input
+                    type="text"
+                    placeholder="ابحث بالوصف"
+                    className="w-full md:w-64 text-right p-2 border rounded"
+                    value={descriptionFilter}
+                    onChange={e => setDescriptionFilter(e.target.value)}
+                  />
+                </div>
+              )}
+              {packages.length === 0 ? (
+                <div className="text-center py-8">لا توجد طرود</div>
+              ) : (
+                packages.map((pkg, idx) => (
+                  <div key={pkg.id} className="bg-white rounded-xl shadow p-6 flex flex-col items-center border border-gray-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="font-bold text-lg">طرد</span>
+                      <span className="font-bold text-lg">#{String(idx + 1).padStart(3, '0')}</span>
+                    </div>
+                    <div className="mb-2 text-gray-600 text-sm">رقم التتبع: <span className="font-mono">{pkg.trackingNumber}</span></div>
+                    <div className="my-4">
+                      <svg width="64" height="64" fill="none" viewBox="0 0 24 24"><rect width="100%" height="100%" rx="8" fill="#F3F4F6"/><path d="M3 7l9-4 9 4M4 8v8a2 2 0 001 1.73l7 4.2a2 2 0 002 0l7-4.2A2 2 0 0020 16V8M4 8l8 4.5M20 8l-8 4.5" stroke="#222" strokeWidth="1.5" strokeLinejoin="round"/></svg>
+                    </div>
+                    <div className="mb-2">
+                      <span className={`px-3 py-1 rounded-full text-sm font-semibold ${pkg.status === 'RECEIVED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{getStatusText(pkg.status)}</span>
+                    </div>
+                    <div className="mb-2 text-gray-500 text-sm">تاريخ الإنشاء: {new Date(pkg.createdAt).toLocaleDateString('ar')}</div>
+                    <div className="flex flex-col items-center gap-2 mt-2">
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-1"
+                          onClick={() => {
+                            setSelectedShopPackageId(pkg.id)
+                            setIsShopEditOpen(true)
+                          }}
+                        >
+                          تعديل المتجر
+                        </Button>
+                        <span className="text-sm text-gray-700">{pkg.shop?.name ? `${pkg.shop.name} (${pkg.shop.email})` : 'غير محدد'}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-center font-bold text-lg">رقم التتبع</TableHead>
+                  <TableHead className="text-center font-bold text-lg">الحالة</TableHead>
+                  <TableHead className="text-center font-bold text-lg">الوصف</TableHead>
+                  <TableHead className="text-center font-bold text-lg">تاريخ الإنشاء</TableHead>
+                  <TableHead className="text-center font-bold text-lg">الإجراءات</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {packages.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-4">
+                      لا توجد طرود
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  packages.map((pkg) => (
+                    <TableRow key={pkg.id}>
+                      <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
+                      <TableCell className="text-center">
+                        <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
+                          {getStatusText(pkg.status)}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-center">{pkg.description || '-'}</TableCell>
+                      <TableCell className="text-center">
+                        {new Date(pkg.createdAt).toLocaleDateString('ar')}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Button
+                          onClick={() => openEditDialog(pkg)}
+                          className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        >
+                          تعديل
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          )}
         </div>
       </main>
 
@@ -277,8 +489,8 @@ export default function ShopPackagesPage() {
               <label className="text-right">الحالة</label>
               <div className="col-span-3">
                 <Select
-                  value={selectedPackage?.status}
-                  onValueChange={handleStatusChange}
+                  value={editStatus}
+                  onValueChange={setEditStatus}
                   disabled={updating}
                 >
                   <SelectTrigger>
@@ -286,13 +498,14 @@ export default function ShopPackagesPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="RECEIVED">تم الاستلام</SelectItem>
+                    <SelectItem value="IN_SHOP">في المتجر</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
           </div>
           <DialogFooter>
-            <div className="flex justify-center gap-4">
+            <div className="flex justify-center items-center gap-4 w-full">
               <button
                 onClick={() => setIsEditDialogOpen(false)}
                 className="bg-gray-500 text-white px-8 py-3 rounded-md hover:bg-gray-600 transition-colors"
@@ -300,7 +513,7 @@ export default function ShopPackagesPage() {
                 إلغاء
               </button>
               <button
-                onClick={() => selectedPackage && handleStatusChange(selectedPackage.status)}
+                onClick={handleSaveStatus}
                 disabled={updating}
                 className="bg-green-500 text-white px-8 py-3 rounded-md hover:bg-green-600 transition-colors"
               >
@@ -310,6 +523,17 @@ export default function ShopPackagesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ShopEditWizard
+        isOpen={isShopEditOpen}
+        onClose={() => {
+          setIsShopEditOpen(false)
+          setSelectedShopPackageId(null)
+        }}
+        currentShopId={selectedShopPackageId ? packages.find(p => p.id === selectedShopPackageId)?.shopId || '' : ''}
+        shops={shops}
+        onSave={handleShopChange}
+      />
     </div>
   )
 } 

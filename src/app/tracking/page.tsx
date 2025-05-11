@@ -375,8 +375,8 @@ export default function TrackingPage() {
             <TableBody>
               {currentOrders.length === 0 && !loading ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-4">
-                    لا توجد طلبات
+                  <TableCell colSpan={8} className="text-center py-8 align-middle">
+                    <span className="inline-block w-full">لا توجد طلبات</span>
                   </TableCell>
                 </TableRow>
               ) : (

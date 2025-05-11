@@ -614,8 +614,8 @@ export default function TrackingPackagesPage() {
             <TableBody>
               {currentPackages.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={isAdminOrOwner ? 7 : 6} className="text-center py-8">
-                    لا توجد طلبات متابعة حالياً
+                  <TableCell colSpan={isAdminOrOwner ? 7 : 6} className="text-center py-8 align-middle">
+                    <span className="inline-block w-full">لا توجد طلبات متابعة حالياً</span>
                   </TableCell>
                 </TableRow>
               ) : (

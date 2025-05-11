@@ -140,10 +140,27 @@ export default function AccountsPage() {
             </div>
           )}
 
-          {users.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-md p-6 text-center">
-              <p className="text-gray-600 text-lg">لا توجد حسابات حتى الآن</p>
-            </div>
+          {filteredUsers.length === 0 ? (
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-center text-sm font-bold text-gray-700 uppercase tracking-wider">الاسم الكامل</th>
+                  <th className="px-6 py-3 text-center text-sm font-bold text-gray-700 uppercase tracking-wider">البريد الإلكتروني</th>
+                  <th className="px-6 py-3 text-center text-sm font-bold text-gray-700 uppercase tracking-wider">المحافظة</th>
+                  <th className="px-6 py-3 text-center text-sm font-bold text-gray-700 uppercase tracking-wider">المدينة</th>
+                  <th className="px-6 py-3 text-center text-sm font-bold text-gray-700 uppercase tracking-wider">رقم الهاتف</th>
+                  <th className="px-6 py-3 text-center text-sm font-bold text-gray-700 uppercase tracking-wider">الدور</th>
+                  <th className="px-6 py-3 text-center text-sm font-bold text-gray-700 uppercase tracking-wider">تاريخ التسجيل</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td colSpan={7} className="text-center py-8 align-middle">
+                    <span className="inline-block w-full">لا توجد حسابات حتى الآن</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           ) : (
             <>
               {/* Filter Inputs */}
