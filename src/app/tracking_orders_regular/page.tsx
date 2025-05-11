@@ -37,6 +37,8 @@ export default function TrackingOrdersRegularPage() {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
   const [purchaseSiteFilter, setPurchaseSiteFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 20
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -241,6 +243,19 @@ export default function TrackingOrdersRegularPage() {
     return matchesPurchaseSite && matchesStatus
   })
 
+  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / itemsPerPage))
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const currentOrders = filteredOrders.slice(startIndex, endIndex)
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1)
+  }
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1)
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -328,14 +343,14 @@ export default function TrackingOrdersRegularPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredOrders.length === 0 && !loading ? (
+              {currentOrders.length === 0 && !loading ? (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-4">
                     لا توجد طلبات
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredOrders.map((order) => (
+                currentOrders.map((order) => (
                   <TableRow key={order.id}>
                     <TableCell className="text-center">{order.purchaseSite}</TableCell>
                     <TableCell className="text-center">
@@ -368,6 +383,33 @@ export default function TrackingOrdersRegularPage() {
               )}
             </TableBody>
           </Table>
+
+          {/* Pagination Controls - Always show */}
+          <div className="flex justify-center items-center gap-4 mt-6">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+              className="flex items-center gap-2"
+            >
+              <span className="h-4 w-4">&#8592;</span>
+              السابق
+            </Button>
+            <span className="text-sm text-gray-600">
+              الصفحة {currentPage} من {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className="flex items-center gap-2"
+            >
+              التالي
+              <span className="h-4 w-4">&#8594;</span>
+            </Button>
+          </div>
         </div>
       </main>
 

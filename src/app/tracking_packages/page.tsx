@@ -448,7 +448,7 @@ export default function TrackingPackagesPage() {
     const matchesUser = userFilter === 'ALL' || userFilter === '' || pkg.userId === userFilter
     return matchesTrackingNumber && matchesStatus && matchesShop && matchesUser
   })
-  const totalPages = Math.ceil(filteredPackages.length / itemsPerPage)
+  const totalPages = Math.max(1, Math.ceil(filteredPackages.length / itemsPerPage))
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
   const currentPackages = filteredPackages.slice(startIndex, endIndex)

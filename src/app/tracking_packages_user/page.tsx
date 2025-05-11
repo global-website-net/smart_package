@@ -12,6 +12,7 @@ import ShopEditWizard from '@/app/components/ShopEditWizard'
 import { Edit2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Filter } from 'lucide-react'
 
 interface Shop {
   id: string
@@ -58,6 +59,9 @@ export default function UserPackagesPage() {
   const [statusFilter, setStatusFilter] = useState('')
   const isMobile = useIsMobile()
   const canEditShop = true // Set to true to show the edit shop button
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 20
+  const [showMobileFilters, setShowMobileFilters] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -142,23 +146,17 @@ export default function UserPackagesPage() {
       setError(null)
 
       // Update the package in Supabase
-      const { data, error: updateError } = await supabase
+      const { error: updateError } = await supabase
         .from('package')
         .update({ 
           shopId: newShopId,
           updatedAt: new Date().toISOString()
         })
         .eq('id', selectedPackageId)
-        .select()
-        .single()
 
       if (updateError) {
         console.error('Error updating package:', updateError)
-        throw new Error('حدث خطأ أثناء تحديث المتجر')
-      }
-
-      if (!data) {
-        throw new Error('لم يتم العثور على الطرد')
+        throw new Error('An error occurred while updating the shop')
       }
 
       // Get the updated shop data
@@ -264,6 +262,17 @@ export default function UserPackagesPage() {
     return matchesTrackingNumber && matchesShop && matchesStatus
   })
 
+  const totalPages = Math.max(1, Math.ceil(filteredPackages.length / itemsPerPage))
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const currentPackages = filteredPackages.slice(startIndex, endIndex)
+  const handlePreviousPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1)
+  }
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -331,10 +340,53 @@ export default function UserPackagesPage() {
           {/* Mobile Card Layout */}
           {isMobile ? (
             <div className="flex flex-col gap-6">
-              {filteredPackages.length === 0 ? (
+              {/* Mobile Filters Icon */}
+              <div className="flex justify-end mb-4">
+                <button
+                  className="p-2 rounded-full border border-gray-300 bg-white shadow"
+                  onClick={() => setShowMobileFilters(v => !v)}
+                  aria-label="Show filters"
+                >
+                  <Filter className="w-7 h-7 text-black" />
+                </button>
+              </div>
+              {showMobileFilters && (
+                <div className="flex flex-col gap-3 mb-4 p-4 bg-white rounded-lg shadow border border-gray-200">
+                  <input
+                    type="text"
+                    placeholder="ابحث برقم التتبع"
+                    className="w-full md:w-64 text-right p-2 border rounded"
+                    value={trackingNumberFilter}
+                    onChange={e => setTrackingNumberFilter(e.target.value)}
+                  />
+                  <select
+                    className="w-full md:w-48 text-right p-2 border rounded"
+                    value={statusFilter}
+                    onChange={e => setStatusFilter(e.target.value)}
+                  >
+                    <option value="ALL">كل الحالات</option>
+                    <option value="AWAITING_PAYMENT">في انتظار الدفع</option>
+                    <option value="PREPARING">قيد التحضير</option>
+                    <option value="DELIVERING_TO_SHOP">قيد التوصيل للمتجر</option>
+                    <option value="IN_SHOP">في المتجر</option>
+                    <option value="RECEIVED">تم الاستلام</option>
+                  </select>
+                  <select
+                    className="w-full md:w-48 text-right p-2 border rounded"
+                    value={shopFilter}
+                    onChange={e => setShopFilter(e.target.value)}
+                  >
+                    <option value="ALL">كل المتاجر</option>
+                    {shops.map(shop => (
+                      <option key={shop.id} value={shop.id}>{shop.fullName}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              {currentPackages.length === 0 ? (
                 <div className="text-center py-8">لا توجد طرود</div>
               ) : (
-                filteredPackages.map((pkg, idx) => (
+                currentPackages.map((pkg, idx) => (
                   <div key={pkg.id} className="bg-white rounded-xl shadow p-6 flex flex-col items-center border border-gray-200">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="font-bold text-lg">طرد</span>
@@ -351,70 +403,104 @@ export default function UserPackagesPage() {
                       </span>
                     </div>
                     <div className="mb-2 text-gray-500 text-sm">تاريخ الإنشاء: {new Date(pkg.createdAt).toLocaleDateString('ar')}</div>
-                    {/* Edit shop button if allowed */}
-                    {canEditShop && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-2 flex items-center gap-1"
-                        onClick={() => handleEditShop(pkg)}
-                      >
-                        <Edit2 className="w-4 h-4" /> تعديل المتجر
-                      </Button>
-                    )}
+                    {/* Edit shop button and current shop */}
+                    <div className="flex flex-col items-center gap-2 mt-2">
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-2 flex items-center gap-1"
+                          onClick={() => {
+                            setSelectedPackageId(pkg.id)
+                            setIsShopEditOpen(true)
+                          }}
+                        >
+                          <Edit2 className="w-4 h-4" /> تعديل المتجر
+                        </Button>
+                        <span className="text-sm text-gray-700">{pkg.User?.fullName ? `${pkg.User.fullName} (${pkg.User.email})` : 'غير محدد'}</span>
+                      </div>
+                    </div>
                   </div>
                 ))
               )}
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-center font-bold text-lg">رقم التتبع</TableHead>
-                  <TableHead className="text-center font-bold text-lg">المتجر</TableHead>
-                  <TableHead className="text-center font-bold text-lg">الحالة</TableHead>
-                  <TableHead className="text-center font-bold text-lg">الوصف</TableHead>
-                  <TableHead className="text-center font-bold text-lg">تاريخ الإنشاء</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredPackages.length === 0 ? (
+            <>
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-4">
-                      لا توجد طرود
-                    </TableCell>
+                    <TableHead className="text-center font-bold text-lg">رقم التتبع</TableHead>
+                    <TableHead className="text-center font-bold text-lg">المتجر</TableHead>
+                    <TableHead className="text-center font-bold text-lg">الحالة</TableHead>
+                    <TableHead className="text-center font-bold text-lg">الوصف</TableHead>
+                    <TableHead className="text-center font-bold text-lg">تاريخ الإنشاء</TableHead>
                   </TableRow>
-                ) :
-                  filteredPackages.map((pkg) => (
-                    <TableRow key={pkg.id}>
-                      <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          <span>{pkg.User?.fullName || 'غير محدد'}</span>
-                          <Button
-                            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                            onClick={() => {
-                              setSelectedPackageId(pkg.id)
-                              setIsShopEditOpen(true)
-                            }}
-                          >
-                            تعديل
-                          </Button>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
-                          {getStatusText(pkg.status)}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-center">{pkg.description || '-'}</TableCell>
-                      <TableCell className="text-center">
-                        {new Date(pkg.createdAt).toLocaleDateString('ar')}
+                </TableHeader>
+                <TableBody>
+                  {currentPackages.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-4">
+                        لا توجد طرود
                       </TableCell>
                     </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
+                  ) :
+                    currentPackages.map((pkg) => (
+                      <TableRow key={pkg.id}>
+                        <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
+                        <TableCell className="text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <span>{pkg.User?.fullName || 'غير محدد'}</span>
+                            <Button
+                              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                              onClick={() => {
+                                setSelectedPackageId(pkg.id)
+                                setIsShopEditOpen(true)
+                              }}
+                            >
+                              تعديل
+                            </Button>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
+                            {getStatusText(pkg.status)}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-center">{pkg.description || '-'}</TableCell>
+                        <TableCell className="text-center">
+                          {new Date(pkg.createdAt).toLocaleDateString('ar')}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+              {/* Pagination Controls - Always show */}
+              <div className="flex justify-center items-center gap-4 mt-6">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePreviousPage}
+                  disabled={currentPage === 1}
+                  className="flex items-center gap-2"
+                >
+                  <span className="h-4 w-4">&#8592;</span>
+                  السابق
+                </Button>
+                <span className="text-sm text-gray-600">
+                  الصفحة {currentPage} من {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                  className="flex items-center gap-2"
+                >
+                  التالي
+                  <span className="h-4 w-4">&#8594;</span>
+                </Button>
+              </div>
+            </>
           )}
         </div>
       </main>

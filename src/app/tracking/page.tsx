@@ -279,7 +279,7 @@ export default function TrackingPage() {
     const matchesStatus = statusFilter === 'ALL' || statusFilter === '' || order.status === statusFilter
     return matchesOrderNumber && matchesStatus
   })
-  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage)
+  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / itemsPerPage))
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
   const currentOrders = filteredOrders.slice(startIndex, endIndex)
