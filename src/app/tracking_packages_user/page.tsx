@@ -164,21 +164,14 @@ export default function UserPackagesPage() {
         pkg.id === selectedPackageId ? updatedPackage : pkg
       ))
 
-      toast({
-        title: 'تم التحديث',
-        description: 'تم تحديث المتجر بنجاح'
-      })
+      toast.success('تم تحديث المتجر بنجاح')
 
       setIsShopEditOpen(false)
       setSelectedPackageId(null)
     } catch (error) {
       console.error('Error in handleShopChange:', error)
       setError(error instanceof Error ? error.message : 'حدث خطأ أثناء تحديث المتجر')
-      toast({
-        title: 'خطأ',
-        description: error instanceof Error ? error.message : 'حدث خطأ أثناء تحديث المتجر',
-        variant: 'destructive'
-      })
+      toast.error(error instanceof Error ? error.message : 'حدث خطأ أثناء تحديث المتجر')
     } finally {
       setUpdating(false)
     }
