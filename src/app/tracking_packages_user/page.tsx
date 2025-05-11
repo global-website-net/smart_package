@@ -145,18 +145,21 @@ export default function UserPackagesPage() {
       setUpdating(true)
       setError(null)
 
-      // Update the package in Supabase
-      const { error: updateError } = await supabase
-        .from('package')
-        .update({ 
-          shopId: newShopId,
-          updatedAt: new Date().toISOString()
+      // Call the API route to update the shop
+      const response = await fetch('/api/packages/update-shop', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          packageId: selectedPackageId,
+          newShopId: newShopId
         })
-        .eq('id', selectedPackageId)
+      })
 
-      if (updateError) {
-        console.error('Error updating package:', updateError)
-        throw new Error('An error occurred while updating the shop')
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'حدث خطأ أثناء تحديث المتجر')
       }
 
       // Get the updated shop data
@@ -281,7 +284,7 @@ export default function UserPackagesPage() {
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-6">تتبع الطرود</h1>
             <div className="flex justify-center items-center">
-              <div className="relative w-32 sm:w-48 md:w-64">
+              <div className="relative w-56 sm:w-64 md:w-80">
                 <div className="w-full h-0.5 bg-green-500"></div>
                 <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
               </div>
@@ -294,58 +297,61 @@ export default function UserPackagesPage() {
             </div>
           )}
 
-          {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-4 items-center justify-center">
-            <Input
-              type="text"
-              placeholder="ابحث برقم التتبع"
-              className="w-full md:w-64 text-right"
-              value={trackingNumberFilter}
-              onChange={e => setTrackingNumberFilter(e.target.value)}
-            />
-            <Select
-              value={shopFilter}
-              onValueChange={setShopFilter}
-            >
-              <SelectTrigger className="w-full md:w-48 text-right">
-                <SelectValue placeholder="كل المتاجر" className="text-right" />
-              </SelectTrigger>
-              <SelectContent className="text-right" align="end">
-                <SelectItem value="ALL">كل المتاجر</SelectItem>
-                {shops.map(shop => (
-                  <SelectItem key={shop.id} value={shop.id}>
-                    {shop.fullName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select
-              value={statusFilter}
-              onValueChange={setStatusFilter}
-            >
-              <SelectTrigger className="w-full md:w-48 text-right">
-                <SelectValue placeholder="كل الحالات" className="text-right" />
-              </SelectTrigger>
-              <SelectContent className="text-right" align="end">
-                <SelectItem value="ALL">كل الحالات</SelectItem>
-                <SelectItem value="AWAITING_PAYMENT">في انتظار الدفع</SelectItem>
-                <SelectItem value="PREPARING">قيد التحضير</SelectItem>
-                <SelectItem value="DELIVERING_TO_SHOP">قيد التوصيل للمتجر</SelectItem>
-                <SelectItem value="IN_SHOP">في المتجر</SelectItem>
-                <SelectItem value="RECEIVED">تم الاستلام</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Desktop Filters */}
+          {!isMobile && (
+            <div className="flex flex-col sm:flex-row gap-4 mb-4 items-center justify-center">
+              <Input
+                type="text"
+                placeholder="ابحث برقم التتبع"
+                className="w-full md:w-64 text-right"
+                value={trackingNumberFilter}
+                onChange={e => setTrackingNumberFilter(e.target.value)}
+              />
+              <Select
+                value={shopFilter}
+                onValueChange={setShopFilter}
+              >
+                <SelectTrigger className="w-full md:w-48 text-right">
+                  <SelectValue placeholder="كل المتاجر" className="text-right" />
+                </SelectTrigger>
+                <SelectContent className="text-right" align="end">
+                  <SelectItem value="ALL">كل المتاجر</SelectItem>
+                  {shops.map(shop => (
+                    <SelectItem key={shop.id} value={shop.id}>
+                      {shop.fullName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={statusFilter}
+                onValueChange={setStatusFilter}
+              >
+                <SelectTrigger className="w-full md:w-48 text-right">
+                  <SelectValue placeholder="كل الحالات" className="text-right" />
+                </SelectTrigger>
+                <SelectContent className="text-right" align="end">
+                  <SelectItem value="ALL">كل الحالات</SelectItem>
+                  <SelectItem value="AWAITING_PAYMENT">في انتظار الدفع</SelectItem>
+                  <SelectItem value="PREPARING">قيد التحضير</SelectItem>
+                  <SelectItem value="DELIVERING_TO_SHOP">قيد التوصيل للمتجر</SelectItem>
+                  <SelectItem value="IN_SHOP">في المتجر</SelectItem>
+                  <SelectItem value="RECEIVED">تم الاستلام</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Mobile Card Layout */}
           {isMobile ? (
             <div className="flex flex-col gap-6">
               {/* Mobile Filters Icon */}
-              <div className="flex justify-end mb-4">
+              <div className="flex justify-start mb-4">
                 <button
-                  className="p-2 rounded-full border border-gray-300 bg-white shadow"
+                  className="p-0 bg-transparent border-none shadow-none"
+                  style={{ background: 'none', border: 'none', boxShadow: 'none' }}
                   onClick={() => setShowMobileFilters(v => !v)}
-                  aria-label="Show filters"
+                  aria-label="عرض الفلاتر"
                 >
                   <Filter className="w-7 h-7 text-black" />
                 </button>
@@ -394,8 +400,16 @@ export default function UserPackagesPage() {
                     </div>
                     <div className="mb-2 text-gray-600 text-sm">رقم التتبع: <span className="font-mono">{pkg.trackingNumber}</span></div>
                     <div className="my-4">
-                      {/* Generic package icon */}
-                      <svg width="64" height="64" fill="none" viewBox="0 0 24 24"><rect width="100%" height="100%" rx="8" fill="#F3F4F6"/><path d="M3 7l9-4 9 4M4 8v8a2 2 0 001 1.73l7 4.2a2 2 0 002 0l7-4.2A2 2 0 0020 16V8M4 8l8 4.5M20 8l-8 4.5" stroke="#222" strokeWidth="1.5" strokeLinejoin="round"/></svg>
+                      {/* Updated package icon to match screenshot */}
+                      <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                        <rect width="64" height="64" rx="8" fill="white"/>
+                        <g>
+                          <rect x="12" y="20" width="40" height="24" rx="2" fill="black"/>
+                          <polygon points="12,20 32,8 52,20 32,32" fill="black"/>
+                          <rect x="30" y="20" width="4" height="24" fill="white"/>
+                          <polygon points="32,8 32,32 34,20 52,20" fill="white" opacity="0.2"/>
+                        </g>
+                      </svg>
                     </div>
                     <div className="mb-2">
                       <span className={`px-3 py-1 rounded-full text-sm font-semibold ${pkg.status === 'RECEIVED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
@@ -417,7 +431,7 @@ export default function UserPackagesPage() {
                         >
                           <Edit2 className="w-4 h-4" /> تعديل المتجر
                         </Button>
-                        <span className="text-sm text-gray-700">{pkg.User?.fullName ? `${pkg.User.fullName} (${pkg.User.email})` : 'غير محدد'}</span>
+                        <span className="text-sm text-gray-700">{pkg.User?.fullName ? pkg.User.fullName : 'غير محدد'}</span>
                       </div>
                     </div>
                   </div>

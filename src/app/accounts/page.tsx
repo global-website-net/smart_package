@@ -140,6 +140,24 @@ export default function AccountsPage() {
             </div>
           )}
 
+          {/* Filter Inputs - Always visible */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-4 items-center justify-center">
+            <input
+              type="text"
+              placeholder="فلتر حسب الاسم الكامل"
+              value={fullNameFilter}
+              onChange={e => setFullNameFilter(e.target.value)}
+              className="border rounded-md px-3 py-2 w-64 text-right"
+            />
+            <input
+              type="text"
+              placeholder="فلتر حسب البريد الإلكتروني"
+              value={emailFilter}
+              onChange={e => setEmailFilter(e.target.value)}
+              className="border rounded-md px-3 py-2 w-64 text-right"
+            />
+          </div>
+
           {filteredUsers.length === 0 ? (
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -163,23 +181,6 @@ export default function AccountsPage() {
             </table>
           ) : (
             <>
-              {/* Filter Inputs */}
-              <div className="flex flex-col sm:flex-row gap-4 mb-4 items-center justify-center">
-                <input
-                  type="text"
-                  placeholder="فلتر حسب الاسم الكامل"
-                  value={fullNameFilter}
-                  onChange={e => setFullNameFilter(e.target.value)}
-                  className="border rounded-md px-3 py-2 w-64 text-right"
-                />
-                <input
-                  type="text"
-                  placeholder="فلتر حسب البريد الإلكتروني"
-                  value={emailFilter}
-                  onChange={e => setEmailFilter(e.target.value)}
-                  className="border rounded-md px-3 py-2 w-64 text-right"
-                />
-              </div>
               <div className="bg-white rounded-lg shadow-md overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">

@@ -11,6 +11,7 @@ import Header from '@/app/components/Header'
 import PaymentModal from '@/app/components/PaymentModal'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Filter } from 'lucide-react'
 
 interface Order {
   id: string
@@ -27,6 +28,17 @@ interface Order {
   updatedAt: string
 }
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 640)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+  return isMobile
+}
+
 export default function TrackingOrdersRegularPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
@@ -39,6 +51,8 @@ export default function TrackingOrdersRegularPage() {
   const [statusFilter, setStatusFilter] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 20
+  const isMobile = useIsMobile()
+  const [showMobileFilters, setShowMobileFilters] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -279,7 +293,7 @@ export default function TrackingOrdersRegularPage() {
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-6">تتبع الطلبات</h1>
             <div className="flex justify-center items-center">
-              <div className="relative w-32 sm:w-48 md:w-64">
+              <div className="relative w-56 sm:w-64 md:w-80">
                 <div className="w-full h-0.5 bg-green-500"></div>
                 <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
               </div>
@@ -301,88 +315,159 @@ export default function TrackingOrdersRegularPage() {
             </div>
           )}
 
-          {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-4 items-center justify-center">
-            <Input
-              type="text"
-              placeholder="ابحث بموقع الشراء"
-              className="w-full md:w-64 text-right"
-              value={purchaseSiteFilter}
-              onChange={e => setPurchaseSiteFilter(e.target.value)}
-            />
-            <Select
-              value={statusFilter}
-              onValueChange={setStatusFilter}
-            >
-              <SelectTrigger className="w-full md:w-48 text-right">
-                <SelectValue placeholder="كل الحالات" className="text-right" />
-              </SelectTrigger>
-              <SelectContent className="text-right" align="end">
-                <SelectItem value="ALL">كل الحالات</SelectItem>
-                <SelectItem value="PENDING_APPROVAL">في انتظار الموافقة</SelectItem>
-                <SelectItem value="AWAITING_PAYMENT">بانتظار الدفع</SelectItem>
-                <SelectItem value="ORDERING">قيد الطلب</SelectItem>
-                <SelectItem value="ORDER_COMPLETED">تم الطلب</SelectItem>
-                <SelectItem value="CANCELLED">ملغي</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-center">موقع الشراء</TableHead>
-                <TableHead className="text-center">رابط الشراء</TableHead>
-                <TableHead className="text-center">رقم الهاتف</TableHead>
-                <TableHead className="text-center">المبلغ الإجمالي</TableHead>
-                <TableHead className="text-center">الحالة</TableHead>
-                <TableHead className="text-center">ملاحظات</TableHead>
-                <TableHead className="text-center">معلومات إضافية</TableHead>
-                <TableHead className="text-center">تاريخ الإنشاء</TableHead>
-                <TableHead className="text-center">الإجراءات</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {currentOrders.length === 0 && !loading ? (
-                <TableRow>
-                  <TableCell colSpan={9} className="text-center py-4">
-                    لا توجد طلبات
-                  </TableCell>
-                </TableRow>
+          {/* Mobile Layout */}
+          {isMobile ? (
+            <div className="flex flex-col gap-6">
+              {/* Mobile Filters Icon */}
+              <div className="flex justify-end mb-4">
+                <button
+                  className="p-0 bg-transparent border-none shadow-none"
+                  style={{ background: 'none', border: 'none', boxShadow: 'none' }}
+                  onClick={() => setShowMobileFilters(v => !v)}
+                  aria-label="عرض الفلاتر"
+                >
+                  <Filter className="w-7 h-7 text-black" />
+                </button>
+              </div>
+              {showMobileFilters && (
+                <div className="flex flex-col gap-3 mb-4 p-4 bg-white rounded-lg shadow border border-gray-200">
+                  <input
+                    type="text"
+                    placeholder="ابحث بموقع الشراء"
+                    className="w-full md:w-64 text-right p-2 border rounded"
+                    value={purchaseSiteFilter}
+                    onChange={e => setPurchaseSiteFilter(e.target.value)}
+                  />
+                  <select
+                    className="w-full md:w-48 text-right p-2 border rounded"
+                    value={statusFilter}
+                    onChange={e => setStatusFilter(e.target.value)}
+                  >
+                    <option value="ALL">كل الحالات</option>
+                    <option value="PENDING_APPROVAL">في انتظار الموافقة</option>
+                    <option value="AWAITING_PAYMENT">في انتظار الدفع</option>
+                    <option value="ORDERING">قيد الطلب</option>
+                    <option value="ORDER_COMPLETED">تم الطلب</option>
+                    <option value="CANCELLED">ملغي</option>
+                  </select>
+                </div>
+              )}
+              {currentOrders.length === 0 ? (
+                <div className="text-center py-8">لا توجد طلبات</div>
               ) : (
-                currentOrders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="text-center">{order.purchaseSite}</TableCell>
-                    <TableCell className="text-center">
-                      <a href={order.purchaseLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                        {order.purchaseLink}
-                      </a>
-                    </TableCell>
-                    <TableCell className="text-center">{order.phoneNumber}</TableCell>
-                    <TableCell className="text-center">{order.totalAmount ? `₪${order.totalAmount.toFixed(2)}` : '-'}</TableCell>
-                    <TableCell className="text-center">
-                      <span className={`px-2 py-1 rounded-full ${getStatusColor(order.status)}`}>
-                        {getOrderStatusText(order.status)}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-center">{order.notes || '-'}</TableCell>
-                    <TableCell className="text-center">{order.additionalInfo || '-'}</TableCell>
-                    <TableCell className="text-center">{new Date(order.createdAt).toLocaleDateString('ar')}</TableCell>
-                    <TableCell className="text-center">
-                      {order.status === 'AWAITING_PAYMENT' && (
-                        <Button
-                          onClick={() => handlePaymentClick(order)}
-                          className="bg-green-500 hover:bg-green-600 text-white"
-                        >
-                          دفع
-                        </Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
+                currentOrders.map((order, idx) => (
+                  <div key={order.id} className="bg-white rounded-xl shadow p-6 flex flex-col items-center border border-gray-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="font-bold text-lg">طلبية</span>
+                      <span className="font-bold text-lg">O - {order.orderNumber}</span>
+                    </div>
+                    <div className="my-4">
+                      {/* Generic 2-bag icon SVG */}
+                      <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                        <rect width="64" height="64" rx="8" fill="white"/>
+                        <g>
+                          <rect x="18" y="28" width="20" height="18" rx="2" fill="black"/>
+                          <rect x="32" y="20" width="14" height="18" rx="2" fill="black"/>
+                          <rect x="24" y="18" width="8" height="10" rx="2" fill="black"/>
+                        </g>
+                      </svg>
+                    </div>
+                    <div className="mb-2 text-xl font-bold text-black">{order.purchaseSite}</div>
+                    <div className="mb-2">
+                      <span className={`px-3 py-1 rounded-full text-sm font-semibold ${order.status === 'ORDER_COMPLETED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{getOrderStatusText(order.status)}</span>
+                    </div>
+                    {/* Optionally show order code or totalAmount if needed */}
+                    {/* <div className="mb-2 text-gray-500 text-sm">{order.orderNumber}</div> */}
+                  </div>
                 ))
               )}
-            </TableBody>
-          </Table>
+            </div>
+          ) : (
+            <>
+              {/* Desktop Filters */}
+              <div className="flex flex-col sm:flex-row gap-4 mb-4 items-center justify-center">
+                <Input
+                  type="text"
+                  placeholder="ابحث بموقع الشراء"
+                  className="w-full md:w-64 text-right"
+                  value={purchaseSiteFilter}
+                  onChange={e => setPurchaseSiteFilter(e.target.value)}
+                />
+                <Select
+                  value={statusFilter}
+                  onValueChange={setStatusFilter}
+                >
+                  <SelectTrigger className="w-full md:w-48 text-right">
+                    <SelectValue placeholder="كل الحالات" className="text-right" />
+                  </SelectTrigger>
+                  <SelectContent className="text-right" align="end">
+                    <SelectItem value="ALL">كل الحالات</SelectItem>
+                    <SelectItem value="PENDING_APPROVAL">في انتظار الموافقة</SelectItem>
+                    <SelectItem value="AWAITING_PAYMENT">بانتظار الدفع</SelectItem>
+                    <SelectItem value="ORDERING">قيد الطلب</SelectItem>
+                    <SelectItem value="ORDER_COMPLETED">تم الطلب</SelectItem>
+                    <SelectItem value="CANCELLED">ملغي</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {/* Desktop Table */}
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-center">موقع الشراء</TableHead>
+                    <TableHead className="text-center">رابط الشراء</TableHead>
+                    <TableHead className="text-center">رقم الهاتف</TableHead>
+                    <TableHead className="text-center">المبلغ الإجمالي</TableHead>
+                    <TableHead className="text-center">الحالة</TableHead>
+                    <TableHead className="text-center">ملاحظات</TableHead>
+                    <TableHead className="text-center">معلومات إضافية</TableHead>
+                    <TableHead className="text-center">تاريخ الإنشاء</TableHead>
+                    <TableHead className="text-center">الإجراءات</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {currentOrders.length === 0 && !loading ? (
+                    <TableRow>
+                      <TableCell colSpan={9} className="text-center py-4">
+                        لا توجد طلبات
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    currentOrders.map((order) => (
+                      <TableRow key={order.id}>
+                        <TableCell className="text-center">{order.purchaseSite}</TableCell>
+                        <TableCell className="text-center">
+                          <a href={order.purchaseLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                            {order.purchaseLink}
+                          </a>
+                        </TableCell>
+                        <TableCell className="text-center">{order.phoneNumber}</TableCell>
+                        <TableCell className="text-center">{order.totalAmount ? `₪${order.totalAmount.toFixed(2)}` : '-'}</TableCell>
+                        <TableCell className="text-center">
+                          <span className={`px-2 py-1 rounded-full ${getStatusColor(order.status)}`}>
+                            {getOrderStatusText(order.status)}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-center">{order.notes || '-'}</TableCell>
+                        <TableCell className="text-center">{order.additionalInfo || '-'}</TableCell>
+                        <TableCell className="text-center">{new Date(order.createdAt).toLocaleDateString('ar')}</TableCell>
+                        <TableCell className="text-center">
+                          {order.status === 'AWAITING_PAYMENT' && (
+                            <Button
+                              onClick={() => handlePaymentClick(order)}
+                              className="bg-green-500 hover:bg-green-600 text-white"
+                            >
+                              دفع
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </>
+          )}
 
           {/* Pagination Controls - Always show */}
           <div className="flex justify-center items-center gap-4 mt-6">

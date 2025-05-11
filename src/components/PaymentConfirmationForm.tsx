@@ -8,11 +8,6 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
-
 interface WalletData {
   balance: number;
 }
@@ -34,13 +29,26 @@ export default function PaymentConfirmationForm({
   const [error, setError] = useState<string | null>(null)
   const [walletBalance, setWalletBalance] = useState<number | null>(null)
   const router = useRouter()
-  const { data: session, status } = useSession()
+  const { data: session } = useSession()
+
+  // Create Supabase client with user's access token for RLS
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      global: {
+        headers: {
+          Authorization: session?.accessToken ? `Bearer ${session.accessToken}` : undefined
+        }
+      }
+    }
+  )
 
   useEffect(() => {
-    if (status === 'authenticated' && session?.user?.id) {
+    if (session?.user?.id) {
       fetchWalletBalance()
     }
-  }, [status, session])
+  }, [session])
 
   const fetchWalletBalance = async () => {
     try {
@@ -96,7 +104,7 @@ export default function PaymentConfirmationForm({
       setLoading(true)
       setError(null)
 
-      if (status !== 'authenticated' || !session?.user?.id) {
+      if (!session?.user?.id) {
         throw new Error('يجب تسجيل الدخول أولاً')
       }
 

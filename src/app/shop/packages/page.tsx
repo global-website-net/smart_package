@@ -296,51 +296,7 @@ export default function ShopPackagesPage() {
             </div>
           )}
 
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-center font-bold text-lg">رقم التتبع</TableHead>
-                <TableHead className="text-center font-bold text-lg">الحالة</TableHead>
-                <TableHead className="text-center font-bold text-lg">الوصف</TableHead>
-                <TableHead className="text-center font-bold text-lg">تاريخ الإنشاء</TableHead>
-                <TableHead className="text-center font-bold text-lg">الإجراءات</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {packages.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-4">
-                    لا توجد طرود
-                  </TableCell>
-                </TableRow>
-              ) : (
-                packages.map((pkg) => (
-                  <TableRow key={pkg.id}>
-                    <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
-                    <TableCell className="text-center">
-                      <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
-                        {getStatusText(pkg.status)}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-center">{pkg.description || '-'}</TableCell>
-                    <TableCell className="text-center">
-                      {new Date(pkg.createdAt).toLocaleDateString('ar')}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Button
-                        onClick={() => openEditDialog(pkg)}
-                        className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                      >
-                        تعديل
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-
-          {/* Mobile Card Layout */}
+          {/* Mobile View */}
           {typeof window !== 'undefined' && window.innerWidth <= 640 ? (
             <div className="flex flex-col gap-6">
               {/* Mobile Filters Icon */}
@@ -421,6 +377,7 @@ export default function ShopPackagesPage() {
               )}
             </div>
           ) : (
+            /* Desktop View */
             <Table>
               <TableHeader>
                 <TableRow>
