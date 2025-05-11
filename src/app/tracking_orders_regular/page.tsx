@@ -137,7 +137,6 @@ export default function TrackingOrdersRegularPage() {
   }
 
   const handleViewDetails = (order: Order) => {
-    // Implement the logic to view order details
     console.log('Viewing details for order:', order)
   }
 
@@ -147,7 +146,6 @@ export default function TrackingOrdersRegularPage() {
   }
 
   const handlePaymentComplete = () => {
-    // Update the order status in the local state
     setOrders(orders.map(order => 
       order.id === selectedOrder?.id 
         ? { ...order, status: 'ORDERING' }
@@ -168,7 +166,7 @@ export default function TrackingOrdersRegularPage() {
         .eq('userId', session?.user?.id)
         .single()
 
-      if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+      if (fetchError && fetchError.code !== 'PGRST116') {
         console.error('Error fetching wallet:', fetchError)
         throw new Error('حدث خطأ أثناء التحقق من المحفظة')
       }
@@ -213,21 +211,14 @@ export default function TrackingOrdersRegularPage() {
         throw new Error('حدث خطأ أثناء تحديث حالة الطلب')
       }
 
-      toast({
-        title: 'تم التأكيد',
-        description: 'تم تأكيد الدفع بنجاح'
-      })
+      toast.success('تم تأكيد الدفع بنجاح')
 
       // Refresh orders list
       fetchOrders()
     } catch (error) {
       console.error('Error in handleConfirmPayment:', error)
       setError(error instanceof Error ? error.message : 'حدث خطأ أثناء تأكيد الدفع')
-      toast({
-        title: 'خطأ',
-        description: error instanceof Error ? error.message : 'حدث خطأ أثناء تأكيد الدفع',
-        variant: 'destructive'
-      })
+      toast.error(error instanceof Error ? error.message : 'حدث خطأ أثناء تأكيد الدفع')
     } finally {
       setLoading(false)
     }
@@ -350,4 +341,4 @@ export default function TrackingOrdersRegularPage() {
       )}
     </div>
   )
-} 
+}
