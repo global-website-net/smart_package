@@ -299,7 +299,11 @@ export default function TrackingPackagesPage() {
     } catch (error) {
       console.error('Error in fetchPackages:', error)
       setError('حدث خطأ أثناء جلب الطرود')
-      toast.error('حدث خطأ أثناء جلب الطرود')
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ أثناء جلب الطرود',
+        variant: 'destructive'
+      })
     } finally {
       setLoading(false)
     }
@@ -314,11 +318,18 @@ export default function TrackingPackagesPage() {
 
       if (error) throw error
 
-      toast.success('تم حذف الطرد بنجاح')
+      toast({
+        title: 'تم الحذف',
+        description: 'تم حذف الطرد بنجاح'
+      })
       setPackages(packages.filter(pkg => pkg.id !== id))
     } catch (error) {
       console.error('Error deleting package:', error)
-      toast.error('حدث خطأ أثناء حذف الطرد')
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ أثناء حذف الطرد',
+        variant: 'destructive'
+      })
     }
   }
 
@@ -474,11 +485,18 @@ export default function TrackingPackagesPage() {
         pkg.id === selectedPackage.id ? selectedPackage : pkg
       ))
 
-      toast.success('تم تحديث حالة الطرد بنجاح')
+      toast({
+        title: 'تم التحديث',
+        description: 'تم تحديث حالة الطرد بنجاح'
+      })
       setIsEditModalOpen(false)
     } catch (error) {
       console.error('Error updating package:', error)
-      toast.error('حدث خطأ أثناء تحديث الطرد')
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ أثناء تحديث الطرد',
+        variant: 'destructive'
+      })
     } finally {
       setUpdating(false)
     }
