@@ -14,7 +14,7 @@ interface PaymentModalProps {
 export default function PaymentModal({ isOpen, onClose, amount, orderId, onPaymentComplete }: PaymentModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" aria-describedby="payment-confirm-description">
         <DialogHeader>
           <div className="flex justify-between items-center">
             <DialogTitle className="text-xl font-bold text-center">تأكيد الدفع</DialogTitle>
@@ -28,6 +28,9 @@ export default function PaymentModal({ isOpen, onClose, amount, orderId, onPayme
             </Button>
           </div>
         </DialogHeader>
+        <p id="payment-confirm-description" className="sr-only">
+          تأكيد دفع الطلب. هذا الإجراء لا يمكن التراجع عنه.
+        </p>
         <PaymentConfirmationForm
           orderId={orderId}
           totalAmount={amount}

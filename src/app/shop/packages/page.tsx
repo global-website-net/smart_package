@@ -75,65 +75,12 @@ export default function ShopPackagesPage() {
       setLoading(true)
       setError('')
 
-      if (!session?.user?.id) {
-        throw new Error('User not authenticated')
-      }
-
-      console.log('Fetching packages for shop ID:', session.user.id)
-
-      const { data: packages, error } = await supabase
-        .from('package')
-        .select(`
-          id,
-          trackingNumber,
-          status,
-          description,
-          shopId,
-          userId,
-          createdAt,
-          updatedAt,
-          user:User!userId (
-            id,
-            fullName,
-            email
-          ),
-          shop:User!shopId (
-            id,
-            fullName,
-            email
-          )
-        `)
-        .eq('shopId', session.user.id)
-        .order('createdAt', { ascending: false })
-
-      if (error) {
-        console.error('Error fetching packages:', error)
+      const response = await fetch('/api/shop-packages')
+      if (!response.ok) {
         throw new Error('Failed to fetch packages')
       }
-
-      console.log('Fetched packages for shop:', packages)
-
-      if (!packages || packages.length === 0) {
-        console.log('No packages found for shop:', session?.user?.id)
-        setPackages([])
-        return
-      }
-
-      // Transform the data to match our Package interface
-      const transformedData = packages.map((pkg: any) => ({
-        id: pkg.id,
-        trackingNumber: pkg.trackingNumber,
-        status: pkg.status,
-        description: pkg.description,
-        shopId: pkg.shopId,
-        userId: pkg.userId,
-        createdAt: pkg.createdAt,
-        updatedAt: pkg.updatedAt,
-        user: pkg.user?.[0] || null,
-        shop: pkg.shop?.[0] || null
-      }))
-
-      setPackages(transformedData)
+      const packages = await response.json()
+      setPackages(packages)
     } catch (error) {
       console.error('Error in fetchPackages:', error)
       setError('حدث خطأ أثناء جلب الطرود')

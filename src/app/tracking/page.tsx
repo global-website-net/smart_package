@@ -276,7 +276,7 @@ export default function TrackingPage() {
   // Calculate pagination
   const filteredOrders = orders.filter(order => {
     const matchesOrderNumber = orderNumberFilter === '' || order.orderNumber.includes(orderNumberFilter)
-    const matchesStatus = statusFilter === '' || order.status === statusFilter
+    const matchesStatus = statusFilter === 'ALL' || statusFilter === '' || order.status === statusFilter
     return matchesOrderNumber && matchesStatus
   })
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage)
@@ -350,7 +350,7 @@ export default function TrackingPage() {
                   <SelectValue placeholder="كل الحالات" className="text-right" />
                 </SelectTrigger>
                 <SelectContent className="text-right" align="end">
-                  <SelectItem value="">كل الحالات</SelectItem>
+                  <SelectItem value="ALL">كل الحالات</SelectItem>
                   <SelectItem value="PENDING_APPROVAL">في انتظار الموافقة</SelectItem>
                   <SelectItem value="AWAITING_PAYMENT">في انتظار الدفع</SelectItem>
                   <SelectItem value="ORDERING">قيد الطلب</SelectItem>
