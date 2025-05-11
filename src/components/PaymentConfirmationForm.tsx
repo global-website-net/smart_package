@@ -31,17 +31,10 @@ export default function PaymentConfirmationForm({
   const router = useRouter()
   const { data: session } = useSession()
 
-  // Create Supabase client with user's access token for RLS
+  // Create Supabase client (no Authorization header)
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      global: {
-        headers: {
-          Authorization: session?.accessToken ? `Bearer ${session.accessToken}` : undefined
-        }
-      }
-    }
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 
   useEffect(() => {
