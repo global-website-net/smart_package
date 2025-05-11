@@ -39,6 +39,8 @@ export default function AccountsPage() {
     limit: 30,
     totalPages: 1
   })
+  const [fullNameFilter, setFullNameFilter] = useState('')
+  const [emailFilter, setEmailFilter] = useState('')
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -95,6 +97,12 @@ export default function AccountsPage() {
     return date.toISOString().split('T')[0]
   }
 
+  // Filtered users based on filters
+  const filteredUsers = users.filter(user =>
+    user.fullName.toLowerCase().includes(fullNameFilter.toLowerCase()) &&
+    user.email.toLowerCase().includes(emailFilter.toLowerCase())
+  )
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -138,6 +146,23 @@ export default function AccountsPage() {
             </div>
           ) : (
             <>
+              {/* Filter Inputs */}
+              <div className="flex flex-col sm:flex-row gap-4 mb-4 items-center justify-center">
+                <input
+                  type="text"
+                  placeholder="فلتر حسب الاسم الكامل"
+                  value={fullNameFilter}
+                  onChange={e => setFullNameFilter(e.target.value)}
+                  className="border rounded-md px-3 py-2 w-64 text-right"
+                />
+                <input
+                  type="text"
+                  placeholder="فلتر حسب البريد الإلكتروني"
+                  value={emailFilter}
+                  onChange={e => setEmailFilter(e.target.value)}
+                  className="border rounded-md px-3 py-2 w-64 text-right"
+                />
+              </div>
               <div className="bg-white rounded-lg shadow-md overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
@@ -167,7 +192,7 @@ export default function AccountsPage() {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {users.map((user) => (
+                      {filteredUsers.map((user) => (
                         <tr key={user.id}>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                             {user.fullName}

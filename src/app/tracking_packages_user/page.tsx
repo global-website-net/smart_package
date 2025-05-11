@@ -52,7 +52,7 @@ export default function UserPackagesPage() {
   const [isShopEditOpen, setIsShopEditOpen] = useState(false)
   const [updating, setUpdating] = useState(false)
   const isMobile = useIsMobile()
-  const canEditShop = false // Set to true if editing shop is allowed for user
+  const canEditShop = true // Set to true to show the edit shop button
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -292,7 +292,7 @@ export default function UserPackagesPage() {
                     </div>
                     <div className="mb-2">
                       <span className={`px-3 py-1 rounded-full text-sm font-semibold ${pkg.status === 'RECEIVED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                        {pkg.status === 'RECEIVED' ? 'تم الاستلام' : pkg.status === 'AWAITING_PAYMENT' ? 'في انتظار الدفع' : pkg.status}
+                        {getStatusText(pkg.status)}
                       </span>
                     </div>
                     <div className="mb-2 text-gray-500 text-sm">تاريخ الإنشاء: {new Date(pkg.createdAt).toLocaleDateString('ar')}</div>

@@ -11,17 +11,18 @@ const supabase = createClient(
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
+    console.log('Wallet API GET session:', session)
 
     if (!session) {
+      console.error('No session found')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check if user is a REGULAR user
     if (session.user.role !== 'REGULAR') {
+      console.error('User is not REGULAR:', session.user.role)
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Get wallet data
     const { data: wallet, error: walletError } = await supabase
       .from('wallet')
       .select('*')
@@ -29,7 +30,7 @@ export async function GET() {
       .single()
 
     if (walletError) {
-      // If wallet doesn't exist, create one
+      console.error('Supabase walletError:', walletError)
       if (walletError.code === 'PGRST116') {
         const { data: newWallet, error: createError } = await supabase
           .from('wallet')
@@ -47,7 +48,7 @@ export async function GET() {
         if (createError) {
           console.error('Error creating wallet:', createError)
           return NextResponse.json(
-            { error: 'حدث خطأ أثناء إنشاء المحفظة' },
+            { error: 'حدث خطأ أثناء إنشاء المحفظة', details: createError.message },
             { status: 500 }
           )
         }
@@ -57,15 +58,12 @@ export async function GET() {
           transactions: []
         })
       }
-      throw walletError
-      console.error('Error fetching wallet:', walletError)
       return NextResponse.json(
-        { error: 'حدث خطأ أثناء جلب بيانات المحفظة' },
+        { error: 'حدث خطأ أثناء جلب بيانات المحفظة', details: walletError.message },
         { status: 500 }
       )
     }
 
-    // Get wallet transactions
     const { data: transactions, error: transactionsError } = await supabase
       .from('wallettransaction')
       .select('*')
@@ -75,7 +73,7 @@ export async function GET() {
     if (transactionsError) {
       console.error('Error fetching transactions:', transactionsError)
       return NextResponse.json(
-        { error: 'حدث خطأ أثناء جلب المعاملات' },
+        { error: 'حدث خطأ أثناء جلب المعاملات', details: transactionsError.message },
         { status: 500 }
       )
     }
@@ -85,9 +83,9 @@ export async function GET() {
       transactions: transactions || []
     })
   } catch (error) {
-    console.error('Unexpected error:', error)
+    console.error('Unexpected error in wallet GET:', error)
     return NextResponse.json(
-      { error: 'حدث خطأ غير متوقع' },
+      { error: 'حدث خطأ غير متوقع', details: error instanceof Error ? error.message : error },
       { status: 500 }
     )
   }
@@ -96,26 +94,29 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
+    console.log('Wallet API POST session:', session)
 
     if (!session) {
+      console.error('No session found')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check if user is a REGULAR user
     if (session.user.role !== 'REGULAR') {
+      console.error('User is not REGULAR:', session.user.role)
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     const { amount, type, reason } = await request.json()
+    console.log('POST body:', { amount, type, reason })
 
     if (!amount || !type || !reason) {
+      console.error('Missing required fields:', { amount, type, reason })
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       )
     }
 
-    // Get wallet
     const { data: wallet, error: walletError } = await supabase
       .from('wallet')
       .select('*')
@@ -125,24 +126,23 @@ export async function POST(request: Request) {
     if (walletError) {
       console.error('Error fetching wallet:', walletError)
       return NextResponse.json(
-        { error: 'حدث خطأ أثناء جلب بيانات المحفظة' },
+        { error: 'حدث خطأ أثناء جلب بيانات المحفظة', details: walletError.message },
         { status: 500 }
       )
     }
 
-    // Calculate new balance
     const newBalance = type === 'CREDIT' 
       ? wallet.balance + amount 
       : wallet.balance - amount
 
     if (newBalance < 0) {
+      console.error('Insufficient balance:', { newBalance, walletBalance: wallet.balance, amount })
       return NextResponse.json(
         { error: 'رصيد غير كافي' },
         { status: 400 }
       )
     }
 
-    // Start a transaction
     const { data: transaction, error: transactionError } = await supabase
       .from('wallettransaction')
       .insert([
@@ -160,12 +160,11 @@ export async function POST(request: Request) {
     if (transactionError) {
       console.error('Error creating transaction:', transactionError)
       return NextResponse.json(
-        { error: 'حدث خطأ أثناء إنشاء المعاملة' },
+        { error: 'حدث خطأ أثناء إنشاء المعاملة', details: transactionError.message },
         { status: 500 }
       )
     }
 
-    // Update wallet balance
     const { error: updateError } = await supabase
       .from('wallet')
       .update({ 
@@ -177,7 +176,7 @@ export async function POST(request: Request) {
     if (updateError) {
       console.error('Error updating wallet:', updateError)
       return NextResponse.json(
-        { error: 'حدث خطأ أثناء تحديث رصيد المحفظة' },
+        { error: 'حدث خطأ أثناء تحديث رصيد المحفظة', details: updateError.message },
         { status: 500 }
       )
     }
@@ -187,9 +186,9 @@ export async function POST(request: Request) {
       transaction
     })
   } catch (error) {
-    console.error('Unexpected error:', error)
+    console.error('Unexpected error in wallet POST:', error)
     return NextResponse.json(
-      { error: 'حدث خطأ غير متوقع' },
+      { error: 'حدث خطأ غير متوقع', details: error instanceof Error ? error.message : error },
       { status: 500 }
     )
   }
