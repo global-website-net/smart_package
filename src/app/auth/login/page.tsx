@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, Suspense, useEffect } from 'react'
-import { signIn } from 'next-auth/react'
+import { signIn, signOut } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Header from '../../components/Header'
@@ -35,7 +35,7 @@ function LoginForm() {
 
     try {
       // Clear any existing sessions first
-      await signIn('credentials', { redirect: false, email: '', password: '' })
+      await signOut({ redirect: false })
 
       // Attempt to sign in with credentials
       const result = await signIn('credentials', {
