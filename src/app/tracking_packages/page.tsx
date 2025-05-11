@@ -607,34 +607,32 @@ export default function TrackingPackagesPage() {
             </TableBody>
           </Table>
 
-          {/* Pagination Controls */}
-          {packages.length > itemsPerPage && (
-            <div className="flex justify-center items-center gap-4 mt-6">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handlePreviousPage}
-                disabled={currentPage === 1}
-                className="flex items-center gap-2"
-              >
-                <ChevronRight className="h-4 w-4" />
-                السابق
-              </Button>
-              <span className="text-sm text-gray-600">
-                الصفحة {currentPage} من {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleNextPage}
-                disabled={currentPage === totalPages}
-                className="flex items-center gap-2"
-              >
-                التالي
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
+          {/* Pagination Controls - Always show */}
+          <div className="flex justify-center items-center gap-4 mt-6">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+              className="flex items-center gap-2"
+            >
+              <ChevronRight className="h-4 w-4" />
+              السابق
+            </Button>
+            <span className="text-sm text-gray-600">
+              الصفحة {currentPage} من {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className="flex items-center gap-2"
+            >
+              التالي
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </main>
 

@@ -41,6 +41,7 @@ export default function UserPackagesPage() {
   const [isShopEditWizardOpen, setIsShopEditWizardOpen] = useState(false)
   const [isShopEditOpen, setIsShopEditOpen] = useState(false)
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null)
+  const [updating, setUpdating] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -118,41 +119,68 @@ export default function UserPackagesPage() {
     }
   }
 
-  const handleShopChange = async (shopId: string) => {
+  const handleShopChange = async (newShopId: string) => {
     if (!selectedPackageId) return
 
     try {
-      setLoading(true)
-      const { error } = await supabase
+      setUpdating(true)
+      setError(null)
+
+      // Update the package in Supabase
+      const { error: updateError } = await supabase
         .from('package')
         .update({ 
-          shopId,
+          shopId: newShopId,
           updatedAt: new Date().toISOString()
         })
         .eq('id', selectedPackageId)
 
-      if (error) {
-        console.error('Supabase error:', error)
-        throw new Error(error.message)
+      if (updateError) {
+        console.error('Error updating package:', updateError)
+        throw new Error('حدث خطأ أثناء تحديث المتجر')
       }
 
-      // Update the local state to reflect the change
-      setPackages(prevPackages => 
-        prevPackages.map(pkg => 
-          pkg.id === selectedPackageId 
-            ? { ...pkg, shopId } 
-            : pkg
-        )
-      )
+      // Update the local state with the new shop
+      const updatedPackage = {
+        ...packages.find(pkg => pkg.id === selectedPackageId) || {
+          id: selectedPackageId,
+          trackingNumber: '',
+          status: '',
+          shopId: newShopId,
+          description: null,
+          userId: '',
+          createdAt: '',
+          updatedAt: '',
+          User: {
+            id: newShopId,
+            fullName: 'غير معروف',
+            email: ''
+          }
+        },
+        shopId: newShopId
+      }
 
-      toast.success('تم تحديث المتجر بنجاح')
+      setPackages(packages.map(pkg => 
+        pkg.id === selectedPackageId ? updatedPackage : pkg
+      ))
+
+      toast({
+        title: 'تم التحديث',
+        description: 'تم تحديث المتجر بنجاح'
+      })
+
       setIsShopEditOpen(false)
       setSelectedPackageId(null)
     } catch (error) {
-      console.error('Error updating shop:', error)
-      toast.error('حدث خطأ أثناء تحديث المتجر')
+      console.error('Error in handleShopChange:', error)
+      setError(error instanceof Error ? error.message : 'حدث خطأ أثناء تحديث المتجر')
+      toast({
+        title: 'خطأ',
+        description: error instanceof Error ? error.message : 'حدث خطأ أثناء تحديث المتجر',
+        variant: 'destructive'
+      })
     } finally {
-      setLoading(false)
+      setUpdating(false)
     }
   }
 

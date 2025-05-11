@@ -156,6 +156,83 @@ export default function TrackingOrdersRegularPage() {
     setSelectedOrder(null)
   }
 
+  const handleConfirmPayment = async (order: Order) => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      // First check if wallet exists
+      const { data: existingWallet, error: fetchError } = await supabase
+        .from('wallet')
+        .select('balance')
+        .eq('userId', session?.user?.id)
+        .single()
+
+      if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+        console.error('Error fetching wallet:', fetchError)
+        throw new Error('حدث خطأ أثناء التحقق من المحفظة')
+      }
+
+      let walletId
+      if (!existingWallet) {
+        // Create new wallet if it doesn't exist
+        const { data: newWallet, error: createError } = await supabase
+          .from('wallet')
+          .insert([
+            {
+              userId: session?.user?.id,
+              balance: 0,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            }
+          ])
+          .select()
+          .single()
+
+        if (createError) {
+          console.error('Error creating wallet:', createError)
+          throw new Error('حدث خطأ أثناء إنشاء المحفظة')
+        }
+
+        walletId = newWallet.id
+      } else {
+        walletId = existingWallet.id
+      }
+
+      // Update order status
+      const { error: updateError } = await supabase
+        .from('order')
+        .update({
+          status: 'AWAITING_PAYMENT',
+          updatedAt: new Date().toISOString()
+        })
+        .eq('id', order.id)
+
+      if (updateError) {
+        console.error('Error updating order:', updateError)
+        throw new Error('حدث خطأ أثناء تحديث حالة الطلب')
+      }
+
+      toast({
+        title: 'تم التأكيد',
+        description: 'تم تأكيد الدفع بنجاح'
+      })
+
+      // Refresh orders list
+      fetchOrders()
+    } catch (error) {
+      console.error('Error in handleConfirmPayment:', error)
+      setError(error instanceof Error ? error.message : 'حدث خطأ أثناء تأكيد الدفع')
+      toast({
+        title: 'خطأ',
+        description: error instanceof Error ? error.message : 'حدث خطأ أثناء تأكيد الدفع',
+        variant: 'destructive'
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">

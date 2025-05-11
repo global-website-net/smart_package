@@ -272,10 +272,10 @@ export default function TrackingPage() {
   }
 
   // Calculate pagination
-  const totalPages = Math.ceil(packages.length / itemsPerPage)
+  const totalPages = Math.ceil(orders.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
-  const currentPackages = packages.slice(startIndex, endIndex)
+  const currentOrders = orders.slice(startIndex, endIndex)
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
@@ -339,14 +339,14 @@ export default function TrackingPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {orders.length === 0 && !loading ? (
+              {currentOrders.length === 0 && !loading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-4">
+                  <TableCell colSpan={8} className="text-center py-4">
                     لا توجد طلبات
                   </TableCell>
                 </TableRow>
               ) : (
-                orders.map((order) => (
+                currentOrders.map((order) => (
                   <TableRow key={order.id}>
                     <TableCell className="text-center">{order.orderNumber}</TableCell>
                     <TableCell className="text-center">{order.phoneNumber}</TableCell>
@@ -374,6 +374,33 @@ export default function TrackingPage() {
               )}
             </TableBody>
           </Table>
+
+          {/* Pagination Controls - Always show */}
+          <div className="flex justify-center items-center gap-4 mt-6">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+              className="flex items-center gap-2"
+            >
+              <ChevronRight className="h-4 w-4" />
+              السابق
+            </Button>
+            <span className="text-sm text-gray-600">
+              الصفحة {currentPage} من {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className="flex items-center gap-2"
+            >
+              التالي
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </main>
 

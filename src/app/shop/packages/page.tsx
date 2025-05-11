@@ -46,6 +46,7 @@ export default function ShopPackagesPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [updating, setUpdating] = useState(false)
   const { toast } = useToast()
+  const [error, setError] = useState<string | null>(null)
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -61,26 +62,42 @@ export default function ShopPackagesPage() {
   const fetchPackages = async () => {
     try {
       setLoading(true)
-      const { data, error } = await supabase
+      setError(null)
+
+      // Get packages for the current shop user
+      const { data: packages, error } = await supabase
         .from('package')
         .select(`
           *,
-          user:userId (fullName, email),
-          shop:shopId (fullName, email)
+          user:userId (
+            id,
+            fullName,
+            email
+          ),
+          shop:shopId (
+            id,
+            fullName,
+            email
+          )
         `)
         .eq('shopId', session?.user?.id)
         .order('createdAt', { ascending: false })
 
-      if (error) throw error
+      if (error) {
+        console.error('Error fetching packages:', error)
+        throw error
+      }
 
-      if (!data || data.length === 0) {
-        console.log('No packages found for shop:', session?.user?.id)
+      console.log('Fetched packages for shop:', packages)
+
+      if (!packages || packages.length === 0) {
+        console.log('No packages found for this shop')
         setPackages([])
         return
       }
 
       // Transform the data to match the Package interface
-      const transformedPackages = data.map((pkg: any) => {
+      const transformedPackages = packages.map((pkg: any) => {
         const shopData = Array.isArray(pkg.shop) ? pkg.shop[0] : pkg.shop
         const userData = Array.isArray(pkg.user) ? pkg.user[0] : pkg.user
 
@@ -109,7 +126,8 @@ export default function ShopPackagesPage() {
       console.log('Transformed packages:', transformedPackages)
       setPackages(transformedPackages)
     } catch (error) {
-      console.error('Error fetching packages:', error)
+      console.error('Error in fetchPackages:', error)
+      setError('حدث خطأ أثناء جلب الطرود')
       toast({
         title: 'خطأ',
         description: 'حدث خطأ أثناء جلب الطرود',
