@@ -66,11 +66,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          // Clear any existing sessions first
-          await supabase.auth.signOut()
-          await supabaseAdmin.auth.signOut()
-
-          // Get user from database
+          // Get user from database first
           const { data: user, error: userError } = await supabaseAdmin
             .from('User')
             .select('*')
@@ -99,17 +95,6 @@ export const authOptions: NextAuthOptions = {
           if (!authData.user) {
             console.error('User not found in Supabase Auth:', credentials.email)
             throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة')
-          }
-
-          // Create a new session using the regular client
-          const { data: newSession, error: sessionError } = await supabase.auth.signInWithPassword({
-            email: credentials.email,
-            password: credentials.password
-          })
-
-          if (sessionError) {
-            console.error('Session creation error:', sessionError)
-            throw new Error('حدث خطأ أثناء إنشاء الجلسة')
           }
 
           // Return user data
