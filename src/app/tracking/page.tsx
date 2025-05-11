@@ -8,6 +8,16 @@ import { toast } from 'sonner'
 import Header from '@/app/components/Header'
 import { supabase } from '@/lib/supabase'
 import { EditOrderStatusModal } from '@/app/components/EditOrderStatusModal'
+import { createClient } from '@supabase/supabase-js'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { useToast } from '@/components/ui/use-toast'
+import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface Order {
   id: string
@@ -26,6 +36,29 @@ interface Order {
   }
 }
 
+interface Package {
+  id: string
+  trackingNumber: string
+  status: string
+  description: string | null
+  shopId: string
+  userId: string
+  createdAt: string
+  updatedAt: string
+  user: {
+    fullName: string
+    email: string
+  }
+  shop: {
+    fullName: string
+    email: string
+  }
+}
+
+const STATUS_OPTIONS = [
+  { value: 'RECEIVED', label: 'تم الاستلام' }
+]
+
 export default function TrackingPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
@@ -33,6 +66,18 @@ export default function TrackingPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [editingOrder, setEditingOrder] = useState<Order | null>(null)
+  const [packages, setPackages] = useState<Package[]>([])
+  const [selectedPackage, setSelectedPackage] = useState<Package | null>(null)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [updating, setUpdating] = useState(false)
+  const { toast } = useToast()
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 20
+
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -43,6 +88,8 @@ export default function TrackingPage() {
     if (status === 'authenticated') {
       if (session.user.role === 'ADMIN' || session.user.role === 'OWNER') {
         fetchOrders()
+      } else if (session.user.role === 'SHOP') {
+        fetchPackages()
       } else {
         router.push('/')
       }
@@ -92,6 +139,33 @@ export default function TrackingPage() {
     }
   }
 
+  const fetchPackages = async () => {
+    try {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('package')
+        .select(`
+          *,
+          user:userId (fullName, email),
+          shop:shopId (fullName, email)
+        `)
+        .eq('shopId', session?.user?.id)
+
+      if (error) throw error
+
+      setPackages(data || [])
+    } catch (error) {
+      console.error('Error fetching packages:', error)
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ أثناء جلب الطرود',
+        variant: 'destructive'
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const getOrderStatusText = (status: string) => {
     switch (status) {
       case 'PENDING_APPROVAL':
@@ -128,6 +202,87 @@ export default function TrackingPage() {
 
   const handleEditStatus = (order: Order) => {
     setEditingOrder(order)
+  }
+
+  const handleUpdate = async () => {
+    if (!selectedPackage) return
+
+    try {
+      setUpdating(true)
+      const { error } = await supabase
+        .from('package')
+        .update({ 
+          status: selectedPackage.status,
+          updatedAt: new Date().toISOString()
+        })
+        .eq('id', selectedPackage.id)
+
+      if (error) throw error
+
+      setPackages(packages.map(pkg => 
+        pkg.id === selectedPackage.id ? selectedPackage : pkg
+      ))
+
+      toast({
+        title: 'تم التحديث',
+        description: 'تم تحديث حالة الطرد بنجاح'
+      })
+      setIsEditDialogOpen(false)
+    } catch (error) {
+      console.error('Error updating package:', error)
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ أثناء تحديث الطرد',
+        variant: 'destructive'
+      })
+    } finally {
+      setUpdating(false)
+    }
+  }
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'AWAITING_PAYMENT':
+        return 'في انتظار الدفع'
+      case 'PREPARING':
+        return 'قيد التحضير'
+      case 'DELIVERING_TO_SHOP':
+        return 'قيد التوصيل للمتجر'
+      case 'IN_SHOP':
+        return 'في المتجر'
+      case 'RECEIVED':
+        return 'تم الاستلام'
+      case 'PENDING':
+        return 'قيد الانتظار'
+      case 'IN_TRANSIT':
+        return 'قيد الشحن'
+      case 'DELIVERED':
+        return 'تم التسليم'
+      case 'CANCELLED':
+        return 'ملغي'
+      case 'RETURNED':
+        return 'تم الإرجاع'
+      default:
+        return status
+    }
+  }
+
+  // Calculate pagination
+  const totalPages = Math.ceil(packages.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const currentPackages = packages.slice(startIndex, endIndex)
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1)
+    }
+  }
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1)
+    }
   }
 
   if (loading) {
@@ -229,6 +384,64 @@ export default function TrackingPage() {
           }}
         />
       )}
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>تعديل بيانات الطرد</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>رقم التتبع</Label>
+              <Input
+                value={selectedPackage?.trackingNumber}
+                disabled
+                className="bg-gray-100"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>الحالة</Label>
+              <Select
+                value={selectedPackage?.status}
+                onValueChange={(value) => setSelectedPackage(prev => prev ? { ...prev, status: value } : null)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر الحالة" />
+                </SelectTrigger>
+                <SelectContent>
+                  {STATUS_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsEditDialogOpen(false)}
+                disabled={updating}
+              >
+                إلغاء
+              </Button>
+              <Button
+                onClick={handleUpdate}
+                disabled={updating}
+              >
+                {updating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    جاري الحفظ...
+                  </>
+                ) : (
+                  'حفظ التغييرات'
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 } 

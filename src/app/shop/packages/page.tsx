@@ -69,10 +69,45 @@ export default function ShopPackagesPage() {
           shop:shopId (fullName, email)
         `)
         .eq('shopId', session?.user?.id)
+        .order('createdAt', { ascending: false })
 
       if (error) throw error
 
-      setPackages(data || [])
+      if (!data || data.length === 0) {
+        console.log('No packages found for shop:', session?.user?.id)
+        setPackages([])
+        return
+      }
+
+      // Transform the data to match the Package interface
+      const transformedPackages = data.map((pkg: any) => {
+        const shopData = Array.isArray(pkg.shop) ? pkg.shop[0] : pkg.shop
+        const userData = Array.isArray(pkg.user) ? pkg.user[0] : pkg.user
+
+        return {
+          id: pkg.id,
+          trackingNumber: pkg.trackingNumber,
+          status: pkg.status,
+          description: pkg.description,
+          shopId: pkg.shopId,
+          userId: pkg.userId,
+          createdAt: pkg.createdAt,
+          updatedAt: pkg.updatedAt,
+          shop: {
+            id: shopData?.id || '',
+            fullName: shopData?.fullName || 'غير معروف',
+            email: shopData?.email || ''
+          },
+          user: {
+            id: userData?.id || '',
+            fullName: userData?.fullName || 'غير معروف',
+            email: userData?.email || ''
+          }
+        }
+      })
+
+      console.log('Transformed packages:', transformedPackages)
+      setPackages(transformedPackages)
     } catch (error) {
       console.error('Error fetching packages:', error)
       toast({

@@ -13,6 +13,12 @@ import CreatePackageForm from '@/components/CreatePackageForm'
 import EditPackageModal from '@/app/components/EditPackageModal'
 import { Badge } from '@/components/ui/badge'
 import DeletePackageWizard from '@/app/components/DeletePackageWizard'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { useToast } from '@/components/ui/use-toast'
+import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react'
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -90,6 +96,10 @@ function getStatusVariant(status: string) {
   }
 }
 
+const STATUS_OPTIONS = [
+  { value: 'RECEIVED', label: 'تم الاستلام' }
+]
+
 export default function TrackingPackagesPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
@@ -107,6 +117,9 @@ export default function TrackingPackagesPage() {
   const [users, setUsers] = useState<User[]>([])
   const [isDeleteWizardOpen, setIsDeleteWizardOpen] = useState(false)
   const [selectedPackageForDelete, setSelectedPackageForDelete] = useState<Package | null>(null)
+  const { toast } = useToast()
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 20
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -424,6 +437,55 @@ export default function TrackingPackagesPage() {
     }
   }
 
+  // Calculate pagination
+  const totalPages = Math.ceil(packages.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const currentPackages = packages.slice(startIndex, endIndex)
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1)
+    }
+  }
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1)
+    }
+  }
+
+  const handleUpdate = async () => {
+    if (!selectedPackage) return
+
+    try {
+      setUpdating(true)
+      const { error } = await supabase
+        .from('package')
+        .update({ 
+          status: selectedPackage.status,
+          updatedAt: new Date().toISOString()
+        })
+        .eq('id', selectedPackage.id)
+
+      if (error) throw error
+
+      setPackages(packages.map(pkg => 
+        pkg.id === selectedPackage.id ? selectedPackage : pkg
+      ))
+
+      toast.success('تم تحديث حالة الطرد بنجاح')
+      setIsEditModalOpen(false)
+    } catch (error) {
+      console.error('Error updating package:', error)
+      toast.error('حدث خطأ أثناء تحديث الطرد')
+    } finally {
+      setUpdating(false)
+    }
+  }
+
+  const updating = false
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -483,14 +545,14 @@ export default function TrackingPackagesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {packages.length === 0 ? (
+              {currentPackages.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={isAdminOrOwner ? 7 : 6} className="text-center py-8">
                     لا توجد طلبات متابعة حالياً
                   </TableCell>
                 </TableRow>
               ) : (
-                packages.map((pkg) => (
+                currentPackages.map((pkg) => (
                   <TableRow key={pkg.id}>
                     <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
                     <TableCell className="text-center">
@@ -527,6 +589,35 @@ export default function TrackingPackagesPage() {
               )}
             </TableBody>
           </Table>
+
+          {/* Pagination Controls */}
+          {packages.length > itemsPerPage && (
+            <div className="flex justify-center items-center gap-4 mt-6">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePreviousPage}
+                disabled={currentPage === 1}
+                className="flex items-center gap-2"
+              >
+                <ChevronRight className="h-4 w-4" />
+                السابق
+              </Button>
+              <span className="text-sm text-gray-600">
+                الصفحة {currentPage} من {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+                className="flex items-center gap-2"
+              >
+                التالي
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </main>
 
@@ -575,6 +666,64 @@ export default function TrackingPackagesPage() {
           trackingNumber={selectedPackageForDelete.trackingNumber}
         />
       )}
+
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>تعديل بيانات الطرد</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>رقم التتبع</Label>
+              <Input
+                value={selectedPackage?.trackingNumber}
+                disabled
+                className="bg-gray-100"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>الحالة</Label>
+              <Select
+                value={selectedPackage?.status}
+                onValueChange={(value) => setSelectedPackage(prev => prev ? { ...prev, status: value } : null)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر الحالة" />
+                </SelectTrigger>
+                <SelectContent>
+                  {STATUS_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsEditModalOpen(false)}
+                disabled={updating}
+              >
+                إلغاء
+              </Button>
+              <Button
+                onClick={handleUpdate}
+                disabled={updating}
+              >
+                {updating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    جاري الحفظ...
+                  </>
+                ) : (
+                  'حفظ التغييرات'
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 } 
