@@ -122,17 +122,23 @@ export default function UserPackagesPage() {
       setError(null)
 
       // Update the package in Supabase
-      const { error: updateError } = await supabase
+      const { data, error: updateError } = await supabase
         .from('package')
         .update({ 
           shopId: newShopId,
           updatedAt: new Date().toISOString()
         })
         .eq('id', selectedPackageId)
+        .select()
+        .single()
 
       if (updateError) {
         console.error('Error updating package:', updateError)
         throw new Error('حدث خطأ أثناء تحديث المتجر')
+      }
+
+      if (!data) {
+        throw new Error('لم يتم العثور على الطرد')
       }
 
       // Get the updated shop data
@@ -256,34 +262,22 @@ export default function UserPackagesPage() {
                 <TableHead className="text-center font-bold text-lg">الحالة</TableHead>
                 <TableHead className="text-center font-bold text-lg">الوصف</TableHead>
                 <TableHead className="text-center font-bold text-lg">تاريخ الإنشاء</TableHead>
-                <TableHead className="text-center font-bold text-lg">الإجراءات</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {packages.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4">
+                  <TableCell colSpan={5} className="text-center py-4">
                     لا توجد طرود
                   </TableCell>
                 </TableRow>
-              ) : (
+              ) :
                 packages.map((pkg) => (
                   <TableRow key={pkg.id}>
                     <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
                     <TableCell className="text-center">
                       <div className="flex items-center justify-center gap-2">
                         <span>{pkg.User?.fullName || 'غير محدد'}</span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedPackageId(pkg.id)
-                            setIsShopEditOpen(true)
-                          }}
-                          className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                        >
-                          تعديل
-                        </Button>
                       </div>
                     </TableCell>
                     <TableCell className="text-center">
@@ -295,17 +289,8 @@ export default function UserPackagesPage() {
                     <TableCell className="text-center">
                       {new Date(pkg.createdAt).toLocaleDateString('ar')}
                     </TableCell>
-                    <TableCell className="text-center">
-                      <Button
-                        onClick={() => handleViewDetails(pkg)}
-                        className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                      >
-                        عرض التفاصيل
-                      </Button>
-                    </TableCell>
                   </TableRow>
-                ))
-              )}
+                ))}
             </TableBody>
           </Table>
         </div>
