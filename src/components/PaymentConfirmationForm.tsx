@@ -105,7 +105,8 @@ export default function PaymentConfirmationForm({
       <div className="flex justify-center gap-4">
         <Button
           onClick={onCancel}
-          variant="outline"
+          type="button"
+          className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
           disabled={processing}
         >
           إلغاء

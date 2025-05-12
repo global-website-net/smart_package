@@ -173,10 +173,15 @@ export default function WalletPage() {
           <div className="mt-12">
             <h2 className="text-2xl font-bold text-center mb-8">تاريخ المعملات</h2>
             <div className="space-y-4">
+              <div className="flex justify-between items-center border-b pb-4 font-bold text-gray-700">
+                <span className="w-1/3 text-center">التاريخ</span>
+                <span className="w-1/3 text-center">السبب</span>
+                <span className="w-1/3 text-center">المبلغ</span>
+              </div>
               {walletData.transactions.map((transaction) => (
                 <div key={transaction.id} className="flex justify-between items-center border-b pb-4">
-                  <div className="flex items-center gap-2">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <div className="flex items-center gap-2 w-1/3 justify-center">
+                    <span className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {new Date(transaction.createdAt).toLocaleDateString('en-GB', {
                         year: 'numeric',
                         month: '2-digit',
@@ -184,17 +189,20 @@ export default function WalletPage() {
                         hour: '2-digit',
                         minute: '2-digit'
                       })}
-                    </td>
+                    </span>
                     <svg className="w-5 h-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                     </svg>
                   </div>
-                  <div className="flex items-center gap-4">
+                  <span className="w-1/3 text-center text-sm text-gray-700">{transaction.reason}</span>
+                  <div className="flex items-center gap-4 w-1/3 justify-center">
                     <span
                       className={`text-xl font-bold ${transaction.type === 'CREDIT' ? 'text-green-600' : 'text-red-600'}`}
                       dir="rtl"
                     >
-                      {transaction.type === 'DEBIT' ? `-${transaction.amount.toFixed(2)}₪` : `${transaction.amount.toFixed(2)}₪`}
+                      {transaction.type === 'DEBIT'
+                        ? `-${transaction.amount.toFixed(2)}₪`
+                        : `+${transaction.amount.toFixed(2)}₪`}
                     </span>
                   </div>
                 </div>

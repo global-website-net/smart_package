@@ -404,7 +404,6 @@ export default function UserPackagesPage() {
                     </div>
                     <div className="mb-2 text-gray-600 text-sm">رقم التتبع: <span className="font-mono">{pkg.trackingNumber}</span></div>
                     <div className="my-4">
-                      {/* Updated package icon to match screenshot */}
                       <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect x="12" y="20" width="40" height="24" rx="2" fill="black"/>
                         <polygon points="12,20 32,8 52,20 32,32" fill="black"/>

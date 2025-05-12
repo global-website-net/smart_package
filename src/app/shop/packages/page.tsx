@@ -62,7 +62,6 @@ export default function ShopPackagesPage() {
   const [showMobileFilters, setShowMobileFilters] = useState(false)
   const [trackingNumberFilter, setTrackingNumberFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
-  const [descriptionFilter, setDescriptionFilter] = useState('')
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -271,6 +270,12 @@ export default function ShopPackagesPage() {
     }
   }
 
+  const filteredPackages = packages.filter(pkg => {
+    const matchesTrackingNumber = trackingNumberFilter === '' || pkg.trackingNumber.includes(trackingNumberFilter)
+    const matchesStatus = statusFilter === 'ALL' || statusFilter === '' || pkg.status === statusFilter
+    return matchesTrackingNumber && matchesStatus
+  })
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -294,7 +299,7 @@ export default function ShopPackagesPage() {
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-6">ادارة الطرود</h1>
             <div className="flex justify-center items-center">
-              <div className="relative w-40 sm:w-48 md:w-64">
+              <div className="relative w-48 sm:w-48 md:w-64">
                 <div className="w-full h-0.5 bg-green-500"></div>
                 <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
               </div>
@@ -342,19 +347,12 @@ export default function ShopPackagesPage() {
                     <option value="IN_SHOP">في المتجر</option>
                     <option value="RECEIVED">تم الاستلام</option>
                   </select>
-                  <input
-                    type="text"
-                    placeholder="ابحث بالوصف"
-                    className="w-full md:w-64 text-right p-2 border rounded"
-                    value={descriptionFilter}
-                    onChange={e => setDescriptionFilter(e.target.value)}
-                  />
                 </div>
               )}
-              {packages.length === 0 ? (
+              {filteredPackages.length === 0 ? (
                 <div className="text-center py-8">لا توجد طرود</div>
               ) : (
-                packages.map((pkg, idx) => (
+                filteredPackages.map((pkg, idx) => (
                   <div key={pkg.id} className="bg-white rounded-xl shadow p-6 flex flex-col items-center border border-gray-200">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="font-bold text-lg">طرد</span>
@@ -375,49 +373,75 @@ export default function ShopPackagesPage() {
             </div>
           ) : (
             /* Desktop View */
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-center font-bold text-lg">رقم التتبع</TableHead>
-                  <TableHead className="text-center font-bold text-lg">الحالة</TableHead>
-                  <TableHead className="text-center font-bold text-lg">الوصف</TableHead>
-                  <TableHead className="text-center font-bold text-lg">تاريخ الإنشاء</TableHead>
-                  <TableHead className="text-center font-bold text-lg">الإجراءات</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {packages.length === 0 ? (
+            <>
+              {/* Desktop Filters */}
+              {typeof window !== 'undefined' && window.innerWidth > 640 && (
+                <div className="flex flex-col sm:flex-row gap-4 mb-4 items-center justify-center">
+                  <input
+                    type="text"
+                    placeholder="ابحث برقم التتبع"
+                    className="w-full md:w-64 text-right p-2 border rounded"
+                    value={trackingNumberFilter}
+                    onChange={e => setTrackingNumberFilter(e.target.value)}
+                  />
+                  <select
+                    className="w-full md:w-48 text-right p-2 border rounded"
+                    value={statusFilter}
+                    onChange={e => setStatusFilter(e.target.value)}
+                  >
+                    <option value="ALL">كل الحالات</option>
+                    <option value="AWAITING_PAYMENT">في انتظار الدفع</option>
+                    <option value="PREPARING">قيد التحضير</option>
+                    <option value="DELIVERING_TO_SHOP">قيد التوصيل للمتجر</option>
+                    <option value="IN_SHOP">في المتجر</option>
+                    <option value="RECEIVED">تم الاستلام</option>
+                  </select>
+                </div>
+              )}
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-4">
-                      لا توجد طرود
-                    </TableCell>
+                    <TableHead className="text-center font-bold text-lg">رقم التتبع</TableHead>
+                    <TableHead className="text-center font-bold text-lg">الحالة</TableHead>
+                    <TableHead className="text-center font-bold text-lg">الوصف</TableHead>
+                    <TableHead className="text-center font-bold text-lg">تاريخ الإنشاء</TableHead>
+                    <TableHead className="text-center font-bold text-lg">الإجراءات</TableHead>
                   </TableRow>
-                ) : (
-                  packages.map((pkg) => (
-                    <TableRow key={pkg.id}>
-                      <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
-                      <TableCell className="text-center">
-                        <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
-                          {getStatusText(pkg.status)}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-center">{pkg.description || '-'}</TableCell>
-                      <TableCell className="text-center">
-                        {new Date(pkg.createdAt).toLocaleDateString('ar')}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Button
-                          onClick={() => openEditDialog(pkg)}
-                          className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                        >
-                          تعديل
-                        </Button>
+                </TableHeader>
+                <TableBody>
+                  {filteredPackages.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-4">
+                        لا توجد طرود
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  ) : (
+                    filteredPackages.map((pkg) => (
+                      <TableRow key={pkg.id}>
+                        <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
+                        <TableCell className="text-center">
+                          <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
+                            {getStatusText(pkg.status)}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-center">{pkg.description || '-'}</TableCell>
+                        <TableCell className="text-center">
+                          {new Date(pkg.createdAt).toLocaleDateString('ar')}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Button
+                            onClick={() => openEditDialog(pkg)}
+                            className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                          >
+                            تعديل
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </>
           )}
         </div>
       </main>
