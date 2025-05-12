@@ -405,14 +405,11 @@ export default function UserPackagesPage() {
                     <div className="mb-2 text-gray-600 text-sm">رقم التتبع: <span className="font-mono">{pkg.trackingNumber}</span></div>
                     <div className="my-4">
                       {/* Updated package icon to match screenshot */}
-                      <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-                        <rect width="64" height="64" rx="8" fill="white"/>
-                        <g>
-                          <rect x="12" y="20" width="40" height="24" rx="2" fill="black"/>
-                          <polygon points="12,20 32,8 52,20 32,32" fill="black"/>
-                          <rect x="30" y="20" width="4" height="24" fill="white"/>
-                          <polygon points="32,8 32,32 34,20 52,20" fill="white" opacity="0.2"/>
-                        </g>
+                      <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="12" y="20" width="40" height="24" rx="2" fill="black"/>
+                        <polygon points="12,20 32,8 52,20 32,32" fill="black"/>
+                        <rect x="30" y="20" width="4" height="24" fill="white"/>
+                        <polygon points="32,8 32,32 34,20 52,20" fill="white" opacity="0.2"/>
                       </svg>
                     </div>
                     <div className="mb-2">
@@ -424,17 +421,19 @@ export default function UserPackagesPage() {
                     {/* Edit shop button and current shop */}
                     <div className="flex flex-col items-center gap-2 mt-2">
                       <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="mt-2 flex items-center gap-1"
-                          onClick={() => {
-                            setSelectedPackageId(pkg.id)
-                            setIsShopEditOpen(true)
-                          }}
-                        >
-                          <Edit2 className="w-4 h-4" /> تعديل المتجر
-                        </Button>
+                        {pkg.status !== 'RECEIVED' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-2 flex items-center gap-1"
+                            onClick={() => {
+                              setSelectedPackageId(pkg.id)
+                              setIsShopEditOpen(true)
+                            }}
+                          >
+                            <Edit2 className="w-4 h-4" /> تعديل المتجر
+                          </Button>
+                        )}
                         <span className="text-sm text-gray-700">{pkg.User?.fullName ? pkg.User.fullName : 'غير محدد'}</span>
                       </div>
                     </div>
@@ -468,15 +467,17 @@ export default function UserPackagesPage() {
                         <TableCell className="text-center">
                           <div className="flex items-center justify-center gap-2">
                             <span>{pkg.User?.fullName || 'غير محدد'}</span>
-                            <Button
-                              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                              onClick={() => {
-                                setSelectedPackageId(pkg.id)
-                                setIsShopEditOpen(true)
-                              }}
-                            >
-                              تعديل
-                            </Button>
+                            {pkg.status !== 'RECEIVED' && (
+                              <Button
+                                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                onClick={() => {
+                                  setSelectedPackageId(pkg.id)
+                                  setIsShopEditOpen(true)
+                                }}
+                              >
+                                تعديل
+                              </Button>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell className="text-center">
