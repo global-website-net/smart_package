@@ -138,7 +138,10 @@ export default function PaymentConfirmationForm({
       const newBalance = currentBalance - totalAmount
       const { error: updateWalletError } = await supabase
         .from('wallet')
-        .update({ balance: newBalance })
+        .update({ 
+          balance: newBalance,
+          updatedAt: new Date().toISOString()
+        })
         .eq('userId', session.user.id)
 
       if (updateWalletError) {

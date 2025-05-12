@@ -353,7 +353,7 @@ export default function UserPackagesPage() {
                   onClick={() => setShowMobileFilters(v => !v)}
                   aria-label="عرض الفلاتر"
                 >
-                  <Filter className="w-7 h-7 text-black" />
+                  <Filter className="w-7 h-7 text-black" fill="black" />
                 </button>
               </div>
               {showMobileFilters && (
@@ -394,9 +394,11 @@ export default function UserPackagesPage() {
               ) : (
                 currentPackages.map((pkg, idx) => (
                   <div key={pkg.id} className="bg-white rounded-xl shadow p-6 flex flex-col items-center border border-gray-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="font-bold text-lg">طرد</span>
-                      <span className="font-bold text-lg">#{String(idx + 1).padStart(3, '0')}</span>
+                    {/* Package Card Title */}
+                    <div className="flex items-center justify-center gap-2 text-xl font-bold mb-2">
+                      <span>طرد</span>
+                      <span className="mx-1">|</span>
+                      <span>#{idx + 1}</span>
                     </div>
                     <div className="mb-2 text-gray-600 text-sm">رقم التتبع: <span className="font-mono">{pkg.trackingNumber}</span></div>
                     <div className="my-4">

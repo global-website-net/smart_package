@@ -59,7 +59,7 @@ export async function DELETE(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
     if (!session?.user) {
       return NextResponse.json({ message: 'غير مصرح' }, { status: 401 })
     }
@@ -102,11 +102,16 @@ export async function PATCH(request: NextRequest) {
       .single()
 
     if (updateError) {
-      throw new Error('فشل في تحديث بيانات الطرد')
+      console.error('Error updating package:', updateError)
+      return NextResponse.json(
+        { message: 'فشل في تحديث بيانات الطرد' },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json(data)
   } catch (error: any) {
+    console.error('Error in PATCH /api/packages/[id]:', error)
     return NextResponse.json(
       { message: error.message || 'حدث خطأ أثناء تحديث بيانات الطرد' },
       { status: 500 }

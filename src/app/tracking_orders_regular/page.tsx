@@ -319,14 +319,14 @@ export default function TrackingOrdersRegularPage() {
           {isMobile ? (
             <div className="flex flex-col gap-6">
               {/* Mobile Filters Icon */}
-              <div className="flex justify-end mb-4">
+              <div className="flex justify-start mb-4">
                 <button
                   className="p-0 bg-transparent border-none shadow-none"
                   style={{ background: 'none', border: 'none', boxShadow: 'none' }}
                   onClick={() => setShowMobileFilters(v => !v)}
                   aria-label="عرض الفلاتر"
                 >
-                  <Filter className="w-7 h-7 text-black" />
+                  <Filter className="w-7 h-7 text-black" fill="black" />
                 </button>
               </div>
               {showMobileFilters && (
@@ -357,9 +357,11 @@ export default function TrackingOrdersRegularPage() {
               ) : (
                 currentOrders.map((order, idx) => (
                   <div key={order.id} className="bg-white rounded-xl shadow p-6 flex flex-col items-center border border-gray-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="font-bold text-lg">طلبية</span>
-                      <span className="font-bold text-lg">O - {order.orderNumber}</span>
+                    {/* Order Card Title */}
+                    <div className="flex items-center justify-center gap-2 text-xl font-bold mb-2">
+                      <span>طلبية</span>
+                      <span className="mx-1">|</span>
+                      <span>O - {order.orderNumber}</span>
                     </div>
                     <div className="my-4">
                       {/* Generic 2-bag icon SVG */}
@@ -376,6 +378,18 @@ export default function TrackingOrdersRegularPage() {
                     <div className="mb-2">
                       <span className={`px-3 py-1 rounded-full text-sm font-semibold ${order.status === 'ORDER_COMPLETED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{getOrderStatusText(order.status)}</span>
                     </div>
+                    {/* Pay button for AWAITING_PAYMENT status */}
+                    {order.status === 'AWAITING_PAYMENT' && (
+                      <button
+                        className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md mt-2"
+                        onClick={() => {
+                          setSelectedOrder(order)
+                          setIsPaymentModalOpen(true)
+                        }}
+                      >
+                        دفع
+                      </button>
+                    )}
                     {/* Optionally show order code or totalAmount if needed */}
                     {/* <div className="mb-2 text-gray-500 text-sm">{order.orderNumber}</div> */}
                   </div>
@@ -414,6 +428,7 @@ export default function TrackingOrdersRegularPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="text-center">رقم الطلب</TableHead>
                     <TableHead className="text-center">موقع الشراء</TableHead>
                     <TableHead className="text-center">رابط الشراء</TableHead>
                     <TableHead className="text-center">رقم الهاتف</TableHead>
@@ -428,13 +443,14 @@ export default function TrackingOrdersRegularPage() {
                 <TableBody>
                   {currentOrders.length === 0 && !loading ? (
                     <TableRow>
-                      <TableCell colSpan={9} className="text-center py-4">
+                      <TableCell colSpan={10} className="text-center py-4">
                         لا توجد طلبات
                       </TableCell>
                     </TableRow>
                   ) : (
                     currentOrders.map((order) => (
                       <TableRow key={order.id}>
+                        <TableCell className="text-center">{order.orderNumber}</TableCell>
                         <TableCell className="text-center">{order.purchaseSite}</TableCell>
                         <TableCell className="text-center">
                           <a href={order.purchaseLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
