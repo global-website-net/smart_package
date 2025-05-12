@@ -364,17 +364,12 @@ export default function TrackingOrdersRegularPage() {
                       <span>O - {order.orderNumber}</span>
                     </div>
                     <div className="my-4">
-                      {/* Custom shopping bags and suitcase SVG matching screenshot */}
-                      <svg width="80" height="80" viewBox="0 0 64 64" fill="none">
-                        <rect width="64" height="64" rx="8" fill="white"/>
-                        <g>
-                          <rect x="14" y="24" width="24" height="24" rx="2" fill="black"/>
-                          <rect x="34" y="16" width="16" height="32" rx="2" fill="black"/>
-                          <rect x="20" y="32" width="8" height="16" rx="2" fill="white"/>
-                          <rect x="40" y="24" width="4" height="8" rx="1" fill="white"/>
-                          <circle cx="26" cy="28" r="2" fill="white"/>
-                          <circle cx="46" cy="22" r="2" fill="white"/>
-                        </g>
+                      <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="64" height="64" rx="8" fill="#22c55e"/>
+                        <rect x="16" y="24" width="32" height="24" rx="4" fill="white" stroke="#111" strokeWidth="2"/>
+                        <path d="M24 24v-4a8 8 0 0 1 16 0v4" stroke="#111" strokeWidth="2" fill="none"/>
+                        <circle cx="24" cy="36" r="2" fill="#22c55e"/>
+                        <circle cx="40" cy="36" r="2" fill="#22c55e"/>
                       </svg>
                     </div>
                     <div className="mb-2 text-xl font-bold text-black">{order.purchaseSite}</div>
