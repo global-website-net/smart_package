@@ -40,7 +40,7 @@ export default function Header() {
       ]
     } else if (session?.user?.role === 'SHOP') {
       return [
-        { href: '/shop/packages', label: 'إدارة الطرود' },
+        { href: '/shop/packages', label: 'ادارة الطرود' },
         { href: '/account', label: 'الملف الشخصي' },
       ]
     } else {

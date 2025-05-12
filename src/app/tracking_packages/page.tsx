@@ -414,6 +414,8 @@ export default function TrackingPackagesPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'RECEIVED':
+        return 'bg-green-100 text-green-700'
       case 'PENDING':
         return 'bg-yellow-100 text-yellow-800'
       case 'IN_TRANSIT':

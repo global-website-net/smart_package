@@ -228,6 +228,8 @@ export default function ShopPackagesPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'RECEIVED':
+        return 'bg-green-100 text-green-700'
       case 'PENDING':
         return 'bg-yellow-100 text-yellow-800'
       case 'IN_TRANSIT':
@@ -290,7 +292,7 @@ export default function ShopPackagesPage() {
       <main className="p-4 pt-24">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-6">الطرود</h1>
+            <h1 className="text-4xl font-bold mb-6">ادارة الطرود</h1>
             <div className="flex justify-center items-center">
               <div className="relative w-32 sm:w-48 md:w-64">
                 <div className="w-full h-0.5 bg-green-500"></div>
@@ -309,13 +311,14 @@ export default function ShopPackagesPage() {
           {typeof window !== 'undefined' && window.innerWidth <= 640 ? (
             <div className="flex flex-col gap-6">
               {/* Mobile Filters Icon */}
-              <div className="flex justify-end mb-4">
+              <div className="flex justify-start mb-4">
                 <button
-                  className="p-2 rounded-full border border-gray-300 bg-white shadow"
+                  className="p-0 bg-transparent border-none shadow-none"
+                  style={{ background: 'none', border: 'none', boxShadow: 'none' }}
                   onClick={() => setShowMobileFilters(v => !v)}
                   aria-label="عرض الفلاتر"
                 >
-                  <Filter className="w-7 h-7" />
+                  <Filter className="w-7 h-7 text-black" fill="black" />
                 </button>
               </div>
               {showMobileFilters && (
@@ -355,6 +358,7 @@ export default function ShopPackagesPage() {
                   <div key={pkg.id} className="bg-white rounded-xl shadow p-6 flex flex-col items-center border border-gray-200">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="font-bold text-lg">طرد</span>
+                      <span className="mx-1">|</span>
                       <span className="font-bold text-lg">#{String(idx + 1).padStart(3, '0')}</span>
                     </div>
                     <div className="mb-2 text-gray-600 text-sm">رقم التتبع: <span className="font-mono">{pkg.trackingNumber}</span></div>
