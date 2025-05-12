@@ -11,7 +11,7 @@ import Header from '@/app/components/Header'
 import PaymentModal from '@/app/components/PaymentModal'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Filter } from 'lucide-react'
+import { Filter, ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface Order {
   id: string
@@ -364,13 +364,16 @@ export default function TrackingOrdersRegularPage() {
                       <span>O - {order.orderNumber}</span>
                     </div>
                     <div className="my-4">
-                      {/* Generic 2-bag icon SVG */}
-                      <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                      {/* Custom shopping bags and suitcase SVG matching screenshot */}
+                      <svg width="80" height="80" viewBox="0 0 64 64" fill="none">
                         <rect width="64" height="64" rx="8" fill="white"/>
                         <g>
-                          <rect x="18" y="28" width="20" height="18" rx="2" fill="black"/>
-                          <rect x="32" y="20" width="14" height="18" rx="2" fill="black"/>
-                          <rect x="24" y="18" width="8" height="10" rx="2" fill="black"/>
+                          <rect x="14" y="24" width="24" height="24" rx="2" fill="black"/>
+                          <rect x="34" y="16" width="16" height="32" rx="2" fill="black"/>
+                          <rect x="20" y="32" width="8" height="16" rx="2" fill="white"/>
+                          <rect x="40" y="24" width="4" height="8" rx="1" fill="white"/>
+                          <circle cx="26" cy="28" r="2" fill="white"/>
+                          <circle cx="46" cy="22" r="2" fill="white"/>
                         </g>
                       </svg>
                     </div>
@@ -494,7 +497,7 @@ export default function TrackingOrdersRegularPage() {
               disabled={currentPage === 1}
               className="flex items-center gap-2"
             >
-              <span className="h-4 w-4">&#8592;</span>
+              <ChevronRight className="h-4 w-4" />
               السابق
             </Button>
             <span className="text-sm text-gray-600">
@@ -508,7 +511,7 @@ export default function TrackingOrdersRegularPage() {
               className="flex items-center gap-2"
             >
               التالي
-              <span className="h-4 w-4">&#8594;</span>
+              <ChevronLeft className="h-4 w-4" />
             </Button>
           </div>
         </div>

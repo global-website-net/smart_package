@@ -84,6 +84,7 @@ export default function PaymentConfirmationForm({
 
   return (
     <div className="space-y-4">
+      <h2 className="text-xl font-bold text-center mb-4">تأكيد الدفع</h2>
       <div className="text-center">
         <p className="text-lg font-semibold mb-2">المبلغ المطلوب: ₪{totalAmount.toFixed(2)}</p>
         {loading ? (

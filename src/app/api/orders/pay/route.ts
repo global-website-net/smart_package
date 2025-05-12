@@ -115,14 +115,12 @@ export async function POST(request: Request) {
 
     // Create wallet transaction
     const { error: transactionError } = await supabaseAdmin
-      .from('walletTransaction')
+      .from('wallettransaction')
       .insert([{
-        userId: user.id,
-        walletId: wallet.id,
+        walletid: wallet.id,
         amount: amount,
         type: 'DEBIT',
         reason: `دفع مقابل الطلب ${orderId}`,
-        orderId: orderId,
         createdAt: new Date().toISOString()
       }])
 
@@ -156,7 +154,7 @@ export async function POST(request: Request) {
       console.error('Order update error:', updateOrderError)
       // Rollback transaction and wallet update
       await supabaseAdmin
-        .from('walletTransaction')
+        .from('wallettransaction')
         .delete()
         .eq('orderId', orderId)
 

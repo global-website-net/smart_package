@@ -294,7 +294,7 @@ export default function ShopPackagesPage() {
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-6">ادارة الطرود</h1>
             <div className="flex justify-center items-center">
-              <div className="relative w-32 sm:w-48 md:w-64">
+              <div className="relative w-40 sm:w-48 md:w-64">
                 <div className="w-full h-0.5 bg-green-500"></div>
                 <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
               </div>
@@ -369,22 +369,6 @@ export default function ShopPackagesPage() {
                       <span className={`px-3 py-1 rounded-full text-sm font-semibold ${pkg.status === 'RECEIVED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{getStatusText(pkg.status)}</span>
                     </div>
                     <div className="mb-2 text-gray-500 text-sm">تاريخ الإنشاء: {new Date(pkg.createdAt).toLocaleDateString('ar')}</div>
-                    <div className="flex flex-col items-center gap-2 mt-2">
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex items-center gap-1"
-                          onClick={() => {
-                            setSelectedShopPackageId(pkg.id)
-                            setIsShopEditOpen(true)
-                          }}
-                        >
-                          تعديل المتجر
-                        </Button>
-                        <span className="text-sm text-gray-700">{pkg.shop?.name ? `${pkg.shop.name} (${pkg.shop.email})` : 'غير محدد'}</span>
-                      </div>
-                    </div>
                   </div>
                 ))
               )}

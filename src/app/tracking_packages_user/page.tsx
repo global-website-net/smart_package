@@ -12,7 +12,7 @@ import ShopEditWizard from '@/app/components/ShopEditWizard'
 import { Edit2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Filter } from 'lucide-react'
+import { Filter, ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface Shop {
   id: string
@@ -501,7 +501,7 @@ export default function UserPackagesPage() {
                   disabled={currentPage === 1}
                   className="flex items-center gap-2"
                 >
-                  <span className="h-4 w-4">&#8592;</span>
+                  <ChevronRight className="h-4 w-4" />
                   السابق
                 </Button>
                 <span className="text-sm text-gray-600">
@@ -515,7 +515,7 @@ export default function UserPackagesPage() {
                   className="flex items-center gap-2"
                 >
                   التالي
-                  <span className="h-4 w-4">&#8594;</span>
+                  <ChevronLeft className="h-4 w-4" />
                 </Button>
               </div>
             </>
