@@ -120,7 +120,7 @@ export async function POST(request: Request) {
         walletid: wallet.id,
         amount: amount,
         type: 'DEBIT',
-        reason: `دفع مقابل الطلب ${orderId}`,
+        reason: `دفع مقابل الطلب ${order.orderNumber}`,
         createdAt: new Date().toISOString()
       }])
 

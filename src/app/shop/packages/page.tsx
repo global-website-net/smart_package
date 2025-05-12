@@ -341,11 +341,8 @@ export default function ShopPackagesPage() {
                     onChange={e => setStatusFilter(e.target.value)}
                   >
                     <option value="ALL">كل الحالات</option>
-                    <option value="AWAITING_PAYMENT">في انتظار الدفع</option>
-                    <option value="PREPARING">قيد التحضير</option>
-                    <option value="DELIVERING_TO_SHOP">قيد التوصيل للمتجر</option>
-                    <option value="IN_SHOP">في المتجر</option>
                     <option value="RECEIVED">تم الاستلام</option>
+                    <option value="IN_SHOP">في المتجر</option>
                   </select>
                 </div>
               )}
@@ -390,11 +387,8 @@ export default function ShopPackagesPage() {
                     onChange={e => setStatusFilter(e.target.value)}
                   >
                     <option value="ALL">كل الحالات</option>
-                    <option value="AWAITING_PAYMENT">في انتظار الدفع</option>
-                    <option value="PREPARING">قيد التحضير</option>
-                    <option value="DELIVERING_TO_SHOP">قيد التوصيل للمتجر</option>
-                    <option value="IN_SHOP">في المتجر</option>
                     <option value="RECEIVED">تم الاستلام</option>
+                    <option value="IN_SHOP">في المتجر</option>
                   </select>
                 </div>
               )}

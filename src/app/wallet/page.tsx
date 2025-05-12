@@ -200,9 +200,7 @@ export default function WalletPage() {
                       className={`text-xl font-bold ${transaction.type === 'CREDIT' ? 'text-green-600' : 'text-red-600'}`}
                       dir="rtl"
                     >
-                      {transaction.type === 'DEBIT'
-                        ? `-${transaction.amount.toFixed(2)}₪`
-                        : `+${transaction.amount.toFixed(2)}₪`}
+                      {transaction.amount.toFixed(2)}₪{transaction.type === 'DEBIT' ? '-' : '+'}
                     </span>
                   </div>
                 </div>

@@ -433,7 +433,7 @@ export default function UserPackagesPage() {
                             <Edit2 className="w-4 h-4" /> تعديل المتجر
                           </Button>
                         )}
-                        <span className="text-sm text-gray-700">{pkg.User?.fullName ? pkg.User.fullName : 'غير محدد'}</span>
+                        <span className="text-sm text-gray-700">المتجر: {pkg.User?.fullName ? pkg.User.fullName : 'غير محدد'}</span>
                       </div>
                     </div>
                   </div>
