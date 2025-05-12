@@ -62,7 +62,7 @@ export default function Header() {
   }
 
   return (
-    <header className="bg-black text-white fixed w-full top-0 z-50">
+    <header className="bg-black text-white fixed w-full top-0 left-0 z-50 h-20 m-0 p-0" style={{marginTop: 0, paddingTop: 0}}>
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex justify-between items-center h-20">
           {/* Mobile Menu Button - Left Side */}

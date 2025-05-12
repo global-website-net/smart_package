@@ -405,10 +405,10 @@ export default function UserPackagesPage() {
                     <div className="mb-2 text-gray-600 text-sm">رقم التتبع: <span className="font-mono">{pkg.trackingNumber}</span></div>
                     <div className="my-4">
                       <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="12" y="20" width="40" height="24" rx="2" fill="black"/>
-                        <polygon points="12,20 32,8 52,20 32,32" fill="black"/>
-                        <rect x="30" y="20" width="4" height="24" fill="white"/>
-                        <polygon points="32,8 32,32 34,20 52,20" fill="white" opacity="0.2"/>
+                        <rect width="64" height="64" rx="8" fill="#000000"/>
+                        <path d="M16 32L32 16L48 32L32 48L16 32Z" fill="white"/>
+                        <path d="M32 16V48" stroke="white" stroke-width="4"/>
+                        <path d="M16 32H48" stroke="white" stroke-width="4"/>
                       </svg>
                     </div>
                     <div className="mb-2">
