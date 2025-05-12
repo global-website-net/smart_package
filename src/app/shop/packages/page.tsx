@@ -163,21 +163,30 @@ export default function ShopPackagesPage() {
     try {
       setUpdating(true)
       setError(null)
-      const { error: updateError } = await supabase
-        .from('package')
-        .update({ 
-          status: editStatus,
-          updatedAt: new Date().toISOString()
+
+      const response = await fetch('/api/packages/update-status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          packageId: selectedPackage.id,
+          newStatus: editStatus
         })
-        .eq('id', selectedPackage.id)
-      if (updateError) {
-        throw new Error('حدث خطأ أثناء تحديث حالة الطرد')
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'حدث خطأ أثناء تحديث حالة الطرد')
       }
+
+      const updatedPackage = await response.json()
       setPackages(packages.map(pkg => 
         pkg.id === selectedPackage.id 
-          ? { ...pkg, status: editStatus }
+          ? { ...pkg, ...updatedPackage }
           : pkg
       ))
+
       toast.success('تم تحديث حالة الطرد بنجاح')
       setIsEditDialogOpen(false)
       setSelectedPackage(null)

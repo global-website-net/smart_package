@@ -50,41 +50,13 @@ export default function PaymentConfirmationForm({
         throw new Error('يجب تسجيل الدخول أولاً')
       }
 
-      // Get user's wallet
-      const { data, error } = await supabase
-        .from('wallet')
-        .select('balance')
-        .eq('userId', session.user.id)
-        .single()
-
-      if (error) {
-        if (error.code === 'PGRST116') {
-          // No wallet exists, create one with 0 balance
-          const { data: newWallet, error: createError } = await supabase
-            .from('wallet')
-            .insert([
-              {
-                userId: session.user.id,
-                balance: 0,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-              }
-            ])
-            .select()
-            .single()
-
-          if (createError) {
-            console.error('Error creating wallet:', createError)
-            throw new Error('حدث خطأ أثناء إنشاء المحفظة')
-          }
-
-          setWalletBalance(0)
-          return
-        }
-        console.error('Error fetching wallet:', error)
-        throw new Error('حدث خطأ أثناء جلب رصيد المحفظة')
+      // Get user's wallet using the wallet API endpoint
+      const response = await fetch('/api/wallet')
+      if (!response.ok) {
+        throw new Error('Failed to fetch wallet data')
       }
-      setWalletBalance((data as WalletData)?.balance ?? 0)
+      const data = await response.json()
+      setWalletBalance(data.balance)
     } catch (err) {
       console.error('Error fetching wallet balance:', err)
       setError(err instanceof Error ? err.message : 'حدث خطأ أثناء جلب رصيد المحفظة')
@@ -101,76 +73,35 @@ export default function PaymentConfirmationForm({
         throw new Error('يجب تسجيل الدخول أولاً')
       }
 
-      // Fetch wallet balance first
-      const { data, error: balanceError } = await supabase
-        .from('wallet')
-        .select('balance')
-        .eq('userId', session.user.id)
-        .single()
+      // Check if wallet has sufficient balance
+      const response = await fetch('/api/wallet/check-balance', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ amount: totalAmount })
+      })
 
-      if (balanceError) {
-        throw new Error('حدث خطأ أثناء جلب رصيد المحفظة')
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.message || 'حدث خطأ أثناء التحقق من الرصيد')
       }
 
-      const currentBalance = (data as WalletData)?.balance ?? 0
-
-      if (currentBalance < totalAmount) {
-        setError('رصيد المحفظة غير كافٍ. يرجى شحن المحفظة أولاً')
-        return
-      }
-
-      // Start a transaction
-      const { data: order, error: orderError } = await supabase
-        .from('order')
-        .select('status, userId')
-        .eq('id', orderId)
-        .single()
-
-      if (orderError) {
-        throw new Error('حدث خطأ أثناء التحقق من حالة الطلب')
-      }
-
-      if (order.status !== 'AWAITING_PAYMENT') {
-        throw new Error('لا يمكن دفع هذا الطلب')
-      }
-
-      // Update wallet balance
-      const newBalance = currentBalance - totalAmount
-      const { error: updateWalletError } = await supabase
-        .from('wallet')
-        .update({ 
-          balance: newBalance,
-          updatedAt: new Date().toISOString()
+      // Process the payment
+      const paymentResponse = await fetch('/api/orders/pay', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderId,
+          amount: totalAmount
         })
-        .eq('userId', session.user.id)
+      })
 
-      if (updateWalletError) {
-        throw new Error('حدث خطأ أثناء تحديث رصيد المحفظة')
-      }
-
-      // Add transaction record
-      const { error: transactionError } = await supabase
-        .from('wallet_transaction')
-        .insert({
-          userId: session.user.id,
-          amount: -totalAmount,
-          type: 'PAYMENT',
-          description: `دفع مقابل الطلب رقم ${orderId}`,
-          orderId: orderId
-        })
-
-      if (transactionError) {
-        throw new Error('حدث خطأ أثناء تسجيل المعاملة')
-      }
-
-      // Update order status
-      const { error: updateOrderError } = await supabase
-        .from('order')
-        .update({ status: 'ORDERING' })
-        .eq('id', orderId)
-
-      if (updateOrderError) {
-        throw new Error('حدث خطأ أثناء تحديث حالة الطلب')
+      if (!paymentResponse.ok) {
+        const data = await paymentResponse.json()
+        throw new Error(data.error || 'حدث خطأ أثناء عملية الدفع')
       }
 
       toast.success('تم الدفع بنجاح')
