@@ -127,7 +127,7 @@ export default function AccountsPage() {
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-6">جميع الحسابات</h1>
             <div className="flex justify-center items-center">
-              <div className="relative w-44 sm:w-48 md:w-64">
+              <div className="relative w-72 sm:w-48 md:w-64">
                 <div className="w-full h-0.5 bg-green-500"></div>
                 <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
               </div>

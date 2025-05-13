@@ -272,7 +272,7 @@ export default function ShopPackagesPage() {
 
   const filteredPackages = packages.filter(pkg => {
     const matchesTrackingNumber = trackingNumberFilter === '' || pkg.trackingNumber.includes(trackingNumberFilter)
-    const matchesStatus = statusFilter === 'ALL' || statusFilter === '' || pkg.status === statusFilter
+    const matchesStatus = pkg.status === 'RECEIVED' || pkg.status === 'IN_SHOP'
     return matchesTrackingNumber && matchesStatus
   })
 
@@ -297,7 +297,7 @@ export default function ShopPackagesPage() {
       <main className="p-4 pt-24">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-6">ادارة الطرود</h1>
+            <h1 className="text-4xl font-bold mb-6">إدارة الطرود</h1>
             <div className="flex justify-center items-center">
               <div className="relative w-48 sm:w-48 md:w-64">
                 <div className="w-full h-0.5 bg-green-500"></div>
@@ -335,15 +335,6 @@ export default function ShopPackagesPage() {
                     value={trackingNumberFilter}
                     onChange={e => setTrackingNumberFilter(e.target.value)}
                   />
-                  <select
-                    className="w-full md:w-48 text-right p-2 border rounded"
-                    value={statusFilter}
-                    onChange={e => setStatusFilter(e.target.value)}
-                  >
-                    <option value="ALL">كل الحالات</option>
-                    <option value="RECEIVED">تم الاستلام</option>
-                    <option value="IN_SHOP">في المتجر</option>
-                  </select>
                 </div>
               )}
               {filteredPackages.length === 0 ? (
@@ -381,15 +372,6 @@ export default function ShopPackagesPage() {
                     value={trackingNumberFilter}
                     onChange={e => setTrackingNumberFilter(e.target.value)}
                   />
-                  <select
-                    className="w-full md:w-48 text-right p-2 border rounded"
-                    value={statusFilter}
-                    onChange={e => setStatusFilter(e.target.value)}
-                  >
-                    <option value="ALL">كل الحالات</option>
-                    <option value="RECEIVED">تم الاستلام</option>
-                    <option value="IN_SHOP">في المتجر</option>
-                  </select>
                 </div>
               )}
               <Table>
