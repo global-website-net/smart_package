@@ -20,7 +20,7 @@ const supabaseAdmin = createClient(
 async function generateUniqueOrderNumber(): Promise<string> {
   const prefix = 'ORD'
   const timestamp = Date.now().toString().slice(-6)
-  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0')
+  const random = Math.floor(Math.random() * 100000).toString().padStart(5, '0')
   const orderNumber = `${prefix}-${timestamp}-${random}`
 
   // Check if the order number already exists
