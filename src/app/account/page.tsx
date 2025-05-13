@@ -277,12 +277,12 @@ export default function AccountPage() {
       <Header />
       <Toaster position="top-center" />
       
-      <main className="p-4 pt-24">
+      <main className="p-4 mt-20">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-6">الحساب الشخصي</h1>
             <div className="flex justify-center items-center">
-              <div className="relative w-64 sm:w-80 md:w-96">
+              <div className="relative w-80 sm:w-80 md:w-96">
                 <div className="w-full h-0.5 bg-green-500"></div>
                 <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
               </div>

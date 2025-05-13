@@ -96,7 +96,7 @@ export async function POST(request: Request) {
           phoneNumber,
           notes,
           additionalInfo,
-          status: 'PENDING',
+          status: 'PENDING_APPROVAL',
           orderNumber,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
