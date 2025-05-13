@@ -403,11 +403,8 @@ export default function UserPackagesPage() {
                       <span>#{idx + 1}</span>
                     </div>
                     <div className="mb-2 text-gray-600 text-sm">رقم التتبع: <span className="font-mono">{pkg.trackingNumber}</span></div>
-                    <div className="my-4">
-                      <svg width="64" height="64" fill="none" viewBox="0 0 24 24">
-                        <rect width="100%" height="100%" rx="8" fill="#F3F4F6"/>
-                        <path d="M3 7l9-4 9 4M4 8v8a2 2 0 001 1.73l7 4.2a2 2 0 002 0l7-4.2A2 2 0 0020 16V8M4 8l8 4.5M20 8l-8 4.5" stroke="#222" strokeWidth="1.5" strokeLinejoin="round"/>
-                      </svg>
+                    <div className="my-4 text-5xl text-center">
+                      📦
                     </div>
                     <div className="mb-2">
                       <span className={`px-3 py-1 rounded-full text-sm font-semibold ${pkg.status === 'RECEIVED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
