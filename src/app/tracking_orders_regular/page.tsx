@@ -49,6 +49,7 @@ export default function TrackingOrdersRegularPage() {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
   const [purchaseSiteFilter, setPurchaseSiteFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
+  const [orderNumberFilter, setOrderNumberFilter] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 20
   const isMobile = useIsMobile()
@@ -254,7 +255,8 @@ export default function TrackingOrdersRegularPage() {
   const filteredOrders = orders.filter(order => {
     const matchesPurchaseSite = purchaseSiteFilter === '' || order.purchaseSite.includes(purchaseSiteFilter)
     const matchesStatus = statusFilter === 'ALL' || statusFilter === '' || order.status === statusFilter
-    return matchesPurchaseSite && matchesStatus
+    const matchesOrderNumber = orderNumberFilter === '' || order.orderNumber.includes(orderNumberFilter)
+    return matchesPurchaseSite && matchesStatus && matchesOrderNumber
   })
 
   const totalPages = Math.max(1, Math.ceil(filteredOrders.length / itemsPerPage))
@@ -333,6 +335,13 @@ export default function TrackingOrdersRegularPage() {
                 <div className="flex flex-col gap-3 mb-4 p-4 bg-white rounded-lg shadow border border-gray-200">
                   <input
                     type="text"
+                    placeholder="ابحث برقم الطلب"
+                    className="w-full md:w-64 text-right p-2 border rounded"
+                    value={orderNumberFilter}
+                    onChange={e => setOrderNumberFilter(e.target.value)}
+                  />
+                  <input
+                    type="text"
                     placeholder="ابحث بموقع الشراء"
                     className="w-full md:w-64 text-right p-2 border rounded"
                     value={purchaseSiteFilter}
@@ -396,6 +405,13 @@ export default function TrackingOrdersRegularPage() {
             <>
               {/* Desktop Filters */}
               <div className="flex flex-col sm:flex-row gap-4 mb-4 items-center justify-center">
+                <Input
+                  type="text"
+                  placeholder="ابحث برقم الطلب"
+                  className="w-full md:w-64 text-right"
+                  value={orderNumberFilter}
+                  onChange={e => setOrderNumberFilter(e.target.value)}
+                />
                 <Input
                   type="text"
                   placeholder="ابحث بموقع الشراء"

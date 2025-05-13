@@ -47,7 +47,6 @@ export default function Header() {
       // Default menu items for non-logged-in users
       return [
         { href: '/packages', label: 'أسعارنا' },
-        { href: '/blog', label: 'بلوج' },
       ]
     }
   }

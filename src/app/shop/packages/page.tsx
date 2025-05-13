@@ -272,7 +272,7 @@ export default function ShopPackagesPage() {
 
   const filteredPackages = packages.filter(pkg => {
     const matchesTrackingNumber = trackingNumberFilter === '' || pkg.trackingNumber.includes(trackingNumberFilter)
-    const matchesStatus = pkg.status === 'RECEIVED' || pkg.status === 'IN_SHOP'
+    const matchesStatus = statusFilter === 'ALL' ? (pkg.status === 'RECEIVED' || pkg.status === 'IN_SHOP') : pkg.status === statusFilter
     return matchesTrackingNumber && matchesStatus
   })
 
@@ -335,6 +335,15 @@ export default function ShopPackagesPage() {
                     value={trackingNumberFilter}
                     onChange={e => setTrackingNumberFilter(e.target.value)}
                   />
+                  <select
+                    className="w-full md:w-48 text-right p-2 border rounded"
+                    value={statusFilter}
+                    onChange={e => setStatusFilter(e.target.value)}
+                  >
+                    <option value="ALL">كل الحالات</option>
+                    <option value="RECEIVED">تم الاستلام</option>
+                    <option value="IN_SHOP">في المتجر</option>
+                  </select>
                 </div>
               )}
               {filteredPackages.length === 0 ? (
@@ -372,6 +381,15 @@ export default function ShopPackagesPage() {
                     value={trackingNumberFilter}
                     onChange={e => setTrackingNumberFilter(e.target.value)}
                   />
+                  <select
+                    className="w-full md:w-48 text-right p-2 border rounded"
+                    value={statusFilter}
+                    onChange={e => setStatusFilter(e.target.value)}
+                  >
+                    <option value="ALL">كل الحالات</option>
+                    <option value="RECEIVED">تم الاستلام</option>
+                    <option value="IN_SHOP">في المتجر</option>
+                  </select>
                 </div>
               )}
               <Table>

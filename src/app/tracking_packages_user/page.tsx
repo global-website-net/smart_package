@@ -404,12 +404,9 @@ export default function UserPackagesPage() {
                     </div>
                     <div className="mb-2 text-gray-600 text-sm">رقم التتبع: <span className="font-mono">{pkg.trackingNumber}</span></div>
                     <div className="my-4">
-                      {/* Package Icon SVG */}
-                      <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="8" y="16" width="48" height="32" rx="4" fill="#000" />
-                        <path d="M8 20L32 36L56 20" stroke="#fff" strokeWidth="3"/>
-                        <rect x="20" y="28" width="24" height="16" rx="2" fill="#fff" />
-                        <rect x="28" y="36" width="8" height="8" rx="1" fill="#000" />
+                      <svg width="64" height="64" fill="none" viewBox="0 0 24 24">
+                        <rect width="100%" height="100%" rx="8" fill="#F3F4F6"/>
+                        <path d="M3 7l9-4 9 4M4 8v8a2 2 0 001 1.73l7 4.2a2 2 0 002 0l7-4.2A2 2 0 0020 16V8M4 8l8 4.5M20 8l-8 4.5" stroke="#222" strokeWidth="1.5" strokeLinejoin="round"/>
                       </svg>
                     </div>
                     <div className="mb-2">
