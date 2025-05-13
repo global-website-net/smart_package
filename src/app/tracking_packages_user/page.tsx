@@ -404,7 +404,13 @@ export default function UserPackagesPage() {
                     </div>
                     <div className="mb-2 text-gray-600 text-sm">رقم التتبع: <span className="font-mono">{pkg.trackingNumber}</span></div>
                     <div className="my-4">
-                      <img src="/images/package-icon.svg" width="64" height="64" alt="package icon" />
+                      {/* Package Icon SVG */}
+                      <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="8" y="16" width="48" height="32" rx="4" fill="#000" />
+                        <path d="M8 20L32 36L56 20" stroke="#fff" strokeWidth="3"/>
+                        <rect x="20" y="28" width="24" height="16" rx="2" fill="#fff" />
+                        <rect x="28" y="36" width="8" height="8" rx="1" fill="#000" />
+                      </svg>
                     </div>
                     <div className="mb-2">
                       <span className={`px-3 py-1 rounded-full text-sm font-semibold ${pkg.status === 'RECEIVED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>

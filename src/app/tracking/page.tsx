@@ -192,6 +192,8 @@ export default function TrackingPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'AWAITING_PAYMENT':
+      case 'PENDING_APPROVAL':
+      case 'ORDERING':
         return 'bg-yellow-100 text-yellow-800'
       case 'PENDING':
         return 'bg-yellow-100 text-yellow-800'

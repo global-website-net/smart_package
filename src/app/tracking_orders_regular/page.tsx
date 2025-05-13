@@ -364,12 +364,17 @@ export default function TrackingOrdersRegularPage() {
                       <span>O - {order.orderNumber}</span>
                     </div>
                     <div className="my-4">
+                      {/* Bag Icon SVG */}
                       <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="64" height="64" rx="8" fill="#22c55e"/>
-                        <rect x="16" y="24" width="32" height="24" rx="4" fill="white" stroke="#111" strokeWidth="2"/>
-                        <path d="M24 24v-4a8 8 0 0 1 16 0v4" stroke="#111" strokeWidth="2" fill="none"/>
-                        <circle cx="24" cy="36" r="2" fill="#22c55e"/>
-                        <circle cx="40" cy="36" r="2" fill="#22c55e"/>
+                        <rect width="64" height="64" rx="8" fill="#111" fillOpacity="0.04"/>
+                        <g>
+                          <rect x="18" y="28" width="18" height="18" rx="3" fill="#111"/>
+                          <rect x="28" y="18" width="18" height="28" rx="4" fill="#111"/>
+                          <rect x="22" y="32" width="10" height="10" rx="2" fill="#fff"/>
+                          <rect x="32" y="22" width="10" height="20" rx="2" fill="#fff"/>
+                        </g>
+                        <path d="M22 38a3 3 0 0 1 6 0" stroke="#22c55e" strokeWidth="2" fill="none"/>
+                        <path d="M32 28a4 4 0 0 1 8 0" stroke="#22c55e" strokeWidth="2" fill="none"/>
                       </svg>
                     </div>
                     <div className="mb-2 text-xl font-bold text-black">{order.purchaseSite}</div>
