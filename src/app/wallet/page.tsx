@@ -211,6 +211,10 @@ export default function WalletPage() {
           onSuccess={handlePaymentSuccess}
         />
       )}
+
+      <div className="mt-8 pt-8 border-t border-gray-700 text-center text-gray-400">
+        <p>جميع الحقوق محفوظة 2025 SMART PACKAGE ©</p>
+      </div>
     </div>
   )
 }

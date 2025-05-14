@@ -437,16 +437,16 @@ export default function TrackingOrdersRegularPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-center">رقم الطلب</TableHead>
-                    <TableHead className="text-center">موقع الشراء</TableHead>
-                    <TableHead className="text-center">رابط الشراء</TableHead>
-                    <TableHead className="text-center">رقم الهاتف</TableHead>
-                    <TableHead className="text-center">المبلغ الإجمالي</TableHead>
-                    <TableHead className="text-center">الحالة</TableHead>
-                    <TableHead className="text-center">ملاحظات</TableHead>
-                    <TableHead className="text-center">معلومات إضافية</TableHead>
-                    <TableHead className="text-center">تاريخ الإنشاء</TableHead>
-                    <TableHead className="text-center">الإجراءات</TableHead>
+                    <TableHead className="text-center font-bold">رقم الطلب</TableHead>
+                    <TableHead className="text-center font-bold">موقع الشراء</TableHead>
+                    <TableHead className="text-center font-bold">رابط الشراء</TableHead>
+                    <TableHead className="text-center font-bold">رقم الهاتف</TableHead>
+                    <TableHead className="text-center font-bold">المبلغ الإجمالي</TableHead>
+                    <TableHead className="text-center font-bold">الحالة</TableHead>
+                    <TableHead className="text-center font-bold">ملاحظات</TableHead>
+                    <TableHead className="text-center font-bold">معلومات إضافية</TableHead>
+                    <TableHead className="text-center font-bold">تاريخ الإنشاء</TableHead>
+                    <TableHead className="text-center font-bold">الإجراءات</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
