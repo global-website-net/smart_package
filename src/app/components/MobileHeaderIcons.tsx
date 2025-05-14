@@ -14,7 +14,7 @@ export default function MobileHeaderIcons({ isRegularUser }: MobileHeaderIconsPr
       {/* Wallet - Right */}
       {isRegularUser && (
         <Link href="/wallet" className="text-white">
-          <img src="/wallet_icon_mobile.png" alt="Wallet Icon" className="w-6 h-6" style={{display: 'inline-block', verticalAlign: 'middle'}} />
+          <img src="/white_wallet_icon_mobile.png" alt="Wallet Icon" className="w-6 h-6" style={{display: 'inline-block', verticalAlign: 'middle'}} />
         </Link>
       )}
 

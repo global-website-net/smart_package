@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="64" height="64" rx="8" fill="#000000"/>
-  <path d="M16 32L32 16L48 32L32 48L16 32Z" fill="white"/>
-  <path d="M32 16V48" stroke="white" stroke-width="4"/>
-  <path d="M16 32H48" stroke="white" stroke-width="4"/>
-</svg> 
