@@ -284,7 +284,7 @@ export default function AccountPage() {
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-6">الحساب الشخصي</h1>
             <div className="flex justify-center items-center mb-8">
-              <div className="relative w-56 sm:w-64 md:w-80">
+              <div className="relative w-72 sm:w-64 md:w-80">
                 <div className="w-full h-0.5 bg-green-500"></div>
                 <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
               </div>
@@ -292,57 +292,53 @@ export default function AccountPage() {
             
             {/* Only show icons for REGULAR users */}
             {isRegularUser && (
-              <div className="flex justify-center items-center gap-8 my-8 md:hidden">
-                {/* Package Icon - Right */}
-                <Link href="/tracking_packages_user" className="flex flex-col items-center">
-                  <div className="w-16 h-16 flex items-center justify-center">
-                    <Image 
-                      src="/images/package_hex_icon.png" 
-                      alt="تتبع الطرود" 
-                      width={64} 
-                      height={64}
-                      className="cursor-pointer hover:opacity-80 transition-opacity"
-                    />
-                  </div>
-                  <div className="flex flex-col items-center">
+              <div className="flex flex-col items-center my-8 md:hidden">
+                <div className="flex justify-center items-center gap-8">
+                  {/* Package Icon - Right */}
+                  <Link href="/tracking_packages_user" className="flex flex-col items-center">
+                    <div className="w-16 h-16 flex items-center justify-center">
+                      <Image 
+                        src="/images/package_hex_icon.png" 
+                        alt="تتبع الطرود" 
+                        width={64} 
+                        height={64}
+                        className="cursor-pointer hover:opacity-80 transition-opacity"
+                      />
+                    </div>
                     <span className="text-sm text-gray-700 mt-2">تتبع الطرود</span>
-                    <div className="w-16 h-0.5 bg-green-500 mt-1"></div>
-                  </div>
-                </Link>
+                  </Link>
 
-                {/* Wallet Icon - Middle */}
-                <Link href="/wallet" className="flex flex-col items-center">
-                  <div className="w-16 h-16 flex items-center justify-center">
-                    <Image 
-                      src="/images/wallet_hex_icon.png" 
-                      alt="المحفظة" 
-                      width={64} 
-                      height={64}
-                      className="cursor-pointer hover:opacity-80 transition-opacity"
-                    />
-                  </div>
-                  <div className="flex flex-col items-center">
+                  {/* Wallet Icon - Middle */}
+                  <Link href="/wallet" className="flex flex-col items-center">
+                    <div className="w-16 h-16 flex items-center justify-center">
+                      <Image 
+                        src="/images/wallet_hex_icon.png" 
+                        alt="المحفظة" 
+                        width={64} 
+                        height={64}
+                        className="cursor-pointer hover:opacity-80 transition-opacity"
+                      />
+                    </div>
                     <span className="text-sm text-gray-700 mt-2">المحفظة</span>
-                    <div className="w-12 h-0.5 bg-green-500 mt-1"></div>
-                  </div>
-                </Link>
+                  </Link>
 
-                {/* Shopping Bag Icon - Left */}
-                <Link href="/tracking_orders_regular" className="flex flex-col items-center">
-                  <div className="w-16 h-16 flex items-center justify-center">
-                    <Image 
-                      src="/images/shopping_bag_hex_icon.png" 
-                      alt="تتبع الطلبات" 
-                      width={64} 
-                      height={64}
-                      className="cursor-pointer hover:opacity-80 transition-opacity"
-                    />
-                  </div>
-                  <div className="flex flex-col items-center">
+                  {/* Shopping Bag Icon - Left */}
+                  <Link href="/tracking_orders_regular" className="flex flex-col items-center">
+                    <div className="w-16 h-16 flex items-center justify-center">
+                      <Image 
+                        src="/images/shopping_bag_hex_icon.png" 
+                        alt="تتبع الطلبات" 
+                        width={64} 
+                        height={64}
+                        className="cursor-pointer hover:opacity-80 transition-opacity"
+                      />
+                    </div>
                     <span className="text-sm text-gray-700 mt-2">تتبع الطلبات</span>
-                    <div className="w-18 h-0.5 bg-green-500 mt-1"></div>
-                  </div>
-                </Link>
+                  </Link>
+                </div>
+                
+                {/* Single continuous green line under all icons */}
+                <div className="w-64 h-0.5 bg-green-500 mt-3"></div>
               </div>
             )}
           </div>
@@ -491,13 +487,24 @@ export default function AccountPage() {
                 </div>
 
                 {!isEditing && (
-                  <div className="flex justify-center mt-6">
+                  <div className="flex justify-center gap-4 mt-6">
                     <button
                       onClick={handleEditClick}
                       className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
                     >
                       تعديل الملف الشخصي
                     </button>
+                    
+                    {/* Show delete button beside edit button for REGULAR users */}
+                    {isRegularUser && (
+                      <button
+                        onClick={() => setShowDeleteModal(true)}
+                        className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
+                        disabled={isDeleting}
+                      >
+                        {isDeleting ? 'جاري الحذف...' : 'حذف الحساب'}
+                      </button>
+                    )}
                   </div>
                 )}
 
@@ -523,19 +530,6 @@ export default function AccountPage() {
                   </div>
                 )}
               </form>
-            )}
-
-            {/* Only show delete account section for REGULAR users */}
-            {isRegularUser && !isEditing && (
-              <div className="mt-8 pt-6 border-t border-gray-200">
-                <button
-                  onClick={() => setShowDeleteModal(true)}
-                  className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
-                  disabled={isDeleting}
-                >
-                  {isDeleting ? 'جاري الحذف...' : 'حذف الحساب'}
-                </button>
-              </div>
             )}
           </div>
         </div>
