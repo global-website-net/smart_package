@@ -14,17 +14,7 @@ export default function MobileHeaderIcons({ isRegularUser }: MobileHeaderIconsPr
       {/* Wallet - Right */}
       {isRegularUser && (
         <Link href="/wallet" className="text-white">
-          <svg 
-            className="w-6 h-6" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="1.5"
-          >
-            <rect x="3" y="5" width="18" height="14" rx="2" />
-            <path d="M3 9h18" />
-            <path d="M15 12h2" />
-          </svg>
+          <img src="/wallet_icon_mobile.png" alt="Wallet Icon" className="w-6 h-6" style={{display: 'inline-block', verticalAlign: 'middle'}} />
         </Link>
       )}
 
