@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Header from './components/Header'
 import { useSession } from 'next-auth/react'
-import Image from 'next/image'
 
 export default function Home() {
   const { data: session } = useSession()
@@ -171,13 +170,16 @@ export default function Home() {
                 className="bg-white p-6 rounded-lg shadow-md text-center border border-gray-200 hover:shadow-lg transition-shadow hover:border-green-500"
               >
                 <div className="w-24 h-24 mx-auto mb-4 relative flex items-center justify-center">
-                  <Image 
-                    src="/amazon_logo.png" 
+                  <img 
+                    src={`/images/amazon_logo.png`}
                     alt="Amazon Logo" 
-                    width={96} 
-                    height={40} 
-                    style={{objectFit: 'contain'}} 
-                    unoptimized
+                    style={{
+                      width: 'auto',
+                      height: 'auto',
+                      maxWidth: '96px',
+                      maxHeight: '40px',
+                      objectFit: 'contain'
+                    }}
                   />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">أمازون</h3>
@@ -192,13 +194,16 @@ export default function Home() {
                 className="bg-white p-6 rounded-lg shadow-md text-center border border-gray-200 hover:shadow-lg transition-shadow hover:border-green-500"
               >
                 <div className="w-24 h-24 mx-auto mb-4 relative flex items-center justify-center">
-                  <Image 
-                    src="/ebay_logo.png" 
+                  <img 
+                    src={`/images/ebay_logo.png`}
                     alt="eBay Logo" 
-                    width={96} 
-                    height={40} 
-                    style={{objectFit: 'contain'}} 
-                    unoptimized
+                    style={{
+                      width: 'auto',
+                      height: 'auto',
+                      maxWidth: '96px',
+                      maxHeight: '40px',
+                      objectFit: 'contain'
+                    }}
                   />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">إيباي</h3>
@@ -213,13 +218,16 @@ export default function Home() {
                 className="bg-white p-6 rounded-lg shadow-md text-center border border-gray-200 hover:shadow-lg transition-shadow hover:border-green-500"
               >
                 <div className="w-24 h-24 mx-auto mb-4 relative flex items-center justify-center">
-                  <Image 
-                    src="/aliexpress_logo.png" 
+                  <img 
+                    src={`/images/aliexpress_logo.png`}
                     alt="AliExpress Logo" 
-                    width={96} 
-                    height={40} 
-                    style={{objectFit: 'contain'}} 
-                    unoptimized
+                    style={{
+                      width: 'auto',
+                      height: 'auto',
+                      maxWidth: '96px',
+                      maxHeight: '40px',
+                      objectFit: 'contain'
+                    }}
                   />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">علي إكسبريس</h3>
@@ -234,13 +242,16 @@ export default function Home() {
                 className="bg-white p-6 rounded-lg shadow-md text-center border border-gray-200 hover:shadow-lg transition-shadow hover:border-green-500"
               >
                 <div className="w-24 h-24 mx-auto mb-4 relative flex items-center justify-center">
-                  <Image 
-                    src="/sephora_logo.png" 
+                  <img 
+                    src={`/images/sephora_logo.png`}
                     alt="Sephora Logo" 
-                    width={96} 
-                    height={40} 
-                    style={{objectFit: 'contain'}} 
-                    unoptimized
+                    style={{
+                      width: 'auto',
+                      height: 'auto',
+                      maxWidth: '96px',
+                      maxHeight: '40px',
+                      objectFit: 'contain'
+                    }}
                   />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">سيفورا</h3>
