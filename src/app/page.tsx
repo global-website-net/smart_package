@@ -195,15 +195,8 @@ export default function Home() {
               >
                 <div className="w-24 h-24 mx-auto mb-4 relative flex items-center justify-center">
                   <img 
-                    src={`/images/ebay_logo.png`}
+                    src="/api/images/ebay_logo.png"
                     alt="eBay Logo" 
-                    style={{
-                      width: 'auto',
-                      height: 'auto',
-                      maxWidth: '96px',
-                      maxHeight: '40px',
-                      objectFit: 'contain'
-                    }}
                   />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">إيباي</h3>
@@ -219,15 +212,8 @@ export default function Home() {
               >
                 <div className="w-24 h-24 mx-auto mb-4 relative flex items-center justify-center">
                   <img 
-                    src={`/images/aliexpress_logo.png`}
+                    src="/api/images/aliexpress_logo.png"
                     alt="AliExpress Logo" 
-                    style={{
-                      width: 'auto',
-                      height: 'auto',
-                      maxWidth: '96px',
-                      maxHeight: '40px',
-                      objectFit: 'contain'
-                    }}
                   />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">علي إكسبريس</h3>
@@ -243,15 +229,8 @@ export default function Home() {
               >
                 <div className="w-24 h-24 mx-auto mb-4 relative flex items-center justify-center">
                   <img 
-                    src={`/images/sephora_logo.png`}
+                    src="/api/images/sephora_logo.png"
                     alt="Sephora Logo" 
-                    style={{
-                      width: 'auto',
-                      height: 'auto',
-                      maxWidth: '96px',
-                      maxHeight: '40px',
-                      objectFit: 'contain'
-                    }}
                   />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">سيفورا</h3>
