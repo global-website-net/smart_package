@@ -231,6 +231,13 @@ export default function Home() {
                   <img 
                     src="/api/images/sephora_logo.png"
                     alt="Sephora Logo" 
+                    style={{
+                      width: 'auto',
+                      height: 'auto',
+                      maxWidth: '120px',
+                      maxHeight: '60px',
+                      objectFit: 'contain'
+                    }}
                   />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">سيفورا</h3>

@@ -283,64 +283,71 @@ export default function AccountPage() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-6">الحساب الشخصي</h1>
-            <div className="flex justify-center items-center gap-8 my-8 md:hidden">
-              {/* Package Icon - Right */}
-              <Link href="/tracking_packages_user" className="flex flex-col items-center">
-                <div className="w-16 h-16 flex items-center justify-center">
-                  <Image 
-                    src="/images/package_hex_icon.png" 
-                    alt="تتبع الطرود" 
-                    width={64} 
-                    height={64}
-                    className="cursor-pointer hover:opacity-80 transition-opacity"
-                  />
-                </div>
-                <span className="text-sm text-gray-700 mt-2">تتبع الطرود</span>
-              </Link>
-
-              {/* Wallet Icon - Middle */}
-              <Link href="/wallet" className="flex flex-col items-center">
-                <div className="w-16 h-16 flex items-center justify-center">
-                  <Image 
-                    src="/images/wallet_hex_icon.png" 
-                    alt="المحفظة" 
-                    width={64} 
-                    height={64}
-                    className="cursor-pointer hover:opacity-80 transition-opacity"
-                  />
-                </div>
-                <span className="text-sm text-gray-700 mt-2">المحفظة</span>
-              </Link>
-
-              {/* Shopping Bag Icon - Left */}
-              <Link href="/tracking_orders_regular" className="flex flex-col items-center">
-                <div className="w-16 h-16 flex items-center justify-center">
-                  <Image 
-                    src="/images/shopping_bag_hex_icon.png" 
-                    alt="تتبع الطلبات" 
-                    width={64} 
-                    height={64}
-                    className="cursor-pointer hover:opacity-80 transition-opacity"
-                  />
-                </div>
-                <span className="text-sm text-gray-700 mt-2">تتبع الطلبات</span>
-              </Link>
+            <div className="flex justify-center items-center mb-8">
+              <div className="relative w-56 sm:w-64 md:w-80">
+                <div className="w-full h-0.5 bg-green-500"></div>
+                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
+              </div>
             </div>
+            
+            {/* Only show icons for REGULAR users */}
+            {isRegularUser && (
+              <div className="flex justify-center items-center gap-8 my-8 md:hidden">
+                {/* Package Icon - Right */}
+                <Link href="/tracking_packages_user" className="flex flex-col items-center">
+                  <div className="w-16 h-16 flex items-center justify-center">
+                    <Image 
+                      src="/images/package_hex_icon.png" 
+                      alt="تتبع الطرود" 
+                      width={64} 
+                      height={64}
+                      className="cursor-pointer hover:opacity-80 transition-opacity"
+                    />
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <span className="text-sm text-gray-700 mt-2">تتبع الطرود</span>
+                    <div className="w-16 h-0.5 bg-green-500 mt-1"></div>
+                  </div>
+                </Link>
+
+                {/* Wallet Icon - Middle */}
+                <Link href="/wallet" className="flex flex-col items-center">
+                  <div className="w-16 h-16 flex items-center justify-center">
+                    <Image 
+                      src="/images/wallet_hex_icon.png" 
+                      alt="المحفظة" 
+                      width={64} 
+                      height={64}
+                      className="cursor-pointer hover:opacity-80 transition-opacity"
+                    />
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <span className="text-sm text-gray-700 mt-2">المحفظة</span>
+                    <div className="w-12 h-0.5 bg-green-500 mt-1"></div>
+                  </div>
+                </Link>
+
+                {/* Shopping Bag Icon - Left */}
+                <Link href="/tracking_orders_regular" className="flex flex-col items-center">
+                  <div className="w-16 h-16 flex items-center justify-center">
+                    <Image 
+                      src="/images/shopping_bag_hex_icon.png" 
+                      alt="تتبع الطلبات" 
+                      width={64} 
+                      height={64}
+                      className="cursor-pointer hover:opacity-80 transition-opacity"
+                    />
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <span className="text-sm text-gray-700 mt-2">تتبع الطلبات</span>
+                    <div className="w-18 h-0.5 bg-green-500 mt-1"></div>
+                  </div>
+                </Link>
+              </div>
+            )}
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-bold">الملف الشخصي</h1>
-              {!isEditing && (
-                <button
-                  onClick={handleEditClick}
-                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
-                >
-                  تعديل الملف الشخصي
-                </button>
-              )}
-            </div>
-
             {error && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                 {error}
@@ -482,6 +489,17 @@ export default function AccountPage() {
                     </>
                   )}
                 </div>
+
+                {!isEditing && (
+                  <div className="flex justify-center mt-6">
+                    <button
+                      onClick={handleEditClick}
+                      className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
+                    >
+                      تعديل الملف الشخصي
+                    </button>
+                  </div>
+                )}
 
                 {isEditing && (
                   <div className="flex justify-center items-center mt-6">
