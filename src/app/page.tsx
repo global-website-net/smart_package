@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Header from './components/Header'
 import { useSession } from 'next-auth/react'
-import Image from 'next/image'
 
 export default function Home() {
   const { data: session } = useSession()
@@ -171,14 +170,7 @@ export default function Home() {
                 className="bg-white p-6 rounded-lg shadow-md text-center border border-gray-200 hover:shadow-lg transition-shadow hover:border-green-500"
               >
                 <div className="w-24 h-24 mx-auto mb-4 relative flex items-center justify-center">
-                  <Image 
-                    src="/amazon_logo.png" 
-                    alt="Amazon Logo" 
-                    width={96} 
-                    height={40} 
-                    style={{objectFit: 'contain'}}
-                    priority
-                  />
+                  <img src="/amazon_logo.png" alt="Amazon Logo" width={96} height={40} style={{objectFit: 'contain'}} />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">أمازون</h3>
                 <p className="text-gray-600">أكبر متجر إلكتروني في العالم يقدم مجموعة واسعة من المنتجات بأسعار تنافسية</p>
@@ -192,14 +184,7 @@ export default function Home() {
                 className="bg-white p-6 rounded-lg shadow-md text-center border border-gray-200 hover:shadow-lg transition-shadow hover:border-green-500"
               >
                 <div className="w-24 h-24 mx-auto mb-4 relative flex items-center justify-center">
-                  <Image 
-                    src="/ebay_logo.png" 
-                    alt="eBay Logo" 
-                    width={96} 
-                    height={40} 
-                    style={{objectFit: 'contain'}}
-                    priority
-                  />
+                  <img src="/ebay_logo.png" alt="eBay Logo" width={96} height={40} style={{objectFit: 'contain'}} />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">إيباي</h3>
                 <p className="text-gray-600">منصة مزاد إلكتروني تتيح لك شراء وبيع المنتجات الجديدة والمستعملة</p>
@@ -213,14 +198,7 @@ export default function Home() {
                 className="bg-white p-6 rounded-lg shadow-md text-center border border-gray-200 hover:shadow-lg transition-shadow hover:border-green-500"
               >
                 <div className="w-24 h-24 mx-auto mb-4 relative flex items-center justify-center">
-                  <Image 
-                    src="/aliexpress_logo.png" 
-                    alt="AliExpress Logo" 
-                    width={96} 
-                    height={40} 
-                    style={{objectFit: 'contain'}}
-                    priority
-                  />
+                  <img src="/aliexpress_logo.png" alt="AliExpress Logo" width={96} height={40} style={{objectFit: 'contain'}} />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">علي إكسبريس</h3>
                 <p className="text-gray-600">منصة تسوق إلكتروني تقدم منتجات متنوعة بأسعار منخفضة من موردين عالميين</p>
@@ -234,14 +212,7 @@ export default function Home() {
                 className="bg-white p-6 rounded-lg shadow-md text-center border border-gray-200 hover:shadow-lg transition-shadow hover:border-green-500"
               >
                 <div className="w-24 h-24 mx-auto mb-4 relative flex items-center justify-center">
-                  <Image 
-                    src="/sephora_logo.png" 
-                    alt="Sephora Logo" 
-                    width={96} 
-                    height={40} 
-                    style={{objectFit: 'contain'}}
-                    priority
-                  />
+                  <img src="/sephora_logo.png" alt="Sephora Logo" width={96} height={40} style={{objectFit: 'contain'}} />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">سيفورا</h3>
                 <p className="text-gray-600">متجر متخصص في مستحضرات التجميل والعطور ومستلزمات العناية بالبشرة</p>
