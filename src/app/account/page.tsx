@@ -8,6 +8,8 @@ import { supabase } from '@/lib/supabase'
 import { UserRole } from '@prisma/client'
 import { toast } from 'react-hot-toast'
 import { Toaster } from 'react-hot-toast'
+import Link from 'next/link'
+import Image from 'next/image'
 
 interface UserProfile {
   id: string
@@ -281,11 +283,48 @@ export default function AccountPage() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-6">الحساب الشخصي</h1>
-            <div className="flex justify-center items-center">
-              <div className="relative w-80 sm:w-80 md:w-96">
-                <div className="w-full h-0.5 bg-green-500"></div>
-                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
-              </div>
+            <div className="flex justify-center items-center gap-8 my-8 md:hidden">
+              {/* Package Icon - Right */}
+              <Link href="/tracking_packages_user" className="flex flex-col items-center">
+                <div className="w-16 h-16 flex items-center justify-center">
+                  <Image 
+                    src="/package_hex_icon.png" 
+                    alt="تتبع الطرود" 
+                    width={64} 
+                    height={64}
+                    className="cursor-pointer hover:opacity-80 transition-opacity"
+                  />
+                </div>
+                <span className="text-sm text-gray-700 mt-2">تتبع الطرود</span>
+              </Link>
+
+              {/* Wallet Icon - Middle */}
+              <Link href="/wallet" className="flex flex-col items-center">
+                <div className="w-16 h-16 flex items-center justify-center">
+                  <Image 
+                    src="/wallet_hex_icon.png" 
+                    alt="المحفظة" 
+                    width={64} 
+                    height={64}
+                    className="cursor-pointer hover:opacity-80 transition-opacity"
+                  />
+                </div>
+                <span className="text-sm text-gray-700 mt-2">المحفظة</span>
+              </Link>
+
+              {/* Shopping Bag Icon - Left */}
+              <Link href="/tracking_orders_regular" className="flex flex-col items-center">
+                <div className="w-16 h-16 flex items-center justify-center">
+                  <Image 
+                    src="/shopping_bag_hex_icon.png" 
+                    alt="تتبع الطلبات" 
+                    width={64} 
+                    height={64}
+                    className="cursor-pointer hover:opacity-80 transition-opacity"
+                  />
+                </div>
+                <span className="text-sm text-gray-700 mt-2">تتبع الطلبات</span>
+              </Link>
             </div>
           </div>
 
