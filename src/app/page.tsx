@@ -176,8 +176,8 @@ export default function Home() {
                     style={{
                       width: 'auto',
                       height: 'auto',
-                      maxWidth: '96px',
-                      maxHeight: '40px',
+                      maxWidth: '120px',
+                      maxHeight: '60px',
                       objectFit: 'contain'
                     }}
                   />
