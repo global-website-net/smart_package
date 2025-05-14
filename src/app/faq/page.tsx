@@ -91,19 +91,19 @@ export default function FAQPage() {
                   className="w-full px-6 py-4 text-right flex justify-between items-center hover:bg-gray-50 focus:outline-none"
                 >
                   <span className="flex items-center gap-2">
-                    <img src="/question_icon.png" alt="Question Icon" className="w-6 h-6 ml-2" style={{display: 'inline-block', verticalAlign: 'middle'}} />
+                    <img src="/images/question_icon.png" alt="Question Icon" className="w-6 h-6 ml-2" style={{display: 'inline-block', verticalAlign: 'middle'}} />
                     <span className="text-lg font-medium">{faq.question}</span>
                   </span>
                   {activeIndices.includes(index) ? (
                     <img
-                      src="/collapse_question_icon.png"
+                      src="/images/collapse_question_icon.png"
                       alt="Collapse Question Icon"
                       className="w-5 h-5 transition-transform"
                       style={{display: 'inline-block', verticalAlign: 'middle'}}
                     />
                   ) : (
                     <img
-                      src="/extend_question_icon.png"
+                      src="/images/extend_question_icon.png"
                       alt="Extend Question Icon"
                       className="w-5 h-5 transition-transform"
                       style={{display: 'inline-block', verticalAlign: 'middle'}}
@@ -112,7 +112,7 @@ export default function FAQPage() {
                 </button>
                 {activeIndices.includes(index) && (
                   <div className="px-6 py-4 bg-gray-50 flex items-start gap-2">
-                    <img src="/answer_icon.png" alt="Answer Icon" className="w-6 h-6 ml-2 mt-1" style={{display: 'inline-block', verticalAlign: 'middle'}} />
+                    <img src="/images/answer_icon.png" alt="Answer Icon" className="w-6 h-6 ml-2 mt-1" style={{display: 'inline-block', verticalAlign: 'middle'}} />
                     <p className="text-gray-700 flex-1">{faq.answer}</p>
                   </div>
                 )}

@@ -118,7 +118,7 @@ export default function WalletPage() {
 
           {/* Wallet Icon */}
           <div className="flex justify-center mb-12">
-            <img src="/wallet_icon_mobile.png" alt="Wallet Icon" className="w-24 h-24" style={{display: 'inline-block', verticalAlign: 'middle'}} />
+            <img src="/images/wallet_icon_mobile.png" alt="Wallet Icon" className="w-24 h-24" style={{display: 'inline-block', verticalAlign: 'middle'}} />
           </div>
 
           {/* Balance Display with Arrows */}

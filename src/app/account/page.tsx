@@ -288,7 +288,7 @@ export default function AccountPage() {
               <Link href="/tracking_packages_user" className="flex flex-col items-center">
                 <div className="w-16 h-16 flex items-center justify-center">
                   <Image 
-                    src="/package_hex_icon.png" 
+                    src="/images/package_hex_icon.png" 
                     alt="تتبع الطرود" 
                     width={64} 
                     height={64}
@@ -302,7 +302,7 @@ export default function AccountPage() {
               <Link href="/wallet" className="flex flex-col items-center">
                 <div className="w-16 h-16 flex items-center justify-center">
                   <Image 
-                    src="/wallet_hex_icon.png" 
+                    src="/images/wallet_hex_icon.png" 
                     alt="المحفظة" 
                     width={64} 
                     height={64}
@@ -316,7 +316,7 @@ export default function AccountPage() {
               <Link href="/tracking_orders_regular" className="flex flex-col items-center">
                 <div className="w-16 h-16 flex items-center justify-center">
                   <Image 
-                    src="/shopping_bag_hex_icon.png" 
+                    src="/images/shopping_bag_hex_icon.png" 
                     alt="تتبع الطلبات" 
                     width={64} 
                     height={64}

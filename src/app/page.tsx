@@ -171,7 +171,7 @@ export default function Home() {
               >
                 <div className="w-24 h-24 mx-auto mb-4 relative flex items-center justify-center">
                   <img 
-                    src={`/images/amazon_logo.png`}
+                    src="/api/images/amazon_logo.png"
                     alt="Amazon Logo" 
                     style={{
                       width: 'auto',
