@@ -114,16 +114,7 @@ export default function Header() {
           </div>
 
           {/* Right Side - Pricing */}
-          {!isLoginPage && (
-            <div className="hidden md:flex items-center order-1">
-              <Link 
-                href="/packages" 
-                className="text-white hover:text-green-500 transition-colors text-lg font-semibold border-b-2 border-transparent hover:border-green-500"
-              >
-                أسعارنا
-              </Link>
-            </div>
-          )}
+          {/* 'أسعارنا' link removed from the header */}
 
           {/* Center Logo */}
           <div className="flex-1 flex justify-center order-2">

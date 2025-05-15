@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import RightSideBanner from './components/RightSideBanner'
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,10 +17,15 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="ar" dir="rtl">
       <body className={inter.className}>
         <Providers>
-          {children}
+          <div className="relative min-h-screen flex bg-gray-50">
+            <RightSideBanner />
+            <div className="flex-1 md:mr-[120px]">
+              {children}
+            </div>
+          </div>
         </Providers>
       </body>
     </html>
