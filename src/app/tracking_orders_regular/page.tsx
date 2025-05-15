@@ -12,6 +12,7 @@ import PaymentModal from '@/app/components/PaymentModal'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Filter, ChevronLeft, ChevronRight } from 'lucide-react'
+import Image from 'next/image'
 
 interface Order {
   id: string
@@ -54,6 +55,7 @@ export default function TrackingOrdersRegularPage() {
   const itemsPerPage = 20
   const isMobile = useIsMobile()
   const [showMobileFilters, setShowMobileFilters] = useState(false)
+  const [showDesktopFilters, setShowDesktopFilters] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -272,6 +274,9 @@ export default function TrackingOrdersRegularPage() {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1)
   }
 
+  // Collect unique statuses from orders for the dropdown
+  const statusOptions = Array.from(new Set(orders.map(o => o.status)));
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -290,8 +295,39 @@ export default function TrackingOrdersRegularPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <main className="max-w-6xl mx-auto px-4 py-10 mt-[80px]">
-        <h1 className="text-3xl font-bold text-center mb-2 mt-4">تتبع الطلبات</h1>
+      <main className="max-w-6xl mx-auto px-4 py-10 mt-[70px]">
+        <h1 className="text-3xl font-bold text-center mb-2 mt-0">تتبع الطلبات</h1>
+        <div className="flex flex-col items-center mb-4">
+          <button
+            className="focus:outline-none"
+            onClick={() => setShowDesktopFilters(v => !v)}
+            aria-label="عرض الفلاتر"
+            type="button"
+          >
+            <Image src="/images/filter_icon.png" alt="فلتر" width={32} height={32} />
+          </button>
+          {showDesktopFilters && (
+            <div className="flex flex-col md:flex-row gap-4 mt-4 items-center bg-white p-4 rounded-lg shadow border border-gray-200 w-full md:w-auto max-w-xl">
+              <input
+                type="text"
+                placeholder="ابحث برقم الطلب"
+                className="w-full md:w-64 text-right p-2 border rounded"
+                value={orderNumberFilter}
+                onChange={e => setOrderNumberFilter(e.target.value)}
+              />
+              <select
+                className="w-full md:w-48 text-right p-2 border rounded"
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value)}
+              >
+                <option value="ALL">كل الحالات</option>
+                {statusOptions.map(status => (
+                  <option key={status} value={status}>{getOrderStatusText(status)}</option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
         <div className="flex justify-center items-center mb-8">
           <div className="relative w-56 sm:w-64 md:w-80">
             <div className="w-full h-0.5 bg-green-500"></div>
@@ -322,22 +358,23 @@ export default function TrackingOrdersRegularPage() {
                 <img src="/images/shopping_bag_icon.png" alt="Shopping Bag" className="w-16 h-16 my-2" />
                 {/* Purchase Site */}
                 <div className="mb-2 text-lg font-bold text-black">{order.purchaseSite}</div>
-                {/* Status */}
+                {/* Status as hexagon */}
                 <div className="flex justify-center my-2">
-                  <span
+                  <div
                     className={(() => {
+                      let base = 'flex items-center justify-center hexagon w-16 h-10 text-base font-semibold select-none';
                       switch (order.status) {
                         case 'AWAITING_PAYMENT':
-                          return 'flex items-center justify-center w-12 h-12 text-base font-semibold text-orange-600 border-2 border-orange-400 rounded-full bg-white';
+                          return base + ' text-orange-600 border-2 border-orange-400 bg-white';
                         case 'ORDER_COMPLETED':
-                          return 'flex items-center justify-center w-12 h-12 text-base font-semibold text-green-700 border-2 border-green-400 rounded-full bg-green-100';
+                          return base + ' text-white border-2 border-green-500 bg-green-500';
                         default:
-                          return 'flex items-center justify-center w-12 h-12 text-base font-semibold text-gray-700 border-2 border-gray-300 rounded-full bg-white';
+                          return base + ' text-gray-700 border-2 border-gray-300 bg-white';
                       }
                     })()}
                   >
                     {getOrderStatusText(order.status)}
-                  </span>
+                  </div>
                 </div>
                 {/* Payment button if needed */}
                 {order.status === 'AWAITING_PAYMENT' && (
@@ -414,22 +451,23 @@ export default function TrackingOrdersRegularPage() {
                     🛒
                   </div>
                   <div className="mb-2 text-xl font-bold text-black">{order.purchaseSite}</div>
-                  {/* Status in a circle for mobile as well */}
+                  {/* Status as hexagon */}
                   <div className="flex justify-center my-2">
-                    <span
+                    <div
                       className={(() => {
+                        let base = 'flex items-center justify-center hexagon w-16 h-10 text-base font-semibold select-none';
                         switch (order.status) {
                           case 'AWAITING_PAYMENT':
-                            return 'flex items-center justify-center w-12 h-12 text-base font-semibold text-orange-600 border-2 border-orange-400 rounded-full bg-white';
+                            return base + ' text-orange-600 border-2 border-orange-400 bg-white';
                           case 'ORDER_COMPLETED':
-                            return 'flex items-center justify-center w-12 h-12 text-base font-semibold text-green-700 border-2 border-green-400 rounded-full bg-green-100';
+                            return base + ' text-white border-2 border-green-500 bg-green-500';
                           default:
-                            return 'flex items-center justify-center w-12 h-12 text-base font-semibold text-gray-700 border-2 border-gray-300 rounded-full bg-white';
+                            return base + ' text-gray-700 border-2 border-gray-300 bg-white';
                         }
                       })()}
                     >
                       {getOrderStatusText(order.status)}
-                    </span>
+                    </div>
                   </div>
                   {/* Pay button for AWAITING_PAYMENT status */}
                   {order.status === 'AWAITING_PAYMENT' && (

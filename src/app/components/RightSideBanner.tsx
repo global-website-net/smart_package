@@ -16,7 +16,7 @@ export default function RightSideBanner() {
     >
       <div className="flex flex-col items-center mt-8 gap-4 w-full">
         <img src="/images/profile_icon.png" alt="Profile Icon" className="w-16 h-16 mb-2" />
-        <img src="/images/white_line_right_banner.png" alt="White Line" className="w-10 h-2 mb-2" />
+        <img src="/images/white_line_right_banner.png" alt="White Line" className="w-full h-2 mb-2" />
         <Link href="/" className={`py-2 px-4 w-full text-center rounded-md ${pathname === '/' ? 'bg-black text-white' : 'text-white hover:bg-green-900/40'}`}>
           الرئيسية
         </Link>
