@@ -323,8 +323,21 @@ export default function TrackingOrdersRegularPage() {
                 {/* Purchase Site */}
                 <div className="mb-2 text-lg font-bold text-black">{order.purchaseSite}</div>
                 {/* Status */}
-                <div className={`text-center text-base font-semibold my-2 ${order.status === 'AWAITING_PAYMENT' ? 'text-orange-600 border border-orange-400 rounded px-4 py-1' : order.status === 'ORDER_COMPLETED' ? 'text-green-700 bg-green-100 rounded px-4 py-1' : 'text-gray-700'}`}>
-                  {getOrderStatusText(order.status)}
+                <div className="flex justify-center my-2">
+                  <span
+                    className={(() => {
+                      switch (order.status) {
+                        case 'AWAITING_PAYMENT':
+                          return 'flex items-center justify-center w-12 h-12 text-base font-semibold text-orange-600 border-2 border-orange-400 rounded-full bg-white';
+                        case 'ORDER_COMPLETED':
+                          return 'flex items-center justify-center w-12 h-12 text-base font-semibold text-green-700 border-2 border-green-400 rounded-full bg-green-100';
+                        default:
+                          return 'flex items-center justify-center w-12 h-12 text-base font-semibold text-gray-700 border-2 border-gray-300 rounded-full bg-white';
+                      }
+                    })()}
+                  >
+                    {getOrderStatusText(order.status)}
+                  </span>
                 </div>
                 {/* Payment button if needed */}
                 {order.status === 'AWAITING_PAYMENT' && (
@@ -402,35 +415,4 @@ export default function TrackingOrdersRegularPage() {
                   </div>
                   <div className="mb-2 text-xl font-bold text-black">{order.purchaseSite}</div>
                   <div className="mb-2">
-                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${order.status === 'ORDER_COMPLETED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{getOrderStatusText(order.status)}</span>
-                  </div>
-                  {/* Pay button for AWAITING_PAYMENT status */}
-                  {order.status === 'AWAITING_PAYMENT' && (
-                    <button
-                      className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md mt-2"
-                      onClick={() => {
-                        setSelectedOrder(order)
-                        setIsPaymentModalOpen(true)
-                      }}
-                    >
-                      دفع
-                    </button>
-                  )}
-                  {/* Optionally show order code or totalAmount if needed */}
-                  {/* <div className="mb-2 text-gray-500 text-sm">{order.orderNumber}</div> */}
-                </div>
-              ))
-            )}
-          </div>
-        )}
-        <PaymentModal
-          isOpen={isPaymentModalOpen}
-          onClose={() => setIsPaymentModalOpen(false)}
-          orderId={selectedOrder?.id ?? ''}
-          amount={selectedOrder?.totalAmount ?? 0}
-          onPaymentComplete={handlePaymentComplete}
-        />
-      </main>
-    </div>
-  )
-}
+                    <span className={`
