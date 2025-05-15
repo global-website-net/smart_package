@@ -257,7 +257,7 @@ export default function TrackingOrdersRegularPage() {
   const filteredOrders = orders.filter(order => {
     const matchesPurchaseSite = purchaseSiteFilter === '' || order.purchaseSite.includes(purchaseSiteFilter)
     const matchesStatus = statusFilter === 'ALL' || statusFilter === '' || order.status === statusFilter
-    const matchesOrderNumber = orderNumberFilter === '' || order.orderNumber.includes(orderNumberFilter)
+    const matchesOrderNumber = orderNumberFilter === '' || order.orderNumber.toLowerCase().includes(orderNumberFilter.toLowerCase())
     return matchesPurchaseSite && matchesStatus && matchesOrderNumber
   })
 
@@ -277,17 +277,13 @@ export default function TrackingOrdersRegularPage() {
   // Collect unique statuses from orders for the dropdown
   const statusOptions = Array.from(new Set(orders.map(o => o.status)));
 
-  // All possible order statuses
+  // All possible order statuses (limited to the requested ones)
   const allStatusOptions = [
+    { value: 'AWAITING_PAYMENT', label: 'بانتظار الدفع' },
     { value: 'PENDING_APPROVAL', label: 'في انتظار الموافقة' },
-    { value: 'AWAITING_PAYMENT', label: 'في انتظار الدفع' },
     { value: 'ORDERING', label: 'قيد الطلب' },
     { value: 'ORDER_COMPLETED', label: 'تم الطلب' },
-    { value: 'PENDING', label: 'قيد الانتظار' },
-    { value: 'IN_TRANSIT', label: 'قيد الشحن' },
-    { value: 'DELIVERED', label: 'تم التسليم' },
     { value: 'CANCELLED', label: 'ملغي' },
-    { value: 'RETURNED', label: 'تم الإرجاع' },
   ];
 
   if (loading) {
@@ -371,23 +367,26 @@ export default function TrackingOrdersRegularPage() {
                 <img src="/images/shopping_bag_icon.png" alt="Shopping Bag" className="w-16 h-16 my-2" />
                 {/* Purchase Site */}
                 <div className="mb-2 text-lg font-bold text-black">{order.purchaseSite}</div>
-                {/* Status as hexagon */}
+                {/* Status as pill/badge */}
                 <div className="flex justify-center my-2">
-                  <div
+                  <span
                     className={(() => {
-                      let base = 'flex items-center justify-center hexagon w-20 h-12 text-base font-bold select-none';
                       switch (order.status) {
-                        case 'AWAITING_PAYMENT':
-                          return base + ' hexagon-status-orange';
                         case 'ORDER_COMPLETED':
-                          return base + ' hexagon-status-green';
+                          return 'px-4 py-1 rounded-full bg-green-100 text-green-700 text-base font-bold';
+                        case 'AWAITING_PAYMENT':
+                        case 'PENDING_APPROVAL':
+                        case 'ORDERING':
+                          return 'px-4 py-1 rounded-full bg-yellow-100 text-yellow-700 text-base font-bold';
+                        case 'CANCELLED':
+                          return 'px-4 py-1 rounded-full bg-red-100 text-red-700 text-base font-bold';
                         default:
-                          return base + ' hexagon-status-gray';
+                          return 'px-4 py-1 rounded-full bg-gray-200 text-gray-700 text-base font-bold';
                       }
                     })()}
                   >
                     {getOrderStatusText(order.status)}
-                  </div>
+                  </span>
                 </div>
                 {/* Payment button if needed */}
                 {order.status === 'AWAITING_PAYMENT' && (
@@ -464,23 +463,26 @@ export default function TrackingOrdersRegularPage() {
                     🛒
                   </div>
                   <div className="mb-2 text-xl font-bold text-black">{order.purchaseSite}</div>
-                  {/* Status as hexagon */}
+                  {/* Status as pill/badge */}
                   <div className="flex justify-center my-2">
-                    <div
+                    <span
                       className={(() => {
-                        let base = 'flex items-center justify-center hexagon w-20 h-12 text-base font-bold select-none';
                         switch (order.status) {
-                          case 'AWAITING_PAYMENT':
-                            return base + ' hexagon-status-orange';
                           case 'ORDER_COMPLETED':
-                            return base + ' hexagon-status-green';
+                            return 'px-4 py-1 rounded-full bg-green-100 text-green-700 text-base font-bold';
+                          case 'AWAITING_PAYMENT':
+                          case 'PENDING_APPROVAL':
+                          case 'ORDERING':
+                            return 'px-4 py-1 rounded-full bg-yellow-100 text-yellow-700 text-base font-bold';
+                          case 'CANCELLED':
+                            return 'px-4 py-1 rounded-full bg-red-100 text-red-700 text-base font-bold';
                           default:
-                            return base + ' hexagon-status-gray';
+                            return 'px-4 py-1 rounded-full bg-gray-200 text-gray-700 text-base font-bold';
                         }
                       })()}
                     >
                       {getOrderStatusText(order.status)}
-                    </div>
+                    </span>
                   </div>
                   {/* Pay button for AWAITING_PAYMENT status */}
                   {order.status === 'AWAITING_PAYMENT' && (
