@@ -30,6 +30,11 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next()
     }
 
+    // Allow public access to images and other static assets
+    if (pathname.startsWith('/images')) {
+      return NextResponse.next()
+    }
+
     // Check if user is authenticated
     if (!token) {
       const url = new URL('/auth/login', request.url)
@@ -102,13 +107,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    // Exclude api, _next/static, _next/image, favicon.ico, and images from middleware
+    '/((?!api|_next/static|_next/image|favicon.ico|images).*)',
   ],
 } 
