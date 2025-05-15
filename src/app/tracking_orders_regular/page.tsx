@@ -290,37 +290,56 @@ export default function TrackingOrdersRegularPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <main className="max-w-6xl mx-auto px-4 py-10">
-        <h1 className="text-3xl font-bold text-center mb-8 mt-4">تتبع الطلبات</h1>
+      <main className="max-w-6xl mx-auto px-4 py-10 mt-[80px]">
+        <h1 className="text-3xl font-bold text-center mb-2 mt-4">تتبع الطلبات</h1>
+        <div className="flex justify-center items-center mb-8">
+          <div className="relative w-56 sm:w-64 md:w-80">
+            <div className="w-full h-0.5 bg-green-500"></div>
+            <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
+          </div>
+        </div>
         {/* Desktop grid */}
         <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 justify-items-center">
-          {orders.map((order) => (
-            <div key={order.id} className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center w-full max-w-xs min-h-[320px]">
-              {/* Title */}
-              <div className="flex items-center justify-center text-lg font-bold mb-2">
-                <span>طلبية</span>
-                <span className="mx-2">|</span>
-                <span className="ltr:font-mono rtl:font-mono">{order.orderNumber}</span>
+          {orders.map((order) => {
+            const isSpecialStatus = getOrderStatusText(order.status) !== 'في انتظار الدفع' && getOrderStatusText(order.status) !== 'في انتظار الموافقة';
+            return (
+              <div key={order.id} className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center w-full max-w-xs min-h-[320px] relative">
+                {/* Left-side icon for special statuses */}
+                {isSpecialStatus && (
+                  <img
+                    src="/images/price_hex_icon.png"
+                    alt="Status Icon"
+                    className="absolute left-[-28px] top-1/2 -translate-y-1/2 w-10 h-10 hidden md:block"
+                  />
+                )}
+                {/* Title */}
+                <div className="flex items-center justify-center text-lg font-bold mb-2">
+                  <span>طلبية</span>
+                  <span className="mx-2">|</span>
+                  <span className="ltr:font-mono rtl:font-mono">{order.orderNumber}</span>
+                </div>
+                {/* Icon */}
+                <img src="/images/shopping_bag_icon.png" alt="Shopping Bag" className="w-16 h-16 my-2" />
+                {/* Purchase Site */}
+                <div className="mb-2 text-lg font-bold text-black">{order.purchaseSite}</div>
+                {/* Status */}
+                <div className={`text-center text-base font-semibold my-2 ${order.status === 'AWAITING_PAYMENT' ? 'text-orange-600 border border-orange-400 rounded px-4 py-1' : order.status === 'ORDER_COMPLETED' ? 'text-green-700 bg-green-100 rounded px-4 py-1' : 'text-gray-700'}`}>
+                  {getOrderStatusText(order.status)}
+                </div>
+                {/* Payment button if needed */}
+                {order.status === 'AWAITING_PAYMENT' && (
+                  <button
+                    className="mt-2 mb-2 px-6 py-2 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition"
+                    onClick={() => handlePaymentClick(order)}
+                  >
+                    دفع
+                  </button>
+                )}
+                {/* Creation date */}
+                <div className="mt-auto text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString('ar-EG')}</div>
               </div>
-              {/* Icon */}
-              <img src="/images/shopping_bag_icon.png" alt="Shopping Bag" className="w-16 h-16 my-2" />
-              {/* Status */}
-              <div className={`text-center text-base font-semibold my-2 ${order.status === 'AWAITING_PAYMENT' ? 'text-orange-600 border border-orange-400 rounded px-4 py-1' : order.status === 'ORDER_COMPLETED' ? 'text-green-700 bg-green-100 rounded px-4 py-1' : 'text-gray-700'}`}>
-                {getOrderStatusText(order.status)}
-              </div>
-              {/* Payment button if needed */}
-              {order.status === 'AWAITING_PAYMENT' && (
-                <button
-                  className="mt-2 mb-2 px-6 py-2 border-2 border-orange-400 text-orange-600 rounded-lg font-bold hover:bg-orange-50 transition"
-                  onClick={() => handlePaymentClick(order)}
-                >
-                  دفع
-                </button>
-              )}
-              {/* Creation date */}
-              <div className="mt-auto text-sm text-gray-500">تاريخ الإنشاء: {new Date(order.createdAt).toLocaleDateString('ar-EG')}</div>
-            </div>
-          ))}
+            );
+          })}
         </div>
         {/* Mobile/table fallback: keep existing table or list */}
         {isMobile && (
