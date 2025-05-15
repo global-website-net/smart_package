@@ -277,6 +277,19 @@ export default function TrackingOrdersRegularPage() {
   // Collect unique statuses from orders for the dropdown
   const statusOptions = Array.from(new Set(orders.map(o => o.status)));
 
+  // All possible order statuses
+  const allStatusOptions = [
+    { value: 'PENDING_APPROVAL', label: 'في انتظار الموافقة' },
+    { value: 'AWAITING_PAYMENT', label: 'في انتظار الدفع' },
+    { value: 'ORDERING', label: 'قيد الطلب' },
+    { value: 'ORDER_COMPLETED', label: 'تم الطلب' },
+    { value: 'PENDING', label: 'قيد الانتظار' },
+    { value: 'IN_TRANSIT', label: 'قيد الشحن' },
+    { value: 'DELIVERED', label: 'تم التسليم' },
+    { value: 'CANCELLED', label: 'ملغي' },
+    { value: 'RETURNED', label: 'تم الإرجاع' },
+  ];
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -297,6 +310,12 @@ export default function TrackingOrdersRegularPage() {
       <Header />
       <main className="max-w-6xl mx-auto px-4 py-10 mt-[70px]">
         <h1 className="text-3xl font-bold text-center mb-2 mt-0">تتبع الطلبات</h1>
+        <div className="flex justify-center items-center mb-8">
+          <div className="relative w-56 sm:w-64 md:w-80">
+            <div className="w-full h-0.5 bg-green-500"></div>
+            <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
+          </div>
+        </div>
         <div className="flex flex-col items-center mb-4">
           <button
             className="focus:outline-none"
@@ -321,22 +340,16 @@ export default function TrackingOrdersRegularPage() {
                 onChange={e => setStatusFilter(e.target.value)}
               >
                 <option value="ALL">كل الحالات</option>
-                {statusOptions.map(status => (
-                  <option key={status} value={status}>{getOrderStatusText(status)}</option>
+                {allStatusOptions.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
             </div>
           )}
         </div>
-        <div className="flex justify-center items-center mb-8">
-          <div className="relative w-56 sm:w-64 md:w-80">
-            <div className="w-full h-0.5 bg-green-500"></div>
-            <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
-          </div>
-        </div>
         {/* Desktop grid */}
         <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 justify-items-center">
-          {orders.map((order) => {
+          {currentOrders.map((order) => {
             const isSpecialStatus = getOrderStatusText(order.status) !== 'في انتظار الدفع' && getOrderStatusText(order.status) !== 'في انتظار الموافقة';
             return (
               <div key={order.id} className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center w-full max-w-xs min-h-[320px] relative">
@@ -362,14 +375,14 @@ export default function TrackingOrdersRegularPage() {
                 <div className="flex justify-center my-2">
                   <div
                     className={(() => {
-                      let base = 'flex items-center justify-center hexagon w-16 h-10 text-base font-semibold select-none';
+                      let base = 'flex items-center justify-center hexagon w-20 h-12 text-base font-bold select-none';
                       switch (order.status) {
                         case 'AWAITING_PAYMENT':
-                          return base + ' text-orange-600 border-2 border-orange-400 bg-white';
+                          return base + ' hexagon-status-orange';
                         case 'ORDER_COMPLETED':
-                          return base + ' text-white border-2 border-green-500 bg-green-500';
+                          return base + ' hexagon-status-green';
                         default:
-                          return base + ' text-gray-700 border-2 border-gray-300 bg-white';
+                          return base + ' hexagon-status-gray';
                       }
                     })()}
                   >
@@ -386,7 +399,7 @@ export default function TrackingOrdersRegularPage() {
                   </button>
                 )}
                 {/* Creation date */}
-                <div className="mt-auto text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString('ar-EG')}</div>
+                <div className="mt-auto text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString('en-US')}</div>
               </div>
             );
           })}
@@ -455,14 +468,14 @@ export default function TrackingOrdersRegularPage() {
                   <div className="flex justify-center my-2">
                     <div
                       className={(() => {
-                        let base = 'flex items-center justify-center hexagon w-16 h-10 text-base font-semibold select-none';
+                        let base = 'flex items-center justify-center hexagon w-20 h-12 text-base font-bold select-none';
                         switch (order.status) {
                           case 'AWAITING_PAYMENT':
-                            return base + ' text-orange-600 border-2 border-orange-400 bg-white';
+                            return base + ' hexagon-status-orange';
                           case 'ORDER_COMPLETED':
-                            return base + ' text-white border-2 border-green-500 bg-green-500';
+                            return base + ' hexagon-status-green';
                           default:
-                            return base + ' text-gray-700 border-2 border-gray-300 bg-white';
+                            return base + ' hexagon-status-gray';
                         }
                       })()}
                     >
@@ -484,7 +497,7 @@ export default function TrackingOrdersRegularPage() {
                   {/* Optionally show order code or totalAmount if needed */}
                   {/* <div className="mb-2 text-gray-500 text-sm">{order.orderNumber}</div> */}
                   {/* Creation date */}
-                  <div className="mt-auto text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString('ar-EG')}</div>
+                  <div className="mt-auto text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString('en-US')}</div>
                 </div>
               ))
             )}

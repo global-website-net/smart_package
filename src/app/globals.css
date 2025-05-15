@@ -142,4 +142,20 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 2px solid #111;
+}
+
+.hexagon-status-green {
+  background: #22c55e;
+  color: #fff;
+}
+
+.hexagon-status-orange {
+  background: #f59e42;
+  color: #fff;
+}
+
+.hexagon-status-gray {
+  background: #e5e7eb;
+  color: #222;
 }
