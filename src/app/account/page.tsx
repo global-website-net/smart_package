@@ -275,293 +275,306 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <Toaster position="top-center" />
-      
-      <main className="p-4 mt-20">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-6">الحساب الشخصي</h1>
-            <div className="flex justify-center items-center mb-8">
-              <div className="relative w-72 sm:w-64 md:w-80">
-                <div className="w-full h-0.5 bg-green-500"></div>
-                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
+    <div className="relative min-h-screen bg-gray-50 flex">
+      {/* Right Side Banner - Desktop only */}
+      <div className="hidden md:block fixed top-0 right-0 h-full z-40">
+        <img
+          src="/images/green_seperator_menu_right_side.png"
+          alt="Right Side Banner"
+          className="h-full"
+          style={{ minWidth: '90px', maxWidth: '120px', objectFit: 'cover' }}
+        />
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1">
+        <Header />
+        <Toaster position="top-center" />
+        
+        <main className="p-4 mt-20">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-8">
+              <h1 className="text-4xl font-bold mb-6">الحساب الشخصي</h1>
+              <div className="flex justify-center items-center mb-8">
+                <div className="relative w-72 sm:w-64 md:w-80">
+                  <div className="w-full h-0.5 bg-green-500"></div>
+                  <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
+                </div>
               </div>
+              
+              {/* Only show icons for REGULAR users */}
+              {isRegularUser && (
+                <div className="flex flex-col items-center my-8 md:hidden">
+                  <div className="flex justify-center items-center gap-8">
+                    {/* Package Icon - Right */}
+                    <Link href="/tracking_packages_user" className="flex flex-col items-center">
+                      <div className="w-16 h-16 flex items-center justify-center">
+                        <Image 
+                          src="/images/package_hex_icon.png" 
+                          alt="تتبع الطرود" 
+                          width={64} 
+                          height={64}
+                          className="cursor-pointer hover:opacity-80 transition-opacity"
+                        />
+                      </div>
+                      <span className="text-sm text-gray-700 mt-2">تتبع الطرود</span>
+                    </Link>
+
+                    {/* Wallet Icon - Middle */}
+                    <Link href="/wallet" className="flex flex-col items-center">
+                      <div className="w-16 h-16 flex items-center justify-center">
+                        <Image 
+                          src="/images/wallet_hex_icon.png" 
+                          alt="المحفظة" 
+                          width={64} 
+                          height={64}
+                          className="cursor-pointer hover:opacity-80 transition-opacity"
+                        />
+                      </div>
+                      <span className="text-sm text-gray-700 mt-2">المحفظة</span>
+                    </Link>
+
+                    {/* Shopping Bag Icon - Left */}
+                    <Link href="/tracking_orders_regular" className="flex flex-col items-center">
+                      <div className="w-16 h-16 flex items-center justify-center">
+                        <Image 
+                          src="/images/shopping_bag_hex_icon.png" 
+                          alt="تتبع الطلبات" 
+                          width={64} 
+                          height={64}
+                          className="cursor-pointer hover:opacity-80 transition-opacity"
+                        />
+                      </div>
+                      <span className="text-sm text-gray-700 mt-2">تتبع الطلبات</span>
+                    </Link>
+                  </div>
+                  
+                  {/* Single continuous green line under all icons */}
+                  <div className="w-64 h-0.5 bg-green-500 mt-3"></div>
+                </div>
+              )}
             </div>
-            
-            {/* Only show icons for REGULAR users */}
-            {isRegularUser && (
-              <div className="flex flex-col items-center my-8 md:hidden">
-                <div className="flex justify-center items-center gap-8">
-                  {/* Package Icon - Right */}
-                  <Link href="/tracking_packages_user" className="flex flex-col items-center">
-                    <div className="w-16 h-16 flex items-center justify-center">
-                      <Image 
-                        src="/images/package_hex_icon.png" 
-                        alt="تتبع الطرود" 
-                        width={64} 
-                        height={64}
-                        className="cursor-pointer hover:opacity-80 transition-opacity"
-                      />
-                    </div>
-                    <span className="text-sm text-gray-700 mt-2">تتبع الطرود</span>
-                  </Link>
 
-                  {/* Wallet Icon - Middle */}
-                  <Link href="/wallet" className="flex flex-col items-center">
-                    <div className="w-16 h-16 flex items-center justify-center">
-                      <Image 
-                        src="/images/wallet_hex_icon.png" 
-                        alt="المحفظة" 
-                        width={64} 
-                        height={64}
-                        className="cursor-pointer hover:opacity-80 transition-opacity"
-                      />
-                    </div>
-                    <span className="text-sm text-gray-700 mt-2">المحفظة</span>
-                  </Link>
-
-                  {/* Shopping Bag Icon - Left */}
-                  <Link href="/tracking_orders_regular" className="flex flex-col items-center">
-                    <div className="w-16 h-16 flex items-center justify-center">
-                      <Image 
-                        src="/images/shopping_bag_hex_icon.png" 
-                        alt="تتبع الطلبات" 
-                        width={64} 
-                        height={64}
-                        className="cursor-pointer hover:opacity-80 transition-opacity"
-                      />
-                    </div>
-                    <span className="text-sm text-gray-700 mt-2">تتبع الطلبات</span>
-                  </Link>
+            <div className="bg-white rounded-lg shadow-md p-6">
+              {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                  {error}
                 </div>
-                
-                {/* Single continuous green line under all icons */}
-                <div className="w-64 h-0.5 bg-green-500 mt-3"></div>
-              </div>
-            )}
-          </div>
+              )}
 
-          <div className="bg-white rounded-lg shadow-md p-6">
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                {error}
-              </div>
-            )}
-
-            {updateSuccess && (
-              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                {updateSuccess}
-              </div>
-            )}
-
-            {updateError && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                {updateError}
-              </div>
-            )}
-
-            {isLoading ? (
-              <div className="text-center py-8">جاري التحميل...</div>
-            ) : (
-              <form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-gray-700 mb-2">البريد الإلكتروني</label>
-                    <input
-                      type="email"
-                      value={profile?.email || ''}
-                      disabled
-                      className="w-full p-2 border border-gray-300 rounded-md bg-gray-100"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-gray-700 mb-2">الاسم الكامل</label>
-                    <input
-                      type="text"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleInputChange}
-                      disabled={!isEditing}
-                      className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
-                    />
-                  </div>
-
-                  {!isAdminOrOwner && (
-                    <>
-                      <div>
-                        <label className="block text-gray-700 mb-2">المحافظة</label>
-                        <select
-                          name="governorate"
-                          value={formData.governorate}
-                          onChange={handleInputChange}
-                          disabled={!isEditing}
-                          className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
-                        >
-                          {governorates.map((gov) => (
-                            <option key={gov} value={gov}>{gov}</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-gray-700 mb-2">المدينة</label>
-                        <input
-                          type="text"
-                          name="town"
-                          value={formData.town}
-                          onChange={handleInputChange}
-                          disabled={!isEditing}
-                          className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
-                        />
-                      </div>
-                    </>
-                  )}
-
-                  <div>
-                    <label className="block text-gray-700 mb-2">رقم الهاتف</label>
-                    <input
-                      type="text"
-                      name="phoneNumber"
-                      value={isEditing ? formData.phoneNumber : profile?.phoneNumber || ''}
-                      onChange={handleInputChange}
-                      disabled={!isEditing}
-                      className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-gray-700 mb-2">رمز الهاتف</label>
-                    <select
-                      name="phonePrefix"
-                      value={isEditing ? formData.phonePrefix : profile?.phonePrefix || ''}
-                      onChange={handleInputChange}
-                      disabled={!isEditing}
-                      className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
-                    >
-                      {phonePrefixes.map((prefix) => (
-                        <option key={prefix} value={prefix}>{prefix}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {isEditing && (
-                    <>
-                      <div>
-                        <label className="block text-gray-700 mb-2">كلمة المرور الحالية</label>
-                        <input
-                          type="password"
-                          name="currentPassword"
-                          value={formData.currentPassword}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full p-2 border border-gray-300 rounded-md"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-gray-700 mb-2">كلمة المرور الجديدة (اختياري)</label>
-                        <input
-                          type="password"
-                          name="newPassword"
-                          value={formData.newPassword}
-                          onChange={handleInputChange}
-                          className="w-full p-2 border border-gray-300 rounded-md"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-gray-700 mb-2">تأكيد كلمة المرور الجديدة</label>
-                        <input
-                          type="password"
-                          name="confirmPassword"
-                          value={formData.confirmPassword}
-                          onChange={handleInputChange}
-                          className="w-full p-2 border border-gray-300 rounded-md"
-                        />
-                      </div>
-                    </>
-                  )}
+              {updateSuccess && (
+                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                  {updateSuccess}
                 </div>
+              )}
 
-                {!isEditing && (
-                  <div className="flex justify-center gap-4 mt-6">
-                    <button
-                      onClick={handleEditClick}
-                      className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
-                    >
-                      تعديل الملف الشخصي
-                    </button>
-                    
-                    {/* Show delete button beside edit button for REGULAR users */}
-                    {isRegularUser && (
-                      <button
-                        type="button"
-                        onClick={() => setShowDeleteModal(true)}
-                        className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
-                        disabled={isDeleting}
+              {updateError && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                  {updateError}
+                </div>
+              )}
+
+              {isLoading ? (
+                <div className="text-center py-8">جاري التحميل...</div>
+              ) : (
+                <form onSubmit={handleSubmit}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-gray-700 mb-2">البريد الإلكتروني</label>
+                      <input
+                        type="email"
+                        value={profile?.email || ''}
+                        disabled
+                        className="w-full p-2 border border-gray-300 rounded-md bg-gray-100"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-gray-700 mb-2">الاسم الكامل</label>
+                      <input
+                        type="text"
+                        name="fullName"
+                        value={formData.fullName}
+                        onChange={handleInputChange}
+                        disabled={!isEditing}
+                        className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
+                      />
+                    </div>
+
+                    {!isAdminOrOwner && (
+                      <>
+                        <div>
+                          <label className="block text-gray-700 mb-2">المحافظة</label>
+                          <select
+                            name="governorate"
+                            value={formData.governorate}
+                            onChange={handleInputChange}
+                            disabled={!isEditing}
+                            className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
+                          >
+                            {governorates.map((gov) => (
+                              <option key={gov} value={gov}>{gov}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-gray-700 mb-2">المدينة</label>
+                          <input
+                            type="text"
+                            name="town"
+                            value={formData.town}
+                            onChange={handleInputChange}
+                            disabled={!isEditing}
+                            className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    <div>
+                      <label className="block text-gray-700 mb-2">رقم الهاتف</label>
+                      <input
+                        type="text"
+                        name="phoneNumber"
+                        value={isEditing ? formData.phoneNumber : profile?.phoneNumber || ''}
+                        onChange={handleInputChange}
+                        disabled={!isEditing}
+                        className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-gray-700 mb-2">رمز الهاتف</label>
+                      <select
+                        name="phonePrefix"
+                        value={isEditing ? formData.phonePrefix : profile?.phonePrefix || ''}
+                        onChange={handleInputChange}
+                        disabled={!isEditing}
+                        className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
                       >
-                        {isDeleting ? 'جاري الحذف...' : 'حذف الحساب'}
-                      </button>
+                        {phonePrefixes.map((prefix) => (
+                          <option key={prefix} value={prefix}>{prefix}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {isEditing && (
+                      <>
+                        <div>
+                          <label className="block text-gray-700 mb-2">كلمة المرور الحالية</label>
+                          <input
+                            type="password"
+                            name="currentPassword"
+                            value={formData.currentPassword}
+                            onChange={handleInputChange}
+                            required
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-gray-700 mb-2">كلمة المرور الجديدة (اختياري)</label>
+                          <input
+                            type="password"
+                            name="newPassword"
+                            value={formData.newPassword}
+                            onChange={handleInputChange}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-gray-700 mb-2">تأكيد كلمة المرور الجديدة</label>
+                          <input
+                            type="password"
+                            name="confirmPassword"
+                            value={formData.confirmPassword}
+                            onChange={handleInputChange}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                          />
+                        </div>
+                      </>
                     )}
                   </div>
-                )}
 
-                {isEditing && (
-                  <div className="flex justify-center items-center mt-6">
-                    <div className="flex gap-4 rtl:space-x-reverse">
+                  {!isEditing && (
+                    <div className="flex justify-center gap-4 mt-6">
                       <button
-                        type="button"
-                        onClick={handleCancelEdit}
-                        className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                        disabled={isSubmitting}
+                        onClick={handleEditClick}
+                        className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
                       >
-                        إلغاء
+                        تعديل الملف الشخصي
                       </button>
-                      <button
-                        type="submit"
-                        className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? 'جاري الحفظ...' : 'حفظ التغييرات'}
-                      </button>
+                      
+                      {/* Show delete button beside edit button for REGULAR users */}
+                      {isRegularUser && (
+                        <button
+                          type="button"
+                          onClick={() => setShowDeleteModal(true)}
+                          className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
+                          disabled={isDeleting}
+                        >
+                          {isDeleting ? 'جاري الحذف...' : 'حذف الحساب'}
+                        </button>
+                      )}
                     </div>
-                  </div>
-                )}
-              </form>
-            )}
-          </div>
-        </div>
-      </main>
+                  )}
 
-      {/* Delete Account Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4">تأكيد حذف الحساب</h2>
-            <p className="text-gray-600 mb-6">
-              هل أنت متأكد من رغبتك في حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.
-            </p>
-            <div className="flex justify-center space-x-4 rtl:space-x-reverse mt-6 gap-4">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="bg-gray-300 text-gray-800 px-6 py-2 rounded-md hover:bg-gray-400 transition-colors space-x-20"
-              >
-                إلغاء
-              </button>
-              <button
-                onClick={handleDeleteAccount}
-                className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors space-x-20"
-                disabled={isDeleting}
-              >
-                {isDeleting ? 'جاري الحذف...' : 'تأكيد الحذف'}
-              </button>
+                  {isEditing && (
+                    <div className="flex justify-center items-center mt-6">
+                      <div className="flex gap-4 rtl:space-x-reverse">
+                        <button
+                          type="button"
+                          onClick={handleCancelEdit}
+                          className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                          disabled={isSubmitting}
+                        >
+                          إلغاء
+                        </button>
+                        <button
+                          type="submit"
+                          className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </form>
+              )}
             </div>
           </div>
-        </div>
-      )}
+        </main>
+
+        {/* Delete Account Modal */}
+        {showDeleteModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full">
+              <h2 className="text-xl font-bold mb-4">تأكيد حذف الحساب</h2>
+              <p className="text-gray-600 mb-6">
+                هل أنت متأكد من رغبتك في حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.
+              </p>
+              <div className="flex justify-center space-x-4 rtl:space-x-reverse mt-6 gap-4">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="bg-gray-300 text-gray-800 px-6 py-2 rounded-md hover:bg-gray-400 transition-colors space-x-20"
+                >
+                  إلغاء
+                </button>
+                <button
+                  onClick={handleDeleteAccount}
+                  className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors space-x-20"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? 'جاري الحذف...' : 'تأكيد الحذف'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 } 
