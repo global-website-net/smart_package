@@ -4,7 +4,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import RightSideBanner from './components/RightSideBanner'
 import { getServerSession } from "next-auth";
-import { authOptions } from "./api/auth/[...nextauth]/route";
+import { authOptions } from "./api/auth/auth.config";
 
 const inter = Inter({ subsets: ["latin"] });
 
