@@ -290,251 +290,128 @@ export default function TrackingOrdersRegularPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <main className="p-4 pt-24">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-6">تتبع الطلبات</h1>
-            <div className="flex justify-center items-center">
-              <div className="relative w-56 sm:w-64 md:w-80">
-                <div className="w-full h-0.5 bg-green-500"></div>
-                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
+      <main className="max-w-6xl mx-auto px-4 py-10">
+        <h1 className="text-3xl font-bold text-center mb-8 mt-4">تتبع الطلبات</h1>
+        {/* Desktop grid */}
+        <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 justify-items-center">
+          {orders.map((order) => (
+            <div key={order.id} className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center w-full max-w-xs min-h-[320px]">
+              {/* Title */}
+              <div className="flex items-center justify-center text-lg font-bold mb-2">
+                <span>طلبية</span>
+                <span className="mx-2">|</span>
+                <span className="ltr:font-mono rtl:font-mono">{order.orderNumber}</span>
               </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col items-center -mt-4 mb-6">
-            <button
-              onClick={handleNewOrder}
-              className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-            >
-              طلب جديد
-            </button>
-          </div>
-
-          {error && (
-            <div className="bg-red-50 text-red-800 p-4 rounded-md mb-6">
-              {error}
-            </div>
-          )}
-
-          {/* Mobile Layout */}
-          {isMobile ? (
-            <div className="flex flex-col gap-6">
-              {/* Mobile Filters Icon */}
-              <div className="flex justify-start mb-4">
+              {/* Icon */}
+              <img src="/images/shopping_bag_icon.png" alt="Shopping Bag" className="w-16 h-16 my-2" />
+              {/* Status */}
+              <div className={`text-center text-base font-semibold my-2 ${order.status === 'AWAITING_PAYMENT' ? 'text-orange-600 border border-orange-400 rounded px-4 py-1' : order.status === 'ORDER_COMPLETED' ? 'text-green-700 bg-green-100 rounded px-4 py-1' : 'text-gray-700'}`}>
+                {getOrderStatusText(order.status)}
+              </div>
+              {/* Payment button if needed */}
+              {order.status === 'AWAITING_PAYMENT' && (
                 <button
-                  className="p-0 bg-transparent border-none shadow-none"
-                  style={{ background: 'none', border: 'none', boxShadow: 'none' }}
-                  onClick={() => setShowMobileFilters(v => !v)}
-                  aria-label="عرض الفلاتر"
+                  className="mt-2 mb-2 px-6 py-2 border-2 border-orange-400 text-orange-600 rounded-lg font-bold hover:bg-orange-50 transition"
+                  onClick={() => handlePaymentClick(order)}
                 >
-                  <Filter className="w-7 h-7 text-black" fill="black" />
+                  دفع
                 </button>
-              </div>
-              {showMobileFilters && (
-                <div className="flex flex-col gap-3 mb-4 p-4 bg-white rounded-lg shadow border border-gray-200">
-                  <input
-                    type="text"
-                    placeholder="ابحث برقم الطلب"
-                    className="w-full md:w-64 text-right p-2 border rounded"
-                    value={orderNumberFilter}
-                    onChange={e => setOrderNumberFilter(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="ابحث بموقع الشراء"
-                    className="w-full md:w-64 text-right p-2 border rounded"
-                    value={purchaseSiteFilter}
-                    onChange={e => setPurchaseSiteFilter(e.target.value)}
-                  />
-                  <select
-                    className="w-full md:w-48 text-right p-2 border rounded"
-                    value={statusFilter}
-                    onChange={e => setStatusFilter(e.target.value)}
-                  >
-                    <option value="ALL">كل الحالات</option>
-                    <option value="PENDING_APPROVAL">في انتظار الموافقة</option>
-                    <option value="AWAITING_PAYMENT">في انتظار الدفع</option>
-                    <option value="ORDERING">قيد الطلب</option>
-                    <option value="ORDER_COMPLETED">تم الطلب</option>
-                    <option value="CANCELLED">ملغي</option>
-                  </select>
-                </div>
               )}
-              {currentOrders.length === 0 ? (
-                <div className="text-center py-8">لا توجد طلبات</div>
-              ) : (
-                currentOrders.map((order, idx) => (
-                  <div key={order.id} className="bg-white rounded-xl shadow p-6 flex flex-col items-center border border-gray-200">
-                    {/* Order Card Title */}
-                    <div className="flex items-center justify-center gap-2 text-xl font-bold mb-2">
-                      <span>طلبية</span>
-                      <span className="mx-1">|</span>
-                      <span>O - {order.orderNumber}</span>
-                    </div>
-                    {/* Package Icon SVG (from main page) */}
-                    <div className="my-4 text-5xl text-center">
-                      🛒
-                    </div>
-                    <div className="mb-2 text-xl font-bold text-black">{order.purchaseSite}</div>
-                    <div className="mb-2">
-                      <span className={`px-3 py-1 rounded-full text-sm font-semibold ${order.status === 'ORDER_COMPLETED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{getOrderStatusText(order.status)}</span>
-                    </div>
-                    {/* Pay button for AWAITING_PAYMENT status */}
-                    {order.status === 'AWAITING_PAYMENT' && (
-                      <button
-                        className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md mt-2"
-                        onClick={() => {
-                          setSelectedOrder(order)
-                          setIsPaymentModalOpen(true)
-                        }}
-                      >
-                        دفع
-                      </button>
-                    )}
-                    {/* Optionally show order code or totalAmount if needed */}
-                    {/* <div className="mb-2 text-gray-500 text-sm">{order.orderNumber}</div> */}
-                  </div>
-                ))
-              )}
+              {/* Creation date */}
+              <div className="mt-auto text-sm text-gray-500">تاريخ الإنشاء: {new Date(order.createdAt).toLocaleDateString('ar-EG')}</div>
             </div>
-          ) : (
-            <>
-              {/* Desktop Filters */}
-              <div className="flex flex-col sm:flex-row gap-4 mb-4 items-center justify-center">
-                <Input
+          ))}
+        </div>
+        {/* Mobile/table fallback: keep existing table or list */}
+        {isMobile && (
+          <div className="flex flex-col gap-6">
+            {/* Mobile Filters Icon */}
+            <div className="flex justify-start mb-4">
+              <button
+                className="p-0 bg-transparent border-none shadow-none"
+                style={{ background: 'none', border: 'none', boxShadow: 'none' }}
+                onClick={() => setShowMobileFilters(v => !v)}
+                aria-label="عرض الفلاتر"
+              >
+                <Filter className="w-7 h-7 text-black" fill="black" />
+              </button>
+            </div>
+            {showMobileFilters && (
+              <div className="flex flex-col gap-3 mb-4 p-4 bg-white rounded-lg shadow border border-gray-200">
+                <input
                   type="text"
                   placeholder="ابحث برقم الطلب"
-                  className="w-full md:w-64 text-right"
+                  className="w-full md:w-64 text-right p-2 border rounded"
                   value={orderNumberFilter}
                   onChange={e => setOrderNumberFilter(e.target.value)}
                 />
-                <Input
+                <input
                   type="text"
                   placeholder="ابحث بموقع الشراء"
-                  className="w-full md:w-64 text-right"
+                  className="w-full md:w-64 text-right p-2 border rounded"
                   value={purchaseSiteFilter}
                   onChange={e => setPurchaseSiteFilter(e.target.value)}
                 />
-                <Select
+                <select
+                  className="w-full md:w-48 text-right p-2 border rounded"
                   value={statusFilter}
-                  onValueChange={setStatusFilter}
+                  onChange={e => setStatusFilter(e.target.value)}
                 >
-                  <SelectTrigger className="w-full md:w-48 text-right">
-                    <SelectValue placeholder="كل الحالات" className="text-right" />
-                  </SelectTrigger>
-                  <SelectContent className="text-right" align="end">
-                    <SelectItem value="ALL">كل الحالات</SelectItem>
-                    <SelectItem value="PENDING_APPROVAL">في انتظار الموافقة</SelectItem>
-                    <SelectItem value="AWAITING_PAYMENT">بانتظار الدفع</SelectItem>
-                    <SelectItem value="ORDERING">قيد الطلب</SelectItem>
-                    <SelectItem value="ORDER_COMPLETED">تم الطلب</SelectItem>
-                    <SelectItem value="CANCELLED">ملغي</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <option value="ALL">كل الحالات</option>
+                  <option value="PENDING_APPROVAL">في انتظار الموافقة</option>
+                  <option value="AWAITING_PAYMENT">في انتظار الدفع</option>
+                  <option value="ORDERING">قيد الطلب</option>
+                  <option value="ORDER_COMPLETED">تم الطلب</option>
+                  <option value="CANCELLED">ملغي</option>
+                </select>
               </div>
-              {/* Desktop Table */}
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-center font-bold">رقم الطلب</TableHead>
-                    <TableHead className="text-center font-bold">موقع الشراء</TableHead>
-                    <TableHead className="text-center font-bold">رابط الشراء</TableHead>
-                    <TableHead className="text-center font-bold">رقم الهاتف</TableHead>
-                    <TableHead className="text-center font-bold">المبلغ الإجمالي</TableHead>
-                    <TableHead className="text-center font-bold">الحالة</TableHead>
-                    <TableHead className="text-center font-bold">ملاحظات</TableHead>
-                    <TableHead className="text-center font-bold">معلومات إضافية</TableHead>
-                    <TableHead className="text-center font-bold">تاريخ الإنشاء</TableHead>
-                    <TableHead className="text-center font-bold">الإجراءات</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {currentOrders.length === 0 && !loading ? (
-                    <TableRow>
-                      <TableCell colSpan={10} className="text-center py-4">
-                        لا توجد طلبات
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    currentOrders.map((order) => (
-                      <TableRow key={order.id}>
-                        <TableCell className="text-center">{order.orderNumber}</TableCell>
-                        <TableCell className="text-center">{order.purchaseSite}</TableCell>
-                        <TableCell className="text-center">
-                          <a href={order.purchaseLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                            {order.purchaseLink}
-                          </a>
-                        </TableCell>
-                        <TableCell className="text-center">{order.phoneNumber}</TableCell>
-                        <TableCell className="text-center">{order.totalAmount ? `₪${order.totalAmount.toFixed(2)}` : '-'}</TableCell>
-                        <TableCell className="text-center">
-                          <span className={`px-2 py-1 rounded-full ${getStatusColor(order.status)}`}>
-                            {getOrderStatusText(order.status)}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-center">{order.notes || '-'}</TableCell>
-                        <TableCell className="text-center">{order.additionalInfo || '-'}</TableCell>
-                        <TableCell className="text-center">{new Date(order.createdAt).toLocaleDateString('ar')}</TableCell>
-                        <TableCell className="text-center">
-                          {order.status === 'AWAITING_PAYMENT' && (
-                            <Button
-                              onClick={() => handlePaymentClick(order)}
-                              className="bg-green-500 hover:bg-green-600 text-white"
-                            >
-                              دفع
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))
+            )}
+            {currentOrders.length === 0 ? (
+              <div className="text-center py-8">لا توجد طلبات</div>
+            ) : (
+              currentOrders.map((order, idx) => (
+                <div key={order.id} className="bg-white rounded-xl shadow p-6 flex flex-col items-center border border-gray-200">
+                  {/* Order Card Title */}
+                  <div className="flex items-center justify-center gap-2 text-xl font-bold mb-2">
+                    <span>طلبية</span>
+                    <span className="mx-1">|</span>
+                    <span>O - {order.orderNumber}</span>
+                  </div>
+                  {/* Package Icon SVG (from main page) */}
+                  <div className="my-4 text-5xl text-center">
+                    🛒
+                  </div>
+                  <div className="mb-2 text-xl font-bold text-black">{order.purchaseSite}</div>
+                  <div className="mb-2">
+                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${order.status === 'ORDER_COMPLETED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{getOrderStatusText(order.status)}</span>
+                  </div>
+                  {/* Pay button for AWAITING_PAYMENT status */}
+                  {order.status === 'AWAITING_PAYMENT' && (
+                    <button
+                      className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md mt-2"
+                      onClick={() => {
+                        setSelectedOrder(order)
+                        setIsPaymentModalOpen(true)
+                      }}
+                    >
+                      دفع
+                    </button>
                   )}
-                </TableBody>
-              </Table>
-            </>
-          )}
-
-          {/* Pagination Controls - Always show */}
-          <div className="flex justify-center items-center gap-4 mt-6">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handlePreviousPage}
-              disabled={currentPage === 1}
-              className="flex items-center gap-2"
-            >
-              <ChevronRight className="h-4 w-4" />
-              السابق
-            </Button>
-            <span className="text-sm text-gray-600">
-              الصفحة {currentPage} من {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleNextPage}
-              disabled={currentPage === totalPages}
-              className="flex items-center gap-2"
-            >
-              التالي
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
+                  {/* Optionally show order code or totalAmount if needed */}
+                  {/* <div className="mb-2 text-gray-500 text-sm">{order.orderNumber}</div> */}
+                </div>
+              ))
+            )}
           </div>
-        </div>
-      </main>
-
-      {selectedOrder && (
+        )}
         <PaymentModal
           isOpen={isPaymentModalOpen}
-          onClose={() => {
-            setIsPaymentModalOpen(false)
-            setSelectedOrder(null)
-          }}
-          amount={selectedOrder.totalAmount}
-          orderId={selectedOrder.id}
+          onClose={() => setIsPaymentModalOpen(false)}
+          orderId={selectedOrder?.id ?? ''}
+          amount={selectedOrder?.totalAmount ?? 0}
           onPaymentComplete={handlePaymentComplete}
         />
-      )}
+      </main>
     </div>
   )
 }

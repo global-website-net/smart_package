@@ -22,7 +22,7 @@ export default function RootLayout({
         <Providers>
           <div className="relative min-h-screen flex bg-gray-50">
             <RightSideBannerWrapper />
-            <div className="flex-1 md:mr-[160px]">
+            <div className="flex-1 md:mr-[200px]">
               {children}
             </div>
           </div>
