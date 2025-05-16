@@ -368,7 +368,13 @@ export default function TrackingOrdersRegularPage() {
                   <span className="ltr:font-mono rtl:font-mono">{order.orderNumber}</span>
                 </div>
                 {/* Icon */}
-                <img src="/images/shopping_bag_icon.png" alt="Shopping Bag" className="w-16 h-16 my-2" />
+                <img
+                  src="/images/shopping_bag_icon.png"
+                  alt="Shopping Bag"
+                  className="w-16 h-16 my-2 cursor-pointer"
+                  onClick={() => router.push(`/tracking_packages_user/${order.id}`)}
+                  title="عرض تفاصيل الطرد"
+                />
                 {/* Purchase Site */}
                 <div className="mb-2 text-lg font-bold text-black">{order.purchaseSite}</div>
                 {/* Status as pill/badge */}

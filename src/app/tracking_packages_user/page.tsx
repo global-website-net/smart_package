@@ -13,6 +13,7 @@ import { Edit2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Filter, ChevronLeft, ChevronRight } from 'lucide-react'
+import Image from 'next/image'
 
 interface Shop {
   id: string
@@ -62,6 +63,7 @@ export default function UserPackagesPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 20
   const [showMobileFilters, setShowMobileFilters] = useState(false)
+  const [showDesktopFilters, setShowDesktopFilters] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -278,244 +280,200 @@ export default function UserPackagesPage() {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1)
   }
 
+  // Collect unique shop names and statuses for filters
+  const shopOptions = shops.map(shop => ({ value: shop.id, label: shop.fullName }))
+  const statusOptions = Array.from(new Set(packages.map(pkg => pkg.status)))
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <main className="p-4 pt-24">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-6">تتبع الطرود</h1>
-            <div className="flex justify-center items-center">
-              <div className="relative w-56 sm:w-64 md:w-80">
-                <div className="w-full h-0.5 bg-green-500"></div>
-                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
-              </div>
-            </div>
+      <main className="max-w-6xl mx-auto px-4 py-10 mt-[70px]">
+        <h1 className="text-3xl font-bold text-center mb-2 mt-0">تتبع الطرود</h1>
+        <div className="flex justify-center items-center mb-8">
+          <div className="relative w-56 sm:w-64 md:w-80">
+            <div className="w-full h-0.5 bg-green-500"></div>
+            <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
           </div>
-
-          {error && (
-            <div className="bg-red-50 text-red-800 p-4 rounded-md mb-6">
-              {error}
-            </div>
-          )}
-
-          {/* Desktop Filters */}
-          {!isMobile && (
-            <div className="flex flex-col sm:flex-row gap-4 mb-4 items-center justify-center">
-              <Input
+        </div>
+        {/* Filter icon and panel */}
+        <div className="flex flex-col items-center mb-4">
+          <button
+            className="focus:outline-none"
+            onClick={() => setShowDesktopFilters(v => !v)}
+            aria-label="عرض الفلاتر"
+            type="button"
+          >
+            <Image src="/images/filter_icon.png" alt="فلتر" width={32} height={32} />
+          </button>
+          {showDesktopFilters && (
+            <div className="flex flex-col md:flex-row gap-4 mt-4 items-center bg-white p-4 rounded-lg shadow border border-gray-200 w-full md:w-auto max-w-xl">
+              <input
                 type="text"
                 placeholder="ابحث برقم التتبع"
-                className="w-full md:w-64 text-right"
+                className="w-full md:w-64 text-right p-2 border rounded"
                 value={trackingNumberFilter}
                 onChange={e => setTrackingNumberFilter(e.target.value)}
               />
-              <Select
+              <select
+                className="w-full md:w-48 text-right p-2 border rounded"
                 value={shopFilter}
-                onValueChange={setShopFilter}
+                onChange={e => setShopFilter(e.target.value)}
               >
-                <SelectTrigger className="w-full md:w-48 text-right">
-                  <SelectValue placeholder="كل المتاجر" className="text-right" />
-                </SelectTrigger>
-                <SelectContent className="text-right" align="end">
-                  <SelectItem value="ALL">كل المتاجر</SelectItem>
-                  {shops.map(shop => (
-                    <SelectItem key={shop.id} value={shop.id}>
-                      {shop.fullName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select
+                <option value="ALL">كل المتاجر</option>
+                {shopOptions.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+              <select
+                className="w-full md:w-48 text-right p-2 border rounded"
                 value={statusFilter}
-                onValueChange={setStatusFilter}
+                onChange={e => setStatusFilter(e.target.value)}
               >
-                <SelectTrigger className="w-full md:w-48 text-right">
-                  <SelectValue placeholder="كل الحالات" className="text-right" />
-                </SelectTrigger>
-                <SelectContent className="text-right" align="end">
-                  <SelectItem value="ALL">كل الحالات</SelectItem>
-                  <SelectItem value="AWAITING_PAYMENT">في انتظار الدفع</SelectItem>
-                  <SelectItem value="PREPARING">قيد التحضير</SelectItem>
-                  <SelectItem value="DELIVERING_TO_SHOP">قيد التوصيل للمتجر</SelectItem>
-                  <SelectItem value="IN_SHOP">في المتجر</SelectItem>
-                  <SelectItem value="RECEIVED">تم الاستلام</SelectItem>
-                </SelectContent>
-              </Select>
+                <option value="ALL">كل الحالات</option>
+                {statusOptions.map(status => (
+                  <option key={status} value={status}>{getStatusText(status)}</option>
+                ))}
+              </select>
             </div>
-          )}
-
-          {/* Mobile Card Layout */}
-          {isMobile ? (
-            <div className="flex flex-col gap-6">
-              {/* Mobile Filters Icon */}
-              <div className="flex justify-start mb-4">
-                <button
-                  className="p-0 bg-transparent border-none shadow-none"
-                  style={{ background: 'none', border: 'none', boxShadow: 'none' }}
-                  onClick={() => setShowMobileFilters(v => !v)}
-                  aria-label="عرض الفلاتر"
-                >
-                  <Filter className="w-7 h-7 text-black" fill="black" />
-                </button>
-              </div>
-              {showMobileFilters && (
-                <div className="flex flex-col gap-3 mb-4 p-4 bg-white rounded-lg shadow border border-gray-200">
-                  <input
-                    type="text"
-                    placeholder="ابحث برقم التتبع"
-                    className="w-full md:w-64 text-right p-2 border rounded"
-                    value={trackingNumberFilter}
-                    onChange={e => setTrackingNumberFilter(e.target.value)}
-                  />
-                  <select
-                    className="w-full md:w-48 text-right p-2 border rounded"
-                    value={statusFilter}
-                    onChange={e => setStatusFilter(e.target.value)}
-                  >
-                    <option value="ALL">كل الحالات</option>
-                    <option value="AWAITING_PAYMENT">في انتظار الدفع</option>
-                    <option value="PREPARING">قيد التحضير</option>
-                    <option value="DELIVERING_TO_SHOP">قيد التوصيل للمتجر</option>
-                    <option value="IN_SHOP">في المتجر</option>
-                    <option value="RECEIVED">تم الاستلام</option>
-                  </select>
-                  <select
-                    className="w-full md:w-48 text-right p-2 border rounded"
-                    value={shopFilter}
-                    onChange={e => setShopFilter(e.target.value)}
-                  >
-                    <option value="ALL">كل المتاجر</option>
-                    {shops.map(shop => (
-                      <option key={shop.id} value={shop.id}>{shop.fullName}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-              {currentPackages.length === 0 ? (
-                <div className="text-center py-8">لا توجد طرود</div>
-              ) : (
-                currentPackages.map((pkg, idx) => (
-                  <div key={pkg.id} className="bg-white rounded-xl shadow p-6 flex flex-col items-center border border-gray-200">
-                    {/* Package Card Title */}
-                    <div className="flex items-center justify-center gap-2 text-xl font-bold mb-2">
-                      <span>طرد</span>
-                      <span className="mx-1">|</span>
-                      <span>#{idx + 1}</span>
-                    </div>
-                    <div className="mb-2 text-gray-600 text-sm">رقم التتبع: <span className="font-mono">{pkg.trackingNumber}</span></div>
-                    <div className="my-4 text-5xl text-center">
-                      📦
-                    </div>
-                    <div className="mb-2">
-                      <span className={`px-3 py-1 rounded-full text-sm font-semibold ${pkg.status === 'RECEIVED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                        {getStatusText(pkg.status)}
-                      </span>
-                    </div>
-                    <div className="mb-2 text-gray-500 text-sm">تاريخ الإنشاء: {new Date(pkg.createdAt).toLocaleDateString('ar')}</div>
-                    {/* Edit shop button and current shop */}
-                    <div className="flex flex-col items-center gap-2 mt-2">
-                      <div className="flex items-center gap-2">
-                        {pkg.status !== 'RECEIVED' && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="mt-2 flex items-center gap-1"
-                            onClick={() => {
-                              setSelectedPackageId(pkg.id)
-                              setIsShopEditOpen(true)
-                            }}
-                          >
-                            <Edit2 className="w-4 h-4" /> تعديل المتجر
-                          </Button>
-                        )}
-                        <span className="text-sm text-gray-700">المتجر: {pkg.User?.fullName ? pkg.User.fullName : 'غير محدد'}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          ) : (
-            <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-center font-bold text-lg">رقم التتبع</TableHead>
-                    <TableHead className="text-center font-bold text-lg">المتجر</TableHead>
-                    <TableHead className="text-center font-bold text-lg">الحالة</TableHead>
-                    <TableHead className="text-center font-bold text-lg">الوصف</TableHead>
-                    <TableHead className="text-center font-bold text-lg">تاريخ الإنشاء</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {currentPackages.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center py-4">
-                        لا توجد طرود
-                      </TableCell>
-                    </TableRow>
-                  ) :
-                    currentPackages.map((pkg) => (
-                      <TableRow key={pkg.id}>
-                        <TableCell className="text-center">{pkg.trackingNumber}</TableCell>
-                        <TableCell className="text-center">
-                          <div className="flex items-center justify-center gap-2">
-                            <span>{pkg.User?.fullName || 'غير محدد'}</span>
-                            {pkg.status !== 'RECEIVED' && (
-                              <Button
-                                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                onClick={() => {
-                                  setSelectedPackageId(pkg.id)
-                                  setIsShopEditOpen(true)
-                                }}
-                              >
-                                تعديل
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <span className={`px-2 py-1 rounded-full ${getStatusColor(pkg.status)}`}>
-                            {getStatusText(pkg.status)}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-center">{pkg.description || '-'}</TableCell>
-                        <TableCell className="text-center">
-                          {new Date(pkg.createdAt).toLocaleDateString('ar')}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-              {/* Pagination Controls - Always show */}
-              <div className="flex justify-center items-center gap-4 mt-6">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handlePreviousPage}
-                  disabled={currentPage === 1}
-                  className="flex items-center gap-2"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                  السابق
-                </Button>
-                <span className="text-sm text-gray-600">
-                  الصفحة {currentPage} من {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleNextPage}
-                  disabled={currentPage === totalPages}
-                  className="flex items-center gap-2"
-                >
-                  التالي
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-              </div>
-            </>
           )}
         </div>
+        {/* No packages found message */}
+        {currentPackages.length === 0 && (
+          <div className="text-center text-lg text-gray-500 my-8">لا توجد طرود</div>
+        )}
+        {/* Desktop grid */}
+        <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 justify-items-center">
+          {currentPackages.map((pkg) => {
+            const isSpecialStatus = getStatusText(pkg.status) !== 'في انتظار الدفع' && getStatusText(pkg.status) !== 'في انتظار الموافقة';
+            return (
+              <div key={pkg.id} className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center w-full max-w-xs min-h-[320px] relative">
+                {/* Left-side icon for special statuses */}
+                {isSpecialStatus && (
+                  <img
+                    src="/images/price_hex_icon.png"
+                    alt="Status Icon"
+                    className="absolute left-[-28px] top-1/2 -translate-y-1/2 w-10 h-10 hidden md:block"
+                  />
+                )}
+                {/* Title */}
+                <div className="flex items-center justify-center text-lg font-bold mb-2">
+                  <span>طرد</span>
+                  <span className="mx-2">|</span>
+                  <span className="ltr:font-mono rtl:font-mono">{pkg.trackingNumber}</span>
+                </div>
+                {/* Icon */}
+                <img src="/images/package_icon.png" alt="Package Icon" className="w-16 h-16 my-2" />
+                {/* Status as pill/badge */}
+                <div className="flex justify-center my-2">
+                  <span className={getStatusColor(pkg.status) + ' px-4 py-1 rounded-full text-base font-bold'}>{getStatusText(pkg.status)}</span>
+                </div>
+                {/* Payment button if needed */}
+                {pkg.status === 'AWAITING_PAYMENT' && (
+                  <button
+                    className="mt-2 mb-2 px-6 py-2 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition"
+                    // onClick={() => handlePaymentClick(pkg)}
+                  >
+                    دفع
+                  </button>
+                )}
+                {/* Creation date */}
+                <div className="mt-auto text-sm text-gray-500">{new Date(pkg.createdAt).toLocaleDateString('en-US')}</div>
+              </div>
+            );
+          })}
+        </div>
+        {/* Mobile/table fallback: keep existing table or list */}
+        {isMobile && (
+          <div className="flex flex-col gap-6">
+            {/* Mobile Filters Icon */}
+            <div className="flex justify-start mb-4">
+              <button
+                className="p-0 bg-transparent border-none shadow-none"
+                style={{ background: 'none', border: 'none', boxShadow: 'none' }}
+                onClick={() => setShowMobileFilters(v => !v)}
+                aria-label="عرض الفلاتر"
+              >
+                <Filter className="w-7 h-7 text-black" fill="black" />
+              </button>
+            </div>
+            {showMobileFilters && (
+              <div className="flex flex-col gap-3 mb-4 p-4 bg-white rounded-lg shadow border border-gray-200">
+                <input
+                  type="text"
+                  placeholder="ابحث برقم التتبع"
+                  className="w-full md:w-64 text-right p-2 border rounded"
+                  value={trackingNumberFilter}
+                  onChange={e => setTrackingNumberFilter(e.target.value)}
+                />
+                <select
+                  className="w-full md:w-48 text-right p-2 border rounded"
+                  value={statusFilter}
+                  onChange={e => setStatusFilter(e.target.value)}
+                >
+                  <option value="ALL">كل الحالات</option>
+                  <option value="AWAITING_PAYMENT">في انتظار الدفع</option>
+                  <option value="PREPARING">قيد التحضير</option>
+                  <option value="DELIVERING_TO_SHOP">قيد التوصيل للمتجر</option>
+                  <option value="IN_SHOP">في المتجر</option>
+                  <option value="RECEIVED">تم الاستلام</option>
+                </select>
+                <select
+                  className="w-full md:w-48 text-right p-2 border rounded"
+                  value={shopFilter}
+                  onChange={e => setShopFilter(e.target.value)}
+                >
+                  <option value="ALL">كل المتاجر</option>
+                  {shops.map(shop => (
+                    <option key={shop.id} value={shop.id}>{shop.fullName}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+            {currentPackages.length === 0 ? (
+              <div className="text-center py-8">لا توجد طرود</div>
+            ) : (
+              currentPackages.map((pkg, idx) => (
+                <div key={pkg.id} className="bg-white rounded-xl shadow p-6 flex flex-col items-center border border-gray-200">
+                  {/* Package Card Title */}
+                  <div className="flex items-center justify-center gap-2 text-xl font-bold mb-2">
+                    <span>طرد</span>
+                    <span className="mx-1">|</span>
+                    <span>#{idx + 1}</span>
+                  </div>
+                  <div className="mb-2 text-gray-600 text-sm">رقم التتبع: <span className="font-mono">{pkg.trackingNumber}</span></div>
+                  <div className="my-4 text-5xl text-center">
+                    📦
+                  </div>
+                  <div className="mb-2">
+                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${pkg.status === 'RECEIVED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                      {getStatusText(pkg.status)}
+                    </span>
+                  </div>
+                  <div className="mb-2 text-gray-500 text-sm">تاريخ الإنشاء: {new Date(pkg.createdAt).toLocaleDateString('ar')}</div>
+                  {/* Edit shop button and current shop */}
+                  <div className="flex flex-col items-center gap-2 mt-2">
+                    <div className="flex items-center gap-2">
+                      {pkg.status !== 'RECEIVED' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-2 flex items-center gap-1"
+                          onClick={() => {
+                            setSelectedPackageId(pkg.id)
+                            setIsShopEditOpen(true)
+                          }}
+                        >
+                          <Edit2 className="w-4 h-4" /> تعديل المتجر
+                        </Button>
+                      )}
+                      <span className="text-sm text-gray-700">المتجر: {pkg.User?.fullName ? pkg.User.fullName : 'غير محدد'}</span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </main>
 
       <ShopEditWizard

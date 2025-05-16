@@ -11,8 +11,8 @@ export default function Footer() {
       style={{ backgroundImage: "url('/images/bottom_banner.png')" }}
     >
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
-        {/* Left Side */}
-        <div className="flex flex-col items-start gap-2 md:w-1/3">
+        {/* Right Side (was Left) */}
+        <div className="flex flex-col items-end gap-2 md:w-1/3">
           <div className="flex items-center gap-2">
             <span className="inline-block w-6 h-6 bg-[url('/images/phone_icon.png')] bg-contain bg-center bg-no-repeat" />
             <span className="text-lg font-bold">999-999-9999</span>
@@ -31,8 +31,8 @@ export default function Footer() {
             </Link>
           )}
         </div>
-        {/* Right Side */}
-        <div className="flex flex-col items-end gap-2 md:w-1/3">
+        {/* Left Side (was Right) */}
+        <div className="flex flex-col items-start gap-2 md:w-1/3">
           <span className="text-lg font-bold">سياسة الخصوصية</span>
           <span className="text-lg font-bold">سياسة الترجيع</span>
         </div>
