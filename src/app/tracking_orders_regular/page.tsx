@@ -343,6 +343,10 @@ export default function TrackingOrdersRegularPage() {
             </div>
           )}
         </div>
+        {/* No orders found message */}
+        {currentOrders.length === 0 && (
+          <div className="text-center text-lg text-gray-500 my-8">لا توجد طلبات</div>
+        )}
         {/* Desktop grid */}
         <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 justify-items-center">
           {currentOrders.map((order) => {

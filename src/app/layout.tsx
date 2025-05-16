@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import RightSideBannerWrapper from './components/RightSideBannerWrapper'
+import Footer from './components/Footer'
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,11 +21,14 @@ export default function RootLayout({
     <html lang="ar" dir="rtl">
       <body className={inter.className}>
         <Providers>
-          <div className="relative min-h-screen flex bg-gray-50">
-            <RightSideBannerWrapper />
-            <div className="flex-1 md:mr-[200px]">
-              {children}
+          <div className="relative min-h-screen flex flex-col bg-gray-50">
+            <div className="flex-1 flex bg-gray-50">
+              <RightSideBannerWrapper />
+              <div className="flex-1 md:mr-[200px]">
+                {children}
+              </div>
             </div>
+            <Footer />
           </div>
         </Providers>
       </body>
