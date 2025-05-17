@@ -15,6 +15,11 @@ const supabaseAdmin = createClient(
   }
 )
 
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
 export const dynamic = 'force-dynamic'
 
 export async function DELETE(request: NextRequest) {
@@ -117,4 +122,20 @@ export async function PATCH(request: NextRequest) {
       { status: 500 }
     )
   }
+}
+
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+  const { id } = params;
+  if (!id) {
+    return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+  }
+  const { data, error } = await supabase
+    .from('package')
+    .select('*, shop:shopId(fullName, email, id)')
+    .eq('id', id)
+    .single();
+  if (error || !data) {
+    return NextResponse.json({ error: error?.message || 'Not found' }, { status: 404 });
+  }
+  return NextResponse.json(data, { status: 200 });
 } 
