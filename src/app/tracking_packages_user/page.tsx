@@ -362,11 +362,19 @@ export default function UserPackagesPage() {
                   <span className="ltr:font-mono rtl:font-mono">{pkg.trackingNumber}</span>
                 </div>
                 {/* Icon */}
-                <img src="/images/package_icon.png" alt="Package Icon" className="w-16 h-16 my-2" />
+                <img
+                  src="/images/package_icon.png"
+                  alt="Package Icon"
+                  className="w-16 h-16 my-2 cursor-pointer"
+                  onClick={() => router.push(`/tracking_packages_user/${pkg.id}`)}
+                  title="عرض تفاصيل الطرد"
+                />
                 {/* Status as pill/badge */}
                 <div className="flex justify-center my-2">
                   <span className={getStatusColor(pkg.status) + ' px-4 py-1 rounded-full text-base font-bold'}>{getStatusText(pkg.status)}</span>
                 </div>
+                {/* Creation date - move here under status */}
+                <div className="text-sm text-gray-500">{new Date(pkg.createdAt).toLocaleDateString('en-US')}</div>
                 {/* Payment button if needed */}
                 {pkg.status === 'AWAITING_PAYMENT' && (
                   <button
@@ -376,8 +384,6 @@ export default function UserPackagesPage() {
                     دفع
                   </button>
                 )}
-                {/* Creation date */}
-                <div className="mt-auto text-sm text-gray-500">{new Date(pkg.createdAt).toLocaleDateString('en-US')}</div>
               </div>
             );
           })}

@@ -372,8 +372,8 @@ export default function TrackingOrdersRegularPage() {
                   src="/images/shopping_bag_icon.png"
                   alt="Shopping Bag"
                   className="w-16 h-16 my-2 cursor-pointer"
-                  onClick={() => router.push(`/tracking_packages_user/${order.id}`)}
-                  title="عرض تفاصيل الطرد"
+                  onClick={() => router.push(`/tracking_orders_regular/${order.id}`)}
+                  title="عرض تفاصيل الطلب"
                 />
                 {/* Purchase Site */}
                 <div className="mb-2 text-lg font-bold text-black">{order.purchaseSite}</div>
