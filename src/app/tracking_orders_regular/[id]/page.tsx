@@ -95,6 +95,32 @@ export default function OrderDetailsPage() {
     setSavingShop(false);
   };
 
+  // Status text mapping
+  function getOrderStatusText(status: string) {
+    switch (status) {
+      case 'AWAITING_PAYMENT':
+        return 'في انتظار الدفع';
+      case 'PENDING_APPROVAL':
+        return 'في انتظار الموافقة';
+      case 'ORDERING':
+        return 'قيد الطلب';
+      case 'ORDER_COMPLETED':
+        return 'تم الطلب';
+      case 'PENDING':
+        return 'قيد الانتظار';
+      case 'IN_TRANSIT':
+        return 'قيد الشحن';
+      case 'DELIVERED':
+        return 'تم التسليم';
+      case 'CANCELLED':
+        return 'ملغي';
+      case 'RETURNED':
+        return 'تم الإرجاع';
+      default:
+        return status;
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -128,24 +154,10 @@ export default function OrderDetailsPage() {
     );
   }
 
-  // Dynamic status/progress logic (example, adjust as needed)
-  const progressSteps = [
-    {
-      icon: "/images/payment_hex_icon.png",
-      label: "تم الدفع",
-      active: order.status === "ORDER_COMPLETED" || order.status === "DELIVERED",
-    },
-    {
-      icon: "/images/delivery_hex_icon.png",
-      label: "قيد التوصيل",
-      active: order.status === "IN_TRANSIT" || order.status === "DELIVERED",
-    },
-  ];
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <main className="max-w-3xl mx-auto px-4 py-10 mt-[70px]">
+      <main className="max-w-2xl mx-auto px-4 py-10 mt-[70px]">
         {/* Title and underline */}
         <h1 className="text-3xl font-bold text-center mb-2 mt-0">تفاصيل الطلب</h1>
         <div className="flex justify-center items-center mb-8">
@@ -154,41 +166,55 @@ export default function OrderDetailsPage() {
             <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
           </div>
         </div>
-        {/* Card with order info */}
-        <div className="bg-white rounded-xl shadow-md p-6 flex flex-col md:flex-row items-center justify-between mb-8">
-          <div className="flex-1 flex flex-col gap-2 items-start md:items-end">
-            <div className="flex items-center text-lg font-bold">
+        {/* Top Row: Icon | Vertical Line | Info (centered) */}
+        <div className="flex flex-row items-center justify-center p-6 mb-8 gap-4 mx-auto w-fit">
+          {/* Right: Order Icon */}
+          <div className="flex-shrink-0 flex flex-col items-center justify-center">
+            <img src="/images/shopping_bag_icon.png" alt="Order Icon" className="w-20 h-20" />
+          </div>
+          {/* Middle: Vertical Line */}
+          <div className="h-24 w-px bg-black mx-4" />
+          {/* Left: Info */}
+          <div className="flex flex-col items-start justify-center flex-1">
+            <div className="flex items-center text-xl font-bold mb-1">
               <span>طلبية</span>
               <span className="mx-2">|</span>
-              <span className="ltr:font-mono rtl:font-mono">#{order.orderNumber}</span>
+              <span className="font-mono">{order.orderNumber}</span>
             </div>
-            <div className="text-gray-700 font-mono">{order.purchaseSite}</div>
-            <div className="flex items-center gap-2 text-gray-500 text-sm">
-              <Image src="/images/calendar_icon.png" alt="تاريخ الإنشاء" width={20} height={20} />
-              <span>{new Date(order.createdAt).toLocaleDateString("en-US")}</span>
+            <div className="text-black font-mono text-base mt-2 flex items-center gap-2">
+              <span>{new Date(order.createdAt).toLocaleDateString('en-GB')}</span>
+              <img src="/images/calendar_icon.png" alt="Calendar Icon" className="w-5 h-5" />
             </div>
           </div>
-          <div className="flex-1 flex justify-center">
-            <Image src="/images/shopping_bag_icon.png" alt="Order Icon" width={100} height={100} />
+        </div>
+        {/* Green Divider */}
+        <div className="w-full h-0.5 bg-green-500 mb-8" />
+        {/* Status Row: Shopping Bag | Delivery | Payment */}
+        <div className="flex flex-row items-end justify-between mb-8 gap-4">
+          {/* Right: Shopping Bag Icon + Status */}
+          <div className="flex flex-col items-center justify-end flex-1">
+            <img src="/images/shopping_bag_icon.png" alt="Order Icon" className="w-16 h-16 mb-2" />
+            <div className="text-black text-lg font-bold mt-1">{getOrderStatusText(order.status)}</div>
+          </div>
+          {/* Middle: Delivery Icon */}
+          <div className="flex flex-col items-center justify-end flex-1">
+            <img src="/images/delivery_hex_icon.png" alt="Delivery Icon" className="w-16 h-16 mb-2" />
+            <div className="text-black text-lg font-bold mt-1">{order.purchaseSite}</div>
+          </div>
+          {/* Left: Payment Icon */}
+          <div className="flex flex-col items-center justify-end flex-1">
+            <img src="/images/payment_hex_icon.png" alt="Payment Icon" className="w-16 h-16 mb-2" />
+            <div className="text-black text-lg font-bold mt-1">{order.totalAmount.toFixed(2)}₪</div>
           </div>
         </div>
-        {/* Progress/status section */}
-        <div className="flex flex-row justify-between items-center mb-8 px-2">
-          {progressSteps.map((step, idx) => (
-            <div key={idx} className="flex flex-col items-center flex-1">
-              <Image src={step.icon} alt={step.label} width={56} height={56} className={step.active ? "opacity-100" : "opacity-30"} />
-              <div className={`mt-2 text-center text-base font-bold ${step.active ? "text-black" : "text-gray-400"}`}>{step.label}</div>
-            </div>
-          ))}
-        </div>
-        {/* Shop info and selection */}
-        <div className="flex flex-col items-center mb-8">
-          <Image src="/images/shop_icon.png" alt="Shop Icon" width={60} height={60} />
-          <div className="mt-2 text-lg font-bold">{order.Shop?.fullName || "غير محدد"}</div>
-          <div className="mt-4 w-full max-w-xs">
-            <label className="block mb-2 text-sm font-medium text-gray-700">اختيار المتجر</label>
+        {/* Green Divider */}
+        <div className="w-full h-0.5 bg-green-500 mb-8" />
+        {/* Shop Section: Market Icon, Dropdown, Save Button */}
+        <div className="flex flex-col items-center justify-center mb-8">
+          <img src="/images/market_icon.png" alt="Market Icon" className="w-20 h-20 mb-4" />
+          <div className="w-full max-w-xs">
             <select
-              className="w-full p-2 border rounded text-right"
+              className="w-full p-2 border rounded text-right mb-2"
               value={shopEdit}
               onChange={e => setShopEdit(e.target.value)}
               disabled={savingShop}
@@ -198,11 +224,11 @@ export default function OrderDetailsPage() {
               ))}
             </select>
             <Button
-              className="mt-2 w-full"
+              className="w-full bg-green-600 hover:bg-green-700 text-white"
               onClick={handleShopChange}
               disabled={savingShop || shopEdit === order.shopId}
             >
-              {savingShop ? "...جارٍ الحفظ" : "حفظ المتجر"}
+              {savingShop ? "...جارٍ الحفظ" : "حفظ التغييرات"}
             </Button>
           </div>
         </div>
