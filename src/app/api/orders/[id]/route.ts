@@ -13,7 +13,7 @@ export async function GET(request: NextRequest, context: any) {
   }
   const { data, error } = await supabase
     .from('order')
-    .select('*, Shop:shopId(fullName, email, id)')
+    .select('*')
     .eq('id', id)
     .single();
   if (error || !data) {

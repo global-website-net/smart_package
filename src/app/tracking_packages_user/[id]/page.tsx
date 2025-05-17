@@ -201,8 +201,8 @@ export default function PackageDetailsPage() {
             <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
           </div>
         </div>
-        {/* Top Row: Icon | Vertical Line | Info (centered) */}
-        <div className="flex flex-row items-center justify-center p-6 mb-8 gap-4">
+        {/* Top Row: Icon | Vertical Line | Info (perfectly centered) */}
+        <div className="flex flex-row items-center justify-center p-6 mb-8 gap-4 mx-auto w-fit">
           {/* Right: Package Icon */}
           <div className="flex-shrink-0 flex flex-col items-center justify-center">
             <img src="/images/package_icon.png" alt="Package Icon" className="w-20 h-20" />
@@ -271,8 +271,17 @@ export default function PackageDetailsPage() {
       {/* Bottom Banner/Footer with background image and correct layout */}
       <footer className="w-full bg-cover bg-center text-white py-8 px-4" style={{backgroundImage: "url('/images/bottom_banner.png')"}}>
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
-          {/* Right: phone and email */}
+          {/* Right: privacy and return policy */}
           <div className="flex flex-col items-end gap-2 md:w-1/3">
+            <span className="text-lg font-bold">سياسة الخصوصية</span>
+            <span className="text-lg font-bold">سياسة الترجيع</span>
+          </div>
+          {/* Center: label */}
+          <div className="flex flex-col items-center gap-2 md:w-1/3">
+            <span className="text-xl font-bold">تسوق برياحة سهولة</span>
+          </div>
+          {/* Left: phone and email */}
+          <div className="flex flex-col items-start gap-2 md:w-1/3">
             <div className="flex items-center gap-2">
               <span className="inline-block w-6 h-6 bg-[url('/images/phone_icon.png')] bg-contain bg-center bg-no-repeat"></span>
               <span className="text-lg font-bold">999-999-9999</span>
@@ -281,15 +290,6 @@ export default function PackageDetailsPage() {
               <span className="inline-block w-6 h-6 bg-[url('/images/email_icon.png')] bg-contain bg-center bg-no-repeat"></span>
               <span className="text-lg font-bold">someone@example.com</span>
             </div>
-          </div>
-          {/* Center: label */}
-          <div className="flex flex-col items-center gap-2 md:w-1/3">
-            <span className="text-xl font-bold">تسوق برياحة سهولة</span>
-          </div>
-          {/* Left: privacy and return policy */}
-          <div className="flex flex-col items-start gap-2 md:w-1/3">
-            <span className="text-lg font-bold">سياسة الخصوصية</span>
-            <span className="text-lg font-bold">سياسة الترجيع</span>
           </div>
         </div>
       </footer>
