@@ -398,7 +398,9 @@ export default function TrackingOrdersRegularPage() {
                     {getOrderStatusText(order.status)}
                   </span>
                 </div>
-                {/* Payment button if needed */}
+                {/* Creation date - move here under status */}
+                <div className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString('en-US')}</div>
+                {/* Payment button if needed - move below date */}
                 {order.status === 'AWAITING_PAYMENT' && (
                   <button
                     className="mt-2 mb-2 px-6 py-2 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition"
@@ -407,8 +409,6 @@ export default function TrackingOrdersRegularPage() {
                     دفع
                   </button>
                 )}
-                {/* Creation date */}
-                <div className="mt-auto text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString('en-US')}</div>
               </div>
             );
           })}
@@ -494,6 +494,8 @@ export default function TrackingOrdersRegularPage() {
                       {getOrderStatusText(order.status)}
                     </span>
                   </div>
+                  {/* Creation date - move here under status */}
+                  <div className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString('en-US')}</div>
                   {/* Pay button for AWAITING_PAYMENT status */}
                   {order.status === 'AWAITING_PAYMENT' && (
                     <button
@@ -508,8 +510,6 @@ export default function TrackingOrdersRegularPage() {
                   )}
                   {/* Optionally show order code or totalAmount if needed */}
                   {/* <div className="mb-2 text-gray-500 text-sm">{order.orderNumber}</div> */}
-                  {/* Creation date */}
-                  <div className="mt-auto text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString('en-US')}</div>
                 </div>
               ))
             )}
