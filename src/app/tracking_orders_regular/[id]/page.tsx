@@ -41,37 +41,33 @@ export default function OrderDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [shopEdit, setShopEdit] = useState("");
   const [savingShop, setSavingShop] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     if (sessionStatus === "unauthenticated") {
       router.push("/auth/login");
       return;
     }
-    if (params?.id) {
-      fetchOrder(params.id as string);
-      fetchShops();
-    }
-  }, [params, sessionStatus]);
-
-  const fetchOrder = async (id: string) => {
+    if (!params?.id) return;
     setLoading(true);
-    const { data, error } = await supabase
-      .from("order")
-      .select("*, Shop:shopId(fullName, email, id)")
-      .eq("id", id)
-      .single();
-    if (error) {
-      toast.error("تعذر جلب بيانات الطلب");
-      setLoading(false);
-      return;
-    }
-    setOrder({
-      ...data,
-      Shop: data.Shop || { fullName: "غير محدد", email: "" },
-    });
-    setShopEdit(data.shopId || "");
-    setLoading(false);
-  };
+    setErrorMsg(null);
+    fetch(`/api/orders/${params.id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          setErrorMsg(data.error);
+          setOrder(null);
+        } else {
+          setOrder({
+            ...data,
+            Shop: data.Shop || { fullName: "غير محدد", email: "" },
+          });
+          setShopEdit(data.shopId || "");
+        }
+      })
+      .catch(err => setErrorMsg(err.message))
+      .finally(() => setLoading(false));
+  }, [params]);
 
   const fetchShops = async () => {
     const response = await fetch("/api/users/shops");
@@ -99,7 +95,7 @@ export default function OrderDetailsPage() {
     setSavingShop(false);
   };
 
-  if (loading || !order) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
@@ -107,6 +103,24 @@ export default function OrderDetailsPage() {
           <div className="max-w-4xl mx-auto">
             <div className="flex justify-center items-center h-64">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+            </div>
+            {errorMsg && (
+              <div className="mt-8 text-center text-red-600 font-bold">{errorMsg}</div>
+            )}
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (!order) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <main className="p-4 pt-24">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex justify-center items-center h-64">
+              <div className="text-red-600 font-bold">{errorMsg || 'تعذر جلب بيانات الطلب'}</div>
             </div>
           </div>
         </main>

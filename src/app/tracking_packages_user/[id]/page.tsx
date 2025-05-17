@@ -201,8 +201,8 @@ export default function PackageDetailsPage() {
             <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
           </div>
         </div>
-        {/* Top Card: Icon | Vertical Line | Info */}
-        <div className="flex flex-row items-center justify-between bg-white rounded-xl shadow-md p-6 mb-8 gap-4">
+        {/* Top Row: Icon | Vertical Line | Info (centered) */}
+        <div className="flex flex-row items-center justify-center p-6 mb-8 gap-4">
           {/* Right: Package Icon */}
           <div className="flex-shrink-0 flex flex-col items-center justify-center">
             <img src="/images/package_icon.png" alt="Package Icon" className="w-20 h-20" />
@@ -216,8 +216,10 @@ export default function PackageDetailsPage() {
               <span className="mx-2">|</span>
               <span className="font-mono">{pkg.trackingNumber}</span>
             </div>
-            <div className="text-gray-700 font-mono text-lg">RS{pkg.trackingNumber}</div>
-            <div className="text-black font-mono text-base mt-2">{new Date(pkg.createdAt).toLocaleDateString('en-GB')}</div>
+            <div className="text-black font-mono text-base mt-2 flex items-center gap-2">
+              <span>{new Date(pkg.createdAt).toLocaleDateString('en-GB')}</span>
+              <img src="/images/calendar_icon.png" alt="Calendar Icon" className="w-5 h-5" />
+            </div>
           </div>
         </div>
         {/* Green Divider */}
@@ -232,7 +234,8 @@ export default function PackageDetailsPage() {
           {/* Middle: Receipt Icon + Customs Payment */}
           <div className="flex flex-col items-center flex-1">
             <img src="/images/receipt_icon.png" alt="Receipt Icon" className="w-16 h-16 mb-2" />
-            <div className="text-black text-lg font-bold mt-1">{(pkg.customs_payment ?? 0).toFixed(2)}₪ جمرك</div>
+            <div className="text-black text-lg font-bold mt-1">{(pkg.customs_payment ?? 0).toFixed(2)}₪</div>
+            <div className="text-black text-base font-bold mt-1">جمرك</div>
           </div>
           {/* Left: Price Tag Hexagon Icon */}
           <div className="flex flex-col items-center flex-1">
@@ -256,7 +259,7 @@ export default function PackageDetailsPage() {
               ))}
             </select>
             <Button
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-bold"
+              className="w-full bg-green-600 hover:bg-green-700 text-white"
               onClick={handleShopChange}
               disabled={savingShop || shopEdit === pkg.shopId}
             >
@@ -265,25 +268,29 @@ export default function PackageDetailsPage() {
           </div>
         </div>
       </main>
-      {/* Bottom Banner/Footer */}
-      <footer className="w-full bg-white border-t border-gray-200 py-4 px-6 mt-8 flex flex-col md:flex-row items-center justify-between gap-4 fixed bottom-0 left-0 z-50">
-        {/* Right side: privacy and return policy */}
-        <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 rtl:flex-row-reverse">
-          <span className="text-gray-700 font-semibold cursor-pointer hover:underline">سياسة الخصوصية</span>
-          <span className="text-gray-700 font-semibold cursor-pointer hover:underline">سياسة الترجيع</span>
-        </div>
-        {/* Center: (empty for now, can add logo or label if needed) */}
-        <div className="flex-1"></div>
-        {/* Left side: phone and email */}
-        <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 rtl:flex-row-reverse">
-          <span className="flex items-center gap-1 text-gray-700 font-semibold">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm0 12a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2zm12-12a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zm0 12a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-            999-999-9999
-          </span>
-          <span className="flex items-center gap-1 text-gray-700 font-semibold">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12H8m8 0a4 4 0 11-8 0 4 4 0 018 0zm0 0v1a4 4 0 01-4 4H8a4 4 0 01-4-4v-1" /></svg>
-            someone@example.com
-          </span>
+      {/* Bottom Banner/Footer with background image and correct layout */}
+      <footer className="w-full bg-cover bg-center text-white py-8 px-4" style={{backgroundImage: "url('/images/bottom_banner.png')"}}>
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+          {/* Right: phone and email */}
+          <div className="flex flex-col items-end gap-2 md:w-1/3">
+            <div className="flex items-center gap-2">
+              <span className="inline-block w-6 h-6 bg-[url('/images/phone_icon.png')] bg-contain bg-center bg-no-repeat"></span>
+              <span className="text-lg font-bold">999-999-9999</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="inline-block w-6 h-6 bg-[url('/images/email_icon.png')] bg-contain bg-center bg-no-repeat"></span>
+              <span className="text-lg font-bold">someone@example.com</span>
+            </div>
+          </div>
+          {/* Center: label */}
+          <div className="flex flex-col items-center gap-2 md:w-1/3">
+            <span className="text-xl font-bold">تسوق برياحة سهولة</span>
+          </div>
+          {/* Left: privacy and return policy */}
+          <div className="flex flex-col items-start gap-2 md:w-1/3">
+            <span className="text-lg font-bold">سياسة الخصوصية</span>
+            <span className="text-lg font-bold">سياسة الترجيع</span>
+          </div>
         </div>
       </footer>
     </div>
