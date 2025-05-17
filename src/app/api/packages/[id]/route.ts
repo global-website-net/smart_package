@@ -124,7 +124,7 @@ export async function PATCH(request: NextRequest) {
   }
 }
 
-export async function GET(req: NextRequest, context: { params: { id: string } }) {
+export async function GET(req: NextRequest, context: any) {
   const { id } = context.params;
   if (!id) {
     return NextResponse.json({ error: 'Missing id' }, { status: 400 });
