@@ -26,6 +26,7 @@ interface Package {
   updatedAt: string;
   User: Shop;
   customs: number | null;
+  customs_payment: number | null;
   paymentStatus: string | null;
 }
 
@@ -34,6 +35,34 @@ const STATUS_STEPS = [
   { key: "CUSTOMS", label: "جمارك", icon: "/images/customs_hex_icon.png" },
   { key: "DELIVERING_TO_SHOP", label: "قيد التوصيل", icon: "/images/delivery_hex_icon.png" },
 ];
+
+// Status text mapping
+function getStatusText(status: string) {
+  switch (status) {
+    case 'AWAITING_PAYMENT':
+      return 'في انتظار الدفع';
+    case 'PREPARING':
+      return 'قيد التحضير';
+    case 'DELIVERING_TO_SHOP':
+      return 'قيد التوصيل للمتجر';
+    case 'IN_SHOP':
+      return 'في المتجر';
+    case 'RECEIVED':
+      return 'تم الاستلام';
+    case 'PENDING':
+      return 'قيد الانتظار';
+    case 'IN_TRANSIT':
+      return 'قيد الشحن';
+    case 'DELIVERED':
+      return 'تم التسليم';
+    case 'CANCELLED':
+      return 'ملغي';
+    case 'RETURNED':
+      return 'تم الإرجاع';
+    default:
+      return status;
+  }
+}
 
 export default function PackageDetailsPage() {
   const router = useRouter();
@@ -72,6 +101,7 @@ export default function PackageDetailsPage() {
             ...data,
             User: data.shop || { fullName: "غير محدد", email: "" },
             customs: data.customs ?? 0,
+            customs_payment: data.customs_payment ?? 0,
             paymentStatus: data.paymentStatus ?? "",
           });
           setShopEdit(data.shopId);
@@ -162,7 +192,7 @@ export default function PackageDetailsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <main className="max-w-3xl mx-auto px-4 py-10 mt-[70px]">
+      <main className="max-w-2xl mx-auto px-4 py-10 mt-[70px]">
         {/* Title and underline */}
         <h1 className="text-3xl font-bold text-center mb-2 mt-0">تفاصيل الطرد</h1>
         <div className="flex justify-center items-center mb-8">
@@ -171,41 +201,52 @@ export default function PackageDetailsPage() {
             <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
           </div>
         </div>
-        {/* Card with package info */}
-        <div className="bg-white rounded-xl shadow-md p-6 flex flex-col md:flex-row items-center justify-between mb-8">
-          <div className="flex-1 flex flex-col gap-2 items-start md:items-end">
-            <div className="flex items-center text-lg font-bold">
+        {/* Top Card: Icon | Vertical Line | Info */}
+        <div className="flex flex-row items-center justify-between bg-white rounded-xl shadow-md p-6 mb-8 gap-4">
+          {/* Right: Package Icon */}
+          <div className="flex-shrink-0 flex flex-col items-center justify-center">
+            <img src="/images/package_icon.png" alt="Package Icon" className="w-20 h-20" />
+          </div>
+          {/* Middle: Vertical Line */}
+          <div className="h-24 w-px bg-black mx-4" />
+          {/* Left: Info */}
+          <div className="flex flex-col items-start justify-center flex-1">
+            <div className="flex items-center text-xl font-bold mb-1">
               <span>طرد</span>
               <span className="mx-2">|</span>
-              <span className="ltr:font-mono rtl:font-mono">#{pkg.trackingNumber}</span>
+              <span className="font-mono">{pkg.trackingNumber}</span>
             </div>
-            <div className="text-gray-700 font-mono">RS{pkg.trackingNumber}</div>
-            <div className="flex items-center gap-2 text-gray-500 text-sm">
-              <Image src="/images/calendar_icon.png" alt="تاريخ الإنشاء" width={20} height={20} />
-              <span>{new Date(pkg.createdAt).toLocaleDateString("en-US")}</span>
-            </div>
-          </div>
-          <div className="flex-1 flex justify-center">
-            <Image src="/images/package_icon.png" alt="Package Icon" width={100} height={100} />
+            <div className="text-gray-700 font-mono text-lg">RS{pkg.trackingNumber}</div>
+            <div className="text-black font-mono text-base mt-2">{new Date(pkg.createdAt).toLocaleDateString('en-GB')}</div>
           </div>
         </div>
-        {/* Progress/status section */}
-        <div className="flex flex-row justify-between items-center mb-8 px-2">
-          {progressSteps.map((step, idx) => (
-            <div key={idx} className="flex flex-col items-center flex-1">
-              <Image src={step.icon} alt={step.label} width={56} height={56} className={step.active ? "opacity-100" : "opacity-30"} />
-              <div className={`mt-2 text-center text-base font-bold ${step.active ? "text-black" : "text-gray-400"}`}>{step.label}</div>
-            </div>
-          ))}
+        {/* Green Divider */}
+        <div className="w-full h-0.5 bg-green-500 mb-8" />
+        {/* Status Row: Truck | Receipt | Price Tag */}
+        <div className="flex flex-row items-end justify-between mb-8 gap-4">
+          {/* Right: Truck Icon + Status */}
+          <div className="flex flex-col items-center flex-1">
+            <img src="/images/truck_icon.png" alt="Truck Icon" className="w-16 h-16 mb-2" />
+            <div className="text-black text-lg font-bold mt-1">{getStatusText(pkg.status)}</div>
+          </div>
+          {/* Middle: Receipt Icon + Customs Payment */}
+          <div className="flex flex-col items-center flex-1">
+            <img src="/images/receipt_icon.png" alt="Receipt Icon" className="w-16 h-16 mb-2" />
+            <div className="text-black text-lg font-bold mt-1">{(pkg.customs_payment ?? 0).toFixed(2)}₪ جمرك</div>
+          </div>
+          {/* Left: Price Tag Hexagon Icon */}
+          <div className="flex flex-col items-center flex-1">
+            <img src="/images/price_tag_hexagon.png" alt="Price Tag Hexagon" className="w-16 h-16 mb-2" />
+          </div>
         </div>
-        {/* Shop info and selection */}
-        <div className="flex flex-col items-center mb-8">
-          <Image src="/images/shop_icon.png" alt="Shop Icon" width={60} height={60} />
-          <div className="mt-2 text-lg font-bold">{pkg.User?.fullName || "غير محدد"}</div>
-          <div className="mt-4 w-full max-w-xs">
-            <label className="block mb-2 text-sm font-medium text-gray-700">اختيار المتجر</label>
+        {/* Green Divider */}
+        <div className="w-full h-0.5 bg-green-500 mb-8" />
+        {/* Shop Section: Market Icon, Dropdown, Save Button */}
+        <div className="flex flex-col items-center justify-center mb-8">
+          <img src="/images/market_icon.png" alt="Market Icon" className="w-20 h-20 mb-4" />
+          <div className="w-full max-w-xs">
             <select
-              className="w-full p-2 border rounded text-right"
+              className="w-full p-2 border rounded text-right mb-2"
               value={shopEdit}
               onChange={e => setShopEdit(e.target.value)}
               disabled={savingShop}
@@ -215,22 +256,25 @@ export default function PackageDetailsPage() {
               ))}
             </select>
             <Button
-              className="mt-2 w-full"
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-bold"
               onClick={handleShopChange}
               disabled={savingShop || shopEdit === pkg.shopId}
             >
-              {savingShop ? "...جارٍ الحفظ" : "حفظ المتجر"}
+              {savingShop ? "...جارٍ الحفظ" : "حفظ التغييرات"}
             </Button>
           </div>
         </div>
-        {/* Call to Action (optional) */}
-        {/* <div className="flex justify-center mt-8">
-          <Button className="bg-green-500 text-white px-8 py-3 rounded-full">Call To Action</Button>
-        </div> */}
       </main>
       {/* Bottom Banner/Footer */}
       <footer className="w-full bg-white border-t border-gray-200 py-4 px-6 mt-8 flex flex-col md:flex-row items-center justify-between gap-4 fixed bottom-0 left-0 z-50">
-        {/* Right side: phone and email */}
+        {/* Right side: privacy and return policy */}
+        <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 rtl:flex-row-reverse">
+          <span className="text-gray-700 font-semibold cursor-pointer hover:underline">سياسة الخصوصية</span>
+          <span className="text-gray-700 font-semibold cursor-pointer hover:underline">سياسة الترجيع</span>
+        </div>
+        {/* Center: (empty for now, can add logo or label if needed) */}
+        <div className="flex-1"></div>
+        {/* Left side: phone and email */}
         <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 rtl:flex-row-reverse">
           <span className="flex items-center gap-1 text-gray-700 font-semibold">
             <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm0 12a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2zm12-12a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zm0 12a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
@@ -240,13 +284,6 @@ export default function PackageDetailsPage() {
             <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12H8m8 0a4 4 0 11-8 0 4 4 0 018 0zm0 0v1a4 4 0 01-4 4H8a4 4 0 01-4-4v-1" /></svg>
             someone@example.com
           </span>
-        </div>
-        {/* Center: (empty for now, can add logo or label if needed) */}
-        <div className="flex-1"></div>
-        {/* Left side: privacy and return policy */}
-        <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 rtl:flex-row-reverse">
-          <span className="text-gray-700 font-semibold cursor-pointer hover:underline">سياسة الخصوصية</span>
-          <span className="text-gray-700 font-semibold cursor-pointer hover:underline">سياسة الترجيع</span>
         </div>
       </footer>
     </div>
