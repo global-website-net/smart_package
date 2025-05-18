@@ -506,7 +506,7 @@ export default function AccountPage() {
       {/* Delete Account Confirmation Modal */}
       <Dialog open={showDeleteModal} onClose={() => { setShowDeleteModal(false); setDeleteRequested(false); }} className="fixed z-50 inset-0 overflow-y-auto">
         <div className="flex items-center justify-center min-h-screen px-4">
-          <Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
+          <div className="fixed inset-0 bg-black opacity-30" />
           <div className="relative bg-white rounded-lg shadow-lg max-w-md w-full mx-auto p-6 z-10">
             {!deleteRequested ? (
               <>
