@@ -45,6 +45,7 @@ export default function AccountPage() {
   const [error, setError] = useState('')
   const [isEditing, setIsEditing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [shops, setShops] = useState<Array<{ id: string; name: string }>>([])
   const [formData, setFormData] = useState({
     fullName: '',
     governorate: '',
@@ -53,7 +54,8 @@ export default function AccountPage() {
     phoneNumber: '',
     currentPassword: '',
     newPassword: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    shopId: ''
   })
   const [updateSuccess, setUpdateSuccess] = useState('')
   const [updateError, setUpdateError] = useState('')
@@ -104,7 +106,6 @@ export default function AccountPage() {
           const userData = await response.json()
 
           if (userData) {
-            // Update profile state
             setProfile({
               id: userData.id,
               email: userData.email,
@@ -117,7 +118,6 @@ export default function AccountPage() {
               createdAt: userData.createdAt
             })
 
-            // Update form data
             setFormData(prev => ({
               ...prev,
               fullName: userData.fullName || '',
@@ -125,12 +125,20 @@ export default function AccountPage() {
               town: userData.town || '',
               phonePrefix: userData.phonePrefix || '',
               phoneNumber: userData.phoneNumber || '',
+              shopId: userData.shopId || '',
               currentPassword: '',
               newPassword: '',
               confirmPassword: ''
             }))
-          } else {
-            setError('لم يتم العثور على بيانات المستخدم')
+          }
+
+          // Fetch shops if user is REGULAR
+          if (session.user.role === 'REGULAR') {
+            const shopsResponse = await fetch('/api/shops')
+            if (shopsResponse.ok) {
+              const shopsData = await shopsResponse.json()
+              setShops(shopsData)
+            }
           }
         } catch (err) {
           console.error('Error in fetchProfile:', err)
@@ -293,69 +301,72 @@ export default function AccountPage() {
         
         <main className="p-4 mt-20">
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold mb-6">الحساب الشخصي</h1>
-              <div className="flex justify-center items-center mb-8">
-                <div className="relative w-72 sm:w-64 md:w-80">
-                  <div className="w-full h-0.5 bg-green-500"></div>
-                  <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
+            {/* Profile Section */}
+            <div className="flex justify-end items-center mb-8">
+              <div className="flex items-center gap-4">
+                {/* Hex Icons Stack */}
+                <div className="flex flex-col items-center gap-4">
+                  <Link href="/tracking_packages_user" className="group">
+                    <div className="w-16 h-16 relative">
+                      <Image 
+                        src="/images/package_hex_icon.png" 
+                        alt="تتبع الطرود" 
+                        width={64} 
+                        height={64}
+                        className="transition-transform group-hover:scale-110"
+                      />
+                    </div>
+                    <span className="text-sm text-gray-700 mt-1 block text-center">تتبع الطرود</span>
+                  </Link>
+                  <Link href="/wallet" className="group">
+                    <div className="w-16 h-16 relative">
+                      <Image 
+                        src="/images/wallet_hex_icon.png" 
+                        alt="المحفظة" 
+                        width={64} 
+                        height={64}
+                        className="transition-transform group-hover:scale-110"
+                      />
+                    </div>
+                    <span className="text-sm text-gray-700 mt-1 block text-center">المحفظة</span>
+                  </Link>
+                  <Link href="/tracking_orders_regular" className="group">
+                    <div className="w-16 h-16 relative">
+                      <Image 
+                        src="/images/shopping_bag_hex_icon.png" 
+                        alt="تتبع الطلبات" 
+                        width={64} 
+                        height={64}
+                        className="transition-transform group-hover:scale-110"
+                      />
+                    </div>
+                    <span className="text-sm text-gray-700 mt-1 block text-center">تتبع الطلبات</span>
+                  </Link>
+                </div>
+                
+                {/* Vertical Line */}
+                <div className="h-48 w-0.5 bg-gray-300"></div>
+                
+                {/* Profile Icon */}
+                <div className="w-16 h-16 relative">
+                  <Image 
+                    src="/images/profile_hex_icon.png" 
+                    alt="الملف الشخصي" 
+                    width={64} 
+                    height={64}
+                    className="cursor-pointer"
+                  />
                 </div>
               </div>
-              
-              {/* Only show icons for REGULAR users */}
-              {isRegularUser && (
-                <div className="flex flex-col items-center my-8 md:hidden">
-                  <div className="flex justify-center items-center gap-8">
-                    {/* Package Icon - Right */}
-                    <Link href="/tracking_packages_user" className="flex flex-col items-center">
-                      <div className="w-16 h-16 flex items-center justify-center">
-                        <Image 
-                          src="/images/package_hex_icon.png" 
-                          alt="تتبع الطرود" 
-                          width={64} 
-                          height={64}
-                          className="cursor-pointer hover:opacity-80 transition-opacity"
-                        />
-                      </div>
-                      <span className="text-sm text-gray-700 mt-2">تتبع الطرود</span>
-                    </Link>
-
-                    {/* Wallet Icon - Middle */}
-                    <Link href="/wallet" className="flex flex-col items-center">
-                      <div className="w-16 h-16 flex items-center justify-center">
-                        <Image 
-                          src="/images/wallet_hex_icon.png" 
-                          alt="المحفظة" 
-                          width={64} 
-                          height={64}
-                          className="cursor-pointer hover:opacity-80 transition-opacity"
-                        />
-                      </div>
-                      <span className="text-sm text-gray-700 mt-2">المحفظة</span>
-                    </Link>
-
-                    {/* Shopping Bag Icon - Left */}
-                    <Link href="/tracking_orders_regular" className="flex flex-col items-center">
-                      <div className="w-16 h-16 flex items-center justify-center">
-                        <Image 
-                          src="/images/shopping_bag_hex_icon.png" 
-                          alt="تتبع الطلبات" 
-                          width={64} 
-                          height={64}
-                          className="cursor-pointer hover:opacity-80 transition-opacity"
-                        />
-                      </div>
-                      <span className="text-sm text-gray-700 mt-2">تتبع الطلبات</span>
-                    </Link>
-                  </div>
-                  
-                  {/* Single continuous green line under all icons */}
-                  <div className="w-64 h-0.5 bg-green-500 mt-3"></div>
-                </div>
-              )}
             </div>
 
-            <div className="bg-white rounded-lg shadow-md p-6">
+            {/* Green Divider */}
+            <div className="w-full h-0.5 bg-green-500 mb-8"></div>
+
+            {/* Form Section */}
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h1 className="text-3xl font-bold text-center mb-8">الملف الشخصي</h1>
+
               {error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                   {error}
@@ -377,7 +388,7 @@ export default function AccountPage() {
               {isLoading ? (
                 <div className="text-center py-8">جاري التحميل...</div>
               ) : (
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-gray-700 mb-2">البريد الإلكتروني</label>
@@ -401,7 +412,7 @@ export default function AccountPage() {
                       />
                     </div>
 
-                    {!isAdminOrOwner && (
+                    {isRegularUser && (
                       <>
                         <div>
                           <label className="block text-gray-700 mb-2">المحافظة</label>
@@ -412,6 +423,7 @@ export default function AccountPage() {
                             disabled={!isEditing}
                             className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
                           >
+                            <option value="">اختر المحافظة</option>
                             {governorates.map((gov) => (
                               <option key={gov} value={gov}>{gov}</option>
                             ))}
@@ -429,119 +441,130 @@ export default function AccountPage() {
                             className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
                           />
                         </div>
+
+                        <div>
+                          <label className="block text-gray-700 mb-2">اختيار المتجر</label>
+                          <select
+                            name="shopId"
+                            value={formData.shopId}
+                            onChange={handleInputChange}
+                            disabled={!isEditing}
+                            className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
+                          >
+                            <option value="">اختر المتجر</option>
+                            {shops.map((shop) => (
+                              <option key={shop.id} value={shop.id}>{shop.name}</option>
+                            ))}
+                          </select>
+                        </div>
                       </>
                     )}
 
                     <div>
                       <label className="block text-gray-700 mb-2">رقم الهاتف</label>
-                      <input
-                        type="text"
-                        name="phoneNumber"
-                        value={isEditing ? formData.phoneNumber : profile?.phoneNumber || ''}
-                        onChange={handleInputChange}
-                        disabled={!isEditing}
-                        className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
-                      />
+                      <div className="flex gap-2">
+                        <select
+                          name="phonePrefix"
+                          value={formData.phonePrefix}
+                          onChange={handleInputChange}
+                          disabled={!isEditing}
+                          className={`w-24 p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
+                        >
+                          {phonePrefixes.map((prefix) => (
+                            <option key={prefix} value={prefix}>{prefix}</option>
+                          ))}
+                        </select>
+                        <input
+                          type="text"
+                          name="phoneNumber"
+                          value={formData.phoneNumber}
+                          onChange={handleInputChange}
+                          disabled={!isEditing}
+                          className={`flex-1 p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
+                        />
+                      </div>
                     </div>
-
-                    <div>
-                      <label className="block text-gray-700 mb-2">رمز الهاتف</label>
-                      <select
-                        name="phonePrefix"
-                        value={isEditing ? formData.phonePrefix : profile?.phonePrefix || ''}
-                        onChange={handleInputChange}
-                        disabled={!isEditing}
-                        className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
-                      >
-                        {phonePrefixes.map((prefix) => (
-                          <option key={prefix} value={prefix}>{prefix}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {isEditing && (
-                      <>
-                        <div>
-                          <label className="block text-gray-700 mb-2">كلمة المرور الحالية</label>
-                          <input
-                            type="password"
-                            name="currentPassword"
-                            value={formData.currentPassword}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-gray-700 mb-2">كلمة المرور الجديدة (اختياري)</label>
-                          <input
-                            type="password"
-                            name="newPassword"
-                            value={formData.newPassword}
-                            onChange={handleInputChange}
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-gray-700 mb-2">تأكيد كلمة المرور الجديدة</label>
-                          <input
-                            type="password"
-                            name="confirmPassword"
-                            value={formData.confirmPassword}
-                            onChange={handleInputChange}
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                          />
-                        </div>
-                      </>
-                    )}
                   </div>
 
-                  {!isEditing && (
-                    <div className="flex justify-center gap-4 mt-6">
-                      <button
-                        onClick={handleEditClick}
-                        className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
-                      >
-                        تعديل الملف الشخصي
-                      </button>
-                      
-                      {/* Show delete button beside edit button for REGULAR users */}
-                      {isRegularUser && (
-                        <button
-                          type="button"
-                          onClick={() => setShowDeleteModal(true)}
-                          className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
-                          disabled={isDeleting}
-                        >
-                          {isDeleting ? 'جاري الحذف...' : 'حذف الحساب'}
-                        </button>
-                      )}
+                  {isEditing && (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-gray-700 mb-2">كلمة المرور الحالية</label>
+                        <input
+                          type="password"
+                          name="currentPassword"
+                          value={formData.currentPassword}
+                          onChange={handleInputChange}
+                          required
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-gray-700 mb-2">كلمة المرور الجديدة (اختياري)</label>
+                        <input
+                          type="password"
+                          name="newPassword"
+                          value={formData.newPassword}
+                          onChange={handleInputChange}
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-gray-700 mb-2">تأكيد كلمة المرور الجديدة</label>
+                        <input
+                          type="password"
+                          name="confirmPassword"
+                          value={formData.confirmPassword}
+                          onChange={handleInputChange}
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                        />
+                      </div>
                     </div>
                   )}
 
-                  {isEditing && (
-                    <div className="flex justify-center items-center mt-6">
-                      <div className="flex gap-4 rtl:space-x-reverse">
+                  <div className="flex justify-center gap-4 mt-8">
+                    {!isEditing ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={handleEditClick}
+                          className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 transition-colors"
+                        >
+                          تعديل الملف الشخصي
+                        </button>
+                        {isRegularUser && (
+                          <button
+                            type="button"
+                            onClick={() => setShowDeleteModal(true)}
+                            className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors"
+                            disabled={isDeleting}
+                          >
+                            {isDeleting ? 'جاري الحذف...' : 'حذف الحساب'}
+                          </button>
+                        )}
+                      </>
+                    ) : (
+                      <div className="flex gap-4">
                         <button
                           type="button"
                           onClick={handleCancelEdit}
-                          className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                          className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition-colors"
                           disabled={isSubmitting}
                         >
                           إلغاء
                         </button>
                         <button
                           type="submit"
-                          className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                          className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 transition-colors"
                           disabled={isSubmitting}
                         >
                           {isSubmitting ? 'جاري الحفظ...' : 'حفظ التغييرات'}
                         </button>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </form>
               )}
             </div>
@@ -556,16 +579,16 @@ export default function AccountPage() {
               <p className="text-gray-600 mb-6">
                 هل أنت متأكد من رغبتك في حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.
               </p>
-              <div className="flex justify-center space-x-4 rtl:space-x-reverse mt-6 gap-4">
+              <div className="flex justify-center gap-4">
                 <button
                   onClick={() => setShowDeleteModal(false)}
-                  className="bg-gray-300 text-gray-800 px-6 py-2 rounded-md hover:bg-gray-400 transition-colors space-x-20"
+                  className="bg-gray-300 text-gray-800 px-6 py-2 rounded-md hover:bg-gray-400 transition-colors"
                 >
                   إلغاء
                 </button>
                 <button
                   onClick={handleDeleteAccount}
-                  className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors space-x-20"
+                  className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors"
                   disabled={isDeleting}
                 >
                   {isDeleting ? 'جاري الحذف...' : 'تأكيد الحذف'}

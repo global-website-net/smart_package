@@ -196,42 +196,21 @@ export default function OrderDetailsPage() {
             <img src="/images/shopping_bag_icon.png" alt="Order Icon" className="w-16 h-16 mb-2" />
             <div className="text-black text-lg font-bold mt-1">{getOrderStatusText(order.status)}</div>
           </div>
-          {/* Middle: Delivery Icon */}
+          {/* Middle: Market Icon above Shop Name */}
           <div className="flex flex-col items-center justify-end flex-1">
+            <img src="/images/market_icon.png" alt="Market Icon" className="w-12 h-12 mb-1" />
             <img src="/images/delivery_hex_icon.png" alt="Delivery Icon" className="w-16 h-16 mb-2" />
             <div className="text-black text-lg font-bold mt-1">{order.purchaseSite}</div>
           </div>
-          {/* Left: Payment Icon */}
+          {/* Left: Price Tag Hexagon above Payment Icon and Amount */}
           <div className="flex flex-col items-center justify-end flex-1">
+            <img src="/images/price_tag_hexagon.png" alt="Price Tag Hexagon" className="w-12 h-12 mb-1" />
             <img src="/images/payment_hex_icon.png" alt="Payment Icon" className="w-16 h-16 mb-2" />
             <div className="text-black text-lg font-bold mt-1">{order.totalAmount.toFixed(2)}₪</div>
           </div>
         </div>
         {/* Green Divider */}
         <div className="w-full h-0.5 bg-green-500 mb-8" />
-        {/* Shop Section: Market Icon, Dropdown, Save Button */}
-        <div className="flex flex-col items-center justify-center mb-8">
-          <img src="/images/market_icon.png" alt="Market Icon" className="w-20 h-20 mb-4" />
-          <div className="w-full max-w-xs">
-            <select
-              className="w-full p-2 border rounded text-right mb-2"
-              value={shopEdit}
-              onChange={e => setShopEdit(e.target.value)}
-              disabled={savingShop}
-            >
-              {shops.map(shop => (
-                <option key={shop.id} value={shop.id}>{shop.fullName}</option>
-              ))}
-            </select>
-            <Button
-              className="w-full bg-green-600 hover:bg-green-700 text-white"
-              onClick={handleShopChange}
-              disabled={savingShop || shopEdit === order.shopId}
-            >
-              {savingShop ? "...جارٍ الحفظ" : "حفظ التغييرات"}
-            </Button>
-          </div>
-        </div>
       </main>
     </div>
   );

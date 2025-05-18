@@ -11,16 +11,10 @@ export default function Footer() {
       style={{ backgroundImage: "url('/images/bottom_banner.png')" }}
     >
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
-        {/* Right Side (was Left) */}
+        {/* Right Side: privacy and return policy */}
         <div className="flex flex-col items-end gap-2 md:w-1/3">
-          <div className="flex items-center gap-2">
-            <span className="inline-block w-6 h-6 bg-[url('/images/phone_icon.png')] bg-contain bg-center bg-no-repeat" />
-            <span className="text-lg font-bold">999-999-9999</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="inline-block w-6 h-6 bg-[url('/images/email_icon.png')] bg-contain bg-center bg-no-repeat" />
-            <span className="text-lg font-bold">someone@example.com</span>
-          </div>
+          <span className="text-lg font-bold">سياسة الخصوصية</span>
+          <span className="text-lg font-bold">سياسة الترجيع</span>
         </div>
         {/* Center */}
         <div className="flex flex-col items-center gap-2 md:w-1/3">
@@ -31,10 +25,16 @@ export default function Footer() {
             </Link>
           )}
         </div>
-        {/* Left Side (was Right) */}
+        {/* Left Side: phone and email */}
         <div className="flex flex-col items-start gap-2 md:w-1/3">
-          <span className="text-lg font-bold">سياسة الخصوصية</span>
-          <span className="text-lg font-bold">سياسة الترجيع</span>
+          <div className="flex items-center gap-2">
+            <span className="inline-block w-6 h-6 bg-[url('/images/phone_icon.png')] bg-contain bg-center bg-no-repeat" />
+            <span className="text-lg font-bold">999-999-9999</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="inline-block w-6 h-6 bg-[url('/images/email_icon.png')] bg-contain bg-center bg-no-repeat" />
+            <span className="text-lg font-bold">someone@example.com</span>
+          </div>
         </div>
       </div>
     </footer>
