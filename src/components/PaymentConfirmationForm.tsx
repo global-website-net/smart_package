@@ -101,7 +101,7 @@ export default function PaymentConfirmationForm({
           {error}
           {error === 'رصيد غير كافي في المحفظة' && (
             <span
-              className="mr-4 text-gray-700 underline cursor-pointer hover:text-gray-900"
+              className="mr-4 text-gray-700 cursor-pointer hover:text-gray-900"
               onClick={() => router.push('/wallet/')}
             >
               (إضافة رصيد)

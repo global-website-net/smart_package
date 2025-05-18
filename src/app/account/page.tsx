@@ -62,6 +62,7 @@ export default function AccountPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [passwordError, setPasswordError] = useState('')
   const router = useRouter()
 
   const isAdminOrOwner = session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER'
@@ -195,11 +196,12 @@ export default function AccountPage() {
     e.preventDefault()
     setUpdateSuccess('')
     setUpdateError('')
+    setPasswordError('')
     setIsSubmitting(true)
 
     // Validate current password if we're submitting changes
     if (formData.currentPassword === '') {
-      setUpdateError('كلمة المرور الحالية مطلوبة للتعديل')
+      setPasswordError('كلمة المرور الحالية مطلوبة للتعديل')
       setIsSubmitting(false)
       return
     }
@@ -207,7 +209,7 @@ export default function AccountPage() {
     // Validate passwords if changing password
     if (formData.newPassword) {
       if (formData.newPassword !== formData.confirmPassword) {
-        setUpdateError('كلمات المرور الجديدة غير متطابقة')
+        setPasswordError('كلمات المرور الجديدة غير متطابقة')
         setIsSubmitting(false)
         return
       }
@@ -233,7 +235,7 @@ export default function AccountPage() {
       if (!response.ok) {
         const errorData = await response.json()
         if (errorData.error === 'Invalid password' || errorData.error === 'كلمة المرور الحالية غير صحيحة') {
-          setUpdateError('كلمة المرور غير صحيحة')
+          setPasswordError('كلمة المرور غير صحيحة')
           setIsSubmitting(false)
           return
         }
@@ -295,8 +297,8 @@ export default function AccountPage() {
         </div>
       </div>
       {/* Profile & Navigation Section */}
-      <div className="flex flex-row justify-center items-center w-full max-w-2xl mb-8">
-        {/* Left: Profile Icon */}
+      <div className="flex flex-row-reverse justify-center items-center w-full max-w-2xl mb-8">
+        {/* Profile Icon (right side) */}
         <div className="flex-1 flex justify-center">
           <div className="w-32 h-32 rounded-full bg-gray-400 flex items-center justify-center">
             <Image src="/images/profile_icon.png" alt="الملف الشخصي" width={80} height={80} />
@@ -304,22 +306,22 @@ export default function AccountPage() {
         </div>
         {/* Vertical Line */}
         <div className="h-24 w-px bg-black mx-4"></div>
-        {/* Right: Navigation Icons */}
-        <div className="flex flex-col items-center mr-8">
-          <Link href="/tracking_packages_user" className="group mb-6">
-            <div className="w-12 h-12 mb-1">
+        {/* Navigation Icons (left side, vertical, right-aligned) */}
+        <div className="flex flex-col items-end ml-8">
+          <Link href="/tracking_packages_user" className="group mb-6 flex flex-row-reverse items-center gap-2">
+            <div className="w-12 h-12 mb-1 flex items-center justify-center">
               <Image src="/images/package_hex_icon.png" alt="تتبع الرزم" width={48} height={48} />
             </div>
             <span className="text-sm text-gray-700">تتبع الرزم</span>
           </Link>
-          <Link href="/wallet" className="group mb-6">
-            <div className="w-12 h-12 mb-1">
+          <Link href="/wallet" className="group mb-6 flex flex-row-reverse items-center gap-2">
+            <div className="w-12 h-12 mb-1 flex items-center justify-center">
               <Image src="/images/wallet_hex_icon.png" alt="المحفظة" width={48} height={48} />
             </div>
             <span className="text-sm text-gray-700">المحفظة</span>
           </Link>
-          <Link href="/tracking_orders_regular" className="group">
-            <div className="w-12 h-12 mb-1">
+          <Link href="/tracking_orders_regular" className="group flex flex-row-reverse items-center gap-2">
+            <div className="w-12 h-12 mb-1 flex items-center justify-center">
               <Image src="/images/shopping_bag_hex_icon.png" alt="تتبع الطلبات" width={48} height={48} />
             </div>
             <span className="text-sm text-gray-700">تتبع الطلبات</span>
@@ -334,44 +336,131 @@ export default function AccountPage() {
         </div>
       </div>
       {/* Form Section */}
-      <form className="w-full max-w-lg flex flex-col gap-6 items-end">
+      <form onSubmit={handleSubmit} className="w-full max-w-lg flex flex-col gap-6 items-end">
         <div className="w-full">
           <label className="block text-gray-700 mb-1 pr-2">الاسم</label>
-          <input type="text" name="fullName" value={formData.fullName} onChange={handleInputChange} className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right" />
+          <input 
+            type="text" 
+            name="fullName" 
+            value={formData.fullName} 
+            onChange={handleInputChange} 
+            disabled={!isEditing}
+            className={`w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none text-right ${
+              !isEditing ? 'bg-gray-100' : 'bg-transparent'
+            }`} 
+          />
         </div>
         <div className="w-full">
           <label className="block text-gray-700 mb-1 pr-2">رقم المشترك</label>
-          <input type="text" name="id" value={profile?.id || ''} disabled className="w-full border-0 border-b-2 border-gray-300 bg-gray-100 text-right" />
+          <input 
+            type="text" 
+            name="id" 
+            value={profile?.id || ''} 
+            disabled 
+            className="w-full border-0 border-b-2 border-gray-300 bg-gray-100 text-right" 
+          />
         </div>
         <div className="w-full">
           <label className="block text-gray-700 mb-1 pr-2">المحافظة</label>
-          <input type="text" name="governorate" value={formData.governorate} onChange={handleInputChange} className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right" />
-        </div>
-        <div className="w-full">
-          <label className="block text-gray-700 mb-1 pr-2">رقم الهاتف</label>
-          <input type="text" name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right" />
-        </div>
-        <div className="w-full">
-          <label className="block text-gray-700 mb-1 pr-2">البريد الإلكتروني</label>
-          <input type="email" name="email" value={profile?.email || ''} disabled className="w-full border-0 border-b-2 border-gray-300 bg-gray-100 text-right" />
-        </div>
-        <div className="w-full">
-          <label className="block text-gray-700 mb-1 pr-2">كلمة المرور</label>
-          <input type="password" name="currentPassword" value={formData.currentPassword} onChange={handleInputChange} className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right" />
-        </div>
-        <div className="w-full">
-          <label className="block text-gray-700 mb-1 pr-2">اختيار المتجر</label>
-          <select name="shopId" value={formData.shopId} onChange={handleInputChange} className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right">
-            <option value="">اختر المتجر</option>
-            {shops.map(shop => (
-              <option key={shop.id} value={shop.id}>{shop.name}</option>
+          <select 
+            name="governorate" 
+            value={formData.governorate} 
+            onChange={handleInputChange} 
+            disabled={!isEditing}
+            className={`w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none text-right ${
+              !isEditing ? 'bg-gray-100' : 'bg-transparent'
+            }`}
+          >
+            <option value="">اختر المحافظة</option>
+            {governorates.map((gov) => (
+              <option key={gov} value={gov}>{gov}</option>
             ))}
           </select>
         </div>
+        <div className="w-full">
+          <label className="block text-gray-700 mb-1 pr-2">رقم الهاتف</label>
+          <input 
+            type="text" 
+            name="phoneNumber" 
+            value={formData.phoneNumber} 
+            onChange={handleInputChange} 
+            disabled={!isEditing}
+            className={`w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none text-right ${
+              !isEditing ? 'bg-gray-100' : 'bg-transparent'
+            }`} 
+          />
+        </div>
+        <div className="w-full">
+          <label className="block text-gray-700 mb-1 pr-2">البريد الإلكتروني</label>
+          <input 
+            type="email" 
+            name="email" 
+            value={profile?.email || ''} 
+            disabled 
+            className="w-full border-0 border-b-2 border-gray-300 bg-gray-100 text-right" 
+          />
+        </div>
+        {isEditing && (
+          <>
+            <div className="w-full">
+              <label className="block text-gray-700 mb-1 pr-2">كلمة المرور الحالية</label>
+              <input 
+                type="password" 
+                name="currentPassword" 
+                value={formData.currentPassword} 
+                onChange={handleInputChange} 
+                className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right" 
+              />
+              {passwordError && (
+                <p className="text-red-500 text-sm mt-1">{passwordError}</p>
+              )}
+            </div>
+            <div className="w-full">
+              <label className="block text-gray-700 mb-1 pr-2">كلمة المرور الجديدة (اختياري)</label>
+              <input 
+                type="password" 
+                name="newPassword" 
+                value={formData.newPassword} 
+                onChange={handleInputChange} 
+                className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right" 
+              />
+            </div>
+            <div className="w-full">
+              <label className="block text-gray-700 mb-1 pr-2">تأكيد كلمة المرور الجديدة</label>
+              <input 
+                type="password" 
+                name="confirmPassword" 
+                value={formData.confirmPassword} 
+                onChange={handleInputChange} 
+                className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right" 
+              />
+            </div>
+          </>
+        )}
+        {isRegularUser && (
+          <div className="w-full">
+            <label className="block text-gray-700 mb-1 pr-2">اختيار المتجر</label>
+            <select 
+              name="shopId" 
+              value={formData.shopId} 
+              onChange={handleInputChange} 
+              disabled={!isEditing}
+              className={`w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none text-right ${
+                !isEditing ? 'bg-gray-100' : 'bg-transparent'
+              }`}
+            >
+              <option value="">اختر المتجر</option>
+              {shops.map(shop => (
+                <option key={shop.id} value={shop.id}>{shop.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
         {/* Action Buttons */}
-        <div className="flex justify-center gap-4 mt-8">
+        <div className="flex gap-4 mt-4">
           {!isEditing ? (
             <button
+              type="button"
               onClick={handleEditClick}
               className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
             >
@@ -380,6 +469,7 @@ export default function AccountPage() {
           ) : (
             <>
               <button
+                type="button"
                 onClick={handleCancelEdit}
                 className="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
               >
@@ -395,6 +485,7 @@ export default function AccountPage() {
             </>
           )}
           <button
+            type="button"
             onClick={() => setShowDeleteModal(true)}
             className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
           >

@@ -259,7 +259,11 @@ export default function PackageDetailsPage() {
               ))}
             </select>
             <Button
-              className="w-full bg-green-600 hover:bg-green-700 text-white"
+              className={`w-full ${
+                savingShop || shopEdit === pkg.shopId
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-green-600 hover:bg-green-700'
+              } text-white`}
               onClick={handleShopChange}
               disabled={savingShop || shopEdit === pkg.shopId}
             >
