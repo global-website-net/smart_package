@@ -10,6 +10,7 @@ import { toast } from 'react-hot-toast'
 import { Toaster } from 'react-hot-toast'
 import Link from 'next/link'
 import Image from 'next/image'
+import { Dialog } from '@headlessui/react'
 
 interface UserProfile {
   id: string
@@ -21,6 +22,7 @@ interface UserProfile {
   phonePrefix: string
   phoneNumber: string
   createdAt: string
+  shopId: string
 }
 
 // Extended session user type to include user_metadata
@@ -45,7 +47,7 @@ export default function AccountPage() {
   const [error, setError] = useState('')
   const [isEditing, setIsEditing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [shops, setShops] = useState<Array<{ id: string; name: string }>>([])
+  const [shops, setShops] = useState<Array<{ id: string; fullName: string }>>([])
   const [formData, setFormData] = useState({
     fullName: '',
     governorate: '',
@@ -60,6 +62,7 @@ export default function AccountPage() {
   const [updateSuccess, setUpdateSuccess] = useState('')
   const [updateError, setUpdateError] = useState('')
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteRequested, setDeleteRequested] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [passwordError, setPasswordError] = useState('')
@@ -116,7 +119,8 @@ export default function AccountPage() {
               town: userData.town || '',
               phonePrefix: userData.phonePrefix || '',
               phoneNumber: userData.phoneNumber || '',
-              createdAt: userData.createdAt
+              createdAt: userData.createdAt,
+              shopId: userData.shopId || '',
             })
 
             setFormData(prev => ({
@@ -135,7 +139,7 @@ export default function AccountPage() {
 
           // Fetch shops if user is REGULAR
           if (session.user.role === 'REGULAR') {
-            const shopsResponse = await fetch('/api/shops')
+            const shopsResponse = await fetch('/api/users/shops')
             if (shopsResponse.ok) {
               const shopsData = await shopsResponse.json()
               setShops(shopsData)
@@ -229,6 +233,7 @@ export default function AccountPage() {
           phoneNumber: formData.phoneNumber,
           currentPassword: formData.currentPassword,
           newPassword: formData.newPassword || undefined,
+          shopId: formData.shopId,
         }),
       })
 
@@ -284,8 +289,18 @@ export default function AccountPage() {
     }
   }
 
+  const handleConfirmDelete = async () => {
+    // Placeholder for sending email to admin
+    await fetch('/api/send-admin-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: profile?.email, adminEmail: 'someone@example.com' })
+    });
+    setDeleteRequested(true);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center" style={{ fontFamily: 'Dubai, sans-serif' }}>
       {/* Header Title */}
       <div className="w-full text-center mt-8">
         <h1 className="text-3xl font-bold">الحساب الشخصي</h1>
@@ -298,15 +313,7 @@ export default function AccountPage() {
       </div>
       {/* Profile & Navigation Section */}
       <div className="flex flex-row-reverse justify-center items-center w-full max-w-2xl mb-8">
-        {/* Profile Icon (right side) */}
-        <div className="flex-1 flex justify-center">
-          <div className="w-32 h-32 rounded-full bg-gray-400 flex items-center justify-center">
-            <Image src="/images/profile_icon.png" alt="الملف الشخصي" width={80} height={80} />
-          </div>
-        </div>
-        {/* Vertical Line */}
-        <div className="h-24 w-px bg-black mx-4"></div>
-        {/* Navigation Icons (left side, vertical, right-aligned) */}
+        {/* Navigation Icons (right side, vertical, right-aligned) */}
         <div className="flex flex-col items-end ml-8">
           <Link href="/tracking_packages_user" className="group mb-6 flex flex-row-reverse items-center gap-2">
             <div className="w-12 h-12 mb-1 flex items-center justify-center">
@@ -327,14 +334,15 @@ export default function AccountPage() {
             <span className="text-sm text-gray-700">تتبع الطلبات</span>
           </Link>
         </div>
-      </div>
-      {/* Green Divider */}
-      <div className="flex justify-center items-center mb-8">
-        <div className="relative w-56 sm:w-64 md:w-80">
-          <div className="w-full h-0.5 bg-green-500"></div>
-          <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
+        {/* Vertical Line */}
+        <div className="h-24 w-px bg-black mx-4"></div>
+        {/* Profile Icon (left side) */}
+        <div className="flex-1 flex justify-center">
+          <Image src="/images/profile_icon.png" alt="الملف الشخصي" width={80} height={80} />
         </div>
       </div>
+      {/* Green Divider */}
+      <div className="w-full h-0.5 bg-green-500 mb-8"></div>
       {/* Form Section */}
       <form onSubmit={handleSubmit} className="w-full max-w-lg flex flex-col gap-6 items-end">
         <div className="w-full">
@@ -451,21 +459,30 @@ export default function AccountPage() {
             >
               <option value="">اختر المتجر</option>
               {shops.map(shop => (
-                <option key={shop.id} value={shop.id}>{shop.name}</option>
+                <option key={shop.id} value={shop.id}>{shop.fullName}</option>
               ))}
             </select>
           </div>
         )}
         {/* Action Buttons */}
-        <div className="flex gap-4 mt-4">
+        <div className="flex gap-4 mt-8 mb-16 justify-center items-center w-full">
           {!isEditing ? (
-            <button
-              type="button"
-              onClick={handleEditClick}
-              className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-            >
-              تعديل التفاصيل
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={handleEditClick}
+                className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+              >
+                تعديل التفاصيل
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(true)}
+                className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+              >
+                حذف الحساب
+              </button>
+            </>
           ) : (
             <>
               <button
@@ -484,15 +501,47 @@ export default function AccountPage() {
               </button>
             </>
           )}
-          <button
-            type="button"
-            onClick={() => setShowDeleteModal(true)}
-            className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-          >
-            حذف الحساب
-          </button>
         </div>
       </form>
+      {/* Delete Account Confirmation Modal */}
+      <Dialog open={showDeleteModal} onClose={() => { setShowDeleteModal(false); setDeleteRequested(false); }} className="fixed z-50 inset-0 overflow-y-auto">
+        <div className="flex items-center justify-center min-h-screen px-4">
+          <Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
+          <div className="relative bg-white rounded-lg shadow-lg max-w-md w-full mx-auto p-6 z-10">
+            {!deleteRequested ? (
+              <>
+                <Dialog.Title className="text-lg font-bold mb-4 text-center">تأكيد حذف الحساب</Dialog.Title>
+                <p className="mb-6 text-center text-gray-700">هل أنت متأكد أنك تريد حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.</p>
+                <div className="flex justify-center gap-4 mt-4">
+                  <button
+                    onClick={() => setShowDeleteModal(false)}
+                    className="px-6 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500"
+                  >
+                    إلغاء
+                  </button>
+                  <button
+                    onClick={handleConfirmDelete}
+                    className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                  >
+                    حذف الحساب
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="text-center">
+                <Dialog.Title className="text-lg font-bold mb-4">تم إرسال الطلب</Dialog.Title>
+                <p className="mb-6 text-green-700">Admin will contact you soon to handle your request</p>
+                <button
+                  onClick={() => { setShowDeleteModal(false); setDeleteRequested(false); }}
+                  className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                >
+                  حسناً
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </Dialog>
     </div>
   )
 } 
