@@ -287,11 +287,24 @@ export default function AccountPage() {
       {/* Header Title */}
       <div className="w-full text-center mt-8">
         <h1 className="text-3xl font-bold">الحساب الشخصي</h1>
-        <div className="mx-auto w-1/2 h-0.5 bg-green-500 mt-2 mb-8"></div>
+        <div className="flex justify-center items-center mb-8">
+          <div className="relative w-56 sm:w-64 md:w-80">
+            <div className="w-full h-0.5 bg-green-500"></div>
+            <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
+          </div>
+        </div>
       </div>
       {/* Profile & Navigation Section */}
       <div className="flex flex-row justify-center items-center w-full max-w-2xl mb-8">
-        {/* Left: Navigation Icons */}
+        {/* Left: Profile Icon */}
+        <div className="flex-1 flex justify-center">
+          <div className="w-32 h-32 rounded-full bg-gray-400 flex items-center justify-center">
+            <Image src="/images/profile_icon.png" alt="الملف الشخصي" width={80} height={80} />
+          </div>
+        </div>
+        {/* Vertical Line */}
+        <div className="h-24 w-px bg-black mx-4"></div>
+        {/* Right: Navigation Icons */}
         <div className="flex flex-col items-center mr-8">
           <Link href="/tracking_packages_user" className="group mb-6">
             <div className="w-12 h-12 mb-1">
@@ -312,17 +325,14 @@ export default function AccountPage() {
             <span className="text-sm text-gray-700">تتبع الطلبات</span>
           </Link>
         </div>
-        {/* Vertical Line */}
-        <div className="h-40 w-0.5 bg-gray-300 mx-8"></div>
-        {/* Right: Profile Icon */}
-        <div className="flex-1 flex justify-center">
-          <div className="w-32 h-32 rounded-full bg-gray-400 flex items-center justify-center">
-            <Image src="/images/profile_hex_icon.png" alt="الملف الشخصي" width={80} height={80} />
-          </div>
-        </div>
       </div>
       {/* Green Divider */}
-      <div className="w-full h-0.5 bg-green-500 mb-8"></div>
+      <div className="flex justify-center items-center mb-8">
+        <div className="relative w-56 sm:w-64 md:w-80">
+          <div className="w-full h-0.5 bg-green-500"></div>
+          <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
+        </div>
+      </div>
       {/* Form Section */}
       <form className="w-full max-w-lg flex flex-col gap-6 items-end">
         <div className="w-full">
@@ -358,8 +368,39 @@ export default function AccountPage() {
             ))}
           </select>
         </div>
-        {/* Call to Action Button */}
-        <button type="submit" className="mx-auto mt-8 px-8 py-2 bg-green-500 text-white rounded-full hover:bg-green-600">Call To Action</button>
+        {/* Action Buttons */}
+        <div className="flex justify-center gap-4 mt-8">
+          {!isEditing ? (
+            <button
+              onClick={handleEditClick}
+              className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+            >
+              تعديل التفاصيل
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={handleCancelEdit}
+                className="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              >
+                إلغاء
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
+              >
+                {isSubmitting ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+              </button>
+            </>
+          )}
+          <button
+            onClick={() => setShowDeleteModal(true)}
+            className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+          >
+            حذف الحساب
+          </button>
+        </div>
       </form>
     </div>
   )

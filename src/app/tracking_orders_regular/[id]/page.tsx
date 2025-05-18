@@ -8,6 +8,7 @@ import Header from "@/app/components/Header";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import PaymentModal from "@/app/components/PaymentModal";
 
 interface Shop {
   id: string;
@@ -42,6 +43,7 @@ export default function OrderDetailsPage() {
   const [shopEdit, setShopEdit] = useState("");
   const [savingShop, setSavingShop] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   useEffect(() => {
     if (sessionStatus === "unauthenticated") {
@@ -93,6 +95,17 @@ export default function OrderDetailsPage() {
     setOrder({ ...order, shopId: shopEdit, Shop: selectedShop || order.Shop });
     toast.success("تم تحديث المتجر");
     setSavingShop(false);
+  };
+
+  const handlePaymentClick = () => {
+    setIsPaymentModalOpen(true);
+  };
+
+  const handlePaymentComplete = () => {
+    if (order) {
+      setOrder({ ...order, status: 'ORDERING' });
+    }
+    setIsPaymentModalOpen(false);
   };
 
   // Status text mapping
@@ -195,6 +208,14 @@ export default function OrderDetailsPage() {
           <div className="flex flex-col items-center justify-end flex-1">
             <img src="/images/truck_icon.png" alt="Truck Icon" className="w-16 h-16 mb-2" />
             <div className="text-black text-lg font-bold mt-1">{getOrderStatusText(order.status)}</div>
+            {order.status === 'AWAITING_PAYMENT' && (
+              <button
+                className="mt-2 px-6 py-2 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition"
+                onClick={handlePaymentClick}
+              >
+                دفع
+              </button>
+            )}
           </div>
           {/* Middle: Market Icon above Shop Name */}
           <div className="flex flex-col items-center justify-end flex-1">
@@ -208,6 +229,13 @@ export default function OrderDetailsPage() {
           </div>
         </div>
       </main>
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        orderId={order?.id ?? ''}
+        amount={order?.totalAmount ?? 0}
+        onPaymentComplete={handlePaymentComplete}
+      />
     </div>
   );
 } 

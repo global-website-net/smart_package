@@ -148,11 +148,7 @@ export default function Header() {
           <div className="hidden md:flex items-center order-3">
             {status === 'loading' ? (
               <div className="w-24 h-8 bg-black rounded-md animate-pulse"></div>
-            ) : isLoggedIn ? (
-              <div className="text-white text-lg font-medium">
-                {session?.user?.fullName || session?.user?.name}
-              </div>
-            ) : (
+            ) : !isLoggedIn && (
               <Link
                 href="/auth/login"
                 className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors text-sm font-medium"

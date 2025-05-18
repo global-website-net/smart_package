@@ -234,12 +234,12 @@ export default function PackageDetailsPage() {
           {/* Middle: Receipt Icon + Customs Payment */}
           <div className="flex flex-col items-center justify-end flex-1">
             <img src="/images/receipt_icon.png" alt="Receipt Icon" className="w-16 h-16 mb-2" />
-            <div className="text-black text-lg font-bold mt-1">{(pkg.customs_payment ?? 0).toFixed(2)}₪</div>
-            <div className="text-black text-base font-bold mt-1">جمرك</div>
+            <div className="text-black text-lg font-bold mt-1">{(pkg.customs_payment ?? 0).toFixed(2)}₪ جمرك</div>
           </div>
           {/* Left: Price Tag Hexagon Icon */}
           <div className="flex flex-col items-center justify-end flex-1">
             <img src="/images/price_tag_hexagon.png" alt="Price Tag Hexagon" className="w-16 h-16 mb-2" />
+            <div className="text-black text-lg font-bold mt-1">{(pkg.customs ?? 0).toFixed(2)}₪</div>
           </div>
         </div>
         {/* Green Divider */}
