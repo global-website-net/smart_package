@@ -303,7 +303,7 @@ export default function AccountPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col items-center" style={{ fontFamily: 'Dubai, sans-serif' }}>
       {/* Header Title */}
       <div className="w-full text-center mt-8">
-        <h1 className="text-3xl font-bold">الحساب الشخصي</h1>
+        <h1 className="text-3xl font-bold text-center mb-4 mt-0">الحساب الشخصي</h1>
         <div className="flex justify-center items-center mb-8">
           <div className="relative w-56 sm:w-64 md:w-80">
             <div className="w-full h-0.5 bg-green-500"></div>
@@ -312,37 +312,43 @@ export default function AccountPage() {
         </div>
       </div>
       {/* Profile & Navigation Section */}
-      <div className="flex flex-row-reverse justify-center items-center w-full max-w-2xl mb-8">
+      <div className="flex flex-row justify-center items-center w-full max-w-2xl mb-8">
         {/* Navigation Icons (right side, vertical, right-aligned) */}
-        <div className="flex flex-col items-end ml-8">
-          <Link href="/tracking_packages_user" className="group mb-6 flex flex-row-reverse items-center gap-2">
-            <div className="w-12 h-12 mb-1 flex items-center justify-center">
-              <Image src="/images/package_hex_icon.png" alt="تتبع الرزم" width={48} height={48} />
+        <div className="flex flex-col items-end mr-8 gap-6">
+          <Link href="/tracking_packages_user" className="group flex flex-row items-center gap-3">
+            <span className="text-lg text-gray-800">تتبع الرزم</span>
+            <div className="w-14 h-14 flex items-center justify-center">
+              <Image src="/images/package_hex_icon.png" alt="تتبع الرزم" width={56} height={56} />
             </div>
-            <span className="text-sm text-gray-700">تتبع الرزم</span>
           </Link>
-          <Link href="/wallet" className="group mb-6 flex flex-row-reverse items-center gap-2">
-            <div className="w-12 h-12 mb-1 flex items-center justify-center">
-              <Image src="/images/wallet_hex_icon.png" alt="المحفظة" width={48} height={48} />
+          <Link href="/wallet" className="group flex flex-row items-center gap-3">
+            <span className="text-lg text-gray-800">المحفظة</span>
+            <div className="w-14 h-14 flex items-center justify-center">
+              <Image src="/images/wallet_hex_icon.png" alt="المحفظة" width={56} height={56} />
             </div>
-            <span className="text-sm text-gray-700">المحفظة</span>
           </Link>
-          <Link href="/tracking_orders_regular" className="group flex flex-row-reverse items-center gap-2">
-            <div className="w-12 h-12 mb-1 flex items-center justify-center">
-              <Image src="/images/shopping_bag_hex_icon.png" alt="تتبع الطلبات" width={48} height={48} />
+          <Link href="/tracking_orders_regular" className="group flex flex-row items-center gap-3">
+            <span className="text-lg text-gray-800">تتبع الطلبات</span>
+            <div className="w-14 h-14 flex items-center justify-center">
+              <Image src="/images/shopping_bag_hex_icon.png" alt="تتبع الطلبات" width={56} height={56} />
             </div>
-            <span className="text-sm text-gray-700">تتبع الطلبات</span>
           </Link>
         </div>
         {/* Vertical Line */}
-        <div className="h-24 w-px bg-black mx-4"></div>
-        {/* Profile Icon (left side) */}
+        <div className="h-48 w-px bg-black mx-8"></div>
+        {/* Profile Icon (left side, much larger) */}
         <div className="flex-1 flex justify-center">
-          <Image src="/images/profile_icon.png" alt="الملف الشخصي" width={80} height={80} />
+          <div className="w-48 h-48 rounded-full bg-gray-400 flex items-center justify-center">
+            <Image src="/images/profile_icon.png" alt="الملف الشخصي" width={160} height={160} />
+          </div>
         </div>
       </div>
       {/* Green Divider */}
-      <div className="w-full h-0.5 bg-green-500 mb-8"></div>
+      <div className="flex justify-center items-center mb-8">
+        <div className="relative w-56 sm:w-64 md:w-80">
+          <div className="w-full h-0.5 bg-green-500"></div>
+        </div>
+      </div>
       {/* Form Section */}
       <form onSubmit={handleSubmit} className="w-full max-w-lg flex flex-col gap-6 items-end">
         <div className="w-full">
@@ -379,7 +385,6 @@ export default function AccountPage() {
               !isEditing ? 'bg-gray-100' : 'bg-transparent'
             }`}
           >
-            <option value="">اختر المحافظة</option>
             {governorates.map((gov) => (
               <option key={gov} value={gov}>{gov}</option>
             ))}
@@ -530,7 +535,7 @@ export default function AccountPage() {
             ) : (
               <div className="text-center">
                 <Dialog.Title className="text-lg font-bold mb-4">تم إرسال الطلب</Dialog.Title>
-                <p className="mb-6 text-green-700">Admin will contact you soon to handle your request</p>
+                <p className="mb-6 text-green-700">سيتم التواصل معك من قبل الإدارة قريباً لمعالجة طلبك</p>
                 <button
                   onClick={() => { setShowDeleteModal(false); setDeleteRequested(false); }}
                   className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"

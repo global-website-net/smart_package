@@ -42,6 +42,7 @@ export async function GET(request: Request) {
         town,
         phonePrefix,
         phoneNumber,
+        shopId,
         createdAt,
         updatedAt
       `)
@@ -73,6 +74,7 @@ export async function GET(request: Request) {
       town: user.town,
       phonePrefix: user.phonePrefix,
       phoneNumber: user.phoneNumber,
+      shopId: user.shopId,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt
     }
@@ -101,6 +103,7 @@ export async function PUT(request: Request) {
       town, 
       phonePrefix, 
       phoneNumber, 
+      shopId,
       currentPassword,
       newPassword 
     } = body
@@ -122,6 +125,7 @@ export async function PUT(request: Request) {
       fullName,
       phonePrefix,
       phoneNumber,
+      shopId,
       updatedAt: new Date().toISOString()
     }
 
@@ -180,6 +184,7 @@ export async function PUT(request: Request) {
         town,
         phonePrefix,
         phoneNumber,
+        shopId,
         createdAt,
         updatedAt
       `)

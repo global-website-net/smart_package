@@ -113,35 +113,29 @@ export default function Header() {
             )}
           </div>
 
-          {/* Right Side - Pricing */}
-          {/* 'أسعارنا' link removed from the header */}
-
-          {/* Center Logo */}
-          <div className="flex-1 flex justify-center order-2">
-            <Link href="/" className="flex items-center space-x-2 rtl:space-x-reverse">
+          {/* Desktop Main Navigation */}
+          <div className="hidden md:flex flex-1 items-center justify-between w-full">
+            {/* Right side labels */}
+            <div className="flex items-center gap-6">
+              <Link href="/about" className="text-white text-base font-medium hover:text-green-400">من نحن</Link>
+              <Link href="/packages" className="text-white text-base font-medium hover:text-green-400">أسعارنا</Link>
+              <Link href="/contact" className="text-white text-base font-medium hover:text-green-400">التواصل</Link>
+            </div>
+            {/* Center Logo with Location Icon */}
+            <Link href="/" className="flex items-center gap-2">
               <span className="text-sm md:text-xl">SMART PACKAGE</span>
-              <svg 
-                className="w-6 h-6 text-green-500" 
-                viewBox="0 0 24 24"
-              >
-                <path 
-                  fill="none"
-                  stroke="currentColor" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M12 21s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 7.2c0 7.3-8 11.8-8 11.8z"
-                />
-                <circle 
-                  cx="12" 
-                  cy="10" 
-                  r="3" 
-                  fill="white" 
-                  stroke="currentColor"
-                  strokeWidth={2}
-                />
+              <svg className="w-6 h-6 text-green-500" viewBox="0 0 24 24">
+                <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 21s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 7.2c0 7.3-8 11.8-8 11.8z" />
+                <circle cx="12" cy="10" r="3" fill="white" stroke="currentColor" strokeWidth={2} />
               </svg>
+              <img src="/images/location_icon.png" alt="Location" className="w-5 h-5 ml-1" />
             </Link>
+            {/* Left side labels */}
+            <div className="flex items-center gap-6">
+              <Link href="/campaigns" className="text-white text-base font-medium hover:text-green-400">حملات</Link>
+              <Link href="/blog" className="text-white text-base font-medium hover:text-green-400">بلوج</Link>
+              <Link href="/faq" className="text-white text-base font-medium hover:text-green-400">الأسئلة المتكررة</Link>
+            </div>
           </div>
 
           {/* Left Side - Login/User Menu (Desktop) */}
