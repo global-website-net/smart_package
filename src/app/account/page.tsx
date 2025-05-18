@@ -283,321 +283,84 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-gray-50 flex">
-      {/* Right Side Banner - Desktop only */}
-      <div className="hidden md:block fixed top-0 right-0 h-full z-40">
-        <img
-          src="/images/green_seperator_menu_right_side.png"
-          alt="Right Side Banner"
-          className="h-full"
-          style={{ minWidth: '90px', maxWidth: '120px', objectFit: 'cover' }}
-        />
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center">
+      {/* Header Title */}
+      <div className="w-full text-center mt-8">
+        <h1 className="text-3xl font-bold">الحساب الشخصي</h1>
+        <div className="mx-auto w-1/2 h-0.5 bg-green-500 mt-2 mb-8"></div>
       </div>
-
-      {/* Main Content */}
-      <div className="flex-1">
-        <Header />
-        <Toaster position="top-center" />
-        
-        <main className="p-4 mt-20">
-          <div className="max-w-4xl mx-auto">
-            {/* Profile Section */}
-            <div className="flex justify-end items-center mb-8">
-              <div className="flex items-center gap-4">
-                {/* Hex Icons Stack */}
-                <div className="flex flex-col items-center gap-4">
-                  <Link href="/tracking_packages_user" className="group">
-                    <div className="w-16 h-16 relative">
-                      <Image 
-                        src="/images/package_hex_icon.png" 
-                        alt="تتبع الطرود" 
-                        width={64} 
-                        height={64}
-                        className="transition-transform group-hover:scale-110"
-                      />
-                    </div>
-                    <span className="text-sm text-gray-700 mt-1 block text-center">تتبع الطرود</span>
-                  </Link>
-                  <Link href="/wallet" className="group">
-                    <div className="w-16 h-16 relative">
-                      <Image 
-                        src="/images/wallet_hex_icon.png" 
-                        alt="المحفظة" 
-                        width={64} 
-                        height={64}
-                        className="transition-transform group-hover:scale-110"
-                      />
-                    </div>
-                    <span className="text-sm text-gray-700 mt-1 block text-center">المحفظة</span>
-                  </Link>
-                  <Link href="/tracking_orders_regular" className="group">
-                    <div className="w-16 h-16 relative">
-                      <Image 
-                        src="/images/shopping_bag_hex_icon.png" 
-                        alt="تتبع الطلبات" 
-                        width={64} 
-                        height={64}
-                        className="transition-transform group-hover:scale-110"
-                      />
-                    </div>
-                    <span className="text-sm text-gray-700 mt-1 block text-center">تتبع الطلبات</span>
-                  </Link>
-                </div>
-                
-                {/* Vertical Line */}
-                <div className="h-48 w-0.5 bg-gray-300"></div>
-                
-                {/* Profile Icon */}
-                <div className="w-16 h-16 relative">
-                  <Image 
-                    src="/images/profile_hex_icon.png" 
-                    alt="الملف الشخصي" 
-                    width={64} 
-                    height={64}
-                    className="cursor-pointer"
-                  />
-                </div>
-              </div>
+      {/* Profile & Navigation Section */}
+      <div className="flex flex-row justify-center items-center w-full max-w-2xl mb-8">
+        {/* Left: Navigation Icons */}
+        <div className="flex flex-col items-center mr-8">
+          <Link href="/tracking_packages_user" className="group mb-6">
+            <div className="w-12 h-12 mb-1">
+              <Image src="/images/package_hex_icon.png" alt="تتبع الرزم" width={48} height={48} />
             </div>
-
-            {/* Green Divider */}
-            <div className="w-full h-0.5 bg-green-500 mb-8"></div>
-
-            {/* Form Section */}
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h1 className="text-3xl font-bold text-center mb-8">الملف الشخصي</h1>
-
-              {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                  {error}
-                </div>
-              )}
-
-              {updateSuccess && (
-                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                  {updateSuccess}
-                </div>
-              )}
-
-              {updateError && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                  {updateError}
-                </div>
-              )}
-
-              {isLoading ? (
-                <div className="text-center py-8">جاري التحميل...</div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-gray-700 mb-2">البريد الإلكتروني</label>
-                      <input
-                        type="email"
-                        value={profile?.email || ''}
-                        disabled
-                        className="w-full p-2 border border-gray-300 rounded-md bg-gray-100"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-gray-700 mb-2">الاسم الكامل</label>
-                      <input
-                        type="text"
-                        name="fullName"
-                        value={formData.fullName}
-                        onChange={handleInputChange}
-                        disabled={!isEditing}
-                        className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
-                      />
-                    </div>
-
-                    {isRegularUser && (
-                      <>
-                        <div>
-                          <label className="block text-gray-700 mb-2">المحافظة</label>
-                          <select
-                            name="governorate"
-                            value={formData.governorate}
-                            onChange={handleInputChange}
-                            disabled={!isEditing}
-                            className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
-                          >
-                            <option value="">اختر المحافظة</option>
-                            {governorates.map((gov) => (
-                              <option key={gov} value={gov}>{gov}</option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="block text-gray-700 mb-2">المدينة</label>
-                          <input
-                            type="text"
-                            name="town"
-                            value={formData.town}
-                            onChange={handleInputChange}
-                            disabled={!isEditing}
-                            className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-gray-700 mb-2">اختيار المتجر</label>
-                          <select
-                            name="shopId"
-                            value={formData.shopId}
-                            onChange={handleInputChange}
-                            disabled={!isEditing}
-                            className={`w-full p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
-                          >
-                            <option value="">اختر المتجر</option>
-                            {shops.map((shop) => (
-                              <option key={shop.id} value={shop.id}>{shop.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </>
-                    )}
-
-                    <div>
-                      <label className="block text-gray-700 mb-2">رقم الهاتف</label>
-                      <div className="flex gap-2">
-                        <select
-                          name="phonePrefix"
-                          value={formData.phonePrefix}
-                          onChange={handleInputChange}
-                          disabled={!isEditing}
-                          className={`w-24 p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
-                        >
-                          {phonePrefixes.map((prefix) => (
-                            <option key={prefix} value={prefix}>{prefix}</option>
-                          ))}
-                        </select>
-                        <input
-                          type="text"
-                          name="phoneNumber"
-                          value={formData.phoneNumber}
-                          onChange={handleInputChange}
-                          disabled={!isEditing}
-                          className={`flex-1 p-2 border border-gray-300 rounded-md ${!isEditing ? 'bg-gray-100' : ''}`}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {isEditing && (
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-gray-700 mb-2">كلمة المرور الحالية</label>
-                        <input
-                          type="password"
-                          name="currentPassword"
-                          value={formData.currentPassword}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full p-2 border border-gray-300 rounded-md"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-gray-700 mb-2">كلمة المرور الجديدة (اختياري)</label>
-                        <input
-                          type="password"
-                          name="newPassword"
-                          value={formData.newPassword}
-                          onChange={handleInputChange}
-                          className="w-full p-2 border border-gray-300 rounded-md"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-gray-700 mb-2">تأكيد كلمة المرور الجديدة</label>
-                        <input
-                          type="password"
-                          name="confirmPassword"
-                          value={formData.confirmPassword}
-                          onChange={handleInputChange}
-                          className="w-full p-2 border border-gray-300 rounded-md"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex justify-center gap-4 mt-8">
-                    {!isEditing ? (
-                      <>
-                        <button
-                          type="button"
-                          onClick={handleEditClick}
-                          className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 transition-colors"
-                        >
-                          تعديل الملف الشخصي
-                        </button>
-                        {isRegularUser && (
-                          <button
-                            type="button"
-                            onClick={() => setShowDeleteModal(true)}
-                            className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors"
-                            disabled={isDeleting}
-                          >
-                            {isDeleting ? 'جاري الحذف...' : 'حذف الحساب'}
-                          </button>
-                        )}
-                      </>
-                    ) : (
-                      <div className="flex gap-4">
-                        <button
-                          type="button"
-                          onClick={handleCancelEdit}
-                          className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition-colors"
-                          disabled={isSubmitting}
-                        >
-                          إلغاء
-                        </button>
-                        <button
-                          type="submit"
-                          className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 transition-colors"
-                          disabled={isSubmitting}
-                        >
-                          {isSubmitting ? 'جاري الحفظ...' : 'حفظ التغييرات'}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </form>
-              )}
+            <span className="text-sm text-gray-700">تتبع الرزم</span>
+          </Link>
+          <Link href="/wallet" className="group mb-6">
+            <div className="w-12 h-12 mb-1">
+              <Image src="/images/wallet_hex_icon.png" alt="المحفظة" width={48} height={48} />
             </div>
+            <span className="text-sm text-gray-700">المحفظة</span>
+          </Link>
+          <Link href="/tracking_orders_regular" className="group">
+            <div className="w-12 h-12 mb-1">
+              <Image src="/images/shopping_bag_hex_icon.png" alt="تتبع الطلبات" width={48} height={48} />
+            </div>
+            <span className="text-sm text-gray-700">تتبع الطلبات</span>
+          </Link>
+        </div>
+        {/* Vertical Line */}
+        <div className="h-40 w-0.5 bg-gray-300 mx-8"></div>
+        {/* Right: Profile Icon */}
+        <div className="flex-1 flex justify-center">
+          <div className="w-32 h-32 rounded-full bg-gray-400 flex items-center justify-center">
+            <Image src="/images/profile_hex_icon.png" alt="الملف الشخصي" width={80} height={80} />
           </div>
-        </main>
-
-        {/* Delete Account Modal */}
-        {showDeleteModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full">
-              <h2 className="text-xl font-bold mb-4">تأكيد حذف الحساب</h2>
-              <p className="text-gray-600 mb-6">
-                هل أنت متأكد من رغبتك في حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.
-              </p>
-              <div className="flex justify-center gap-4">
-                <button
-                  onClick={() => setShowDeleteModal(false)}
-                  className="bg-gray-300 text-gray-800 px-6 py-2 rounded-md hover:bg-gray-400 transition-colors"
-                >
-                  إلغاء
-                </button>
-                <button
-                  onClick={handleDeleteAccount}
-                  className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors"
-                  disabled={isDeleting}
-                >
-                  {isDeleting ? 'جاري الحذف...' : 'تأكيد الحذف'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
+      {/* Green Divider */}
+      <div className="w-full h-0.5 bg-green-500 mb-8"></div>
+      {/* Form Section */}
+      <form className="w-full max-w-lg flex flex-col gap-6 items-end">
+        <div className="w-full">
+          <label className="block text-gray-700 mb-1 pr-2">الاسم</label>
+          <input type="text" name="fullName" value={formData.fullName} onChange={handleInputChange} className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right" />
+        </div>
+        <div className="w-full">
+          <label className="block text-gray-700 mb-1 pr-2">رقم المشترك</label>
+          <input type="text" name="id" value={profile?.id || ''} disabled className="w-full border-0 border-b-2 border-gray-300 bg-gray-100 text-right" />
+        </div>
+        <div className="w-full">
+          <label className="block text-gray-700 mb-1 pr-2">المحافظة</label>
+          <input type="text" name="governorate" value={formData.governorate} onChange={handleInputChange} className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right" />
+        </div>
+        <div className="w-full">
+          <label className="block text-gray-700 mb-1 pr-2">رقم الهاتف</label>
+          <input type="text" name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right" />
+        </div>
+        <div className="w-full">
+          <label className="block text-gray-700 mb-1 pr-2">البريد الإلكتروني</label>
+          <input type="email" name="email" value={profile?.email || ''} disabled className="w-full border-0 border-b-2 border-gray-300 bg-gray-100 text-right" />
+        </div>
+        <div className="w-full">
+          <label className="block text-gray-700 mb-1 pr-2">كلمة المرور</label>
+          <input type="password" name="currentPassword" value={formData.currentPassword} onChange={handleInputChange} className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right" />
+        </div>
+        <div className="w-full">
+          <label className="block text-gray-700 mb-1 pr-2">اختيار المتجر</label>
+          <select name="shopId" value={formData.shopId} onChange={handleInputChange} className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right">
+            <option value="">اختر المتجر</option>
+            {shops.map(shop => (
+              <option key={shop.id} value={shop.id}>{shop.name}</option>
+            ))}
+          </select>
+        </div>
+        {/* Call to Action Button */}
+        <button type="submit" className="mx-auto mt-8 px-8 py-2 bg-green-500 text-white rounded-full hover:bg-green-600">Call To Action</button>
+      </form>
     </div>
   )
 } 

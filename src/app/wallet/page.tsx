@@ -121,31 +121,10 @@ export default function WalletPage() {
             <img src="/images/wallet_icon_mobile.png" alt="Wallet Icon" className="w-24 h-24" style={{display: 'inline-block', verticalAlign: 'middle'}} />
           </div>
 
-          {/* Balance Display with Arrows */}
+          {/* Balance Display */}
           <div className="flex justify-center items-center mb-8">
-            {/* Left Side Arrows */}
-            <div className="flex items-center gap-2">
-              <button className="bg-black text-white w-8 h-8 rounded-full flex items-center justify-center cursor-pointer">
-                &lt;&lt;
-              </button>
-              <button className="bg-black text-white w-8 h-8 rounded-full flex items-center justify-center cursor-pointer">
-                &lt;
-              </button>
-            </div>
-
-            {/* Balance Amount */}
             <div className="mx-4">
               <BalanceDisplay amount={walletData.balance} />
-            </div>
-
-            {/* Right Side Arrows */}
-            <div className="flex items-center gap-2">
-              <button className="bg-black text-white w-8 h-8 rounded-full flex items-center justify-center cursor-pointer">
-                &gt;
-              </button>
-              <button className="bg-black text-white w-8 h-8 rounded-full flex items-center justify-center cursor-pointer">
-                &gt;&gt;
-              </button>
             </div>
           </div>
 

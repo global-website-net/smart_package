@@ -191,26 +191,22 @@ export default function OrderDetailsPage() {
         <div className="w-full h-0.5 bg-green-500 mb-8" />
         {/* Status Row: Shopping Bag | Delivery | Payment */}
         <div className="flex flex-row items-end justify-between mb-8 gap-4">
-          {/* Right: Shopping Bag Icon + Status */}
+          {/* Right: Truck Icon + Status */}
           <div className="flex flex-col items-center justify-end flex-1">
-            <img src="/images/shopping_bag_icon.png" alt="Order Icon" className="w-16 h-16 mb-2" />
+            <img src="/images/truck_icon.png" alt="Truck Icon" className="w-16 h-16 mb-2" />
             <div className="text-black text-lg font-bold mt-1">{getOrderStatusText(order.status)}</div>
           </div>
           {/* Middle: Market Icon above Shop Name */}
           <div className="flex flex-col items-center justify-end flex-1">
-            <img src="/images/market_icon.png" alt="Market Icon" className="w-12 h-12 mb-1" />
-            <img src="/images/delivery_hex_icon.png" alt="Delivery Icon" className="w-16 h-16 mb-2" />
+            <img src="/images/market_icon.png" alt="Market Icon" className="w-16 h-16 mb-2" />
             <div className="text-black text-lg font-bold mt-1">{order.purchaseSite}</div>
           </div>
           {/* Left: Price Tag Hexagon above Payment Icon and Amount */}
           <div className="flex flex-col items-center justify-end flex-1">
-            <img src="/images/price_tag_hexagon.png" alt="Price Tag Hexagon" className="w-12 h-12 mb-1" />
-            <img src="/images/payment_hex_icon.png" alt="Payment Icon" className="w-16 h-16 mb-2" />
+            <img src="/images/price_tag_hexagon.png" alt="Price Tag Hexagon" className="w-16 h-16 mb-2" />
             <div className="text-black text-lg font-bold mt-1">{order.totalAmount.toFixed(2)}₪</div>
           </div>
         </div>
-        {/* Green Divider */}
-        <div className="w-full h-0.5 bg-green-500 mb-8" />
       </main>
     </div>
   );
