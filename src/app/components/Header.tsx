@@ -117,8 +117,22 @@ export default function Header() {
           <div className="hidden md:flex flex-1 items-center justify-center w-full">
             <nav className="flex items-center gap-8 w-full justify-center">
               {/* Right side labels (from right to left for Arabic) */}
-              <Link href="/faq" className="text-white text-base font-medium hover:text-green-400">الأسئلة المتكررة</Link>
+              <Link href="/about" className="text-white text-base font-medium hover:text-green-400">من نحن</Link>
+              <Link href="/faq" className="text-white text-base font-medium hover:text-green-400 leading-tight flex flex-col items-center justify-center" style={{lineHeight: '1.1'}}>
+                <span>الأسئلة</span>
+                <span>المتكررة</span>
+              </Link>
+              {status !== 'loading' && !isLoggedIn && (
+                <Link
+                  href="/auth/login"
+                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors text-sm font-medium ml-2"
+                >
+                  تسجيل الدخول
+                </Link>
+              )}
+              <Link href="/packages" className="text-white text-base font-medium hover:text-green-400">أسعارنا</Link>
               <Link href="/blog" className="text-white text-base font-medium hover:text-green-400">بلوج</Link>
+              <Link href="/contact" className="text-white text-base font-medium hover:text-green-400">التواصل</Link>
               <Link href="/campaigns" className="text-white text-base font-medium hover:text-green-400">حملات</Link>
               {/* Center Logo with Location Icon */}
               <Link href="/" className="flex items-center gap-2 mx-4">
@@ -128,10 +142,6 @@ export default function Header() {
                   <circle cx="12" cy="10" r="3" fill="white" stroke="currentColor" strokeWidth={2} />
                 </svg>
               </Link>
-              {/* Left side labels */}
-              <Link href="/contact" className="text-white text-base font-medium hover:text-green-400">التواصل</Link>
-              <Link href="/packages" className="text-white text-base font-medium hover:text-green-400">أسعارنا</Link>
-              <Link href="/about" className="text-white text-base font-medium hover:text-green-400">من نحن</Link>
             </nav>
           </div>
 
