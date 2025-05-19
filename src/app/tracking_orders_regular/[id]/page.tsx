@@ -208,14 +208,6 @@ export default function OrderDetailsPage() {
           <div className="flex flex-col items-center justify-end flex-1">
             <img src="/images/truck_icon.png" alt="Truck Icon" className="w-16 h-16 mb-2" />
             <div className="text-black text-lg font-bold mt-1">{getOrderStatusText(order.status)}</div>
-            {order.status === 'AWAITING_PAYMENT' && (
-              <button
-                className="mt-2 px-6 py-2 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition"
-                onClick={handlePaymentClick}
-              >
-                دفع
-              </button>
-            )}
           </div>
           {/* Middle: Market Icon above Shop Name */}
           <div className="flex flex-col items-center justify-end flex-1">
@@ -226,6 +218,14 @@ export default function OrderDetailsPage() {
           <div className="flex flex-col items-center justify-end flex-1">
             <img src="/images/price_tag_hexagon.png" alt="Price Tag Hexagon" className="w-16 h-16 mb-2" />
             <div className="text-black text-lg font-bold mt-1">{order.totalAmount.toFixed(2)}₪</div>
+            {order.status === 'AWAITING_PAYMENT' && (
+              <button
+                className="mt-2 px-6 py-2 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition"
+                onClick={handlePaymentClick}
+              >
+                دفع
+              </button>
+            )}
           </div>
         </div>
       </main>

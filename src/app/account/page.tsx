@@ -315,33 +315,27 @@ export default function AccountPage() {
       <div className="flex flex-row justify-center items-center w-full max-w-2xl mb-8">
         {/* Navigation Icons (right side, vertical, right-aligned) */}
         <div className="flex flex-col items-end mr-8 gap-6">
-          <Link href="/tracking_packages_user" className="group flex flex-row items-center gap-3">
+          <a className="group flex flex-row items-center gap-3" href="/tracking_packages_user">
             <span className="text-lg text-gray-800">تتبع الرزم</span>
             <div className="w-14 h-14 flex items-center justify-center">
-              <Image src="/images/package_hex_icon.png" alt="تتبع الرزم" width={56} height={56} />
+              <img alt="تتبع الرزم" loading="lazy" width="56" height="56" decoding="async" data-nimg="1" srcSet="/_next/image?url=%2Fimages%2Fpackage_hex_icon.png&w=64&q=75 1x, /_next/image?url=%2Fimages%2Fpackage_hex_icon.png&w=128&q=75 2x" src="/_next/image?url=%2Fimages%2Fpackage_hex_icon.png&w=128&q=75" style={{color: 'transparent'}} />
             </div>
-          </Link>
-          <Link href="/wallet" className="group flex flex-row items-center gap-3">
+          </a>
+          <a className="group flex flex-row items-center gap-3" href="/wallet">
             <span className="text-lg text-gray-800">المحفظة</span>
             <div className="w-14 h-14 flex items-center justify-center">
-              <Image src="/images/wallet_hex_icon.png" alt="المحفظة" width={56} height={56} />
+              <img alt="المحفظة" loading="lazy" width="56" height="56" decoding="async" data-nimg="1" srcSet="/_next/image?url=%2Fimages%2Fwallet_hex_icon.png&w=64&q=75 1x, /_next/image?url=%2Fimages%2Fwallet_hex_icon.png&w=128&q=75 2x" src="/_next/image?url=%2Fimages%2Fwallet_hex_icon.png&w=128&q=75" style={{color: 'transparent'}} />
             </div>
-          </Link>
-          <Link href="/tracking_orders_regular" className="group flex flex-row items-center gap-3">
+          </a>
+          <a className="group flex flex-row items-center gap-3" href="/tracking_orders_regular">
             <span className="text-lg text-gray-800">تتبع الطلبات</span>
             <div className="w-14 h-14 flex items-center justify-center">
-              <Image src="/images/shopping_bag_hex_icon.png" alt="تتبع الطلبات" width={56} height={56} />
+              <img alt="تتبع الطلبات" loading="lazy" width="56" height="56" decoding="async" data-nimg="1" srcSet="/_next/image?url=%2Fimages%2Fshopping_bag_hex_icon.png&w=64&q=75 1x, /_next/image?url=%2Fimages%2Fshopping_bag_hex_icon.png&w=128&q=75 2x" src="/_next/image?url=%2Fimages%2Fshopping_bag_hex_icon.png&w=128&q=75" style={{color: 'transparent'}} />
             </div>
-          </Link>
+          </a>
         </div>
         {/* Vertical Line */}
         <div className="h-48 w-px bg-black mx-8"></div>
-        {/* Profile Icon (left side, much larger) */}
-        <div className="flex-1 flex justify-center">
-          <div className="w-48 h-48 rounded-full bg-gray-400 flex items-center justify-center">
-            <Image src="/images/profile_icon.png" alt="الملف الشخصي" width={160} height={160} />
-          </div>
-        </div>
       </div>
       {/* Green Divider */}
       <div className="flex justify-center items-center mb-8">

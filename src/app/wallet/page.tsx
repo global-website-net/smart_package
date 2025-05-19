@@ -149,7 +149,7 @@ export default function WalletPage() {
               </div>
               {walletData.transactions.map((transaction) => (
                 <div key={transaction.id} className="flex justify-between items-center border-b pb-4">
-                  <div className="flex items-center gap-2 w-1/3 justify-center">
+                  <div className="flex items-center gap-1 w-1/3 justify-center">
                     <span className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {new Date(transaction.createdAt).toLocaleDateString('en-GB', {
                         year: 'numeric',
