@@ -66,7 +66,6 @@ export default function AccountPage() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [passwordError, setPasswordError] = useState('')
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter()
@@ -310,8 +309,8 @@ export default function AccountPage() {
       <Header />
       <main className="w-full flex flex-col items-center pt-24">
         {/* Header Title */}
-        <div className="w-full text-center mt-8">
-          <h1 className="text-3xl font-bold text-center mb-4 mt-0">الحساب الشخصي</h1>
+        <div className="max-w-6xl mx-auto px-4 w-full text-center mt-8">
+          <h1 className="text-3xl font-bold text-center mb-2">الحساب الشخصي</h1>
           <div className="flex justify-center items-center mb-8">
             <div className="relative w-56 sm:w-64 md:w-80">
               <div className="w-full h-0.5 bg-green-500"></div>
@@ -324,7 +323,7 @@ export default function AccountPage() {
           <div className="flex flex-row items-center justify-center mb-8 gap-4">
             {/* Profile Icon (left side) */}
             <div className="flex justify-end">
-              <div className="w-48 h-48 rounded-full bg-gray-300 flex items-center justify-center">
+              <div className="w-48 h-48 rounded-full flex items-center justify-center">
                 <img src="/images/profile_icon.png" alt="الملف الشخصي" width={160} height={160} style={{borderRadius: '50%'}} />
               </div>
             </div>
@@ -332,19 +331,19 @@ export default function AccountPage() {
             <div className="h-40 w-1 bg-black mx-2"></div>
             {/* Navigation Icons (right side, vertical, right-aligned) */}
             <div className="flex flex-col items-end gap-4 min-w-[120px]">
-              <Link className="group flex flex-row-reverse items-center gap-2" href="/tracking_packages_user">
+              <Link className="group flex flex-row-reverse items-center gap-2 h-14" href="/tracking_packages_user">
                 <span className="text-lg text-gray-800">تتبع الرزم</span>
                 <div className="w-14 h-14 flex items-center justify-center">
                   <Image alt="تتبع الرزم" width={56} height={56} src="/images/package_hex_icon.png" />
                 </div>
               </Link>
-              <Link className="group flex flex-row-reverse items-center gap-2" href="/wallet">
+              <Link className="group flex flex-row-reverse items-center gap-2 h-14" href="/wallet">
                 <span className="text-lg text-gray-800">المحفظة</span>
                 <div className="w-14 h-14 flex items-center justify-center">
                   <Image alt="المحفظة" width={56} height={56} src="/images/wallet_hex_icon.png" />
                 </div>
               </Link>
-              <Link className="group flex flex-row-reverse items-center gap-2" href="/tracking_orders_regular">
+              <Link className="group flex flex-row-reverse items-center gap-2 h-14" href="/tracking_orders_regular">
                 <span className="text-lg text-gray-800">تتبع الطلبات</span>
                 <div className="w-14 h-14 flex items-center justify-center">
                   <Image alt="تتبع الطلبات" width={56} height={56} src="/images/shopping_bag_hex_icon.png" />
@@ -424,37 +423,12 @@ export default function AccountPage() {
               <div className="w-full relative">
                 <label className="block text-gray-700 font-bold mb-1 pr-2">كلمة المرور الحالية</label>
                 <input 
-                  type={showCurrentPassword ? "text" : "password"}
+                  type="password"
                   name="currentPassword" 
                   value={formData.currentPassword} 
                   onChange={handleInputChange} 
-                  className={`w-full border-0 border-b-2 ${passwordError ? 'border-red-500' : 'border-gray-300'} focus:border-green-500 outline-none bg-transparent text-right pr-10`}
+                  className={`w-full border-0 border-b-2 ${passwordError ? 'border-red-500' : 'border-gray-300'} focus:border-green-500 outline-none bg-transparent text-right`}
                 />
-                <button
-                  type="button"
-                  tabIndex={-1}
-                  className="absolute left-2 top-9 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-                  onClick={() => setShowCurrentPassword((v) => !v)}
-                  aria-label={showCurrentPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
-                >
-                  {showCurrentPassword ? (
-                    // Eye Off (Heroicons)
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12.001C3.226 15.376 7.05 19.5 12 19.5c1.658 0 3.237-.356 4.646-.99m3.374-2.53A10.45 10.45 0 0022.066 12c-1.292-3.375-5.116-7.5-10.066-7.5-1.272 0-2.492.195-3.637.553" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18" />
-                    </svg>
-                  ) : (
-                    // Eye (Heroicons)
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12C3.5 7.5 7.364 4.5 12 4.5c4.636 0 8.5 3 9.75 7.5-1.25 4.5-5.114 7.5-9.75 7.5-4.636 0-8.5-3-9.75-7.5z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  )}
-                </button>
-                {passwordError && (
-                  <p className="text-red-500 text-sm mt-1 text-right">{passwordError}</p>
-                )}
               </div>
               <div className="w-full">
                 <label className="block text-gray-700 font-bold mb-1 pr-2">كلمة المرور الجديدة (اختياري)</label>
