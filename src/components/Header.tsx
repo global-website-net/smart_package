@@ -42,13 +42,13 @@ export default function Header() {
           <div className="flex flex-1 items-center justify-end gap-6">
             <Link href="/campaigns" className="px-2 py-1 font-bold">حملات</Link>
             <Link href="/blog" className="px-2 py-1 font-bold">بلوج</Link>
-            <div className="flex flex-col items-center leading-tight">
+            <div className="flex items-center gap-2 leading-tight">
               <Link href="/faq" className="px-2 py-1 flex flex-col items-center leading-tight font-bold">
                 <span>الأسئلة</span>
                 <span>المتكررة</span>
               </Link>
               {status !== 'authenticated' && (
-                <Link href="/auth/login" className="mt-1 px-2 py-1 bg-green-600 rounded text-white text-sm font-bold">تسجيل دخول</Link>
+                <Link href="/auth/login" className="px-2 py-1 bg-green-600 rounded text-white text-sm font-bold">تسجيل دخول</Link>
               )}
             </div>
           </div>
@@ -67,13 +67,13 @@ export default function Header() {
           </div>
           <Link href="/campaigns" className="block px-3 py-2 font-bold">حملات</Link>
           <Link href="/blog" className="block px-3 py-2 font-bold">بلوج</Link>
-          <div className="flex flex-col items-center leading-tight">
+          <div className="flex items-center gap-2 leading-tight">
             <Link href="/faq" className="block px-3 py-2 flex flex-col items-start leading-tight font-bold">
               <span>الأسئلة</span>
               <span>المتكررة</span>
             </Link>
             {status !== 'authenticated' && (
-              <Link href="/auth/login" className="mt-1 block px-3 py-2 bg-green-600 rounded text-white text-sm font-bold">تسجيل دخول</Link>
+              <Link href="/auth/login" className="block px-3 py-2 bg-green-600 rounded text-white text-sm font-bold">تسجيل دخول</Link>
             )}
           </div>
         </div>

@@ -62,14 +62,11 @@ export default function Home() {
       <Header />
       
       <main className="max-w-6xl mx-auto px-4 py-6">
-        {/* Header Title and Banner */}
-        <div className="w-full text-center mt-8">
-          <h1 className="text-5xl font-bold mb-2 text-gray-900">تسوق من جميع أنحاء العالم</h1>
-          <div className="flex justify-center items-center mb-6">
-            <div className="relative w-full max-w-[600px]">
-              <div className="w-full h-0.5 bg-green-500"></div>
-              <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
-            </div>
+        <h1 className="text-5xl font-bold mb-2 text-gray-900">تسوق من جميع أنحاء العالم</h1>
+        <div className="flex justify-center items-center mb-6">
+          <div className="relative w-full max-w-[600px]">
+            <div className="w-full h-0.5 bg-green-500"></div>
+            <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
           </div>
         </div>
 
