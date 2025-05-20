@@ -114,36 +114,26 @@ export default function Header() {
           </div>
 
           {/* Desktop Main Navigation */}
-          <div className="hidden md:flex flex-1 items-center justify-center w-full">
-            <nav className="flex items-center gap-8 w-full justify-center">
-              <Link href="/about" className="text-white text-base font-medium hover:text-green-400 flex items-center justify-center">من نحن</Link>
-              <div className="flex flex-col items-center justify-center h-full">
-                <Link href="/faq" className="text-white text-base font-medium hover:text-green-400 leading-tight flex flex-col items-center justify-center p-0 m-0" style={{lineHeight: '1.1', margin: 0, padding: 0}}>
-                  <span style={{margin: 0, padding: 0}}>الأسئلة</span>
-                  <span style={{margin: 0, padding: 0}}>المتكررة</span>
-                </Link>
-              </div>
-              {status !== 'loading' && !isLoggedIn && (
-                <Link
-                  href="/auth/login"
-                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors text-sm font-medium ml-2"
-                >
-                  تسجيل الدخول
-                </Link>
-              )}
-              <Link href="/packages" className="text-white text-base font-medium hover:text-green-400 flex items-center justify-center">أسعارنا</Link>
-              <Link href="/blog" className="text-white text-base font-medium hover:text-green-400 flex items-center justify-center">بلوج</Link>
-              <Link href="/contact" className="text-white text-base font-medium hover:text-green-400 flex items-center justify-center">التواصل</Link>
-              <Link href="/campaigns" className="text-white text-base font-medium hover:text-green-400 flex items-center justify-center">حملات</Link>
-              {/* Center Logo with Location Icon */}
-              <Link href="/" className="flex items-center gap-2 mx-4">
-                <span className="text-sm md:text-xl font-bold">SMART PACKAGE</span>
-                <svg className="w-6 h-6 text-green-500" viewBox="0 0 24 24">
-                  <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 21s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 7.2c0 7.3-8 11.8-8 11.8z" />
-                  <circle cx="12" cy="10" r="3" fill="white" stroke="currentColor" strokeWidth={2} />
-                </svg>
+          <div className="hidden md:flex flex-1 items-center justify-between w-full">
+            {/* Right side: 'من نحن' */}
+            <Link href="/about" className="text-white text-base font-medium hover:text-green-400">من نحن</Link>
+            {/* Center: Logo and label */}
+            <Link href="/" className="flex items-center gap-2 mx-4">
+              <span className="text-sm md:text-xl font-bold">SMART PACKAGE</span>
+              <svg className="w-6 h-6 text-green-500" viewBox="0 0 24 24">
+                <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 21s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 7.2c0 7.3-8 11.8-8 11.8z" />
+                <circle cx="12" cy="10" r="3" fill="white" stroke="currentColor" strokeWidth={2} />
+              </svg>
+            </Link>
+            {/* Left side: Log-in button */}
+            {status !== 'loading' && !isLoggedIn && (
+              <Link
+                href="/auth/login"
+                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors text-sm font-medium"
+              >
+                تسجيل الدخول
               </Link>
-            </nav>
+            )}
           </div>
 
           {/* Left Side - Login/User Menu (Desktop) */}

@@ -313,8 +313,16 @@ export default function AccountPage() {
       </div>
       {/* Profile & Navigation Section */}
       <div className="flex flex-row justify-center items-center w-full max-w-2xl mb-8">
-        {/* Navigation Icons (right side, vertical, right-aligned) */}
-        <div className="flex flex-col items-end mr-20 gap-6">
+        {/* Profile Icon (right side) */}
+        <div className="flex-1 flex justify-center">
+          <div className="w-48 h-48 rounded-full bg-gray-300 flex items-center justify-center">
+            <img src="/images/profile_icon.png" alt="الملف الشخصي" width={160} height={160} style={{borderRadius: '50%'}} />
+          </div>
+        </div>
+        {/* Vertical Line */}
+        <div className="h-48 w-px bg-black mx-8"></div>
+        {/* Navigation Icons (left side, vertical, right-aligned) */}
+        <div className="flex flex-col items-end gap-6">
           <a className="group flex flex-row items-center gap-3" href="/tracking_packages_user">
             <span className="text-lg text-gray-800">تتبع الرزم</span>
             <div className="w-14 h-14 flex items-center justify-center">
@@ -334,8 +342,6 @@ export default function AccountPage() {
             </div>
           </a>
         </div>
-        {/* Vertical Line */}
-        <div className="h-48 w-px bg-black mx-8"></div>
       </div>
       {/* Green Divider */}
       <div className="flex justify-center items-center mb-8">
