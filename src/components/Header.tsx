@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import Header from '../../components/Header'
 
 export default function Header() {
   const { data: session, status } = useSession()
