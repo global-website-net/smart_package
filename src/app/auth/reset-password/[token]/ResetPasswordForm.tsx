@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Header from '@/app/components/Header'
+import Header from '../../../../components/Header'
 
 interface ResetPasswordFormProps {
   token: string

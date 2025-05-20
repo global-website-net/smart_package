@@ -322,7 +322,15 @@ export default function AccountPage() {
         {/* Profile & Navigation Section */}
         <div className="w-full max-w-4xl mx-auto px-4">
           <div className="flex flex-row items-center justify-center mb-8 gap-4">
-            {/* Navigation Icons (left side, vertical, right-aligned) */}
+            {/* Profile Icon (left side) */}
+            <div className="flex justify-end">
+              <div className="w-48 h-48 rounded-full bg-gray-300 flex items-center justify-center">
+                <img src="/images/profile_icon.png" alt="الملف الشخصي" width={160} height={160} style={{borderRadius: '50%'}} />
+              </div>
+            </div>
+            {/* Vertical divider with bold style */}
+            <div className="h-40 w-1 bg-black mx-2"></div>
+            {/* Navigation Icons (right side, vertical, right-aligned) */}
             <div className="flex flex-col items-end gap-4 min-w-[120px]">
               <Link className="group flex flex-row-reverse items-center gap-2" href="/tracking_packages_user">
                 <div className="w-14 h-14 flex items-center justify-center">
@@ -342,14 +350,6 @@ export default function AccountPage() {
                 </div>
                 <span className="text-lg text-gray-800">تتبع الطلبات</span>
               </Link>
-            </div>
-            {/* Vertical divider with bold style */}
-            <div className="h-40 w-1 bg-black mx-2"></div>
-            {/* Profile Icon (right side) */}
-            <div className="flex justify-end">
-              <div className="w-48 h-48 rounded-full bg-gray-300 flex items-center justify-center">
-                <img src="/images/profile_icon.png" alt="الملف الشخصي" width={160} height={160} style={{borderRadius: '50%'}} />
-              </div>
             </div>
           </div>
           {/* Green Divider */}
@@ -433,65 +433,48 @@ export default function AccountPage() {
                 <button
                   type="button"
                   tabIndex={-1}
-                  className="absolute left-2 top-9 transform -translate-y-1/2 text-gray-500"
+                  className="absolute left-2 top-9 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
                   onClick={() => setShowCurrentPassword((v) => !v)}
                   aria-label={showCurrentPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
                 >
                   {showCurrentPassword ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-1.657.403-3.22 1.125-4.575M15 12a3 3 0 11-6 0 3 3 0 016 0zm6.364-2.364A9.956 9.956 0 0122 9c0 5.523-4.477 10-10 10a9.956 9.956 0 01-4.636-1.364M3 3l18 18" /></svg>
+                    // Eye Off (Heroicons)
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12.001C3.226 15.376 7.05 19.5 12 19.5c1.658 0 3.237-.356 4.646-.99m3.374-2.53A10.45 10.45 0 0022.066 12c-1.292-3.375-5.116-7.5-10.066-7.5-1.272 0-2.492.195-3.637.553" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18" />
+                    </svg>
                   ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm2.25 2.25A9.956 9.956 0 0022 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 1.657.403 3.22 1.125 4.575" /></svg>
+                    // Eye (Heroicons)
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12C3.5 7.5 7.364 4.5 12 4.5c4.636 0 8.5 3 9.75 7.5-1.25 4.5-5.114 7.5-9.75 7.5-4.636 0-8.5-3-9.75-7.5z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
                   )}
                 </button>
                 {passwordError && (
                   <p className="text-red-500 text-sm mt-1 text-right">{passwordError}</p>
                 )}
               </div>
-              <div className="w-full relative">
+              <div className="w-full">
                 <label className="block text-gray-700 font-bold mb-1 pr-2">كلمة المرور الجديدة (اختياري)</label>
                 <input 
-                  type={showNewPassword ? "text" : "password"}
+                  type="password"
                   name="newPassword" 
                   value={formData.newPassword} 
                   onChange={handleInputChange} 
-                  className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right pr-10" 
+                  className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right" 
                 />
-                <button
-                  type="button"
-                  tabIndex={-1}
-                  className="absolute left-2 top-9 transform -translate-y-1/2 text-gray-500"
-                  onClick={() => setShowNewPassword((v) => !v)}
-                  aria-label={showNewPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
-                >
-                  {showNewPassword ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-1.657.403-3.22 1.125-4.575M15 12a3 3 0 11-6 0 3 3 0 016 0zm6.364-2.364A9.956 9.956 0 0122 9c0 5.523-4.477 10-10 10a9.956 9.956 0 01-4.636-1.364M3 3l18 18" /></svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm2.25 2.25A9.956 9.956 0 0022 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 1.657.403 3.22 1.125 4.575" /></svg>
-                  )}
-                </button>
               </div>
-              <div className="w-full relative">
+              <div className="w-full">
                 <label className="block text-gray-700 font-bold mb-1 pr-2">تأكيد كلمة المرور الجديدة</label>
                 <input 
-                  type={showConfirmPassword ? "text" : "password"}
+                  type="password"
                   name="confirmPassword" 
                   value={formData.confirmPassword} 
                   onChange={handleInputChange} 
-                  className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right pr-10" 
+                  className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right" 
                 />
-                <button
-                  type="button"
-                  tabIndex={-1}
-                  className="absolute left-2 top-9 transform -translate-y-1/2 text-gray-500"
-                  onClick={() => setShowConfirmPassword((v) => !v)}
-                  aria-label={showConfirmPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
-                >
-                  {showConfirmPassword ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-1.657.403-3.22 1.125-4.575M15 12a3 3 0 11-6 0 3 3 0 016 0zm6.364-2.364A9.956 9.956 0 0122 9c0 5.523-4.477 10-10 10a9.956 9.956 0 01-4.636-1.364M3 3l18 18" /></svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm2.25 2.25A9.956 9.956 0 0022 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 1.657.403 3.22 1.125 4.575" /></svg>
-                  )}
-                </button>
               </div>
             </>
           )}
