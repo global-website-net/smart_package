@@ -4,7 +4,7 @@ import { useState, Suspense, useEffect } from 'react'
 import { signIn, signOut } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import Header from '../../components/Header'
+import Header from '../../../components/Header'
 import { Eye, EyeOff } from 'lucide-react'
 
 function LoginForm() {

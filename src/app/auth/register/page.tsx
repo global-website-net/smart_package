@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Header from '../../components/Header'
+import Header from '../../../components/Header'
 import { signIn } from 'next-auth/react'
 import { supabase } from '@/lib/supabase'
 import bcrypt from 'bcryptjs'
