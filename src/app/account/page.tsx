@@ -314,7 +314,7 @@ export default function AccountPage() {
       {/* Profile & Navigation Section */}
       <div className="flex flex-row justify-center items-center w-full max-w-2xl mb-8">
         {/* Navigation Icons (right side, vertical, right-aligned) */}
-        <div className="flex flex-col items-end mr-8 gap-6">
+        <div className="flex flex-col items-end mr-20 gap-6">
           <a className="group flex flex-row items-center gap-3" href="/tracking_packages_user">
             <span className="text-lg text-gray-800">تتبع الرزم</span>
             <div className="w-14 h-14 flex items-center justify-center">

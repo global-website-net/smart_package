@@ -116,12 +116,13 @@ export default function Header() {
           {/* Desktop Main Navigation */}
           <div className="hidden md:flex flex-1 items-center justify-center w-full">
             <nav className="flex items-center gap-8 w-full justify-center">
-              {/* Right side labels (from right to left for Arabic) */}
-              <Link href="/about" className="text-white text-base font-medium hover:text-green-400">من نحن</Link>
-              <Link href="/faq" className="text-white text-base font-medium hover:text-green-400 leading-tight flex flex-col items-center justify-center" style={{lineHeight: '1.1'}}>
-                <span>الأسئلة</span>
-                <span>المتكررة</span>
-              </Link>
+              <Link href="/about" className="text-white text-base font-medium hover:text-green-400 flex items-center justify-center">من نحن</Link>
+              <div className="flex flex-col items-center justify-center h-full">
+                <Link href="/faq" className="text-white text-base font-medium hover:text-green-400 leading-tight flex flex-col items-center justify-center p-0 m-0" style={{lineHeight: '1.1', margin: 0, padding: 0}}>
+                  <span style={{margin: 0, padding: 0}}>الأسئلة</span>
+                  <span style={{margin: 0, padding: 0}}>المتكررة</span>
+                </Link>
+              </div>
               {status !== 'loading' && !isLoggedIn && (
                 <Link
                   href="/auth/login"
@@ -130,10 +131,10 @@ export default function Header() {
                   تسجيل الدخول
                 </Link>
               )}
-              <Link href="/packages" className="text-white text-base font-medium hover:text-green-400">أسعارنا</Link>
-              <Link href="/blog" className="text-white text-base font-medium hover:text-green-400">بلوج</Link>
-              <Link href="/contact" className="text-white text-base font-medium hover:text-green-400">التواصل</Link>
-              <Link href="/campaigns" className="text-white text-base font-medium hover:text-green-400">حملات</Link>
+              <Link href="/packages" className="text-white text-base font-medium hover:text-green-400 flex items-center justify-center">أسعارنا</Link>
+              <Link href="/blog" className="text-white text-base font-medium hover:text-green-400 flex items-center justify-center">بلوج</Link>
+              <Link href="/contact" className="text-white text-base font-medium hover:text-green-400 flex items-center justify-center">التواصل</Link>
+              <Link href="/campaigns" className="text-white text-base font-medium hover:text-green-400 flex items-center justify-center">حملات</Link>
               {/* Center Logo with Location Icon */}
               <Link href="/" className="flex items-center gap-2 mx-4">
                 <span className="text-sm md:text-xl font-bold">SMART PACKAGE</span>

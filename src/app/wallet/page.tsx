@@ -149,7 +149,7 @@ export default function WalletPage() {
               </div>
               {walletData.transactions.map((transaction) => (
                 <div key={transaction.id} className="flex justify-between items-center border-b pb-4">
-                  <div className="flex items-center gap-1 w-1/3 justify-center">
+                  <div className="flex items-center w-1/3 justify-center">
                     <span className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {new Date(transaction.createdAt).toLocaleDateString('en-GB', {
                         year: 'numeric',
@@ -159,7 +159,7 @@ export default function WalletPage() {
                         minute: '2-digit'
                       })}
                     </span>
-                    <img src="/images/calendar_icon.png" alt="Calendar Icon" className="w-5 h-5" />
+                    <img src="/images/calendar_icon.png" alt="Calendar Icon" className="w-5 h-5 ml-1" />
                   </div>
                   <span className="w-1/3 text-center text-sm text-gray-700">{transaction.reason}</span>
                   <div className="flex items-center gap-4 w-1/3 justify-center">
