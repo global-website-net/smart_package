@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import Header from '@/app/components/Header'
+import Header from '@/components/Header'
 import PaymentWizard from '@/components/PaymentWizard'
 import BalanceDisplay from '@/components/BalanceDisplay'
 
