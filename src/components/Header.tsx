@@ -22,78 +22,120 @@ export default function Header() {
     <header className="bg-white shadow-md">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            <Link href="/" className="text-2xl font-bold text-green-600">
-              Smart Package
-            </Link>
-          </div>
+          {status === 'authenticated' ? (
+            <div className="flex items-center">
+              <Link href="/" className="text-2xl font-bold text-green-600">
+                Smart Package
+              </Link>
+            </div>
+          ) : (
+            <div className="flex-1 flex items-center justify-center">
+              <Link href="/" className="text-2xl font-bold text-green-600">
+                Smart Package
+              </Link>
+            </div>
+          )}
 
-          <div className="flex items-center space-x-8 rtl:space-x-reverse">
-            <Link
-              href="/"
-              className={`${
-                pathname === '/'
-                  ? 'text-green-600'
-                  : 'text-gray-700 hover:text-green-600'
-              } px-3 py-2 text-sm font-medium`}
-            >
-              الرئيسية
-            </Link>
-            <Link
-              href="/how-it-works"
-              className={`${
-                pathname === '/how-it-works'
-                  ? 'text-green-600'
-                  : 'text-gray-700 hover:text-green-600'
-              } px-3 py-2 text-sm font-medium`}
-            >
-              كيف يعمل
-            </Link>
-            <Link
-              href="/#shopping-sites"
-              className={`${
-                pathname === '/#shopping-sites'
-                  ? 'text-green-600'
-                  : 'text-gray-700 hover:text-green-600'
-              } px-3 py-2 text-sm font-medium`}
-            >
-              مواقع التسوق
-            </Link>
-            <Link
-              href="/packages"
-              className={`${
-                pathname === '/packages'
-                  ? 'text-green-600'
-                  : 'text-gray-700 hover:text-green-600'
-              } px-3 py-2 text-sm font-medium`}
-            >
-              الباقات
-            </Link>
-            <Link
-              href="/blog"
-              className={`${
-                pathname === '/blog'
-                  ? 'text-green-600'
-                  : 'text-gray-700 hover:text-green-600'
-              } px-3 py-2 text-sm font-medium`}
-            >
-              المدونة
-            </Link>
-            <Link
-              href="/contact"
-              className={`${
-                pathname === '/contact'
-                  ? 'text-green-600'
-                  : 'text-gray-700 hover:text-green-600'
-              } px-3 py-2 text-sm font-medium`}
-            >
-              اتصل بنا
-            </Link>
+          <div className="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
+            {status === 'authenticated' ? (
+              <>
+                <Link
+                  href="/"
+                  className={`${
+                    pathname === '/'
+                      ? 'text-green-600'
+                      : 'text-gray-700 hover:text-green-600'
+                  } px-3 py-2 text-sm font-medium`}
+                >
+                  الرئيسية
+                </Link>
+                <Link
+                  href="/how-it-works"
+                  className={`${
+                    pathname === '/how-it-works'
+                      ? 'text-green-600'
+                      : 'text-gray-700 hover:text-green-600'
+                  } px-3 py-2 text-sm font-medium`}
+                >
+                  كيف يعمل
+                </Link>
+                <Link
+                  href="/#shopping-sites"
+                  className={`${
+                    pathname === '/#shopping-sites'
+                      ? 'text-green-600'
+                      : 'text-gray-700 hover:text-green-600'
+                  } px-3 py-2 text-sm font-medium`}
+                >
+                  مواقع التسوق
+                </Link>
+                <Link
+                  href="/packages"
+                  className={`${
+                    pathname === '/packages'
+                      ? 'text-green-600'
+                      : 'text-gray-700 hover:text-green-600'
+                  } px-3 py-2 text-sm font-medium`}
+                >
+                  الباقات
+                </Link>
+                <Link
+                  href="/blog"
+                  className={`${
+                    pathname === '/blog'
+                      ? 'text-green-600'
+                      : 'text-gray-700 hover:text-green-600'
+                  } px-3 py-2 text-sm font-medium`}
+                >
+                  المدونة
+                </Link>
+                <Link
+                  href="/contact"
+                  className={`${
+                    pathname === '/contact'
+                      ? 'text-green-600'
+                      : 'text-gray-700 hover:text-green-600'
+                  } px-3 py-2 text-sm font-medium`}
+                >
+                  اتصل بنا
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/how-it-works"
+                  className={`${
+                    pathname === '/how-it-works'
+                      ? 'text-green-600'
+                      : 'text-gray-700 hover:text-green-600'
+                  } px-3 py-2 text-sm font-medium`}
+                >
+                  كيف يعمل
+                </Link>
+                <Link
+                  href="/prices"
+                  className={`${
+                    pathname === '/prices'
+                      ? 'text-green-600'
+                      : 'text-gray-700 hover:text-green-600'
+                  } px-3 py-2 text-sm font-medium`}
+                >
+                  أسعارنا
+                </Link>
+              </>
+            )}
           </div>
 
           <div className="flex items-center space-x-4 rtl:space-x-reverse">
             {status === 'authenticated' ? (
               <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                <Link
+                  href="/faq"
+                  className="flex flex-col items-center text-gray-700 hover:text-green-600 px-3 py-2 text-sm font-medium"
+                >
+                  <span>الأسئلة</span>
+                  <span>المتكررة</span>
+                </Link>
                 <Link
                   href="/account"
                   className="text-gray-700 hover:text-green-600 px-3 py-2 text-sm font-medium"
@@ -110,14 +152,21 @@ export default function Header() {
             ) : (
               <div className="flex items-center space-x-4 rtl:space-x-reverse">
                 <Link
-                  href="/prices"
-                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 text-sm font-medium"
+                  href="/auth/login"
+                  className="text-gray-700 hover:text-green-600 px-3 py-2 text-sm font-medium"
                 >
-                  أسعارنا
+                  تسجيل دخول
+                </Link>
+                <Link
+                  href="/faq"
+                  className="flex flex-col items-center text-gray-700 hover:text-green-600 px-3 py-2 text-sm font-medium"
+                >
+                  <span>الأسئلة</span>
+                  <span>المتكررة</span>
                 </Link>
                 <Link
                   href="/auth/signup"
-                  className="text-gray-700 hover:text-green-600 px-3 py-2 text-sm font-medium"
+                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 text-sm font-medium"
                 >
                   إنشاء حساب
                 </Link>
@@ -175,74 +224,81 @@ export default function Header() {
         } md:hidden bg-white shadow-md`}
       >
         <div className="px-2 pt-2 pb-3 space-y-1">
-          <Link
-            href="/"
-            className={`${
-              pathname === '/'
-                ? 'text-green-600'
-                : 'text-gray-700 hover:text-green-600'
-            } block px-3 py-2 text-base font-medium`}
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            الرئيسية
-          </Link>
-          <Link
-            href="/how-it-works"
-            className={`${
-              pathname === '/how-it-works'
-                ? 'text-green-600'
-                : 'text-gray-700 hover:text-green-600'
-            } block px-3 py-2 text-base font-medium`}
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            كيف يعمل
-          </Link>
-          <Link
-            href="/#shopping-sites"
-            className={`${
-              pathname === '/#shopping-sites'
-                ? 'text-green-600'
-                : 'text-gray-700 hover:text-green-600'
-            } block px-3 py-2 text-base font-medium`}
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            مواقع التسوق
-          </Link>
-          <Link
-            href="/packages"
-            className={`${
-              pathname === '/packages'
-                ? 'text-green-600'
-                : 'text-gray-700 hover:text-green-600'
-            } block px-3 py-2 text-base font-medium`}
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            الباقات
-          </Link>
-          <Link
-            href="/blog"
-            className={`${
-              pathname === '/blog'
-                ? 'text-green-600'
-                : 'text-gray-700 hover:text-green-600'
-            } block px-3 py-2 text-base font-medium`}
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            المدونة
-          </Link>
-          <Link
-            href="/contact"
-            className={`${
-              pathname === '/contact'
-                ? 'text-green-600'
-                : 'text-gray-700 hover:text-green-600'
-            } block px-3 py-2 text-base font-medium`}
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            اتصل بنا
-          </Link>
           {status === 'authenticated' ? (
             <>
+              <Link
+                href="/faq"
+                className="flex flex-col items-center text-gray-700 hover:text-green-600 px-3 py-2 text-sm font-medium"
+              >
+                <span>الأسئلة</span>
+                <span>المتكررة</span>
+              </Link>
+              <Link
+                href="/"
+                className={`${
+                  pathname === '/'
+                    ? 'text-green-600'
+                    : 'text-gray-700 hover:text-green-600'
+                } block px-3 py-2 text-base font-medium`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                الرئيسية
+              </Link>
+              <Link
+                href="/how-it-works"
+                className={`${
+                  pathname === '/how-it-works'
+                    ? 'text-green-600'
+                    : 'text-gray-700 hover:text-green-600'
+                } block px-3 py-2 text-base font-medium`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                كيف يعمل
+              </Link>
+              <Link
+                href="/#shopping-sites"
+                className={`${
+                  pathname === '/#shopping-sites'
+                    ? 'text-green-600'
+                    : 'text-gray-700 hover:text-green-600'
+                } block px-3 py-2 text-base font-medium`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                مواقع التسوق
+              </Link>
+              <Link
+                href="/packages"
+                className={`${
+                  pathname === '/packages'
+                    ? 'text-green-600'
+                    : 'text-gray-700 hover:text-green-600'
+                } block px-3 py-2 text-base font-medium`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                الباقات
+              </Link>
+              <Link
+                href="/blog"
+                className={`${
+                  pathname === '/blog'
+                    ? 'text-green-600'
+                    : 'text-gray-700 hover:text-green-600'
+                } block px-3 py-2 text-base font-medium`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                المدونة
+              </Link>
+              <Link
+                href="/contact"
+                className={`${
+                  pathname === '/contact'
+                    ? 'text-green-600'
+                    : 'text-gray-700 hover:text-green-600'
+                } block px-3 py-2 text-base font-medium`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                اتصل بنا
+              </Link>
               <Link
                 href="/account"
                 className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-green-600"
@@ -263,15 +319,44 @@ export default function Header() {
           ) : (
             <>
               <Link
+                href="/faq"
+                className="flex flex-col items-center text-gray-700 hover:text-green-600 px-3 py-2 text-sm font-medium"
+              >
+                <span>الأسئلة</span>
+                <span>المتكررة</span>
+              </Link>
+              <Link
+                href="/how-it-works"
+                className={`${
+                  pathname === '/how-it-works'
+                    ? 'text-green-600'
+                    : 'text-gray-700 hover:text-green-600'
+                } block px-3 py-2 text-base font-medium`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                كيف يعمل
+              </Link>
+              <Link
                 href="/prices"
-                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-green-600"
+                className={`${
+                  pathname === '/prices'
+                    ? 'text-green-600'
+                    : 'text-gray-700 hover:text-green-600'
+                } block px-3 py-2 text-base font-medium`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 أسعارنا
               </Link>
               <Link
-                href="/auth/signup"
+                href="/auth/login"
                 className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-green-600"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                تسجيل دخول
+              </Link>
+              <Link
+                href="/auth/signup"
+                className="block px-3 py-2 text-base font-medium text-green-600 hover:text-green-700"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 إنشاء حساب

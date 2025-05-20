@@ -137,6 +137,9 @@ export default function WalletPage() {
               إضافة رصيد
             </button>
           </div>
+          
+          {/* Green Divider */}
+          <div className="w-full h-0.5 bg-green-500 mb-8" />
 
           {/* Transaction History */}
           <div className="mt-12">

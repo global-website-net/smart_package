@@ -307,22 +307,22 @@ export default function AccountPage() {
         <div className="w-full text-center mt-8">
           <h1 className="text-3xl font-bold text-center mb-4 mt-0">الحساب الشخصي</h1>
           <div className="flex justify-center items-center mb-8">
-            <div className="relative w-full">
+            <div className="relative w-56 sm:w-64 md:w-80">
               <div className="w-full h-0.5 bg-green-500"></div>
               <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
             </div>
           </div>
         </div>
         {/* Profile & Navigation Section */}
-        <div className="flex flex-row justify-center items-center w-full max-w-2xl mb-8">
+        <div className="flex items-center justify-between w-full max-w-4xl px-4">
           {/* Profile Icon (right side) */}
           <div className="flex-1 flex justify-center">
-            <div className="w-48 h-48 rounded-full flex items-center justify-center">
+            <div className="w-48 h-48 rounded-full bg-gray-300 flex items-center justify-center">
               <img src="/images/profile_icon.png" alt="الملف الشخصي" width={160} height={160} style={{borderRadius: '50%'}} />
             </div>
           </div>
-          {/* Move vertical divider here, close to profile icon */}
-          <div className="h-48 w-px bg-black mx-4"></div>
+          {/* Vertical divider with reduced margin and overlap */}
+          <div className="h-48 w-px bg-black mx-2" style={{ marginLeft: '-1rem' }}></div>
           {/* Navigation Icons (left side, vertical, right-aligned) */}
           <div className="flex flex-col items-end gap-6">
             <a className="group flex flex-row items-center gap-3" href="/tracking_packages_user">
@@ -346,11 +346,7 @@ export default function AccountPage() {
           </div>
         </div>
         {/* Green Divider */}
-        <div className="flex justify-center items-center mb-8">
-          <div className="relative w-56 sm:w-64 md:w-80">
-            <div className="w-full h-0.5 bg-green-500"></div>
-          </div>
-        </div>
+        <div className="w-full h-0.5 bg-green-500 mb-8" />
         {/* Form Section */}
         <form onSubmit={handleSubmit} className="w-full max-w-lg flex flex-col gap-6 items-end">
           <div className="w-full">
