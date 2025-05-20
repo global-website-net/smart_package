@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import Header from '../components/Header'
+import Header from '@/components/Header'
 import { useRouter } from 'next/navigation'
 
 interface Package {

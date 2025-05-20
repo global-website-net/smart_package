@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import Header from '../components/Header'
+import Header from '@/components/Header'
 import Toast from '@/app/components/Toast'
 import { supabase } from '@/lib/supabase'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'

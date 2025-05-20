@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Header from '../components/Header'
+import Header from '@/components/Header'
 import { FaPhone, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa'
 import Link from 'next/link'
 
