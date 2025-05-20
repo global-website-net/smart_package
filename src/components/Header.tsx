@@ -19,232 +19,74 @@ export default function Header() {
   ]
 
   return (
-    <header className="bg-white shadow-md">
+    <header className="bg-black text-white shadow-md">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <div className="flex justify-between h-16">
-          {/* Logo - Fixed position */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 top-4">
-            <Link href="/" className="text-2xl font-bold text-green-600">
-              Smart Package
+        <div className="flex justify-between h-14 items-center relative">
+          {/* Left side navigation (RTL: visually right) */}
+          <div className="flex flex-1 items-center justify-start gap-6">
+            <Link href="/" className="px-2 py-1 font-bold">الرئيسية</Link>
+            <Link href="/how-it-works" className="px-2 py-1">من نحن</Link>
+            <Link href="/prices" className="px-2 py-1">اسعارنا</Link>
+            <Link href="/contact" className="px-2 py-1">التواصل</Link>
+          </div>
+
+          {/* Centered Logo */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center">
+            <Link href="/" className="flex items-center gap-2 text-white text-lg font-extrabold">
+              <img src="/images/logo_pin.png" alt="logo" className="w-6 h-6" />
+              <span>SMART PACKAGE</span>
             </Link>
           </div>
 
-          {/* Left side navigation */}
-          <div className="flex-1 flex items-center justify-start">
-            <div className="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
-              <Link
-                href="/faq"
-                className="flex flex-col items-center text-gray-700 hover:text-green-600 px-3 py-2 text-sm font-medium"
-              >
-                <span>الأسئلة</span>
-                <span>المتكررة</span>
-              </Link>
-            </div>
+          {/* Right side navigation (RTL: visually left) */}
+          <div className="flex flex-1 items-center justify-end gap-6">
+            <Link href="/campaigns" className="px-2 py-1">حملات</Link>
+            <Link href="/blog" className="px-2 py-1">بلوج</Link>
+            <Link href="/faq" className="px-2 py-1 flex flex-col items-center leading-tight">
+              <span>الأسئلة</span>
+              <span>المتكررة</span>
+            </Link>
           </div>
 
-          {/* Right side navigation */}
-          <div className="flex-1 flex items-center justify-end">
-            <div className="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
-              <Link
-                href="/prices"
-                className={`${
-                  pathname === '/prices'
-                    ? 'text-green-600'
-                    : 'text-gray-700 hover:text-green-600'
-                } px-3 py-2 text-sm font-medium`}
-              >
-                أسعارنا
-              </Link>
-              <Link
-                href="/how-it-works"
-                className={`${
-                  pathname === '/how-it-works'
-                    ? 'text-green-600'
-                    : 'text-gray-700 hover:text-green-600'
-                } px-3 py-2 text-sm font-medium`}
-              >
-                من نحن
-              </Link>
-            </div>
-
-            <div className="flex items-center space-x-4 rtl:space-x-reverse">
-              {status === 'authenticated' ? (
-                <div className="flex items-center space-x-4 rtl:space-x-reverse">
-                  <Link
-                    href="/account"
-                    className="text-gray-700 hover:text-green-600 px-3 py-2 text-sm font-medium"
-                  >
-                    حسابي
-                  </Link>
-                  <button
-                    onClick={() => signOut()}
-                    className="text-gray-700 hover:text-green-600 px-3 py-2 text-sm font-medium"
-                  >
-                    تسجيل خروج
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-4 rtl:space-x-reverse">
-                  <Link
-                    href="/auth/login"
-                    className="text-gray-700 hover:text-green-600 px-3 py-2 text-sm font-medium"
-                  >
-                    تسجيل دخول
-                  </Link>
-                  <Link
-                    href="/auth/signup"
-                    className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 text-sm font-medium"
-                  >
-                    إنشاء حساب
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-center md:hidden">
-              <button
-                type="button"
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-green-600 focus:outline-none"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              >
-                <span className="sr-only">فتح القائمة</span>
-                {isMobileMenuOpen ? (
-                  <svg
-                    className="block h-6 w-6"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                ) : (
-                  <svg
-                    className="block h-6 w-6"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  </svg>
-                )}
-              </button>
-            </div>
+          {/* Auth/account buttons (far right, overlay) */}
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+            {status === 'authenticated' ? (
+              <>
+                <Link href="/account" className="px-2 py-1">حسابي</Link>
+                <button onClick={() => signOut()} className="px-2 py-1">تسجيل خروج</button>
+              </>
+            ) : (
+              <>
+                <Link href="/auth/login" className="px-2 py-1">تسجيل دخول</Link>
+                <Link href="/auth/signup" className="px-2 py-1 bg-green-600 rounded text-white">إنشاء حساب</Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
 
       {/* Mobile menu */}
-      <div
-        className={`${
-          isMobileMenuOpen ? 'block' : 'hidden'
-        } md:hidden bg-white shadow-md`}
-      >
-        <div className="px-2 pt-2 pb-3 space-y-1">
+      <div className={`${isMobileMenuOpen ? 'block' : 'hidden'} md:hidden bg-black text-white shadow-md`}>
+        <div className="px-2 pt-2 pb-3 space-y-1 flex flex-col gap-2">
+          <Link href="/" className="block px-3 py-2">الرئيسية</Link>
+          <Link href="/how-it-works" className="block px-3 py-2">من نحن</Link>
+          <Link href="/prices" className="block px-3 py-2">اسعارنا</Link>
+          <Link href="/contact" className="block px-3 py-2">التواصل</Link>
+          <Link href="/campaigns" className="block px-3 py-2">حملات</Link>
+          <Link href="/blog" className="block px-3 py-2">بلوج</Link>
+          <Link href="/faq" className="block px-3 py-2 flex flex-col items-start leading-tight">
+            <span>الأسئلة</span>
+            <span>المتكررة</span>
+          </Link>
           {status === 'authenticated' ? (
             <>
-              <Link
-                href="/faq"
-                className="flex flex-col items-center text-gray-700 hover:text-green-600 px-3 py-2 text-sm font-medium"
-              >
-                <span>الأسئلة</span>
-                <span>المتكررة</span>
-              </Link>
-              <Link
-                href="/prices"
-                className={`${
-                  pathname === '/prices'
-                    ? 'text-green-600'
-                    : 'text-gray-700 hover:text-green-600'
-                } block px-3 py-2 text-base font-medium`}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                أسعارنا
-              </Link>
-              <Link
-                href="/how-it-works"
-                className={`${
-                  pathname === '/how-it-works'
-                    ? 'text-green-600'
-                    : 'text-gray-700 hover:text-green-600'
-                } block px-3 py-2 text-base font-medium`}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                من نحن
-              </Link>
-              <Link
-                href="/account"
-                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-green-600"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                حسابي
-              </Link>
-              <button
-                onClick={() => {
-                  signOut()
-                  setIsMobileMenuOpen(false)
-                }}
-                className="block w-full text-right px-3 py-2 text-base font-medium text-gray-700 hover:text-green-600"
-              >
-                تسجيل خروج
-              </button>
+              <Link href="/account" className="block px-3 py-2">حسابي</Link>
+              <button onClick={() => { signOut(); setIsMobileMenuOpen(false); }} className="block px-3 py-2">تسجيل خروج</button>
             </>
           ) : (
             <>
-              <Link
-                href="/faq"
-                className="flex flex-col items-center text-gray-700 hover:text-green-600 px-3 py-2 text-sm font-medium"
-              >
-                <span>الأسئلة</span>
-                <span>المتكررة</span>
-              </Link>
-              <Link
-                href="/prices"
-                className={`${
-                  pathname === '/prices'
-                    ? 'text-green-600'
-                    : 'text-gray-700 hover:text-green-600'
-                } block px-3 py-2 text-base font-medium`}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                أسعارنا
-              </Link>
-              <Link
-                href="/how-it-works"
-                className={`${
-                  pathname === '/how-it-works'
-                    ? 'text-green-600'
-                    : 'text-gray-700 hover:text-green-600'
-                } block px-3 py-2 text-base font-medium`}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                من نحن
-              </Link>
-              <Link
-                href="/auth/login"
-                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-green-600"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                تسجيل دخول
-              </Link>
-              <Link
-                href="/auth/signup"
-                className="block px-3 py-2 text-base font-medium text-green-600 hover:text-green-700"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                إنشاء حساب
-              </Link>
+              <Link href="/auth/login" className="block px-3 py-2">تسجيل دخول</Link>
+              <Link href="/auth/signup" className="block px-3 py-2 bg-green-600 rounded text-white">إنشاء حساب</Link>
             </>
           )}
         </div>

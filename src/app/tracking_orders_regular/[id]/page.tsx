@@ -209,15 +209,15 @@ export default function OrderDetailsPage() {
             <img src="/images/truck_icon.png" alt="Truck Icon" className="w-16 h-16 mb-2" />
             <div className="text-black text-lg font-bold mt-1">{getOrderStatusText(order.status)}</div>
           </div>
-          {/* Middle: Market Icon above Shop Name */}
-          <div className="flex flex-col items-center justify-end flex-1">
-            <img src="/images/market_icon.png" alt="Market Icon" className="w-16 h-16 mb-2" />
-            <div className="text-black text-lg font-bold mt-1">{order.purchaseSite}</div>
-          </div>
-          {/* Left: Price Tag Hexagon above Amount */}
+          {/* Middle: Price Tag Hexagon above Amount */}
           <div className="flex flex-col items-center justify-end flex-1">
             <img src="/images/price_tag_hexagon.png" alt="Price Tag Hexagon" className="w-16 h-16 mb-2" />
             <div className="text-black text-lg font-bold mt-1">{order.totalAmount.toFixed(2)}₪</div>
+          </div>
+          {/* Left: Market Icon above Shop Name */}
+          <div className="flex flex-col items-center justify-end flex-1">
+            <img src="/images/market_icon.png" alt="Market Icon" className="w-16 h-16 mb-2" />
+            <div className="text-black text-lg font-bold mt-1">{order.purchaseSite}</div>
           </div>
         </div>
         {/* Pay button row */}

@@ -66,6 +66,9 @@ export default function AccountPage() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [passwordError, setPasswordError] = useState('')
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter()
 
   const isAdminOrOwner = session?.user?.role === 'ADMIN' || session?.user?.role === 'OWNER'
@@ -203,6 +206,13 @@ export default function AccountPage() {
     setPasswordError('')
     setIsSubmitting(true)
 
+    // Prevent submission if current password is empty
+    if (!formData.currentPassword) {
+      setPasswordError('يجب إدخال كلمة المرور الحالية');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       // First verify the current password
       const verifyResponse = await fetch('/api/auth/verify-password', {
@@ -218,7 +228,7 @@ export default function AccountPage() {
       const verifyData = await verifyResponse.json();
       
       if (!verifyResponse.ok) {
-        setPasswordError('كلمة المرور الحالية غير صحيحة');
+        setPasswordError(verifyData.error || 'كلمة المرور الحالية غير صحيحة');
         setIsSubmitting(false);
         return;
       }
@@ -311,35 +321,35 @@ export default function AccountPage() {
         </div>
         {/* Profile & Navigation Section */}
         <div className="w-full max-w-4xl mx-auto px-4">
-          <div className="flex flex-row justify-between items-center mb-8">
-            {/* Profile Icon (right side) */}
-            <div className="flex justify-end">
-              <div className="w-48 h-48 rounded-full bg-gray-300 flex items-center justify-center">
-                <img src="/images/profile_icon.png" alt="الملف الشخصي" width={160} height={160} style={{borderRadius: '50%'}} />
-              </div>
-            </div>
-            {/* Vertical divider with bold style */}
-            <div className="h-48 w-1 bg-black mx-2"></div>
+          <div className="flex flex-row items-center justify-center mb-8 gap-4">
             {/* Navigation Icons (left side, vertical, right-aligned) */}
-            <div className="flex flex-col items-end gap-6">
-              <Link className="group flex flex-row-reverse items-center gap-3" href="/tracking_packages_user">
+            <div className="flex flex-col items-end gap-4 min-w-[120px]">
+              <Link className="group flex flex-row-reverse items-center gap-2" href="/tracking_packages_user">
                 <div className="w-14 h-14 flex items-center justify-center">
                   <Image alt="تتبع الرزم" width={56} height={56} src="/images/package_hex_icon.png" />
                 </div>
                 <span className="text-lg text-gray-800">تتبع الرزم</span>
               </Link>
-              <Link className="group flex flex-row-reverse items-center gap-3" href="/wallet">
+              <Link className="group flex flex-row-reverse items-center gap-2" href="/wallet">
                 <div className="w-14 h-14 flex items-center justify-center">
                   <Image alt="المحفظة" width={56} height={56} src="/images/wallet_hex_icon.png" />
                 </div>
                 <span className="text-lg text-gray-800">المحفظة</span>
               </Link>
-              <Link className="group flex flex-row-reverse items-center gap-3" href="/tracking_orders_regular">
+              <Link className="group flex flex-row-reverse items-center gap-2" href="/tracking_orders_regular">
                 <div className="w-14 h-14 flex items-center justify-center">
                   <Image alt="تتبع الطلبات" width={56} height={56} src="/images/shopping_bag_hex_icon.png" />
                 </div>
                 <span className="text-lg text-gray-800">تتبع الطلبات</span>
               </Link>
+            </div>
+            {/* Vertical divider with bold style */}
+            <div className="h-40 w-1 bg-black mx-2"></div>
+            {/* Profile Icon (right side) */}
+            <div className="flex justify-end">
+              <div className="w-48 h-48 rounded-full bg-gray-300 flex items-center justify-center">
+                <img src="/images/profile_icon.png" alt="الملف الشخصي" width={160} height={160} style={{borderRadius: '50%'}} />
+              </div>
             </div>
           </div>
           {/* Green Divider */}
@@ -411,38 +421,77 @@ export default function AccountPage() {
           </div>
           {isEditing && (
             <>
-              <div className="w-full">
+              <div className="w-full relative">
                 <label className="block text-gray-700 font-bold mb-1 pr-2">كلمة المرور الحالية</label>
                 <input 
-                  type="password" 
+                  type={showCurrentPassword ? "text" : "password"}
                   name="currentPassword" 
                   value={formData.currentPassword} 
                   onChange={handleInputChange} 
-                  className={`w-full border-0 border-b-2 ${passwordError ? 'border-red-500' : 'border-gray-300'} focus:border-green-500 outline-none bg-transparent text-right`}
+                  className={`w-full border-0 border-b-2 ${passwordError ? 'border-red-500' : 'border-gray-300'} focus:border-green-500 outline-none bg-transparent text-right pr-10`}
                 />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  className="absolute left-2 top-9 transform -translate-y-1/2 text-gray-500"
+                  onClick={() => setShowCurrentPassword((v) => !v)}
+                  aria-label={showCurrentPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                >
+                  {showCurrentPassword ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-1.657.403-3.22 1.125-4.575M15 12a3 3 0 11-6 0 3 3 0 016 0zm6.364-2.364A9.956 9.956 0 0122 9c0 5.523-4.477 10-10 10a9.956 9.956 0 01-4.636-1.364M3 3l18 18" /></svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm2.25 2.25A9.956 9.956 0 0022 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 1.657.403 3.22 1.125 4.575" /></svg>
+                  )}
+                </button>
                 {passwordError && (
                   <p className="text-red-500 text-sm mt-1 text-right">{passwordError}</p>
                 )}
               </div>
-              <div className="w-full">
+              <div className="w-full relative">
                 <label className="block text-gray-700 font-bold mb-1 pr-2">كلمة المرور الجديدة (اختياري)</label>
                 <input 
-                  type="password" 
+                  type={showNewPassword ? "text" : "password"}
                   name="newPassword" 
                   value={formData.newPassword} 
                   onChange={handleInputChange} 
-                  className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right" 
+                  className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right pr-10" 
                 />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  className="absolute left-2 top-9 transform -translate-y-1/2 text-gray-500"
+                  onClick={() => setShowNewPassword((v) => !v)}
+                  aria-label={showNewPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                >
+                  {showNewPassword ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-1.657.403-3.22 1.125-4.575M15 12a3 3 0 11-6 0 3 3 0 016 0zm6.364-2.364A9.956 9.956 0 0122 9c0 5.523-4.477 10-10 10a9.956 9.956 0 01-4.636-1.364M3 3l18 18" /></svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm2.25 2.25A9.956 9.956 0 0022 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 1.657.403 3.22 1.125 4.575" /></svg>
+                  )}
+                </button>
               </div>
-              <div className="w-full">
+              <div className="w-full relative">
                 <label className="block text-gray-700 font-bold mb-1 pr-2">تأكيد كلمة المرور الجديدة</label>
                 <input 
-                  type="password" 
+                  type={showConfirmPassword ? "text" : "password"}
                   name="confirmPassword" 
                   value={formData.confirmPassword} 
                   onChange={handleInputChange} 
-                  className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right" 
+                  className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right pr-10" 
                 />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  className="absolute left-2 top-9 transform -translate-y-1/2 text-gray-500"
+                  onClick={() => setShowConfirmPassword((v) => !v)}
+                  aria-label={showConfirmPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                >
+                  {showConfirmPassword ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-1.657.403-3.22 1.125-4.575M15 12a3 3 0 11-6 0 3 3 0 016 0zm6.364-2.364A9.956 9.956 0 0122 9c0 5.523-4.477 10-10 10a9.956 9.956 0 01-4.636-1.364M3 3l18 18" /></svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm2.25 2.25A9.956 9.956 0 0022 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 1.657.403 3.22 1.125 4.575" /></svg>
+                  )}
+                </button>
               </div>
             </>
           )}
