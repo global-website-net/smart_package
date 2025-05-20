@@ -228,7 +228,7 @@ export default function AccountPage() {
       const verifyData = await verifyResponse.json();
       
       if (!verifyResponse.ok) {
-        setPasswordError(verifyData.error || 'كلمة المرور الحالية غير صحيحة');
+        setPasswordError('كلمة المرور الحالية غير صحيحة');
         setIsSubmitting(false);
         return;
       }
@@ -308,8 +308,8 @@ export default function AccountPage() {
   return (
     <div className="min-h-screen bg-gray-50" style={{ fontFamily: 'Dubai, sans-serif' }}>
       <Header />
-      <main className="max-w-6xl mx-auto px-4 pt-24">
-        {/* Header Title */}
+      <main className="max-w-6xl mx-auto px-4 py-6">
+        {/* Header Title and Banner */}
         <div className="w-full text-center mt-8">
           <h1 className="text-3xl font-bold text-center mb-2">الحساب الشخصي</h1>
           <div className="flex justify-center items-center mb-8">
@@ -320,197 +320,166 @@ export default function AccountPage() {
           </div>
         </div>
         {/* Profile & Navigation Section */}
-        <div className="w-full max-w-4xl mx-auto">
-          <div className="flex flex-row items-center justify-center mb-8 gap-4">
-            {/* Profile Icon (left side) */}
-            <div className="flex justify-end">
-              <div className="w-48 h-48 rounded-full flex items-center justify-center">
-                <img src="/images/profile_icon.png" alt="الملف الشخصي" width={160} height={160} style={{borderRadius: '50%'}} />
-              </div>
-            </div>
-            {/* Vertical divider with bold style */}
-            <div className="h-40 w-1 bg-black mx-2"></div>
-            {/* Navigation Icons (right side, vertical, right-aligned) */}
-            <div className="flex flex-col items-end gap-4 min-w-[120px]">
-              <Link className="group flex flex-row-reverse items-center gap-2 h-14" href="/tracking_packages_user">
-                <span className="text-lg text-gray-800">تتبع الرزم</span>
-                <div className="w-14 h-14 flex items-center justify-center">
-                  <Image alt="تتبع الرزم" width={56} height={56} src="/images/package_hex_icon.png" />
-                </div>
-              </Link>
-              <Link className="group flex flex-row-reverse items-center gap-2 h-14" href="/wallet">
-                <span className="text-lg text-gray-800">المحفظة</span>
-                <div className="w-14 h-14 flex items-center justify-center">
-                  <Image alt="المحفظة" width={56} height={56} src="/images/wallet_hex_icon.png" />
-                </div>
-              </Link>
-              <Link className="group flex flex-row-reverse items-center gap-2 h-14" href="/tracking_orders_regular">
-                <span className="text-lg text-gray-800">تتبع الطلبات</span>
-                <div className="w-14 h-14 flex items-center justify-center">
-                  <Image alt="تتبع الطلبات" width={56} height={56} src="/images/shopping_bag_hex_icon.png" />
-                </div>
-              </Link>
-            </div>
-          </div>
-          {/* Green Divider */}
-          <div className="h-0.5 bg-green-500 mb-8" />
-        </div>
-        {/* Form Section */}
-        <form onSubmit={handleSubmit} className="w-full max-w-lg flex flex-col gap-6 items-end">
-          <div className="w-full">
-            <label className="block text-gray-700 font-bold mb-1 pr-2">الاسم</label>
-            <input 
-              type="text" 
-              name="fullName" 
-              value={formData.fullName} 
-              onChange={handleInputChange} 
-              disabled={!isEditing}
-              className={`w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none text-right ${
-                !isEditing ? 'bg-gray-100 text-gray-500' : 'bg-transparent'
-              }`} 
-            />
-          </div>
-          <div className="w-full">
-            <label className="block text-gray-700 font-bold mb-1 pr-2">رقم المشترك</label>
-            <input 
-              type="text" 
-              name="id" 
-              value={profile?.id || ''} 
-              disabled 
-              className="w-full border-0 border-b-2 border-gray-300 bg-gray-100 text-gray-500 text-right" 
-            />
-          </div>
-          <div className="w-full">
-            <label className="block text-gray-700 font-bold mb-1 pr-2">المحافظة</label>
-            <select 
-              name="governorate" 
-              value={formData.governorate} 
-              onChange={handleInputChange} 
-              disabled={!isEditing}
-              className={`w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none text-right ${
-                !isEditing ? 'bg-gray-100 text-gray-500' : 'bg-transparent'
-              }`}
-            >
-              {governorates.map((gov) => (
-                <option key={gov} value={gov}>{gov}</option>
-              ))}
-            </select>
-          </div>
-          <div className="w-full">
-            <label className="block text-gray-700 font-bold mb-1 pr-2">رقم الهاتف</label>
-            <input 
-              type="text" 
-              name="phoneNumber" 
-              value={formData.phoneNumber} 
-              onChange={handleInputChange} 
-              disabled={!isEditing}
-              className={`w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none text-right ${
-                !isEditing ? 'bg-gray-100 text-gray-500' : 'bg-transparent'
-              }`} 
-            />
-          </div>
-          <div className="w-full">
-            <label className="block text-gray-700 font-bold mb-1 pr-2">البريد الإلكتروني</label>
-            <input 
-              type="email" 
-              name="email" 
-              value={profile?.email || ''} 
-              disabled 
-              className="w-full border-0 border-b-2 border-gray-300 bg-gray-100 text-gray-500 text-right" 
-            />
-          </div>
-          {isEditing && (
-            <>
-              <div className="w-full relative">
-                <label className="block text-gray-700 font-bold mb-1 pr-2">كلمة المرور الحالية</label>
-                <input 
-                  type="password"
-                  name="currentPassword" 
-                  value={formData.currentPassword} 
-                  onChange={handleInputChange} 
-                  className={`w-full border-0 border-b-2 ${passwordError ? 'border-red-500' : 'border-gray-300'} focus:border-green-500 outline-none bg-transparent text-right`}
-                />
-              </div>
-              <div className="w-full">
-                <label className="block text-gray-700 font-bold mb-1 pr-2">كلمة المرور الجديدة (اختياري)</label>
-                <input 
-                  type="password"
-                  name="newPassword" 
-                  value={formData.newPassword} 
-                  onChange={handleInputChange} 
-                  className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right" 
-                />
-              </div>
-              <div className="w-full">
-                <label className="block text-gray-700 font-bold mb-1 pr-2">تأكيد كلمة المرور الجديدة</label>
-                <input 
-                  type="password"
-                  name="confirmPassword" 
-                  value={formData.confirmPassword} 
-                  onChange={handleInputChange} 
-                  className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right" 
-                />
-              </div>
-            </>
-          )}
-          {isRegularUser && (
+        <div className="flex justify-center items-center min-h-[60vh] w-full">
+          <form onSubmit={handleSubmit} className="w-full max-w-lg flex flex-col gap-6 items-end">
             <div className="w-full">
-              <label className="block text-gray-700 font-bold mb-1 pr-2">اختيار المتجر</label>
+              <label className="block text-gray-700 font-bold mb-1 pr-2">الاسم</label>
+              <input 
+                type="text" 
+                name="fullName" 
+                value={formData.fullName} 
+                onChange={handleInputChange} 
+                disabled={!isEditing}
+                className={`w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none text-right ${
+                  !isEditing ? 'bg-gray-100 text-gray-500' : 'bg-transparent'
+                }`} 
+              />
+            </div>
+            <div className="w-full">
+              <label className="block text-gray-700 font-bold mb-1 pr-2">رقم المشترك</label>
+              <input 
+                type="text" 
+                name="id" 
+                value={profile?.id || ''} 
+                disabled 
+                className="w-full border-0 border-b-2 border-gray-300 bg-gray-100 text-gray-500 text-right" 
+              />
+            </div>
+            <div className="w-full">
+              <label className="block text-gray-700 font-bold mb-1 pr-2">المحافظة</label>
               <select 
-                name="shopId" 
-                value={formData.shopId} 
+                name="governorate" 
+                value={formData.governorate} 
                 onChange={handleInputChange} 
                 disabled={!isEditing}
                 className={`w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none text-right ${
                   !isEditing ? 'bg-gray-100 text-gray-500' : 'bg-transparent'
                 }`}
               >
-                <option value="">اختر المتجر</option>
-                {shops.map(shop => (
-                  <option key={shop.id} value={shop.id}>{shop.fullName}</option>
+                {governorates.map((gov) => (
+                  <option key={gov} value={gov}>{gov}</option>
                 ))}
               </select>
             </div>
-          )}
-          {/* Action Buttons */}
-          <div className="flex gap-4 mt-8 mb-16 justify-center items-center w-full">
-            {!isEditing ? (
+            <div className="w-full">
+              <label className="block text-gray-700 font-bold mb-1 pr-2">رقم الهاتف</label>
+              <input 
+                type="text" 
+                name="phoneNumber" 
+                value={formData.phoneNumber} 
+                onChange={handleInputChange} 
+                disabled={!isEditing}
+                className={`w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none text-right ${
+                  !isEditing ? 'bg-gray-100 text-gray-500' : 'bg-transparent'
+                }`} 
+              />
+            </div>
+            <div className="w-full">
+              <label className="block text-gray-700 font-bold mb-1 pr-2">البريد الإلكتروني</label>
+              <input 
+                type="email" 
+                name="email" 
+                value={profile?.email || ''} 
+                disabled 
+                className="w-full border-0 border-b-2 border-gray-300 bg-gray-100 text-gray-500 text-right" 
+              />
+            </div>
+            {isEditing && (
               <>
-                <button
-                  type="button"
-                  onClick={handleEditClick}
-                  className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                >
-                  تعديل التفاصيل
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowDeleteModal(true)}
-                  className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                >
-                  حذف الحساب
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={handleCancelEdit}
-                  className="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                >
-                  إلغاء
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
-                >
-                  {isSubmitting ? 'جاري الحفظ...' : 'حفظ التغييرات'}
-                </button>
+                <div className="w-full relative">
+                  <label className="block text-gray-700 font-bold mb-1 pr-2">كلمة المرور الحالية</label>
+                  <input 
+                    type="password"
+                    name="currentPassword" 
+                    value={formData.currentPassword} 
+                    onChange={handleInputChange} 
+                    className={`w-full border-0 border-b-2 ${passwordError ? 'border-red-500' : 'border-gray-300'} focus:border-green-500 outline-none bg-transparent text-right`}
+                  />
+                  {passwordError && (
+                    <p className="text-red-500 text-sm mt-1 text-right">{passwordError}</p>
+                  )}
+                </div>
+                <div className="w-full">
+                  <label className="block text-gray-700 font-bold mb-1 pr-2">كلمة المرور الجديدة (اختياري)</label>
+                  <input 
+                    type="password"
+                    name="newPassword" 
+                    value={formData.newPassword} 
+                    onChange={handleInputChange} 
+                    className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right" 
+                  />
+                </div>
+                <div className="w-full">
+                  <label className="block text-gray-700 font-bold mb-1 pr-2">تأكيد كلمة المرور الجديدة</label>
+                  <input 
+                    type="password"
+                    name="confirmPassword" 
+                    value={formData.confirmPassword} 
+                    onChange={handleInputChange} 
+                    className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right" 
+                  />
+                </div>
               </>
             )}
-          </div>
-        </form>
+            {isRegularUser && (
+              <div className="w-full">
+                <label className="block text-gray-700 font-bold mb-1 pr-2">اختيار المتجر</label>
+                <select 
+                  name="shopId" 
+                  value={formData.shopId} 
+                  onChange={handleInputChange} 
+                  disabled={!isEditing}
+                  className={`w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none text-right ${
+                    !isEditing ? 'bg-gray-100 text-gray-500' : 'bg-transparent'
+                  }`}
+                >
+                  <option value="">اختر المتجر</option>
+                  {shops.map(shop => (
+                    <option key={shop.id} value={shop.id}>{shop.fullName}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+            {/* Action Buttons */}
+            <div className="flex gap-4 mt-8 mb-16 justify-center items-center w-full">
+              {!isEditing ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleEditClick}
+                    className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                  >
+                    تعديل التفاصيل
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteModal(true)}
+                    className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                  >
+                    حذف الحساب
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleCancelEdit}
+                    className="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                  >
+                    إلغاء
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
+                  >
+                    {isSubmitting ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+                  </button>
+                </>
+              )}
+            </div>
+          </form>
+        </div>
         {/* Delete Account Confirmation Modal */}
         <Dialog open={showDeleteModal} onClose={() => { setShowDeleteModal(false); setDeleteRequested(false); }} className="fixed z-50 inset-0 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen px-4">

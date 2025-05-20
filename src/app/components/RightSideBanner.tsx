@@ -23,7 +23,6 @@ export default function RightSideBanner() {
         </Link>
         <Link href="/tracking_packages_user" className={`py-2 px-4 w-full text-center rounded-md ${pathname === '/tracking_packages_user' ? 'bg-black text-white' : 'text-white hover:bg-green-900/40'}`}>الرزم</Link>
         <Link href="/tracking_orders_regular" className={`py-2 px-4 w-full text-center rounded-md ${pathname === '/tracking_orders_regular' ? 'bg-black text-white' : 'text-white hover:bg-green-900/40'}`}>الطلبات</Link>
-        <Link href="/account" className={`py-2 px-4 w-full text-center rounded-md ${pathname === '/account' ? 'bg-black text-white' : 'text-white hover:bg-green-900/40'}`}>حسابي</Link>
         <Link href="/wallet" className={`py-2 px-4 w-full text-center rounded-md ${pathname === '/wallet' ? 'bg-black text-white' : 'text-white hover:bg-green-900/40'}`}>المحفظة</Link>
         <Link href="/messages" className={`py-2 px-4 w-full text-center rounded-md ${pathname === '/messages' ? 'bg-black text-white' : 'text-white hover:bg-green-900/40'}`}>الرسائل</Link>
         <Link href="/packages" className={`py-2 px-4 w-full text-center rounded-md ${pathname === '/packages' ? 'bg-black text-white' : 'text-white hover:bg-green-900/40'}`}>أسعارنا</Link>

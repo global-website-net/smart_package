@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useSession, signOut } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
@@ -30,10 +31,10 @@ export default function Header() {
             <Link href="/contact" className="px-2 py-1 font-bold">التواصل</Link>
           </div>
 
-          {/* Centered Logo */}
+          {/* Centered Logo Image */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center">
-            <Link href="/" className="flex items-center gap-2 text-white text-lg font-extrabold">
-              <span>SMART PACKAGE</span>
+            <Link href="/" className="flex items-center">
+              <Image src="/images/smart_package_logo_upper_banner.png" alt="Smart Package Logo" width={180} height={40} style={{height: 40, width: 'auto'}} />
             </Link>
           </div>
 
@@ -51,14 +52,6 @@ export default function Header() {
               )}
             </div>
           </div>
-
-          {/* Auth/account buttons (far right, overlay) */}
-          {status === 'authenticated' && (
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
-              <Link href="/account" className="px-2 py-1">حسابي</Link>
-              <button onClick={() => signOut()} className="px-2 py-1">تسجيل خروج</button>
-            </div>
-          )}
         </div>
       </nav>
 
@@ -83,12 +76,6 @@ export default function Header() {
               <Link href="/auth/login" className="mt-1 block px-3 py-2 bg-green-600 rounded text-white text-sm font-bold">تسجيل دخول</Link>
             )}
           </div>
-          {status === 'authenticated' && (
-            <div className="flex items-center gap-2 px-3 py-2">
-              <Link href="/account" className="px-2 py-2">حسابي</Link>
-              <button onClick={() => { signOut(); setIsMobileMenuOpen(false); }} className="px-2 py-2">تسجيل خروج</button>
-            </div>
-          )}
         </div>
       </div>
     </header>

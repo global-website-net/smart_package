@@ -35,7 +35,10 @@ export default function MobileHeaderIcons({ isRegularUser }: MobileHeaderIconsPr
 
       {/* User Account or Login Button - Left */}
       {isLoggedIn ? (
-        <Link href="/account" className="text-white">
+        <Link 
+          href="/account" 
+          className="text-white"
+        >
           <svg 
             className="w-6 h-6" 
             viewBox="0 0 24 24" 

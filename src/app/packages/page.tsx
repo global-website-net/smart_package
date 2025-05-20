@@ -8,20 +8,18 @@ export default function Packages() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      <main className="p-4 pt-24 pb-10">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-6">أسعارنا</h1>
-            <div className="flex justify-center items-center">
-              <div className="relative w-32 sm:w-48 md:w-64">
-                <div className="w-full h-0.5 bg-green-500"></div>
-                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
-              </div>
+      <main className="max-w-6xl mx-auto px-4 py-6">
+        {/* Header Title and Banner */}
+        <div className="w-full text-center mt-8">
+          <h1 className="text-3xl font-bold text-center mb-2">أسعارنا</h1>
+          <div className="flex justify-center items-center mb-8">
+            <div className="relative w-56 sm:w-64 md:w-80">
+              <div className="w-full h-0.5 bg-green-500"></div>
+              <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
             </div>
           </div>
-          
-          {/* Package sections will be added here later */}
         </div>
+        {/* Main content continues here... */}
       </main>
     </div>
   )

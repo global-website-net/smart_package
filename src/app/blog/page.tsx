@@ -174,185 +174,187 @@ export default function BlogPage() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      <main className="p-4 pt-24">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-6">بلوج</h1>
-            <div className="flex justify-center items-center">
-              <div className="relative w-24 sm:w-32 md:w-40">
-                <div className="w-full h-0.5 bg-green-500"></div>
-                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
-              </div>
+      <main className="max-w-6xl mx-auto px-4 py-6">
+        {/* Header Title and Banner */}
+        <div className="w-full text-center mt-8">
+          <h1 className="text-3xl font-bold text-center mb-2">المدونة</h1>
+          <div className="flex justify-center items-center mb-8">
+            <div className="relative w-56 sm:w-64 md:w-80">
+              <div className="w-full h-0.5 bg-green-500"></div>
+              <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
             </div>
-            {isAdminOrOwner && (
-              <div className="mt-6">
-                <Button
-                  onClick={() => router.push('/blog/create')}
-                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                >
-                  إنشاء مقال جديد
-                </Button>
-              </div>
-            )}
           </div>
+        </div>
 
-          {error && (
-            <div className="bg-red-50 text-red-800 p-4 rounded-md mb-6">
-              {error}
-            </div>
-          )}
-
-          <div className="space-y-6">
-            {posts.map((post) => (
-              <Card key={post.id} className="bg-white rounded-lg shadow-md">
-                <CardHeader>
-                  <div className="mb-2">
-                    <span className="text-lg font-bold text-black">العنوان:</span>
-                  </div>
-                  <CardTitle className="text-base font-normal text-gray-700">
-                    {post.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="prose max-w-none">
-                    <h3 className="text-lg font-bold text-black mb-3">المحتوى:</h3>
-                    <p className="text-base font-normal text-gray-700 whitespace-pre-wrap">{post.content}</p>
-                  </div>
-                  {post.itemlink && (
-                    <div className="mt-4">
-                      <a
-                        href={post.itemlink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-green-600 hover:text-green-800 font-medium"
-                      >
-                        عرض المنتج
-                      </a>
-                    </div>
-                  )}
-                  <div className="mt-4">
-                    <div className="text-lg font-bold text-black mb-1">تاريخ الإنشاء:</div>
-                    <div className="text-base font-normal text-gray-700">
-                      {new Date(post.createdAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit'
-                      })}
-                    </div>
-                  </div>
-                  {isAdminOrOwner && (
-                    <div className="mt-4 flex justify-center">
-                      <div className="flex gap-4 rtl:space-x-reverse">
-                        <button
-                          onClick={() => setPostToDelete(post)}
-                          className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors"
-                        >
-                          حذف
-                        </button>
-                        <button
-                          onClick={() => {
-                            setEditingPost(post)
-                            setEditFormData({
-                              title: post.title,
-                              content: post.content,
-                              itemLink: post.itemlink
-                            })
-                          }}
-                          className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors"
-                        >
-                          تعديل
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {/* Edit Modal */}
-          {editingPost && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-              <div className="bg-white rounded-lg p-6 max-w-2xl w-full">
-                <h2 className="text-2xl font-bold mb-6 text-center">تعديل المقال</h2>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">العنوان</label>
-                    <input
-                      type="text"
-                      value={editFormData.title}
-                      onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
-                      className="mt-1 block w-full rounded-md border-2 border-black shadow-sm focus:border-black focus:ring-black"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">المحتوى</label>
-                    <textarea
-                      value={editFormData.content}
-                      onChange={(e) => setEditFormData({ ...editFormData, content: e.target.value })}
-                      rows={4}
-                      className="mt-1 block w-full rounded-md border-2 border-black shadow-sm focus:border-black focus:ring-black"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">رابط المنتج</label>
-                    <input
-                      type="text"
-                      value={editFormData.itemLink}
-                      onChange={(e) => setEditFormData({ ...editFormData, itemLink: e.target.value })}
-                      className="mt-1 block w-full rounded-md border-2 border-black shadow-sm focus:border-black focus:ring-black"
-                    />
-                  </div>
-                  <div className="flex justify-center items-center mt-6">
-                    <div className="flex gap-4 rtl:space-x-reverse">
-                      <button
-                        onClick={() => setEditingPost(null)}
-                        className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                      >
-                        إلغاء
-                      </button>
-                      <button
-                        onClick={() => handleEditPost(editingPost.id)}
-                        className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                      >
-                        حفظ التغييرات
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Delete Confirmation Modal */}
-          {postToDelete && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-lg p-6 max-w-md w-full">
-                <h2 className="text-xl font-bold mb-4">تأكيد الحذف</h2>
-                <p className="text-gray-600 mb-6">
-                  هل أنت متأكد من رغبتك في حذف هذا المقال؟ لا يمكن التراجع عن هذا الإجراء.
-                </p>
-                <div className="flex justify-center space-x-4 rtl:space-x-reverse mt-6 gap-4">
-                  <button
-                    onClick={() => setPostToDelete(null)}
-                    className="bg-gray-300 text-gray-800 px-6 py-2 rounded-md hover:bg-gray-400 transition-colors"
-                  >
-                    إلغاء
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleDeletePost(postToDelete.id)
-                      setPostToDelete(null)
-                    }}
-                    className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors"
-                  >
-                    حذف
-                  </button>
-                </div>
-              </div>
+        <div className="text-center mb-8">
+          {isAdminOrOwner && (
+            <div className="mt-6">
+              <Button
+                onClick={() => router.push('/blog/create')}
+                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+              >
+                إنشاء مقال جديد
+              </Button>
             </div>
           )}
         </div>
+
+        {error && (
+          <div className="bg-red-50 text-red-800 p-4 rounded-md mb-6">
+            {error}
+          </div>
+        )}
+
+        <div className="space-y-6">
+          {posts.map((post) => (
+            <Card key={post.id} className="bg-white rounded-lg shadow-md">
+              <CardHeader>
+                <div className="mb-2">
+                  <span className="text-lg font-bold text-black">العنوان:</span>
+                </div>
+                <CardTitle className="text-base font-normal text-gray-700">
+                  {post.title}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose max-w-none">
+                  <h3 className="text-lg font-bold text-black mb-3">المحتوى:</h3>
+                  <p className="text-base font-normal text-gray-700 whitespace-pre-wrap">{post.content}</p>
+                </div>
+                {post.itemlink && (
+                  <div className="mt-4">
+                    <a
+                      href={post.itemlink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-green-600 hover:text-green-800 font-medium"
+                    >
+                      عرض المنتج
+                    </a>
+                  </div>
+                )}
+                <div className="mt-4">
+                  <div className="text-lg font-bold text-black mb-1">تاريخ الإنشاء:</div>
+                  <div className="text-base font-normal text-gray-700">
+                    {new Date(post.createdAt).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit'
+                    })}
+                  </div>
+                </div>
+                {isAdminOrOwner && (
+                  <div className="mt-4 flex justify-center">
+                    <div className="flex gap-4 rtl:space-x-reverse">
+                      <button
+                        onClick={() => setPostToDelete(post)}
+                        className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors"
+                      >
+                        حذف
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEditingPost(post)
+                          setEditFormData({
+                            title: post.title,
+                            content: post.content,
+                            itemLink: post.itemlink
+                          })
+                        }}
+                        className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors"
+                      >
+                        تعديل
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Edit Modal */}
+        {editingPost && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg p-6 max-w-2xl w-full">
+              <h2 className="text-2xl font-bold mb-6 text-center">تعديل المقال</h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">العنوان</label>
+                  <input
+                    type="text"
+                    value={editFormData.title}
+                    onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                    className="mt-1 block w-full rounded-md border-2 border-black shadow-sm focus:border-black focus:ring-black"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">المحتوى</label>
+                  <textarea
+                    value={editFormData.content}
+                    onChange={(e) => setEditFormData({ ...editFormData, content: e.target.value })}
+                    rows={4}
+                    className="mt-1 block w-full rounded-md border-2 border-black shadow-sm focus:border-black focus:ring-black"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">رابط المنتج</label>
+                  <input
+                    type="text"
+                    value={editFormData.itemLink}
+                    onChange={(e) => setEditFormData({ ...editFormData, itemLink: e.target.value })}
+                    className="mt-1 block w-full rounded-md border-2 border-black shadow-sm focus:border-black focus:ring-black"
+                  />
+                </div>
+                <div className="flex justify-center items-center mt-6">
+                  <div className="flex gap-4 rtl:space-x-reverse">
+                    <button
+                      onClick={() => setEditingPost(null)}
+                      className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                    >
+                      إلغاء
+                    </button>
+                    <button
+                      onClick={() => handleEditPost(editingPost.id)}
+                      className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                    >
+                      حفظ التغييرات
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {postToDelete && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full">
+              <h2 className="text-xl font-bold mb-4">تأكيد الحذف</h2>
+              <p className="text-gray-600 mb-6">
+                هل أنت متأكد من رغبتك في حذف هذا المقال؟ لا يمكن التراجع عن هذا الإجراء.
+              </p>
+              <div className="flex justify-center space-x-4 rtl:space-x-reverse mt-6 gap-4">
+                <button
+                  onClick={() => setPostToDelete(null)}
+                  className="bg-gray-300 text-gray-800 px-6 py-2 rounded-md hover:bg-gray-400 transition-colors"
+                >
+                  إلغاء
+                </button>
+                <button
+                  onClick={() => {
+                    handleDeletePost(postToDelete.id)
+                    setPostToDelete(null)
+                  }}
+                  className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors"
+                >
+                  حذف
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   )

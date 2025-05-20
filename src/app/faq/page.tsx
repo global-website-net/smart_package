@@ -70,55 +70,53 @@ export default function FAQPage() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      <main className="p-4 pt-24">
-        <div className="max-w-4xl mx-auto">
-          {/* Title */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-6">الأسئلة المتكررة</h1>
-            <div className="flex justify-center items-center">
-              <div className="relative w-32 sm:w-48 md:w-64">
-                <div className="w-full h-0.5 bg-green-500"></div>
-                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
-              </div>
+      <main className="max-w-6xl mx-auto px-4 py-6">
+        {/* Header Title and Banner */}
+        <div className="w-full text-center mt-8">
+          <h1 className="text-3xl font-bold text-center mb-2">الأسئلة المتكررة</h1>
+          <div className="flex justify-center items-center mb-8">
+            <div className="relative w-56 sm:w-64 md:w-80">
+              <div className="w-full h-0.5 bg-green-500"></div>
+              <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
             </div>
           </div>
-          
-          <div className="space-y-4">
-            {faqs.map((faq, index) => (
-              <div key={faq.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-                <button
-                  onClick={() => toggleFAQ(index)}
-                  className="w-full px-6 py-4 text-right flex justify-between items-center hover:bg-gray-50 focus:outline-none"
-                >
-                  <span className="flex items-center gap-2">
-                    <img src="/api/images/question_icon.png" alt="Question Icon" className="w-6 h-6 ml-2" style={{display: 'inline-block', verticalAlign: 'middle'}} />
-                    <span className="text-lg font-medium">{faq.question}</span>
-                  </span>
-                  {activeIndices.includes(index) ? (
-                    <img
-                      src="/api/images/collapse_question_icon.png"
-                      alt="Collapse Question Icon"
-                      className="w-5 h-5 transition-transform"
-                      style={{display: 'inline-block', verticalAlign: 'middle'}}
-                    />
-                  ) : (
-                    <img
-                      src="/api/images/extend_question_icon.png"
-                      alt="Extend Question Icon"
-                      className="w-5 h-5 transition-transform"
-                      style={{display: 'inline-block', verticalAlign: 'middle'}}
-                    />
-                  )}
-                </button>
-                {activeIndices.includes(index) && (
-                  <div className="px-6 py-4 bg-gray-50 flex items-start gap-2">
-                    <img src="/api/images/answer_icon.png" alt="Answer Icon" className="w-6 h-6 ml-2 mt-1" style={{display: 'inline-block', verticalAlign: 'middle'}} />
-                    <p className="text-gray-700 flex-1">{faq.answer}</p>
-                  </div>
+        </div>
+        
+        <div className="space-y-4">
+          {faqs.map((faq, index) => (
+            <div key={faq.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+              <button
+                onClick={() => toggleFAQ(index)}
+                className="w-full px-6 py-4 text-right flex justify-between items-center hover:bg-gray-50 focus:outline-none"
+              >
+                <span className="flex items-center gap-2">
+                  <img src="/api/images/question_icon.png" alt="Question Icon" className="w-6 h-6 ml-2" style={{display: 'inline-block', verticalAlign: 'middle'}} />
+                  <span className="text-lg font-medium">{faq.question}</span>
+                </span>
+                {activeIndices.includes(index) ? (
+                  <img
+                    src="/api/images/collapse_question_icon.png"
+                    alt="Collapse Question Icon"
+                    className="w-5 h-5 transition-transform"
+                    style={{display: 'inline-block', verticalAlign: 'middle'}}
+                  />
+                ) : (
+                  <img
+                    src="/api/images/extend_question_icon.png"
+                    alt="Extend Question Icon"
+                    className="w-5 h-5 transition-transform"
+                    style={{display: 'inline-block', verticalAlign: 'middle'}}
+                  />
                 )}
-              </div>
-            ))}
-          </div>
+              </button>
+              {activeIndices.includes(index) && (
+                <div className="px-6 py-4 bg-gray-50 flex items-start gap-2">
+                  <img src="/api/images/answer_icon.png" alt="Answer Icon" className="w-6 h-6 ml-2 mt-1" style={{display: 'inline-block', verticalAlign: 'middle'}} />
+                  <p className="text-gray-700 flex-1">{faq.answer}</p>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       </main>
 
