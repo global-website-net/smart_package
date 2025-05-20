@@ -319,26 +319,26 @@ export default function AccountPage() {
               </div>
             </div>
             {/* Vertical divider with bold style */}
-            <div className="h-48 w-1 bg-black mx-4"></div>
+            <div className="h-48 w-1 bg-black mx-2"></div>
             {/* Navigation Icons (left side, vertical, right-aligned) */}
             <div className="flex flex-col items-end gap-6">
-              <Link className="group flex flex-row items-center gap-3" href="/tracking_packages_user">
-                <span className="text-lg text-gray-800">تتبع الرزم</span>
+              <Link className="group flex flex-row-reverse items-center gap-3" href="/tracking_packages_user">
                 <div className="w-14 h-14 flex items-center justify-center">
                   <Image alt="تتبع الرزم" width={56} height={56} src="/images/package_hex_icon.png" />
                 </div>
+                <span className="text-lg text-gray-800">تتبع الرزم</span>
               </Link>
-              <Link className="group flex flex-row items-center gap-3" href="/wallet">
-                <span className="text-lg text-gray-800">المحفظة</span>
+              <Link className="group flex flex-row-reverse items-center gap-3" href="/wallet">
                 <div className="w-14 h-14 flex items-center justify-center">
                   <Image alt="المحفظة" width={56} height={56} src="/images/wallet_hex_icon.png" />
                 </div>
+                <span className="text-lg text-gray-800">المحفظة</span>
               </Link>
-              <Link className="group flex flex-row items-center gap-3" href="/tracking_orders_regular">
-                <span className="text-lg text-gray-800">تتبع الطلبات</span>
+              <Link className="group flex flex-row-reverse items-center gap-3" href="/tracking_orders_regular">
                 <div className="w-14 h-14 flex items-center justify-center">
                   <Image alt="تتبع الطلبات" width={56} height={56} src="/images/shopping_bag_hex_icon.png" />
                 </div>
+                <span className="text-lg text-gray-800">تتبع الطلبات</span>
               </Link>
             </div>
           </div>
@@ -418,10 +418,10 @@ export default function AccountPage() {
                   name="currentPassword" 
                   value={formData.currentPassword} 
                   onChange={handleInputChange} 
-                  className="w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none bg-transparent text-right" 
+                  className={`w-full border-0 border-b-2 ${passwordError ? 'border-red-500' : 'border-gray-300'} focus:border-green-500 outline-none bg-transparent text-right`}
                 />
                 {passwordError && (
-                  <p className="text-red-500 text-sm mt-1">{passwordError}</p>
+                  <p className="text-red-500 text-sm mt-1 text-right">{passwordError}</p>
                 )}
               </div>
               <div className="w-full">

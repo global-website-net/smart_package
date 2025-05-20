@@ -214,22 +214,23 @@ export default function OrderDetailsPage() {
             <img src="/images/market_icon.png" alt="Market Icon" className="w-16 h-16 mb-2" />
             <div className="text-black text-lg font-bold mt-1">{order.purchaseSite}</div>
           </div>
-          {/* Left: Price Tag Hexagon above Payment Icon and Amount */}
+          {/* Left: Price Tag Hexagon above Amount */}
           <div className="flex flex-col items-center justify-end flex-1">
             <img src="/images/price_tag_hexagon.png" alt="Price Tag Hexagon" className="w-16 h-16 mb-2" />
-            <div className="flex flex-col items-center mt-1">
-              <div className="text-black text-lg font-bold mb-2">{order.totalAmount.toFixed(2)}₪</div>
-              {order.status === 'AWAITING_PAYMENT' && (
-                <button
-                  className="px-6 py-2 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition"
-                  onClick={handlePaymentClick}
-                >
-                  دفع
-                </button>
-              )}
-            </div>
+            <div className="text-black text-lg font-bold mt-1">{order.totalAmount.toFixed(2)}₪</div>
           </div>
         </div>
+        {/* Pay button row */}
+        {order.status === 'AWAITING_PAYMENT' && (
+          <div className="flex justify-center mt-4">
+            <button
+              className="px-6 py-2 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition"
+              onClick={handlePaymentClick}
+            >
+              دفع
+            </button>
+          </div>
+        )}
       </main>
       <PaymentModal
         isOpen={isPaymentModalOpen}
