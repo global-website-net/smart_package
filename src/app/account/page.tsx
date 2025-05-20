@@ -237,33 +237,33 @@ export default function AccountPage() {
         }),
       })
 
-      const data = await response.json();
+      const data = await response.json()
       if (!response.ok) {
         if (data.error === 'Invalid password' || data.error === 'كلمة المرور الحالية غير صحيحة') {
-          setPasswordError('كلمة المرور غير صحيحة');
-          setIsSubmitting(false);
-          return;
+          setPasswordError('كلمة المرور غير صحيحة')
+          setIsSubmitting(false)
+          return
         }
-        setUpdateError(data.error || 'حدث خطأ أثناء تحديث الملف الشخصي');
-        setIsSubmitting(false);
-        return;
+        setUpdateError(data.error || 'حدث خطأ أثناء تحديث الملف الشخصي')
+        setIsSubmitting(false)
+        return
       }
 
-      setProfile(data);
-      setUpdateSuccess('تم تحديث الملف الشخصي بنجاح');
-      setIsEditing(false);
+      setProfile(data)
+      setUpdateSuccess('تم تحديث الملف الشخصي بنجاح')
+      setIsEditing(false)
       // Clear password fields
       setFormData(prev => ({
         ...prev,
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
-      }));
+      }))
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'حدث خطأ أثناء تحديث الملف الشخصي';
-      setUpdateError(errorMessage);
+      const errorMessage = err instanceof Error ? err.message : 'حدث خطأ أثناء تحديث الملف الشخصي'
+      setUpdateError(errorMessage)
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
   }
 
@@ -307,7 +307,7 @@ export default function AccountPage() {
         <div className="w-full text-center mt-8">
           <h1 className="text-3xl font-bold text-center mb-4 mt-0">الحساب الشخصي</h1>
           <div className="flex justify-center items-center mb-8">
-            <div className="relative w-56 sm:w-64 md:w-80">
+            <div className="relative w-full">
               <div className="w-full h-0.5 bg-green-500"></div>
               <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
             </div>
@@ -322,7 +322,7 @@ export default function AccountPage() {
             </div>
           </div>
           {/* Move vertical divider here, close to profile icon */}
-          <div className="h-48 w-px bg-black mx-8"></div>
+          <div className="h-48 w-px bg-black mx-4"></div>
           {/* Navigation Icons (left side, vertical, right-aligned) */}
           <div className="flex flex-col items-end gap-6">
             <a className="group flex flex-row items-center gap-3" href="/tracking_packages_user">

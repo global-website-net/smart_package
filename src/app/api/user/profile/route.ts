@@ -173,6 +173,11 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'كلمة المرور الحالية مطلوبة للتعديل' }, { status: 400 })
     }
 
+    // Only proceed with the update if we haven't returned an error
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json({ error: 'لا توجد تغييرات لحفظها' }, { status: 400 })
+    }
+
     // Update the user profile in the database
     const { data: updatedUser, error: updateError } = await supabase
       .from('User')

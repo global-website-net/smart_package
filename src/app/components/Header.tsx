@@ -117,11 +117,20 @@ export default function Header() {
           <div className="hidden md:flex flex-1 items-center justify-between w-full">
             {/* Right side: Navigation labels */}
             <div className="flex items-center gap-6">
-              <Link href="/about" className="text-white text-base font-bold hover:text-green-400">من نحن</Link>
-              <Link href="/packages" className="text-white text-base font-bold hover:text-green-400">اسعارنا</Link>
+              {isLoggedIn ? (
+                <Link href="/faq" className="text-white text-base font-bold hover:text-green-400 flex flex-col items-center">
+                  <span>الأسئلة</span>
+                  <span>المتكررة</span>
+                </Link>
+              ) : (
+                <>
+                  <Link href="/about" className="text-white text-base font-bold hover:text-green-400">من نحن</Link>
+                  <Link href="/packages" className="text-white text-base font-bold hover:text-green-400">اسعارنا</Link>
+                </>
+              )}
             </div>
             {/* Center: Logo and label */}
-            <Link href="/" className="flex items-center gap-2 mx-4">
+            <Link href="/" className={`flex items-center gap-2 mx-4 ${isLoggedIn ? 'absolute left-1/2 transform -translate-x-1/2' : ''}`}>
               <span className="text-sm md:text-xl font-bold">SMART PACKAGE</span>
               <svg className="w-6 h-6 text-green-500" viewBox="0 0 24 24">
                 <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 21s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 7.2c0 7.3-8 11.8-8 11.8z" />
@@ -129,19 +138,13 @@ export default function Header() {
               </svg>
             </Link>
             {/* Left side: Log-in button */}
-            {status !== 'loading' && !isLoggedIn && (
-              <div className="flex items-center gap-4">
-                <Link href="/faq" className="text-white text-base font-bold hover:text-green-400 flex flex-col items-center">
-                  <span>الأسئلة</span>
-                  <span>المتكررة</span>
-                </Link>
-                <Link
-                  href="/auth/login"
-                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors text-sm font-medium"
-                >
-                  تسجيل الدخول
-                </Link>
-              </div>
+            {status !== 'loading' && !isLoggedIn && !isLoginPage && (
+              <Link
+                href="/auth/login"
+                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors text-sm font-medium"
+              >
+                تسجيل الدخول
+              </Link>
             )}
           </div>
 
