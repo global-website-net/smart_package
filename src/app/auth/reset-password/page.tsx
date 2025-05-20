@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 import { toast } from 'sonner'
-import Header from '@/app/components/Header'
+import Header from '../../../components/Header'
 
 // Initialize Supabase client
 const supabase = createClient(

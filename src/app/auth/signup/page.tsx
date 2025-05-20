@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Header from '../../components/Header'
+import Header from '../../../components/Header'
 import { useRouter } from 'next/navigation'
 
 export default function Signup() {
