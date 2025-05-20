@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { supabase } from "@/lib/supabase";
-import Header from "@/app/components/Header";
+import Header from '@/components/Header';
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
