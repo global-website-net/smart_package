@@ -168,6 +168,9 @@ export async function PUT(request: Request) {
         console.error('Password comparison error:', error)
         return NextResponse.json({ error: 'حدث خطأ في التحقق من كلمة المرور' }, { status: 500 })
       }
+    } else {
+      // If current password is required but not provided, return error
+      return NextResponse.json({ error: 'كلمة المرور الحالية مطلوبة للتعديل' }, { status: 400 })
     }
 
     // Update the user profile in the database

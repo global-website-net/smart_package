@@ -115,8 +115,11 @@ export default function Header() {
 
           {/* Desktop Main Navigation */}
           <div className="hidden md:flex flex-1 items-center justify-between w-full">
-            {/* Right side: 'من نحن' */}
-            <Link href="/about" className="text-white text-base font-medium hover:text-green-400">من نحن</Link>
+            {/* Right side: Navigation labels */}
+            <div className="flex items-center gap-6">
+              <Link href="/about" className="text-white text-base font-bold hover:text-green-400">من نحن</Link>
+              <Link href="/packages" className="text-white text-base font-bold hover:text-green-400">اسعارنا</Link>
+            </div>
             {/* Center: Logo and label */}
             <Link href="/" className="flex items-center gap-2 mx-4">
               <span className="text-sm md:text-xl font-bold">SMART PACKAGE</span>
@@ -127,12 +130,18 @@ export default function Header() {
             </Link>
             {/* Left side: Log-in button */}
             {status !== 'loading' && !isLoggedIn && (
-              <Link
-                href="/auth/login"
-                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors text-sm font-medium"
-              >
-                تسجيل الدخول
-              </Link>
+              <div className="flex items-center gap-4">
+                <Link href="/faq" className="text-white text-base font-bold hover:text-green-400 flex flex-col items-center">
+                  <span>الأسئلة</span>
+                  <span>المتكررة</span>
+                </Link>
+                <Link
+                  href="/auth/login"
+                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors text-sm font-medium"
+                >
+                  تسجيل الدخول
+                </Link>
+              </div>
             )}
           </div>
 

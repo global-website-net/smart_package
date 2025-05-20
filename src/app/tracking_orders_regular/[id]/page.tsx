@@ -221,7 +221,7 @@ export default function OrderDetailsPage() {
               <div className="text-black text-lg font-bold">{order.totalAmount.toFixed(2)}₪</div>
               {order.status === 'AWAITING_PAYMENT' && (
                 <button
-                  className="ml-4 px-6 py-2 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition"
+                  className="ml-8 px-6 py-2 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition"
                   onClick={handlePaymentClick}
                 >
                   دفع
