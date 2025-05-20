@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react'
 import { createClient } from '@supabase/supabase-js'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { toast } from 'sonner'
-import Header from '@/app/components/Header'
+import Header from '@/components/Header'
 
 // Initialize Supabase client
 const supabase = createClient(
