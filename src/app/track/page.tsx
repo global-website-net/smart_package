@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import Header from '../components/Header'
+import Header from '@/components/Header'
 
 // Define types for package data
 interface PackageHistoryItem {

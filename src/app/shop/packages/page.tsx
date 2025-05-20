@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import Header from '@/app/components/Header'
+import Header from '@/components/Header'
 import {
   Dialog,
   DialogContent,
