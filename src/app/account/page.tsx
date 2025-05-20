@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Header from '../../components/Header'
+import Header from '@/components/Header'
 import { useSession, signOut } from 'next-auth/react'
 import { supabase } from '@/lib/supabase'
 import { UserRole } from '@prisma/client'
@@ -333,22 +333,22 @@ export default function AccountPage() {
             {/* Navigation Icons (right side, vertical, right-aligned) */}
             <div className="flex flex-col items-end gap-4 min-w-[120px]">
               <Link className="group flex flex-row-reverse items-center gap-2" href="/tracking_packages_user">
+                <span className="text-lg text-gray-800">تتبع الرزم</span>
                 <div className="w-14 h-14 flex items-center justify-center">
                   <Image alt="تتبع الرزم" width={56} height={56} src="/images/package_hex_icon.png" />
                 </div>
-                <span className="text-lg text-gray-800">تتبع الرزم</span>
               </Link>
               <Link className="group flex flex-row-reverse items-center gap-2" href="/wallet">
+                <span className="text-lg text-gray-800">المحفظة</span>
                 <div className="w-14 h-14 flex items-center justify-center">
                   <Image alt="المحفظة" width={56} height={56} src="/images/wallet_hex_icon.png" />
                 </div>
-                <span className="text-lg text-gray-800">المحفظة</span>
               </Link>
               <Link className="group flex flex-row-reverse items-center gap-2" href="/tracking_orders_regular">
+                <span className="text-lg text-gray-800">تتبع الطلبات</span>
                 <div className="w-14 h-14 flex items-center justify-center">
                   <Image alt="تتبع الطلبات" width={56} height={56} src="/images/shopping_bag_hex_icon.png" />
                 </div>
-                <span className="text-lg text-gray-800">تتبع الطلبات</span>
               </Link>
             </div>
           </div>
