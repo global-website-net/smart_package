@@ -203,23 +203,27 @@ export default function AccountPage() {
     setPasswordError('')
     setIsSubmitting(true)
 
-    // Validate current password if we're submitting changes
-    if (formData.currentPassword === '') {
-      setPasswordError('كلمة المرور الحالية مطلوبة للتعديل')
-      setIsSubmitting(false)
-      return
-    }
-
-    // Validate passwords if changing password
-    if (formData.newPassword) {
-      if (formData.newPassword !== formData.confirmPassword) {
-        setPasswordError('كلمات المرور الجديدة غير متطابقة')
-        setIsSubmitting(false)
-        return
-      }
-    }
-
     try {
+      // First verify the current password
+      const verifyResponse = await fetch('/api/auth/verify-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentPassword: formData.currentPassword,
+        }),
+      });
+
+      const verifyData = await verifyResponse.json();
+      
+      if (!verifyResponse.ok) {
+        setPasswordError('كلمة المرور الحالية غير صحيحة');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // If password is correct, proceed with profile update
       const response = await fetch('/api/user/profile', {
         method: 'PUT',
         headers: {
@@ -231,41 +235,33 @@ export default function AccountPage() {
           town: isAdminOrOwner ? undefined : formData.town,
           phonePrefix: formData.phonePrefix,
           phoneNumber: formData.phoneNumber,
-          currentPassword: formData.currentPassword,
           newPassword: formData.newPassword || undefined,
           shopId: formData.shopId,
         }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
       if (!response.ok) {
-        if (data.error === 'Invalid password' || data.error === 'كلمة المرور الحالية غير صحيحة') {
-          setPasswordError('كلمة المرور غير صحيحة')
-          setIsSubmitting(false)
-          return
-        }
-        setUpdateError(data.error || 'حدث خطأ أثناء تحديث الملف الشخصي')
-        setIsSubmitting(false)
-        return
+        throw new Error(data.error || 'حدث خطأ أثناء تحديث الملف الشخصي');
       }
 
-      setProfile(data)
-      setUpdateSuccess('تم تحديث الملف الشخصي بنجاح')
-      setIsEditing(false)
+      setProfile(data);
+      setUpdateSuccess('تم تحديث الملف الشخصي بنجاح');
+      setIsEditing(false);
       // Clear password fields
       setFormData(prev => ({
         ...prev,
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
-      }))
+      }));
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'حدث خطأ أثناء تحديث الملف الشخصي'
-      setUpdateError(errorMessage)
+      const errorMessage = err instanceof Error ? err.message : 'حدث خطأ أثناء تحديث الملف الشخصي';
+      setUpdateError(errorMessage);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleDeleteAccount = async () => {
     try {
@@ -314,43 +310,45 @@ export default function AccountPage() {
           </div>
         </div>
         {/* Profile & Navigation Section */}
-        <div className="flex items-center justify-between w-full max-w-4xl px-4">
-          {/* Profile Icon (right side) */}
-          <div className="flex-1 flex justify-center">
-            <div className="w-48 h-48 rounded-full bg-gray-300 flex items-center justify-center">
-              <img src="/images/profile_icon.png" alt="الملف الشخصي" width={160} height={160} style={{borderRadius: '50%'}} />
+        <div className="w-full max-w-4xl mx-auto px-4">
+          <div className="flex flex-row justify-between items-center mb-8">
+            {/* Profile Icon (right side) */}
+            <div className="flex justify-end">
+              <div className="w-48 h-48 rounded-full bg-gray-300 flex items-center justify-center">
+                <img src="/images/profile_icon.png" alt="الملف الشخصي" width={160} height={160} style={{borderRadius: '50%'}} />
+              </div>
+            </div>
+            {/* Vertical divider with bold style */}
+            <div className="h-48 w-1 bg-black mx-4"></div>
+            {/* Navigation Icons (left side, vertical, right-aligned) */}
+            <div className="flex flex-col items-end gap-6">
+              <Link className="group flex flex-row items-center gap-3" href="/tracking_packages_user">
+                <span className="text-lg text-gray-800">تتبع الرزم</span>
+                <div className="w-14 h-14 flex items-center justify-center">
+                  <Image alt="تتبع الرزم" width={56} height={56} src="/images/package_hex_icon.png" />
+                </div>
+              </Link>
+              <Link className="group flex flex-row items-center gap-3" href="/wallet">
+                <span className="text-lg text-gray-800">المحفظة</span>
+                <div className="w-14 h-14 flex items-center justify-center">
+                  <Image alt="المحفظة" width={56} height={56} src="/images/wallet_hex_icon.png" />
+                </div>
+              </Link>
+              <Link className="group flex flex-row items-center gap-3" href="/tracking_orders_regular">
+                <span className="text-lg text-gray-800">تتبع الطلبات</span>
+                <div className="w-14 h-14 flex items-center justify-center">
+                  <Image alt="تتبع الطلبات" width={56} height={56} src="/images/shopping_bag_hex_icon.png" />
+                </div>
+              </Link>
             </div>
           </div>
-          {/* Vertical divider with reduced margin and overlap */}
-          <div className="h-48 w-px bg-black mx-2" style={{ marginLeft: '-1rem' }}></div>
-          {/* Navigation Icons (left side, vertical, right-aligned) */}
-          <div className="flex flex-col items-end gap-6">
-            <a className="group flex flex-row items-center gap-3" href="/tracking_packages_user">
-              <span className="text-lg text-gray-800">تتبع الرزم</span>
-              <div className="w-14 h-14 flex items-center justify-center">
-                <img alt="تتبع الرزم" loading="lazy" width="56" height="56" decoding="async" data-nimg="1" srcSet="/_next/image?url=%2Fimages%2Fpackage_hex_icon.png&w=64&q=75 1x, /_next/image?url=%2Fimages%2Fpackage_hex_icon.png&w=128&q=75 2x" src="/_next/image?url=%2Fimages%2Fpackage_hex_icon.png&w=128&q=75" style={{color: 'transparent'}} />
-              </div>
-            </a>
-            <a className="group flex flex-row items-center gap-3" href="/wallet">
-              <span className="text-lg text-gray-800">المحفظة</span>
-              <div className="w-14 h-14 flex items-center justify-center">
-                <img alt="المحفظة" loading="lazy" width="56" height="56" decoding="async" data-nimg="1" srcSet="/_next/image?url=%2Fimages%2Fwallet_hex_icon.png&w=64&q=75 1x, /_next/image?url=%2Fimages%2Fwallet_hex_icon.png&w=128&q=75 2x" src="/_next/image?url=%2Fimages%2Fwallet_hex_icon.png&w=128&q=75" style={{color: 'transparent'}} />
-              </div>
-            </a>
-            <a className="group flex flex-row items-center gap-3" href="/tracking_orders_regular">
-              <span className="text-lg text-gray-800">تتبع الطلبات</span>
-              <div className="w-14 h-14 flex items-center justify-center">
-                <img alt="تتبع الطلبات" loading="lazy" width="56" height="56" decoding="async" data-nimg="1" srcSet="/_next/image?url=%2Fimages%2Fshopping_bag_hex_icon.png&w=64&q=75 1x, /_next/image?url=%2Fimages%2Fshopping_bag_hex_icon.png&w=128&q=75 2x" src="/_next/image?url=%2Fimages%2Fshopping_bag_hex_icon.png&w=128&q=75" style={{color: 'transparent'}} />
-              </div>
-            </a>
-          </div>
+          {/* Green Divider */}
+          <div className="h-0.5 bg-green-500 mb-8" />
         </div>
-        {/* Green Divider */}
-        <div className="w-full h-0.5 bg-green-500 mb-8" />
         {/* Form Section */}
         <form onSubmit={handleSubmit} className="w-full max-w-lg flex flex-col gap-6 items-end">
           <div className="w-full">
-            <label className="block text-gray-700 mb-1 pr-2">الاسم</label>
+            <label className="block text-gray-700 font-bold mb-1 pr-2">الاسم</label>
             <input 
               type="text" 
               name="fullName" 
@@ -358,29 +356,29 @@ export default function AccountPage() {
               onChange={handleInputChange} 
               disabled={!isEditing}
               className={`w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none text-right ${
-                !isEditing ? 'bg-gray-100' : 'bg-transparent'
+                !isEditing ? 'bg-gray-100 text-gray-500' : 'bg-transparent'
               }`} 
             />
           </div>
           <div className="w-full">
-            <label className="block text-gray-700 mb-1 pr-2">رقم المشترك</label>
+            <label className="block text-gray-700 font-bold mb-1 pr-2">رقم المشترك</label>
             <input 
               type="text" 
               name="id" 
               value={profile?.id || ''} 
               disabled 
-              className="w-full border-0 border-b-2 border-gray-300 bg-gray-100 text-right" 
+              className="w-full border-0 border-b-2 border-gray-300 bg-gray-100 text-gray-500 text-right" 
             />
           </div>
           <div className="w-full">
-            <label className="block text-gray-700 mb-1 pr-2">المحافظة</label>
+            <label className="block text-gray-700 font-bold mb-1 pr-2">المحافظة</label>
             <select 
               name="governorate" 
               value={formData.governorate} 
               onChange={handleInputChange} 
               disabled={!isEditing}
               className={`w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none text-right ${
-                !isEditing ? 'bg-gray-100' : 'bg-transparent'
+                !isEditing ? 'bg-gray-100 text-gray-500' : 'bg-transparent'
               }`}
             >
               {governorates.map((gov) => (
@@ -389,7 +387,7 @@ export default function AccountPage() {
             </select>
           </div>
           <div className="w-full">
-            <label className="block text-gray-700 mb-1 pr-2">رقم الهاتف</label>
+            <label className="block text-gray-700 font-bold mb-1 pr-2">رقم الهاتف</label>
             <input 
               type="text" 
               name="phoneNumber" 
@@ -397,24 +395,24 @@ export default function AccountPage() {
               onChange={handleInputChange} 
               disabled={!isEditing}
               className={`w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none text-right ${
-                !isEditing ? 'bg-gray-100' : 'bg-transparent'
+                !isEditing ? 'bg-gray-100 text-gray-500' : 'bg-transparent'
               }`} 
             />
           </div>
           <div className="w-full">
-            <label className="block text-gray-700 mb-1 pr-2">البريد الإلكتروني</label>
+            <label className="block text-gray-700 font-bold mb-1 pr-2">البريد الإلكتروني</label>
             <input 
               type="email" 
               name="email" 
               value={profile?.email || ''} 
               disabled 
-              className="w-full border-0 border-b-2 border-gray-300 bg-gray-100 text-right" 
+              className="w-full border-0 border-b-2 border-gray-300 bg-gray-100 text-gray-500 text-right" 
             />
           </div>
           {isEditing && (
             <>
               <div className="w-full">
-                <label className="block text-gray-700 mb-1 pr-2">كلمة المرور الحالية</label>
+                <label className="block text-gray-700 font-bold mb-1 pr-2">كلمة المرور الحالية</label>
                 <input 
                   type="password" 
                   name="currentPassword" 
@@ -427,7 +425,7 @@ export default function AccountPage() {
                 )}
               </div>
               <div className="w-full">
-                <label className="block text-gray-700 mb-1 pr-2">كلمة المرور الجديدة (اختياري)</label>
+                <label className="block text-gray-700 font-bold mb-1 pr-2">كلمة المرور الجديدة (اختياري)</label>
                 <input 
                   type="password" 
                   name="newPassword" 
@@ -437,7 +435,7 @@ export default function AccountPage() {
                 />
               </div>
               <div className="w-full">
-                <label className="block text-gray-700 mb-1 pr-2">تأكيد كلمة المرور الجديدة</label>
+                <label className="block text-gray-700 font-bold mb-1 pr-2">تأكيد كلمة المرور الجديدة</label>
                 <input 
                   type="password" 
                   name="confirmPassword" 
@@ -450,14 +448,14 @@ export default function AccountPage() {
           )}
           {isRegularUser && (
             <div className="w-full">
-              <label className="block text-gray-700 mb-1 pr-2">اختيار المتجر</label>
+              <label className="block text-gray-700 font-bold mb-1 pr-2">اختيار المتجر</label>
               <select 
                 name="shopId" 
                 value={formData.shopId} 
                 onChange={handleInputChange} 
                 disabled={!isEditing}
                 className={`w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none text-right ${
-                  !isEditing ? 'bg-gray-100' : 'bg-transparent'
+                  !isEditing ? 'bg-gray-100 text-gray-500' : 'bg-transparent'
                 }`}
               >
                 <option value="">اختر المتجر</option>

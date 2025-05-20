@@ -7,11 +7,12 @@ export default function RightSideBanner() {
   const pathname = usePathname();
   return (
     <div
-      className="hidden md:flex flex-col items-center fixed right-0 w-[200px] z-50 bg-no-repeat bg-cover"
+      className="hidden md:flex flex-col items-center fixed right-0 w-[200px] z-[70] bg-no-repeat bg-cover"
       style={{
         backgroundImage: "url('/images/green_seperator_menu_right_side.png')",
         top: '80px',
-        height: 'calc(100vh - 80px)'
+        height: 'calc(100vh - 80px)',
+        right: '0'
       }}
     >
       <div className="flex flex-col items-center mt-8 gap-4 w-full">
