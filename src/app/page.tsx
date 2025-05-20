@@ -61,7 +61,7 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      <main className="pt-24">
+      <main className="py-6">
         {/* Hero Section */}
         <section className="text-center px-4 py-16 bg-white">
           <div className="max-w-4xl mx-auto">

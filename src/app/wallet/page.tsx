@@ -103,7 +103,7 @@ export default function WalletPage() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      <main className="p-4 pt-24">
+      <main className="p-4 py-6">
         <div className="max-w-4xl mx-auto">
           {/* Title and Wallet Icon */}
           <div className="text-center mb-8">

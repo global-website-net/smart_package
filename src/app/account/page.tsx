@@ -214,13 +214,14 @@ export default function AccountPage() {
 
     try {
       // First verify the current password
-      const verifyResponse = await fetch('/api/auth/verify-password', {
+      const verifyResponse = await fetch('/api/user/verify-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          currentPassword: formData.currentPassword,
+          email: profile?.email || session?.user?.email,
+          password: formData.currentPassword,
         }),
       });
 
@@ -305,11 +306,11 @@ export default function AccountPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center" style={{ fontFamily: 'Dubai, sans-serif' }}>
+    <div className="min-h-screen bg-gray-50" style={{ fontFamily: 'Dubai, sans-serif' }}>
       <Header />
-      <main className="w-full flex flex-col items-center pt-24">
+      <main className="max-w-6xl mx-auto px-4 pt-24">
         {/* Header Title */}
-        <div className="max-w-6xl mx-auto px-4 w-full text-center mt-8">
+        <div className="w-full text-center mt-8">
           <h1 className="text-3xl font-bold text-center mb-2">الحساب الشخصي</h1>
           <div className="flex justify-center items-center mb-8">
             <div className="relative w-56 sm:w-64 md:w-80">
@@ -319,7 +320,7 @@ export default function AccountPage() {
           </div>
         </div>
         {/* Profile & Navigation Section */}
-        <div className="w-full max-w-4xl mx-auto px-4">
+        <div className="w-full max-w-4xl mx-auto">
           <div className="flex flex-row items-center justify-center mb-8 gap-4">
             {/* Profile Icon (left side) */}
             <div className="flex justify-end">
