@@ -159,7 +159,7 @@ export default function WalletPage() {
                         minute: '2-digit'
                       })}
                     </span>
-                    <img src="/images/calendar_icon.png" alt="Calendar Icon" className="w-5 h-5" style={{marginLeft: 0, paddingLeft: 0}} />
+                    <img src="/images/calendar_icon.png" alt="Calendar Icon" className="w-5 h-5" style={{marginLeft: '-4px', paddingLeft: 0}} />
                   </div>
                   <span className="w-1/3 text-center text-sm text-gray-700">{transaction.reason}</span>
                   <div className="flex items-center gap-4 w-1/3 justify-center">

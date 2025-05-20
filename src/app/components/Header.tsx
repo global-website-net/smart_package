@@ -136,20 +136,6 @@ export default function Header() {
             )}
           </div>
 
-          {/* Left Side - Login/User Menu (Desktop) */}
-          <div className="hidden md:flex items-center order-3">
-            {status === 'loading' ? (
-              <div className="w-24 h-8 bg-black rounded-md animate-pulse"></div>
-            ) : !isLoggedIn && (
-              <Link
-                href="/auth/login"
-                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors text-sm font-medium"
-              >
-                تسجيل الدخول
-              </Link>
-            )}
-          </div>
-
           {/* Mobile Icons */}
           <div className={`md:hidden order-3 ${isLoginPage ? 'invisible' : ''}`}>
             <MobileHeaderIcons isRegularUser={isRegularUser} />
