@@ -317,6 +317,12 @@ export default function AccountPage() {
         </div>
         {/* Profile and Navigation Icons Section */}
         <div className="flex flex-row items-center justify-center mb-8 gap-8">
+          {/* Right: Profile Image */}
+          <div className="flex-shrink-0 flex flex-col items-center justify-center">
+            <img alt="الملف الشخصي" className="w-40 h-40 rounded-full object-cover" src="/images/profile_icon.png" />
+          </div>
+          {/* Divider */}
+          <div className="h-32 w-px bg-gray-400 mx-6" />
           {/* Left: Navigation Icons */}
           <div className="flex flex-col gap-6">
             <Link href="/tracking_packages_user" className="flex items-center gap-3">
@@ -331,12 +337,6 @@ export default function AccountPage() {
               <img src="/images/shopping_bag_hex_icon.png" alt="تتبع الطلبات" className="w-8 h-8" />
               <span className="text-sm font-medium">تتبع الطلبات</span>
             </Link>
-          </div>
-          {/* Divider */}
-          <div className="h-32 w-px bg-gray-400 mx-6" />
-          {/* Right: Profile Image */}
-          <div className="flex-shrink-0 flex flex-col items-center justify-center">
-            <img alt="الملف الشخصي" className="w-40 h-40 rounded-full object-cover" src="/images/profile_icon.png" />
           </div>
         </div>
         {/* Green Line */}

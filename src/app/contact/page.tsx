@@ -53,137 +53,144 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="pt-24 pb-12">
-        <div className="max-w-6xl mx-auto px-4">
-          <h1 className="text-3xl font-bold text-center mb-8">التواصل</h1>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            <div className="bg-white p-6 rounded-lg shadow-md text-center">
-              <div className="flex justify-center mb-4">
-                <FaPhone className="text-green-500 text-3xl" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">اتصل بنا</h3>
-              <p className="text-gray-600">+972 59 123 4567</p>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow-md text-center">
-              <div className="flex justify-center mb-4">
-                <FaEnvelope className="text-green-500 text-3xl" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">راسلنا</h3>
-              <p className="text-gray-600">info@smartpackage.com</p>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow-md text-center">
-              <div className="flex justify-center mb-4">
-                <FaMapMarkerAlt className="text-green-500 text-3xl" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">موقعنا</h3>
-              <p className="text-gray-600">رام الله، فلسطين</p>
-            </div>
+      <main className="max-w-2xl mx-auto px-4 py-10 mt-[70px]">
+        {/* Title and underline */}
+        <h1 className="text-3xl font-bold text-center mb-2 mt-0">تواصل معنا</h1>
+        <div className="flex justify-center items-center mb-8">
+          <div className="relative w-56 sm:w-64 md:w-80">
+            <div className="w-full h-0.5 bg-green-500"></div>
+            <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
           </div>
+        </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                    الاسم
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                    البريد الإلكتروني
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                    required
-                  />
-                </div>
-              </div>
+        {/* Contact Info Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white p-6 rounded-lg shadow-md text-center">
+            <div className="flex justify-center mb-4">
+              <FaPhone className="text-green-500 text-3xl" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">اتصل بنا</h3>
+            <p className="text-gray-600">+972 59 123 4567</p>
+          </div>
+          
+          <div className="bg-white p-6 rounded-lg shadow-md text-center">
+            <div className="flex justify-center mb-4">
+              <FaEnvelope className="text-green-500 text-3xl" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">راسلنا</h3>
+            <p className="text-gray-600">info@smartpackage.com</p>
+          </div>
+          
+          <div className="bg-white p-6 rounded-lg shadow-md text-center">
+            <div className="flex justify-center mb-4">
+              <FaMapMarkerAlt className="text-green-500 text-3xl" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">موقعنا</h3>
+            <p className="text-gray-600">رام الله، فلسطين</p>
+          </div>
+        </div>
 
+        {/* Contact Form */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                  رقم الهاتف
-                </label>
-                <input
-                  type="tel"
-                  id="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
-                  الموضوع
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                  الاسم
                 </label>
                 <input
                   type="text"
-                  id="subject"
-                  value={formData.subject}
-                  onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                 />
               </div>
-
+              
               <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-                  الرسالة
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  البريد الإلكتروني
                 </label>
-                <textarea
-                  id="message"
-                  value={formData.message}
-                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  rows={4}
+                <input
+                  type="email"
+                  id="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                 />
               </div>
+            </div>
 
-              {submitStatus.type && (
-                <div
-                  className={`p-4 rounded-md ${
-                    submitStatus.type === 'success'
-                      ? 'bg-green-50 text-green-800'
-                      : 'bg-red-50 text-red-800'
-                  }`}
-                >
-                  {submitStatus.message}
-                </div>
-              )}
+            <div>
+              <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                رقم الهاتف
+              </label>
+              <input
+                type="tel"
+                id="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                required
+              />
+            </div>
 
-              <div className="flex justify-center">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
-                >
-                  {isSubmitting ? 'جاري الإرسال...' : 'إرسال'}
-                </button>
+            <div>
+              <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
+                الموضوع
+              </label>
+              <input
+                type="text"
+                id="subject"
+                value={formData.subject}
+                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                الرسالة
+              </label>
+              <textarea
+                id="message"
+                value={formData.message}
+                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                rows={4}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                required
+              />
+            </div>
+
+            {submitStatus.type && (
+              <div
+                className={`p-4 rounded-md ${
+                  submitStatus.type === 'success'
+                    ? 'bg-green-50 text-green-800'
+                    : 'bg-red-50 text-red-800'
+                }`}
+              >
+                {submitStatus.message}
               </div>
-            </form>
-          </div>
+            )}
+
+            <div className="flex justify-center">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
+              >
+                {isSubmitting ? 'جاري الإرسال...' : 'إرسال'}
+              </button>
+            </div>
+          </form>
         </div>
-      </div>
+      </main>
     </div>
   )
 } 
