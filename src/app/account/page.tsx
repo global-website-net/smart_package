@@ -335,7 +335,7 @@ export default function AccountPage() {
           <div className="h-40 w-0.5 bg-gray-400 mx-6" />
           {/* Left: Navigation Icons */}
           <div className="flex flex-col gap-8">
-            <Link href="/tracking_packages_user" className="flex items-center gap-4">
+            <Link href={session?.user?.role === 'SHOP' ? '/shop/packages' : '/tracking_packages_user'} className="flex items-center gap-4">
               <img src="/images/package_hex_icon.png" alt="تتبع الرزم" className="w-10 h-10" />
               <span className="text-base font-medium">تتبع الرزم</span>
             </Link>
@@ -343,10 +343,12 @@ export default function AccountPage() {
               <img src="/images/wallet_hex_icon.png" alt="المحفظة" className="w-10 h-10" />
               <span className="text-base font-medium">المحفظة</span>
             </Link>
-            <Link href="/tracking_orders_regular" className="flex items-center gap-4">
-              <img src="/images/shopping_bag_hex_icon.png" alt="تتبع الطلبات" className="w-10 h-10" />
-              <span className="text-base font-medium">تتبع الطلبات</span>
-            </Link>
+            {session?.user?.role !== 'SHOP' && (
+              <Link href="/tracking_orders_regular" className="flex items-center gap-4">
+                <img src="/images/shopping_bag_hex_icon.png" alt="تتبع الطلبات" className="w-10 h-10" />
+                <span className="text-base font-medium">تتبع الطلبات</span>
+              </Link>
+            )}
           </div>
         </div>
         {/* Green Line */}

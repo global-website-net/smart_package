@@ -294,7 +294,7 @@ export default function ShopPackagesPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <main className="p-4 pt-24">
+      <main className="p-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-6">إدارة الطرود</h1>

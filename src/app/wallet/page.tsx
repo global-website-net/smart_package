@@ -36,8 +36,8 @@ export default function WalletPage() {
       }
 
       if (status === 'authenticated') {
-        // Check if user is a REGULAR user
-        if (session?.user?.role !== 'REGULAR') {
+        // Allow both REGULAR and SHOP users
+        if (session?.user?.role !== 'REGULAR' && session?.user?.role !== 'SHOP') {
           router.push('/')
           return
         }
@@ -128,15 +128,17 @@ export default function WalletPage() {
             </div>
           </div>
 
-          {/* Add Balance Button and Green Line */}
-          <div className="flex flex-col items-center">
-            <button
-              onClick={() => setShowPaymentWizard(true)}
-              className="bg-green-500 text-white px-8 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 mb-4"
-            >
-              إضافة رصيد
-            </button>
-          </div>
+          {/* Add Balance Button - Only show for REGULAR users */}
+          {session?.user?.role === 'REGULAR' && (
+            <div className="flex justify-center">
+              <button
+                onClick={() => setShowPaymentWizard(true)}
+                className="bg-green-500 text-white px-8 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 mb-4"
+              >
+                إضافة رصيد
+              </button>
+            </div>
+          )}
           
           {/* Green Divider */}
           <div className="w-full h-0.5 bg-green-500 mb-8" />
@@ -152,39 +154,19 @@ export default function WalletPage() {
               </div>
               {walletData.transactions.map((transaction) => (
                 <div key={transaction.id} className="flex justify-between items-center border-b pb-4">
-                  <div className="flex items-center w-1/3 justify-center">
-                    <span className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(transaction.createdAt).toLocaleDateString('en-GB', {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </span>
-                    <img src="/images/calendar_icon.png" alt="Calendar Icon" className="w-5 h-5" style={{marginLeft: '-4px', paddingLeft: 0}} />
-                  </div>
-                  <span className="w-1/3 text-center text-sm text-gray-700">{transaction.reason}</span>
-                  <div className="flex items-center gap-4 w-1/3 justify-center">
-                    <span
-                      className={`text-xl font-bold ${transaction.type === 'CREDIT' ? 'text-green-600' : 'text-red-600'}`}
-                      dir="rtl"
-                    >
-                      {transaction.amount.toFixed(2)}₪{transaction.type === 'DEBIT' ? '-' : '+'}
-                    </span>
-                  </div>
+                  <span className="w-1/3 text-center">{new Date(transaction.createdAt).toLocaleDateString('ar-SA')}</span>
+                  <span className="w-1/3 text-center">{transaction.reason}</span>
+                  <span className={`w-1/3 text-center ${transaction.type === 'CREDIT' ? 'text-green-600' : 'text-red-600'}`}>
+                    {transaction.type === 'CREDIT' ? '+' : '-'}{transaction.amount.toFixed(2)} شيكل
+                  </span>
                 </div>
               ))}
-              {walletData.transactions.length === 0 && (
-                <div className="text-center text-gray-500 font-bold">
-                  لا توجد معاملات حتى الآن
-                </div>
-              )}
             </div>
           </div>
         </div>
       </main>
 
+      {/* Payment Wizard Modal */}
       {showPaymentWizard && (
         <PaymentWizard
           onClose={() => setShowPaymentWizard(false)}

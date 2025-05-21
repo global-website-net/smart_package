@@ -13,14 +13,39 @@ export async function GET(req: NextRequest) {
   if (!session || session.user.role !== 'SHOP') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
   const shopId = session.user.id
-  const { data, error } = await supabase
-    .from('package')
-    .select('*')
-    .eq('shopId', shopId)
-    .order('createdAt', { ascending: false })
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+
+  try {
+    const { data, error } = await supabase
+      .from('package')
+      .select(`
+        *,
+        user:userId (
+          id,
+          fullName,
+          email
+        ),
+        shop:shopId (
+          id,
+          name,
+          email
+        )
+      `)
+      .eq('shopId', shopId)
+      .order('createdAt', { ascending: false })
+
+    if (error) {
+      console.error('Error fetching packages:', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json(data)
+  } catch (error) {
+    console.error('Error in shop-packages route:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
-  return NextResponse.json(data)
 } 

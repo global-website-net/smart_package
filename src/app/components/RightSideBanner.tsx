@@ -1,12 +1,17 @@
 "use client";
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 
 export default function RightSideBanner() {
   const pathname = usePathname();
+  const router = useRouter();
   const { data: session } = useSession();
   const isShopUser = session?.user?.role === 'SHOP';
+
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: '/' });
+  };
 
   const navigationItems = isShopUser ? [
     { href: '/', label: 'الرئيسية' },
@@ -45,7 +50,7 @@ export default function RightSideBanner() {
             {item.label}
           </Link>
         ))}
-        <button onClick={() => signOut()} className="py-2 px-4 w-full text-center rounded-md text-white hover:bg-red-700/80">تسجيل الخروج</button>
+        <button onClick={handleSignOut} className="py-2 px-4 w-full text-center rounded-md text-white hover:bg-red-700/80">تسجيل الخروج</button>
       </div>
     </div>
   )
