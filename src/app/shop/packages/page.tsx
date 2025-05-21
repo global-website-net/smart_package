@@ -399,13 +399,12 @@ export default function ShopPackagesPage() {
                     <TableHead className="text-center font-bold text-lg">الحالة</TableHead>
                     <TableHead className="text-center font-bold text-lg">الوصف</TableHead>
                     <TableHead className="text-center font-bold text-lg">تاريخ الإنشاء</TableHead>
-                    <TableHead className="text-center font-bold text-lg">الإجراءات</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredPackages.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-4">
+                      <TableCell colSpan={4} className="text-center py-4">
                         لا توجد طرود
                       </TableCell>
                     </TableRow>
@@ -421,14 +420,6 @@ export default function ShopPackagesPage() {
                         <TableCell className="text-center">{pkg.description || '-'}</TableCell>
                         <TableCell className="text-center">
                           {new Date(pkg.createdAt).toLocaleDateString('ar')}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Button
-                            onClick={() => openEditDialog(pkg)}
-                            className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                          >
-                            تعديل
-                          </Button>
                         </TableCell>
                       </TableRow>
                     ))
