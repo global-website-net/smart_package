@@ -24,11 +24,11 @@ export default function Header() {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="flex justify-between h-14 items-center relative">
           {/* Right side navigation (RTL: visually right) */}
-          <div className="flex flex-1 items-center justify-end gap-2 ml-4">
-            <Link href="/" className="px-2 py-1 text-lg font-bold">الرئيسية</Link>
-            <Link href="/how-it-works" className="px-2 py-1 text-lg font-bold">من نحن</Link>
-            <Link href="/packages_prices" className="px-2 py-1 text-lg font-bold">اسعارنا</Link>
-            <Link href="/contact" className="px-2 py-1 text-lg font-bold">التواصل</Link>
+          <div className="flex flex-1 items-center justify-start gap-6">
+            <Link href="/" className="px-2 py-1 font-bold">الرئيسية</Link>
+            <Link href="/how-it-works" className="px-2 py-1 font-bold">من نحن</Link>
+            <Link href="/packages_prices" className="px-2 py-1 font-bold">اسعارنا</Link>
+            <Link href="/contact" className="px-2 py-1 font-bold">التواصل</Link>
           </div>
 
           {/* Centered Logo Image */}
@@ -39,16 +39,16 @@ export default function Header() {
           </div>
 
           {/* Left side navigation (RTL: visually left) */}
-          <div className="flex flex-1 items-center justify-start gap-2 mr-4">
-            <Link href="/campaigns" className="px-2 py-1 text-lg font-bold">حملات</Link>
-            <Link href="/blog" className="px-2 py-1 text-lg font-bold">بلوج</Link>
+          <div className="flex flex-1 items-center justify-end gap-6">
+            <Link href="/campaigns" className="px-2 py-1 font-bold">حملات</Link>
+            <Link href="/blog" className="px-2 py-1 font-bold">بلوج</Link>
             <div className="flex items-center gap-2 leading-tight">
-              <Link href="/faq" className="px-2 py-1 flex flex-col items-center leading-tight font-bold text-lg">
+            <Link href="/faq" className="px-2 py-1 flex flex-col items-center leading-tight font-bold">
                 <span>الأسئلة</span>
                 <span>المتكررة</span>
               </Link>
               {status !== 'authenticated' && pathname !== '/auth/login' && (
-                <Link href="/auth/login" className="px-2 py-1 bg-green-600 rounded text-white text-lg font-bold">تسجيل دخول</Link>
+                <Link href="/auth/login" className="px-2 py-1 bg-green-600 rounded text-white text-sm font-bold">تسجيل دخول</Link>
               )}
             </div>
           </div>
