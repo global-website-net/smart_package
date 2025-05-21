@@ -220,7 +220,6 @@ export default function AccountPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: profile?.email || session?.user?.email,
           password: formData.currentPassword,
         }),
       });
@@ -328,19 +327,19 @@ export default function AccountPage() {
           <div className="flex gap-8">
             <Link href="/tracking_packages_user" className="flex flex-col items-center">
               <div className="w-24 h-24 rounded-lg bg-white shadow-md flex items-center justify-center hover:shadow-lg transition-shadow">
-                <img src="/images/package_tracking_icon.png" alt="تتبع الرزم" className="w-16 h-16" />
+                <img src="/images/package_hex_icon.png" alt="تتبع الرزم" className="w-16 h-16" />
               </div>
               <span className="mt-2 text-sm font-medium">تتبع الرزم</span>
             </Link>
             <Link href="/wallet" className="flex flex-col items-center">
               <div className="w-24 h-24 rounded-lg bg-white shadow-md flex items-center justify-center hover:shadow-lg transition-shadow">
-                <img src="/images/wallet_icon.png" alt="المحفظة" className="w-16 h-16" />
+                <img src="/images/wallet_hex_icon.png" alt="المحفظة" className="w-16 h-16" />
               </div>
               <span className="mt-2 text-sm font-medium">المحفظة</span>
             </Link>
             <Link href="/tracking_orders_regular" className="flex flex-col items-center">
               <div className="w-24 h-24 rounded-lg bg-white shadow-md flex items-center justify-center hover:shadow-lg transition-shadow">
-                <img src="/images/order_tracking_icon.png" alt="تتبع الطلبات" className="w-16 h-16" />
+                <img src="/images/shopping_bag_hex_icon.png" alt="تتبع الطلبات" className="w-16 h-16" />
               </div>
               <span className="mt-2 text-sm font-medium">تتبع الطلبات</span>
             </Link>
