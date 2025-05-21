@@ -62,7 +62,9 @@ export default function Home() {
       <Header />
       
       <main className="max-w-6xl mx-auto px-4 py-6">
-        <h1 className="text-5xl font-bold mb-2 text-gray-900">تسوق من جميع أنحاء العالم</h1>
+        <div className="flex justify-center">
+          <h1 className="text-5xl font-bold mb-2 text-gray-900 text-center">تسوق من جميع أنحاء العالم</h1>
+        </div>
         <div className="flex justify-center items-center mb-6">
           <div className="relative w-full max-w-[600px]">
             <div className="w-full h-0.5 bg-green-500"></div>

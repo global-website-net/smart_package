@@ -316,6 +316,30 @@ export default function AccountPage() {
             <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
           </div>
         </div>
+        {/* Profile and Navigation Icons Section */}
+        <div className="flex flex-row items-center justify-center mb-8 gap-8">
+          {/* Left: Navigation Icons */}
+          <div className="flex flex-col items-center gap-6">
+            <div className="flex items-center gap-2">
+              <img src="/images/package_hex_icon.png" alt="تتبع الرزم" className="w-10 h-10" />
+              <span className="text-lg font-bold">تتبع الرزم</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <img src="/images/wallet_hex_icon.png" alt="المحفظة" className="w-10 h-10" />
+              <span className="text-lg font-bold">المحفظة</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <img src="/images/shopping_bag_hex_icon.png" alt="تتبع الطلبات" className="w-10 h-10" />
+              <span className="text-lg font-bold">تتبع الطلبات</span>
+            </div>
+          </div>
+          {/* Divider */}
+          <div className="h-32 w-px bg-gray-400 mx-6" />
+          {/* Right: Profile Icon */}
+          <div className="flex-shrink-0 flex flex-col items-center justify-center">
+            <img src="/images/profile_icon.png" alt="الملف الشخصي" className="w-40 h-40 rounded-full object-cover" />
+          </div>
+        </div>
         {/* Profile & Navigation Section */}
         <div className="flex justify-center items-center min-h-[60vh] w-full">
           <form onSubmit={handleSubmit} className="w-full max-w-lg flex flex-col gap-6 items-end">

@@ -175,7 +175,7 @@ export default function BlogPage() {
       <Header />
       
       <main className="max-w-6xl mx-auto px-4 py-6">
-        <h1 className="text-3xl font-bold text-center mb-2">المدونة</h1>
+        <h1 className="text-3xl font-bold text-center mb-2">بلوج</h1>
         <div className="flex justify-center items-center mb-8">
           <div className="relative w-56 sm:w-64 md:w-80">
             <div className="w-full h-0.5 bg-green-500"></div>
