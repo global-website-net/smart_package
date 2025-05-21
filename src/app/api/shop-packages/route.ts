@@ -47,6 +47,20 @@ export async function GET() {
       )
     }
 
+    console.log('Shop Packages API - Shop user verified:', shopUser)
+
+    // First, let's check if there are any packages with this shopId
+    const { data: packageCount, error: countError } = await supabase
+      .from('package')
+      .select('id', { count: 'exact' })
+      .eq('shopId', session.user.id)
+
+    if (countError) {
+      console.error('Shop Packages API - Error counting packages:', countError)
+    } else {
+      console.log('Shop Packages API - Total packages found:', packageCount?.length || 0)
+    }
+
     console.log('Shop Packages API - Fetching packages for shop:', session.user.id)
 
     const { data: packages, error: packagesError } = await supabase
@@ -58,6 +72,8 @@ export async function GET() {
         status,
         createdAt,
         updatedAt,
+        userId,
+        shopId,
         user:userId (
           id,
           fullName,
@@ -80,6 +96,7 @@ export async function GET() {
       )
     }
 
+    console.log('Shop Packages API - Raw packages data:', packages)
     console.log('Shop Packages API - Successfully fetched packages:', packages?.length || 0)
 
     return NextResponse.json(packages || [])
