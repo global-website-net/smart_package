@@ -272,7 +272,7 @@ export default function ShopPackagesPage() {
 
   const filteredPackages = packages.filter(pkg => {
     const matchesTrackingNumber = trackingNumberFilter === '' || pkg.trackingNumber.includes(trackingNumberFilter)
-    const matchesStatus = statusFilter === 'ALL' ? (pkg.status === 'RECEIVED' || pkg.status === 'IN_SHOP') : pkg.status === statusFilter
+    const matchesStatus = statusFilter === 'ALL' ? true : pkg.status === statusFilter
     return matchesTrackingNumber && matchesStatus
   })
 
