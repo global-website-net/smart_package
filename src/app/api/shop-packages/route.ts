@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/auth.config'
 import { createClient } from '@supabase/supabase-js'
@@ -8,78 +8,83 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions)
-    console.log('Session:', session) // Debug log
+    console.log('Shop Packages API - Session:', session)
 
     if (!session) {
-      console.log('No session found') // Debug log
-      return NextResponse.json({ error: 'No session found' }, { status: 401 })
+      console.error('Shop Packages API - No session found')
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     if (session.user.role !== 'SHOP') {
-      console.log('User is not a shop:', session.user.role) // Debug log
-      return NextResponse.json({ error: 'User is not a shop' }, { status: 401 })
+      console.error('Shop Packages API - User is not SHOP:', session.user.role)
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    const shopId = session.user.id
-    console.log('Shop ID:', shopId) // Debug log
-
-    // First, verify the shop exists
-    const { data: shopData, error: shopError } = await supabase
-      .from('users')
+    // First verify the shop exists
+    const { data: shop, error: shopError } = await supabase
+      .from('shop')
       .select('id')
-      .eq('id', shopId)
+      .eq('id', session.user.id)
       .single()
 
     if (shopError) {
-      console.error('Error verifying shop:', shopError) // Debug log
-      return NextResponse.json({ error: 'Shop verification failed' }, { status: 500 })
+      console.error('Shop Packages API - Error verifying shop:', shopError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء التحقق من المتجر', details: shopError.message },
+        { status: 500 }
+      )
     }
 
-    if (!shopData) {
-      console.log('Shop not found:', shopId) // Debug log
-      return NextResponse.json({ error: 'Shop not found' }, { status: 404 })
+    if (!shop) {
+      console.error('Shop Packages API - Shop not found:', session.user.id)
+      return NextResponse.json(
+        { error: 'لم يتم العثور على المتجر' },
+        { status: 404 }
+      )
     }
 
-    // Then fetch packages
-    const { data, error } = await supabase
+    console.log('Shop Packages API - Fetching packages for shop:', session.user.id)
+
+    const { data: packages, error: packagesError } = await supabase
       .from('package')
       .select(`
         id,
         trackingNumber,
         status,
-        shopId,
-        description,
-        userId,
         createdAt,
         updatedAt,
-        user:users!userId (
+        user:userId (
           id,
           fullName,
           email
         ),
-        shop:users!shopId (
+        shop:shopId (
           id,
-          fullName,
+          name,
           email
         )
       `)
-      .eq('shopId', shopId)
+      .eq('shopId', session.user.id)
       .order('createdAt', { ascending: false })
 
-    if (error) {
-      console.error('Error fetching packages:', error) // Debug log
-      return NextResponse.json({ error: error.message }, { status: 500 })
+    if (packagesError) {
+      console.error('Shop Packages API - Error fetching packages:', packagesError)
+      return NextResponse.json(
+        { error: 'حدث خطأ أثناء جلب الطرود', details: packagesError.message },
+        { status: 500 }
+      )
     }
 
-    console.log('Packages found:', data?.length) // Debug log
-    return NextResponse.json(data || [])
+    console.log('Shop Packages API - Successfully fetched packages:', packages?.length || 0)
+
+    return NextResponse.json(packages || [])
   } catch (error) {
-    console.error('Unexpected error in shop-packages route:', error) // Debug log
+    console.error('Shop Packages API - Unexpected error:', error)
     return NextResponse.json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'حدث خطأ غير متوقع', details: error instanceof Error ? error.message : error },
       { status: 500 }
     )
   }
