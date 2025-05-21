@@ -66,6 +66,7 @@ export default function AccountPage() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [passwordError, setPasswordError] = useState('')
+  const [shopError, setShopError] = useState('')
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter()
@@ -203,11 +204,19 @@ export default function AccountPage() {
     setUpdateSuccess('')
     setUpdateError('')
     setPasswordError('')
+    setShopError('')
     setIsSubmitting(true)
 
     // Prevent submission if current password is empty
     if (!formData.currentPassword) {
       setPasswordError('يجب إدخال كلمة المرور الحالية');
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Validate shop selection for regular users
+    if (isRegularUser && (!formData.shopId || formData.shopId === '')) {
+      setShopError('يرجى اختيار متجر من القائمة');
       setIsSubmitting(false);
       return;
     }
@@ -323,7 +332,7 @@ export default function AccountPage() {
             <img alt="الملف الشخصي" className="w-40 h-40 rounded-full object-cover" src="/images/profile_icon.png" />
           </div>
           {/* Divider */}
-          <div className="h-32 w-px bg-gray-400 mx-6" />
+          <div className="h-40 w-0.5 bg-gray-400 mx-6" />
           {/* Left: Navigation Icons */}
           <div className="flex flex-col gap-8">
             <Link href="/tracking_packages_user" className="flex items-center gap-4">
@@ -454,7 +463,7 @@ export default function AccountPage() {
                   value={formData.shopId} 
                   onChange={handleInputChange} 
                   disabled={!isEditing}
-                  className={`w-full border-0 border-b-2 border-gray-300 focus:border-green-500 outline-none text-right ${
+                  className={`w-full border-0 border-b-2 ${shopError ? 'border-red-500' : 'border-gray-300'} focus:border-green-500 outline-none text-right ${
                     !isEditing ? 'bg-gray-100 text-gray-500' : 'bg-transparent'
                   }`}
                 >
@@ -463,6 +472,9 @@ export default function AccountPage() {
                     <option key={shop.id} value={shop.id}>{shop.fullName}</option>
                   ))}
                 </select>
+                {shopError && (
+                  <p className="text-red-500 text-sm mt-1 text-right">{shopError}</p>
+                )}
               </div>
             )}
             {/* Action Buttons */}
