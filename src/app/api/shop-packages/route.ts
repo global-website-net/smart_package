@@ -9,26 +9,60 @@ const supabase = createClient(
 )
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions)
-  if (!session || session.user.role !== 'SHOP') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  const shopId = session.user.id
-
   try {
+    const session = await getServerSession(authOptions)
+    console.log('Session:', session) // Debug log
+
+    if (!session) {
+      console.log('No session found') // Debug log
+      return NextResponse.json({ error: 'No session found' }, { status: 401 })
+    }
+
+    if (session.user.role !== 'SHOP') {
+      console.log('User is not a shop:', session.user.role) // Debug log
+      return NextResponse.json({ error: 'User is not a shop' }, { status: 401 })
+    }
+
+    const shopId = session.user.id
+    console.log('Shop ID:', shopId) // Debug log
+
+    // First, verify the shop exists
+    const { data: shopData, error: shopError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('id', shopId)
+      .single()
+
+    if (shopError) {
+      console.error('Error verifying shop:', shopError) // Debug log
+      return NextResponse.json({ error: 'Shop verification failed' }, { status: 500 })
+    }
+
+    if (!shopData) {
+      console.log('Shop not found:', shopId) // Debug log
+      return NextResponse.json({ error: 'Shop not found' }, { status: 404 })
+    }
+
+    // Then fetch packages
     const { data, error } = await supabase
       .from('package')
       .select(`
-        *,
-        user:userId (
+        id,
+        trackingNumber,
+        status,
+        shopId,
+        description,
+        userId,
+        createdAt,
+        updatedAt,
+        user:users!userId (
           id,
           fullName,
           email
         ),
-        shop:shopId (
+        shop:users!shopId (
           id,
-          name,
+          fullName,
           email
         )
       `)
@@ -36,15 +70,16 @@ export async function GET(req: NextRequest) {
       .order('createdAt', { ascending: false })
 
     if (error) {
-      console.error('Error fetching packages:', error)
+      console.error('Error fetching packages:', error) // Debug log
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json(data)
+    console.log('Packages found:', data?.length) // Debug log
+    return NextResponse.json(data || [])
   } catch (error) {
-    console.error('Error in shop-packages route:', error)
+    console.error('Unexpected error in shop-packages route:', error) // Debug log
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }

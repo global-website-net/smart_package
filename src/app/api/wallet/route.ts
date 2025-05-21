@@ -18,8 +18,8 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    if (session.user.role !== 'REGULAR') {
-      console.error('User is not REGULAR:', session.user.role)
+    if (session.user.role !== 'REGULAR' && session.user.role !== 'SHOP') {
+      console.error('User is not REGULAR or SHOP:', session.user.role)
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
