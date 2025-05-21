@@ -23,25 +23,26 @@ export async function GET() {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // First verify the shop exists
-    const { data: shop, error: shopError } = await supabase
-      .from('shop')
-      .select('id')
+    // First verify the shop user exists
+    const { data: shopUser, error: shopUserError } = await supabase
+      .from('users')
+      .select('id, role')
       .eq('id', session.user.id)
+      .eq('role', 'SHOP')
       .single()
 
-    if (shopError) {
-      console.error('Shop Packages API - Error verifying shop:', shopError)
+    if (shopUserError) {
+      console.error('Shop Packages API - Error verifying shop user:', shopUserError)
       return NextResponse.json(
-        { error: 'حدث خطأ أثناء التحقق من المتجر', details: shopError.message },
+        { error: 'حدث خطأ أثناء التحقق من حساب المتجر', details: shopUserError.message },
         { status: 500 }
       )
     }
 
-    if (!shop) {
-      console.error('Shop Packages API - Shop not found:', session.user.id)
+    if (!shopUser) {
+      console.error('Shop Packages API - Shop user not found:', session.user.id)
       return NextResponse.json(
-        { error: 'لم يتم العثور على المتجر' },
+        { error: 'لم يتم العثور على حساب المتجر' },
         { status: 404 }
       )
     }
