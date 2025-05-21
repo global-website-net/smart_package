@@ -188,130 +188,127 @@ export default function NewOrder() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <main className="p-4 pt-24">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-6">طلبية جديدة</h1>
-            <div className="flex justify-center items-center">
-              <div className="relative w-48 sm:w-48 md:w-64">
-                <div className="w-full h-0.5 bg-green-500"></div>
-                <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
+      <main className="max-w-2xl mx-auto px-4 py-10 mt-[70px]">
+        {/* Title and underline */}
+        <h1 className="text-3xl font-bold text-center mb-2 mt-0">طلبية جديدة</h1>
+        <div className="flex justify-center items-center mb-8">
+          <div className="relative w-56 sm:w-64 md:w-80">
+            <div className="w-full h-0.5 bg-green-500"></div>
+            <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6">
+          <div className="space-y-6">
+            {/* Purchase Site */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="shopId" className="text-right">
+                موقع الشراء
+              </label>
+              <Select
+                value={formData.shopId}
+                onValueChange={(value) => setFormData({ ...formData, shopId: value })}
+              >
+                <SelectTrigger className="col-span-3 text-right">
+                  <SelectValue placeholder="اختر المتجر" className="text-right" dir="rtl" />
+                </SelectTrigger>
+                <SelectContent className="text-right" align="end">
+                  {shops.length === 0 ? (
+                    <SelectItem value="no-shops" disabled className="text-right">
+                      لا توجد متاجر متاحة
+                    </SelectItem>
+                  ) : (
+                    shops.map((shop) => (
+                      <SelectItem key={shop.id} value={shop.id} className="text-right">
+                        {shop.name}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Purchase Link */}
+            <div>
+              <label htmlFor="purchaseLink" className="block text-gray-700 text-right mb-2">
+                لينك الشراء
+              </label>
+              <input
+                type="text"
+                id="purchaseLink"
+                name="purchaseLink"
+                value={formData.purchaseLink}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                dir="rtl"
+              />
+            </div>
+
+            {/* Phone Number */}
+            <div>
+              <label htmlFor="phoneNumber" className="block text-gray-700 text-right mb-2">
+                رقم الهاتف
+              </label>
+              <input
+                type="text"
+                id="phoneNumber"
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                dir="rtl"
+              />
+            </div>
+
+            {/* Notes */}
+            <div>
+              <label htmlFor="notes" className="block text-gray-700 text-right mb-2">
+                ملاحظات
+              </label>
+              <input
+                type="text"
+                id="notes"
+                name="notes"
+                value={formData.notes}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                dir="rtl"
+              />
+            </div>
+
+            {/* Additional Information Box */}
+            <div>
+              <div className="border-2 border-gray-200 rounded-md p-4">
+                <textarea
+                  id="additionalInfo"
+                  name="additionalInfo"
+                  value={formData.additionalInfo}
+                  onChange={handleInputChange}
+                  rows={3}
+                  placeholder="معلومات إضافية..."
+                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  dir="rtl"
+                />
               </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="flex justify-center gap-4">
+              <button
+                type="submit"
+                className="bg-green-500 text-white px-8 py-3 rounded-md hover:bg-green-600 transition-colors"
+              >
+                إرسال الطلب
+              </button>
+              <button
+                onClick={handleCancel}
+                className="bg-gray-500 text-white px-6 py-3 rounded-md hover:bg-gray-600 transition-colors"
+              >
+                إلغاء
+              </button>
             </div>
           </div>
-
-          <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6">
-            <div className="space-y-6">
-              {/* Purchase Site */}
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label htmlFor="shopId" className="text-right">
-                  موقع الشراء
-                </label>
-                <Select
-                  value={formData.shopId}
-                  onValueChange={(value) => setFormData({ ...formData, shopId: value })}
-                >
-                  <SelectTrigger className="col-span-3 text-right">
-                    <SelectValue placeholder="اختر المتجر" className="text-right" dir="rtl" />
-                  </SelectTrigger>
-                  <SelectContent className="text-right" align="end">
-                    {shops.length === 0 ? (
-                      <SelectItem value="no-shops" disabled className="text-right">
-                        لا توجد متاجر متاحة
-                      </SelectItem>
-                    ) : (
-                      shops.map((shop) => (
-                        <SelectItem key={shop.id} value={shop.id} className="text-right">
-                          {shop.name}
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Purchase Link */}
-              <div>
-                <label htmlFor="purchaseLink" className="block text-gray-700 text-right mb-2">
-                  لينك الشراء
-                </label>
-                <input
-                  type="text"
-                  id="purchaseLink"
-                  name="purchaseLink"
-                  value={formData.purchaseLink}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  dir="rtl"
-                />
-              </div>
-
-              {/* Phone Number */}
-              <div>
-                <label htmlFor="phoneNumber" className="block text-gray-700 text-right mb-2">
-                  رقم الهاتف
-                </label>
-                <input
-                  type="text"
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  dir="rtl"
-                />
-              </div>
-
-              {/* Notes */}
-              <div>
-                <label htmlFor="notes" className="block text-gray-700 text-right mb-2">
-                  ملاحظات
-                </label>
-                <input
-                  type="text"
-                  id="notes"
-                  name="notes"
-                  value={formData.notes}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  dir="rtl"
-                />
-              </div>
-
-              {/* Additional Information Box */}
-              <div>
-                <div className="border-2 border-gray-200 rounded-md p-4">
-                  <textarea
-                    id="additionalInfo"
-                    name="additionalInfo"
-                    value={formData.additionalInfo}
-                    onChange={handleInputChange}
-                    rows={3}
-                    placeholder="معلومات إضافية..."
-                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                    dir="rtl"
-                  />
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <div className="flex justify-center gap-4">
-                <button
-                  type="submit"
-                  className="bg-green-500 text-white px-8 py-3 rounded-md hover:bg-green-600 transition-colors"
-                >
-                  إرسال الطلب
-                </button>
-                <button
-                  onClick={handleCancel}
-                  className="bg-gray-500 text-white px-6 py-3 rounded-md hover:bg-gray-600 transition-colors"
-                >
-                  إلغاء
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
+        </form>
       </main>
 
       {showToast && (

@@ -318,32 +318,30 @@ export default function AccountPage() {
         {/* Profile and Navigation Icons Section */}
         <div className="flex flex-row items-center justify-center mb-8 gap-8">
           {/* Left: Navigation Icons */}
-          <div className="flex-shrink-0 flex flex-col items-center justify-center">
-            <img alt="الملف الشخصي" className="w-40 h-40 rounded-full object-cover" src="/images/profile_icon.png" />
+          <div className="flex flex-col gap-6">
+            <Link href="/tracking_packages_user" className="flex items-center gap-3">
+              <img src="/images/package_hex_icon.png" alt="تتبع الرزم" className="w-8 h-8" />
+              <span className="text-sm font-medium">تتبع الرزم</span>
+            </Link>
+            <Link href="/wallet" className="flex items-center gap-3">
+              <img src="/images/wallet_hex_icon.png" alt="المحفظة" className="w-8 h-8" />
+              <span className="text-sm font-medium">المحفظة</span>
+            </Link>
+            <Link href="/tracking_orders_regular" className="flex items-center gap-3">
+              <img src="/images/shopping_bag_hex_icon.png" alt="تتبع الطلبات" className="w-8 h-8" />
+              <span className="text-sm font-medium">تتبع الطلبات</span>
+            </Link>
           </div>
           {/* Divider */}
           <div className="h-32 w-px bg-gray-400 mx-6" />
-          {/* Right: Navigation Icons */}
-          <div className="flex gap-8">
-            <Link href="/tracking_packages_user" className="flex flex-col items-center">
-              <div className="w-24 h-24 rounded-lg bg-white shadow-md flex items-center justify-center hover:shadow-lg transition-shadow">
-                <img src="/images/package_hex_icon.png" alt="تتبع الرزم" className="w-16 h-16" />
-              </div>
-              <span className="mt-2 text-sm font-medium">تتبع الرزم</span>
-            </Link>
-            <Link href="/wallet" className="flex flex-col items-center">
-              <div className="w-24 h-24 rounded-lg bg-white shadow-md flex items-center justify-center hover:shadow-lg transition-shadow">
-                <img src="/images/wallet_hex_icon.png" alt="المحفظة" className="w-16 h-16" />
-              </div>
-              <span className="mt-2 text-sm font-medium">المحفظة</span>
-            </Link>
-            <Link href="/tracking_orders_regular" className="flex flex-col items-center">
-              <div className="w-24 h-24 rounded-lg bg-white shadow-md flex items-center justify-center hover:shadow-lg transition-shadow">
-                <img src="/images/shopping_bag_hex_icon.png" alt="تتبع الطلبات" className="w-16 h-16" />
-              </div>
-              <span className="mt-2 text-sm font-medium">تتبع الطلبات</span>
-            </Link>
+          {/* Right: Profile Image */}
+          <div className="flex-shrink-0 flex flex-col items-center justify-center">
+            <img alt="الملف الشخصي" className="w-40 h-40 rounded-full object-cover" src="/images/profile_icon.png" />
           </div>
+        </div>
+        {/* Green Line */}
+        <div className="flex justify-center items-center mb-8">
+          <div className="w-full max-w-[600px] h-0.5 bg-green-500" />
         </div>
         {/* Profile & Navigation Section */}
         <div className="flex justify-center items-center min-h-[60vh] w-full">
