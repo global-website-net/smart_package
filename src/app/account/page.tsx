@@ -246,6 +246,7 @@ export default function AccountPage() {
           phoneNumber: formData.phoneNumber,
           newPassword: formData.newPassword || undefined,
           shopId: formData.shopId,
+          currentPassword: formData.currentPassword,
         }),
       });
 
