@@ -47,7 +47,7 @@ export default function Header() {
                 <span>الأسئلة</span>
                 <span>المتكررة</span>
               </Link>
-              {status !== 'authenticated' && (
+              {status !== 'authenticated' && pathname !== '/auth/login' && (
                 <Link href="/auth/login" className="px-2 py-1 bg-green-600 rounded text-white text-sm font-bold">تسجيل دخول</Link>
               )}
             </div>
@@ -72,7 +72,7 @@ export default function Header() {
               <span>الأسئلة</span>
               <span>المتكررة</span>
             </Link>
-            {status !== 'authenticated' && (
+            {status !== 'authenticated' && pathname !== '/auth/login' && (
               <Link href="/auth/login" className="block px-3 py-2 bg-green-600 rounded text-white text-sm font-bold">تسجيل دخول</Link>
             )}
           </div>

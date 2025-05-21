@@ -319,25 +319,31 @@ export default function AccountPage() {
         {/* Profile and Navigation Icons Section */}
         <div className="flex flex-row items-center justify-center mb-8 gap-8">
           {/* Left: Navigation Icons */}
-          <div className="flex flex-col items-center gap-6">
-            <div className="flex items-center gap-2">
-              <img src="/images/package_hex_icon.png" alt="تتبع الرزم" className="w-10 h-10" />
-              <span className="text-lg font-bold">تتبع الرزم</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <img src="/images/wallet_hex_icon.png" alt="المحفظة" className="w-10 h-10" />
-              <span className="text-lg font-bold">المحفظة</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <img src="/images/shopping_bag_hex_icon.png" alt="تتبع الطلبات" className="w-10 h-10" />
-              <span className="text-lg font-bold">تتبع الطلبات</span>
-            </div>
+          <div className="flex-shrink-0 flex flex-col items-center justify-center">
+            <img alt="الملف الشخصي" className="w-40 h-40 rounded-full object-cover" src="/images/profile_icon.png" />
           </div>
           {/* Divider */}
           <div className="h-32 w-px bg-gray-400 mx-6" />
-          {/* Right: Profile Icon */}
-          <div className="flex-shrink-0 flex flex-col items-center justify-center">
-            <img src="/images/profile_icon.png" alt="الملف الشخصي" className="w-40 h-40 rounded-full object-cover" />
+          {/* Right: Navigation Icons */}
+          <div className="flex gap-8">
+            <Link href="/tracking_packages_user" className="flex flex-col items-center">
+              <div className="w-24 h-24 rounded-lg bg-white shadow-md flex items-center justify-center hover:shadow-lg transition-shadow">
+                <img src="/images/package_tracking_icon.png" alt="تتبع الرزم" className="w-16 h-16" />
+              </div>
+              <span className="mt-2 text-sm font-medium">تتبع الرزم</span>
+            </Link>
+            <Link href="/wallet" className="flex flex-col items-center">
+              <div className="w-24 h-24 rounded-lg bg-white shadow-md flex items-center justify-center hover:shadow-lg transition-shadow">
+                <img src="/images/wallet_icon.png" alt="المحفظة" className="w-16 h-16" />
+              </div>
+              <span className="mt-2 text-sm font-medium">المحفظة</span>
+            </Link>
+            <Link href="/tracking_orders_regular" className="flex flex-col items-center">
+              <div className="w-24 h-24 rounded-lg bg-white shadow-md flex items-center justify-center hover:shadow-lg transition-shadow">
+                <img src="/images/order_tracking_icon.png" alt="تتبع الطلبات" className="w-16 h-16" />
+              </div>
+              <span className="mt-2 text-sm font-medium">تتبع الطلبات</span>
+            </Link>
           </div>
         </div>
         {/* Profile & Navigation Section */}

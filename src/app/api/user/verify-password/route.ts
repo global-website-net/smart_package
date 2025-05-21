@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { createClient } from '@supabase/supabase-js';
 import bcrypt from 'bcryptjs';
+
+// Initialize Supabase admin client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,8 +14,13 @@ export async function POST(req: NextRequest) {
     if (!email || !password) {
       return NextResponse.json({ error: 'البريد الإلكتروني وكلمة المرور مطلوبة.' }, { status: 400 });
     }
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user || !user.password) {
+    // Fetch user from Supabase
+    const { data: user, error } = await supabase
+      .from('User')
+      .select('id, password')
+      .eq('email', email)
+      .single();
+    if (error || !user || !user.password) {
       return NextResponse.json({ error: 'المستخدم غير موجود أو لا يملك كلمة مرور.' }, { status: 404 });
     }
     const isValid = await bcrypt.compare(password, user.password);
