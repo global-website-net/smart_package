@@ -26,7 +26,7 @@ export default function RightSideBanner() {
         <Link href="/wallet" className={`py-2 px-4 w-full text-center rounded-md ${pathname === '/wallet' ? 'bg-black text-white' : 'text-white hover:bg-green-900/40'}`}>المحفظة</Link>
         <Link href="/account" className={`py-2 px-4 w-full text-center rounded-md ${pathname === '/account' ? 'bg-black text-white' : 'text-white hover:bg-green-900/40'}`}>حسابي</Link>
         <Link href="/messages" className={`py-2 px-4 w-full text-center rounded-md ${pathname === '/messages' ? 'bg-black text-white' : 'text-white hover:bg-green-900/40'}`}>الرسائل</Link>
-        <Link href="/packages" className={`py-2 px-4 w-full text-center rounded-md ${pathname === '/packages' ? 'bg-black text-white' : 'text-white hover:bg-green-900/40'}`}>أسعارنا</Link>
+        <Link href="/packages_prices" className={`py-2 px-4 w-full text-center rounded-md ${pathname === '/packages_prices' ? 'bg-black text-white' : 'text-white hover:bg-green-900/40'}`}>أسعارنا</Link>
         <button onClick={() => signOut()} className="py-2 px-4 w-full text-center rounded-md text-white hover:bg-red-700/80">تسجيل الخروج</button>
       </div>
     </div>

@@ -324,18 +324,18 @@ export default function AccountPage() {
           {/* Divider */}
           <div className="h-32 w-px bg-gray-400 mx-6" />
           {/* Left: Navigation Icons */}
-          <div className="flex flex-col gap-6">
-            <Link href="/tracking_packages_user" className="flex items-center gap-3">
-              <img src="/images/package_hex_icon.png" alt="تتبع الرزم" className="w-8 h-8" />
-              <span className="text-sm font-medium">تتبع الرزم</span>
+          <div className="flex flex-col gap-8">
+            <Link href="/tracking_packages_user" className="flex items-center gap-4">
+              <img src="/images/package_hex_icon.png" alt="تتبع الرزم" className="w-10 h-10" />
+              <span className="text-base font-medium">تتبع الرزم</span>
             </Link>
-            <Link href="/wallet" className="flex items-center gap-3">
-              <img src="/images/wallet_hex_icon.png" alt="المحفظة" className="w-8 h-8" />
-              <span className="text-sm font-medium">المحفظة</span>
+            <Link href="/wallet" className="flex items-center gap-4">
+              <img src="/images/wallet_hex_icon.png" alt="المحفظة" className="w-10 h-10" />
+              <span className="text-base font-medium">المحفظة</span>
             </Link>
-            <Link href="/tracking_orders_regular" className="flex items-center gap-3">
-              <img src="/images/shopping_bag_hex_icon.png" alt="تتبع الطلبات" className="w-8 h-8" />
-              <span className="text-sm font-medium">تتبع الطلبات</span>
+            <Link href="/tracking_orders_regular" className="flex items-center gap-4">
+              <img src="/images/shopping_bag_hex_icon.png" alt="تتبع الطلبات" className="w-10 h-10" />
+              <span className="text-base font-medium">تتبع الطلبات</span>
             </Link>
           </div>
         </div>

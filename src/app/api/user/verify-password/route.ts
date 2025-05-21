@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import prisma from '@/lib/prisma';
-import bcrypt from 'bcryptjs';
+import { createClient } from '@supabase/supabase-js';
 
 export async function POST(req: Request) {
   try {
@@ -20,21 +19,20 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'كلمة المرور مطلوبة' }, { status: 400 });
     }
 
-    // Get user from database
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { password: true }
+    // Initialize Supabase client
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+
+    // Verify password by attempting to sign in
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: session.user.email!,
+      password: password,
     });
 
-    if (!user || !user.password) {
-      return NextResponse.json({ error: 'المستخدم غير موجود' }, { status: 404 });
-    }
-
-    // Verify password
-    const isValid = await bcrypt.compare(password, user.password);
-
-    if (!isValid) {
-      return NextResponse.json({ error: 'كلمة المرور غير صحيحة' }, { status: 401 });
+    if (error || !data.user) {
+      return NextResponse.json({ error: 'كلمة المرور الحالية غير صحيحة' }, { status: 401 });
     }
 
     return NextResponse.json({ success: true });

@@ -55,9 +55,9 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <main className="max-w-2xl mx-auto px-4 py-10 mt-[70px]">
+      <main className="max-w-2xl mx-auto px-4 py-6">
         {/* Title and underline */}
-        <h1 className="text-3xl font-bold text-center mb-2 mt-0">تواصل معنا</h1>
+        <h1 className="text-3xl font-bold text-center mb-2">التواصل</h1>
         <div className="flex justify-center items-center mb-8">
           <div className="relative w-56 sm:w-64 md:w-80">
             <div className="w-full h-0.5 bg-green-500"></div>

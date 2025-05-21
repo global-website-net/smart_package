@@ -106,7 +106,7 @@ export default function HowItWorksPage() {
           
           <div className="text-center">
             <Link
-              href="/packages"
+              href="/packages_prices"
               className="inline-block bg-green-500 text-white px-6 py-3 rounded-md hover:bg-green-600 transition-colors"
             >
               اكتشف باقاتنا
