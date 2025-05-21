@@ -25,7 +25,7 @@ export async function GET() {
 
     // First verify the shop user exists
     const { data: shopUser, error: shopUserError } = await supabase
-      .from('users')
+      .from('User')
       .select('id, role')
       .eq('id', session.user.id)
       .eq('role', 'SHOP')
@@ -54,6 +54,7 @@ export async function GET() {
       .select(`
         id,
         trackingNumber,
+        description,
         status,
         createdAt,
         updatedAt,
@@ -64,7 +65,7 @@ export async function GET() {
         ),
         shop:shopId (
           id,
-          name,
+          fullName,
           email
         )
       `)
