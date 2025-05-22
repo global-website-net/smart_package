@@ -15,14 +15,16 @@ export default function Header() {
             <Link className="px-2 py-1 text-lg font-bold" href="/prices">اسعارنا</Link>
             <Link className="px-2 py-1 text-lg font-bold" href="/contact">التواصل</Link>
           </div>
-          <div className="absolute left-[55%] md:left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center">
+          <div className="absolute left-[40%] md:left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center">
             <Link className="flex items-center gap-2" href="/">
               <Image 
                 src="/images/smart_package_logo_upper_banner.png"
                 alt="SMART PACKAGE"
-                width={180}
-                height={40}
-                className="h-10 w-auto"
+                width={240}
+                height={60}
+                quality={100}
+                priority
+                className="h-10 w-auto object-contain"
               />
             </Link>
           </div>
@@ -50,9 +52,11 @@ export default function Header() {
             <Image 
               src="/images/smart_package_logo_upper_banner.png"
               alt="SMART PACKAGE"
-              width={180}
-              height={40}
-              className="h-10 w-auto"
+              width={240}
+              height={60}
+              quality={100}
+              priority
+              className="h-10 w-auto object-contain"
             />
           </div>
           <Link className="block px-3 py-2 text-lg font-bold" href="/campaigns">حملات</Link>

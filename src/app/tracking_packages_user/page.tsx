@@ -299,13 +299,13 @@ export default function UserPackagesPage() {
         <div className="flex flex-col items-center mb-4">
           <button
             className="focus:outline-none"
-            onClick={() => setShowDesktopFilters(v => !v)}
+            onClick={() => isMobile ? setShowMobileFilters(v => !v) : setShowDesktopFilters(v => !v)}
             aria-label="عرض الفلاتر"
             type="button"
           >
             <Image src="/images/filter_icon.png" alt="فلتر" width={32} height={32} />
           </button>
-          {showDesktopFilters && (
+          {!isMobile && showDesktopFilters && (
             <div className="flex flex-col md:flex-row gap-4 mt-4 items-center bg-white p-4 rounded-lg shadow border border-gray-200 w-full md:w-auto max-w-xl">
               <input
                 type="text"
@@ -391,17 +391,6 @@ export default function UserPackagesPage() {
         {/* Mobile/table fallback: keep existing table or list */}
         {isMobile && (
           <div className="flex flex-col gap-6">
-            {/* Mobile Filters Icon */}
-            <div className="flex justify-start mb-4">
-              <button
-                className="p-0 bg-transparent border-none shadow-none"
-                style={{ background: 'none', border: 'none', boxShadow: 'none' }}
-                onClick={() => setShowMobileFilters(v => !v)}
-                aria-label="عرض الفلاتر"
-              >
-                <Filter className="w-7 h-7 text-black" fill="black" />
-              </button>
-            </div>
             {showMobileFilters && (
               <div className="flex flex-col gap-3 mb-4 p-4 bg-white rounded-lg shadow border border-gray-200">
                 <input
@@ -447,8 +436,14 @@ export default function UserPackagesPage() {
                     <span>#{idx + 1}</span>
                   </div>
                   <div className="mb-2 text-gray-600 text-sm">رقم التتبع: <span className="font-mono">{pkg.trackingNumber}</span></div>
-                  <div className="my-4 text-5xl text-center">
-                    📦
+                  <div className="my-4 flex justify-center">
+                    <img
+                      src="/images/package_icon.png"
+                      alt="Package Icon"
+                      className="w-16 h-16 cursor-pointer"
+                      onClick={() => router.push(`/tracking_packages_user/${pkg.id}`)}
+                      title="عرض تفاصيل الطرد"
+                    />
                   </div>
                   <div className="mb-2">
                     <span className={`px-3 py-1 rounded-full text-sm font-semibold ${pkg.status === 'RECEIVED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>

@@ -156,16 +156,16 @@ export default function WalletPage() {
               {walletData.transactions.map((transaction) => (
                 <div key={transaction.id} className="flex justify-between items-center border-b pb-4">
                   <span className="w-1/3 text-center flex items-center justify-center gap-2">
-                    <img src="/images/calendar_icon.png" alt="Calendar" className="w-5 h-5 inline-block" />
                     {new Date(transaction.createdAt).toLocaleDateString('en-GB', {
                       year: 'numeric',
                       month: '2-digit',
                       day: '2-digit'
                     })}
+                    <img src="/images/calendar_icon.png" alt="Calendar" className="w-5 h-5 inline-block" />
                   </span>
                   <span className="w-1/3 text-center">{transaction.reason}</span>
                   <span className={`w-1/3 text-center ${transaction.type === 'CREDIT' ? 'text-green-600' : 'text-red-600'}`}>
-                    {transaction.type === 'CREDIT' ? '+' : '-'}{transaction.amount.toFixed(2)} شيكل
+                    {transaction.type === 'CREDIT' ? `+${transaction.amount.toFixed(2)} شيكل` : `${transaction.amount.toFixed(2)} شيكل-`}
                   </span>
                 </div>
               ))}

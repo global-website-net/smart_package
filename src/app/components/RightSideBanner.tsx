@@ -33,12 +33,12 @@ export default function RightSideBanner() {
       className="hidden md:flex flex-col items-center fixed right-0 w-[200px] z-[70] bg-no-repeat bg-cover"
       style={{
         backgroundImage: "url('/images/green_seperator_menu_right_side.png')",
-        top: '80px',
-        height: 'calc(100vh - 80px)',
+        top: '0',
+        height: '100vh',
         right: '0'
       }}
     >
-      <div className="flex flex-col items-center mt-8 gap-4 w-full">
+      <div className="flex flex-col items-center mt-24 gap-4 w-full">
         <img src="/images/profile_icon.png" alt="Profile Icon" className="w-24 h-24 mb-2" />
         <img src="/images/white_line_right_banner.png" alt="White Line" className="w-full h-2 mb-2" />
         {navigationItems.map((item) => (
