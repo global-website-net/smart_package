@@ -55,9 +55,9 @@ export default function Header() {
               <Image
                 src="/images/smart_package_logo_upper_banner.png"
                 alt="Smart Package Logo"
-                width={120}
-                height={40}
-                className="h-8 w-auto sm:h-10"
+                width={90}
+                height={30}
+                className="h-6 w-auto sm:h-8"
                 priority
               />
             </Link>

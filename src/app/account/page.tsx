@@ -325,6 +325,31 @@ export default function AccountPage() {
             <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 w-3 h-3 bg-white border border-green-500 rotate-45"></div>
           </div>
         </div>
+        {/* Mobile Profile & Quick Actions */}
+        <div className="block sm:hidden mb-8">
+          {/* Profile Icon Centered */}
+          <div className="flex justify-center mb-6">
+            <img src="/images/profile_icon.png" alt="الملف الشخصي" className="w-32 h-32 rounded-full bg-gray-400" />
+          </div>
+          {/* Quick Actions Row */}
+          <div className="flex flex-row justify-between items-center mb-8 px-2">
+            {/* Track Orders (Right) */}
+            <Link href="/tracking_orders_regular" className="flex flex-col items-center">
+              <img src="/images/shopping_bag_hex_icon.png" alt="تتبع الطلبات" className="w-16 h-16 mb-1" />
+              <span className="text-sm font-bold">تتبع الطلبات</span>
+            </Link>
+            {/* Wallet (Center) */}
+            <Link href="/wallet" className="flex flex-col items-center">
+              <img src="/images/wallet_hex_icon.png" alt="المحفظة" className="w-16 h-16 mb-1" />
+              <span className="text-sm font-bold">المحفظة</span>
+            </Link>
+            {/* Track Packages (Left) */}
+            <Link href={session?.user?.role === 'SHOP' ? '/shop/packages' : '/tracking_packages_user'} className="flex flex-col items-center">
+              <img src="/images/package_hex_icon.png" alt="تتبع الرزم" className="w-16 h-16 mb-1" />
+              <span className="text-sm font-bold">تتبع الرزم</span>
+            </Link>
+          </div>
+        </div>
         {/* Profile and Navigation Icons Section */}
         <div className="flex flex-row items-center justify-center mb-8 gap-8">
           {/* Right: Profile Image */}
