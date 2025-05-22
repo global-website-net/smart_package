@@ -50,14 +50,15 @@ export default function Header() {
           </div>
 
           {/* Logo */}
-          <div className="flex-1 flex justify-center">
-            <Link href="/" className="flex items-center">
-              <Image 
+          <div className="flex items-center justify-center flex-1">
+            <Link href="/" className="focus:outline-none">
+              <Image
                 src="/images/smart_package_logo_upper_banner.png"
-                alt="SMART PACKAGE"
-                width={180}
+                alt="Smart Package Logo"
+                width={120}
                 height={40}
-                className="h-10 w-auto"
+                className="h-8 w-auto sm:h-10"
+                priority
               />
             </Link>
           </div>

@@ -301,6 +301,7 @@ export default function NewOrder() {
                 إرسال الطلب
               </button>
               <button
+                type="button"
                 onClick={handleCancel}
                 className="bg-gray-500 text-white px-6 py-3 rounded-md hover:bg-gray-600 transition-colors"
               >

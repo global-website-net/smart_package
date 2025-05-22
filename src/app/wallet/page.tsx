@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 import PaymentWizard from '@/components/PaymentWizard'
 import BalanceDisplay from '@/components/BalanceDisplay'
+import { TableCell } from '@/components/ui/table'
 
 interface WalletTransaction {
   id: string
@@ -105,6 +106,37 @@ export default function WalletPage() {
       
       <main className="p-4 py-6">
         <div className="max-w-4xl mx-auto">
+          {/* Mobile Profile & Quick Actions */}
+          <div className="block sm:hidden">
+            {/* Profile Icon Centered */}
+            <div className="flex justify-center mb-6">
+              <div className="rounded-full bg-gray-400 w-32 h-32" />
+            </div>
+            {/* Quick Actions Row */}
+            <div className="flex flex-row justify-between items-center mb-8 px-2">
+              {/* Track Orders (Right) */}
+              <div className="flex flex-col items-center">
+                <img src="/images/track_orders_icon.png" alt="تتبع الطلبات" className="w-16 h-16 mb-1" />
+                <span className="text-sm font-bold">تتبع الطلبات</span>
+              </div>
+              {/* Wallet (Center) */}
+              <div className="flex flex-col items-center">
+                <img src="/images/wallet_icon_mobile.png" alt="المحفظة" className="w-16 h-16 mb-1" />
+                <span className="text-sm font-bold">المحفظة</span>
+              </div>
+              {/* Track Packages (Left) */}
+              <div className="flex flex-col items-center">
+                <img src="/images/track_packages_icon.png" alt="تتبع الرزم" className="w-16 h-16 mb-1" />
+                <span className="text-sm font-bold">تتبع الرزم</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Wallet Icon (hidden on mobile) */}
+          <div className="hidden sm:flex justify-center mb-12">
+            <img src="/images/wallet_icon_mobile.png" alt="Wallet Icon" className="w-24 h-24" style={{display: 'inline-block', verticalAlign: 'middle'}} />
+          </div>
+
           {/* Title and Wallet Icon */}
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-6">المحفظة</h1>
@@ -155,11 +187,14 @@ export default function WalletPage() {
               {walletData.transactions.map((transaction) => (
                 <div key={transaction.id} className="flex justify-between items-center border-b pb-4">
                   <span className="w-1/3 text-center">
-                    {new Date(transaction.createdAt).toLocaleDateString('ar-SA', {
-                      year: 'numeric',
-                      month: '2-digit',
-                      day: '2-digit'
-                    })}
+                    <TableCell className="text-right">
+                      {new Date(transaction.createdAt).toLocaleDateString('ar-SA', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        calendar: 'gregory'
+                      })}
+                    </TableCell>
                   </span>
                   <span className="w-1/3 text-center">{transaction.reason}</span>
                   <span className={`w-1/3 text-center ${transaction.type === 'CREDIT' ? 'text-green-600' : 'text-red-600'}`}>
