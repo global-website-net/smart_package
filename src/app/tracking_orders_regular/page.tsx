@@ -332,7 +332,7 @@ export default function TrackingOrdersRegularPage() {
           
           {showDesktopFilters && (
             <div className="flex flex-col md:flex-row gap-4 mt-4 items-center bg-white p-4 rounded-lg shadow border border-gray-200 w-full md:w-auto max-w-xl">
-              <input
+              <Input
                 type="text"
                 placeholder="ابحث برقم الطلب"
                 className="w-full md:w-64 text-right p-2 border rounded"
@@ -358,8 +358,8 @@ export default function TrackingOrdersRegularPage() {
           <div className="text-center text-lg text-gray-500 my-8">لا توجد طلبات</div>
         )}
 
-        {/* Desktop grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Orders grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 justify-items-center">
           {currentOrders.map((order) => {
             const isSpecialStatus = getOrderStatusText(order.status) !== 'في انتظار الدفع' && getOrderStatusText(order.status) !== 'في انتظار الموافقة';
             return (

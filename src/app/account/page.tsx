@@ -350,11 +350,11 @@ export default function AccountPage() {
             </Link>
           </div>
         </div>
-        {/* Profile and Navigation Icons Section */}
-        <div className="flex flex-row items-center justify-center mb-8 gap-8">
+        {/* Profile and Navigation Icons Section - Desktop Only */}
+        <div className="hidden sm:flex flex-row items-center justify-center mb-8 gap-8">
           {/* Right: Profile Image */}
           <div className="flex-shrink-0 flex flex-col items-center justify-center">
-            <img alt="الملف الشخصي" className="w-40 h-40 rounded-full object-cover" src="/images/profile_icon.png" />
+            <img src="/images/profile_icon.png" alt="الملف الشخصي" className="w-32 h-32 rounded-full bg-gray-400" />
           </div>
           {/* Divider */}
           <div className="h-40 w-0.5 bg-gray-400 mx-6" />
