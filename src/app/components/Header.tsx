@@ -20,11 +20,10 @@ export default function Header() {
               <Image 
                 src="/images/smart_package_logo_upper_banner.png"
                 alt="SMART PACKAGE"
-                width={240}
-                height={60}
-                quality={100}
+                width={90}
+                height={32}
+                className="h-8 w-auto sm:h-10"
                 priority
-                className="h-10 w-auto object-contain"
               />
             </Link>
           </div>

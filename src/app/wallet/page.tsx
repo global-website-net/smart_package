@@ -165,7 +165,7 @@ export default function WalletPage() {
                   </span>
                   <span className="w-1/3 text-center">{transaction.reason}</span>
                   <span className={`w-1/3 text-center ${transaction.type === 'CREDIT' ? 'text-green-600' : 'text-red-600'}`}>
-                    {transaction.type === 'CREDIT' ? `+${transaction.amount.toFixed(2)} شيكل` : `${transaction.amount.toFixed(2)} شيكل-`}
+                    {transaction.type === 'CREDIT' ? `+${transaction.amount.toFixed(2)} شيكل` : `${transaction.amount.toFixed(2)}- شيكل`}
                   </span>
                 </div>
               ))}

@@ -202,44 +202,44 @@ export default function PackageDetailsPage() {
           </div>
         </div>
         {/* Top Row: Icon | Vertical Line | Info (perfectly centered) */}
-        <div className="flex flex-row items-center justify-center p-6 mb-8 gap-4 mx-auto w-fit">
+        <div className="flex flex-col sm:flex-row items-center justify-center p-4 sm:p-6 mb-8 gap-4 mx-auto w-full sm:w-fit">
           {/* Right: Package Icon */}
-          <div className="flex-shrink-0 flex flex-col items-center justify-center">
-            <img src="/images/package_icon.png" alt="Package Icon" className="w-20 h-20" />
+          <div className="flex-shrink-0 flex flex-col items-center justify-center mb-4 sm:mb-0">
+            <img src="/images/package_icon.png" alt="Package Icon" className="w-16 sm:w-20 h-16 sm:h-20" />
           </div>
-          {/* Middle: Vertical Line */}
-          <div className="h-24 w-px bg-black mx-4" />
+          {/* Middle: Vertical Line - Hidden on mobile */}
+          <div className="hidden sm:block h-24 w-px bg-black mx-4" />
           {/* Left: Info */}
-          <div className="flex flex-col items-start justify-center flex-1">
-            <div className="flex items-center text-xl font-bold mb-1">
+          <div className="flex flex-col items-center sm:items-start justify-center">
+            <div className="flex flex-col sm:flex-row items-center text-lg sm:text-xl font-bold mb-1">
               <span>طرد</span>
               <span className="mx-2">|</span>
-              <span className="font-mono">{pkg.trackingNumber}</span>
+              <span className="font-mono text-sm sm:text-base break-all text-center sm:text-left">{pkg.trackingNumber}</span>
             </div>
-            <div className="text-black font-mono text-base mt-2 flex items-center gap-2">
+            <div className="text-black font-mono text-sm sm:text-base mt-2 flex items-center gap-2">
               <span>{new Date(pkg.createdAt).toLocaleDateString('en-GB')}</span>
-              <img src="/images/calendar_icon.png" alt="Calendar Icon" className="w-5 h-5" />
+              <img src="/images/calendar_icon.png" alt="Calendar Icon" className="w-4 sm:w-5 h-4 sm:h-5" />
             </div>
           </div>
         </div>
         {/* Green Divider */}
         <div className="w-full h-0.5 bg-green-500 mb-8" />
         {/* Status Row: Truck | Receipt | Price Tag (aligned bottoms) */}
-        <div className="flex flex-row items-end justify-between mb-8 gap-4">
+        <div className="flex flex-row items-end justify-between mb-8 gap-2 sm:gap-4">
           {/* Right: Truck Icon + Status */}
           <div className="flex flex-col items-center justify-end flex-1">
-            <img src="/images/truck_icon.png" alt="Truck Icon" className="w-16 h-16 mb-2" />
-            <div className="text-black text-lg font-bold mt-1">{getStatusText(pkg.status)}</div>
+            <img src="/images/truck_icon.png" alt="Truck Icon" className="w-10 sm:w-16 h-10 sm:h-16 mb-2" />
+            <div className="text-black text-xs sm:text-lg font-bold mt-1 text-center whitespace-nowrap">{getStatusText(pkg.status)}</div>
           </div>
           {/* Middle: Receipt Icon + Customs Payment */}
           <div className="flex flex-col items-center justify-end flex-1">
-            <img src="/images/receipt_icon.png" alt="Receipt Icon" className="w-16 h-16 mb-2" />
-            <div className="text-black text-lg font-bold mt-1">{(pkg.customs_payment ?? 0).toFixed(2)}₪ جمرك</div>
+            <img src="/images/receipt_icon.png" alt="Receipt Icon" className="w-10 sm:w-16 h-10 sm:h-16 mb-2" />
+            <div className="text-black text-xs sm:text-lg font-bold mt-1 text-center whitespace-nowrap">{(pkg.customs_payment ?? 0).toFixed(2)}₪ جمرك</div>
           </div>
           {/* Left: Price Tag Hexagon Icon */}
           <div className="flex flex-col items-center justify-end flex-1">
-            <img src="/images/price_tag_hexagon.png" alt="Price Tag Hexagon" className="w-16 h-16 mb-2" />
-            <div className="text-black text-lg font-bold mt-1">{(pkg.customs ?? 0).toFixed(2)}₪</div>
+            <img src="/images/price_tag_hexagon.png" alt="Price Tag Hexagon" className="w-10 sm:w-16 h-10 sm:h-16 mb-2" />
+            <div className="text-black text-xs sm:text-lg font-bold mt-1 text-center whitespace-nowrap">{(pkg.customs ?? 0).toFixed(2)}₪</div>
           </div>
         </div>
         {/* Green Divider */}

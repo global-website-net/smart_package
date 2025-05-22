@@ -430,12 +430,12 @@ export default function UserPackagesPage() {
               currentPackages.map((pkg, idx) => (
                 <div key={pkg.id} className="bg-white rounded-xl shadow p-6 flex flex-col items-center border border-gray-200">
                   {/* Package Card Title */}
-                  <div className="flex items-center justify-center gap-2 text-xl font-bold mb-2">
+                  <div className="flex items-center justify-center text-lg font-bold mb-2">
                     <span>طرد</span>
-                    <span className="mx-1">|</span>
-                    <span>#{idx + 1}</span>
+                    <span className="mx-2">|</span>
+                    <span className="ltr:font-mono rtl:font-mono">{pkg.trackingNumber}</span>
                   </div>
-                  <div className="mb-2 text-gray-600 text-sm">رقم التتبع: <span className="font-mono">{pkg.trackingNumber}</span></div>
+                  {/* Icon */}
                   <div className="my-4 flex justify-center">
                     <img
                       src="/images/package_icon.png"
@@ -445,13 +445,21 @@ export default function UserPackagesPage() {
                       title="عرض تفاصيل الطرد"
                     />
                   </div>
-                  <div className="mb-2">
-                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${pkg.status === 'RECEIVED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                      {getStatusText(pkg.status)}
-                    </span>
+                  {/* Status as pill/badge */}
+                  <div className="flex justify-center my-2">
+                    <span className={getStatusColor(pkg.status) + ' px-4 py-1 rounded-full text-base font-bold'}>{getStatusText(pkg.status)}</span>
                   </div>
-                  <div className="mb-2 text-gray-500 text-sm">تاريخ الإنشاء: {new Date(pkg.createdAt).toLocaleDateString('ar')}</div>
-                  {/* Edit shop button and current shop */}
+                  {/* Creation date */}
+                  <div className="text-sm text-gray-500">{new Date(pkg.createdAt).toLocaleDateString('en-US')}</div>
+                  {/* Payment button if needed */}
+                  {pkg.status === 'AWAITING_PAYMENT' && (
+                    <button
+                      className="mt-2 mb-2 px-6 py-2 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition"
+                    >
+                      دفع
+                    </button>
+                  )}
+                  {/* Shop info */}
                   <div className="flex flex-col items-center gap-2 mt-2">
                     <div className="flex items-center gap-2">
                       {pkg.status !== 'RECEIVED' && (

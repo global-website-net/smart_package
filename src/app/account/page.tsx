@@ -328,25 +328,25 @@ export default function AccountPage() {
         {/* Mobile Profile & Quick Actions */}
         <div className="block sm:hidden mb-8">
           {/* Profile Icon Centered */}
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-8">
             <img src="/images/profile_icon.png" alt="الملف الشخصي" className="w-32 h-32 rounded-full bg-gray-400" />
           </div>
           {/* Quick Actions Row */}
-          <div className="flex flex-row justify-between items-center mb-8 px-2">
-            {/* Track Orders (Right) */}
-            <Link href="/tracking_orders_regular" className="flex flex-col items-center">
-              <img src="/images/shopping_bag_hex_icon.png" alt="تتبع الطلبات" className="w-16 h-16 mb-1" />
-              <span className="text-sm font-bold">تتبع الطلبات</span>
+          <div className="flex flex-row justify-between items-center mb-8 px-4">
+            {/* Track Packages (Right) */}
+            <Link href={session?.user?.role === 'SHOP' ? '/shop/packages' : '/tracking_packages_user'} className="flex flex-col items-center transform hover:scale-105 transition-transform duration-200">
+              <img src="/images/package_hex_icon.png" alt="تتبع الرزم" className="w-20 h-20 mb-2" />
+              <span className="text-base font-bold">تتبع الرزم</span>
             </Link>
             {/* Wallet (Center) */}
-            <Link href="/wallet" className="flex flex-col items-center">
-              <img src="/images/wallet_hex_icon.png" alt="المحفظة" className="w-16 h-16 mb-1" />
-              <span className="text-sm font-bold">المحفظة</span>
+            <Link href="/wallet" className="flex flex-col items-center transform hover:scale-105 transition-transform duration-200">
+              <img src="/images/wallet_hex_icon.png" alt="المحفظة" className="w-20 h-20 mb-2" />
+              <span className="text-base font-bold">المحفظة</span>
             </Link>
-            {/* Track Packages (Left) */}
-            <Link href={session?.user?.role === 'SHOP' ? '/shop/packages' : '/tracking_packages_user'} className="flex flex-col items-center">
-              <img src="/images/package_hex_icon.png" alt="تتبع الرزم" className="w-16 h-16 mb-1" />
-              <span className="text-sm font-bold">تتبع الرزم</span>
+            {/* Track Orders (Left) */}
+            <Link href="/tracking_orders_regular" className="flex flex-col items-center transform hover:scale-105 transition-transform duration-200">
+              <img src="/images/shopping_bag_hex_icon.png" alt="تتبع الطلبات" className="w-20 h-20 mb-2" />
+              <span className="text-base font-bold">تتبع الطلبات</span>
             </Link>
           </div>
         </div>
