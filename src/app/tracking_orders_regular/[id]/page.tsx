@@ -180,44 +180,47 @@ export default function OrderDetailsPage() {
           </div>
         </div>
         {/* Top Row: Icon | Vertical Line | Info (centered) */}
-        <div className="flex flex-row items-center justify-center p-6 mb-8 gap-4 mx-auto w-fit">
+        <div className="flex flex-col sm:flex-row items-center justify-center p-4 sm:p-6 mb-8 gap-4 mx-auto w-full sm:w-fit">
           {/* Right: Order Icon */}
-          <div className="flex-shrink-0 flex flex-col items-center justify-center">
-            <img src="/images/shopping_bag_icon.png" alt="Order Icon" className="w-20 h-20" />
+          <div className="flex-shrink-0 flex flex-col items-center justify-center mb-4 sm:mb-0">
+            <img src="/images/shopping_bag_icon.png" alt="Order Icon" className="w-16 sm:w-20 h-16 sm:h-20" />
           </div>
-          {/* Middle: Vertical Line */}
-          <div className="h-24 w-px bg-black mx-4" />
+          {/* Middle: Vertical Line - Hidden on mobile */}
+          <div className="hidden sm:block h-24 w-px bg-black mx-4" />
           {/* Left: Info */}
-          <div className="flex flex-col items-start justify-center flex-1">
-            <div className="flex items-center text-xl font-bold mb-1">
-              <span>طلبية</span>
-              <span className="mx-2">|</span>
-              <span className="font-mono">{order.orderNumber}</span>
+          <div className="flex flex-col items-center sm:items-start justify-center">
+            <div className="flex flex-col sm:flex-row items-center text-lg sm:text-xl font-bold mb-1">
+              <div className="flex flex-col sm:flex-row items-center">
+                <span>طلبية</span>
+                <span className="hidden sm:inline mx-2">|</span>
+                <span className="sm:hidden w-full h-[1px] bg-black my-1"></span>
+              </div>
+              <span className="font-mono text-sm sm:text-base break-all text-center sm:text-left">{order.orderNumber}</span>
             </div>
-            <div className="text-black font-mono text-base mt-2 flex items-center gap-2">
+            <div className="text-black font-mono text-sm sm:text-base mt-2 flex items-center gap-2">
               <span>{new Date(order.createdAt).toLocaleDateString('en-GB')}</span>
-              <img src="/images/calendar_icon.png" alt="Calendar Icon" className="w-5 h-5" />
+              <img src="/images/calendar_icon.png" alt="Calendar Icon" className="w-4 sm:w-5 h-4 sm:h-5" />
             </div>
           </div>
         </div>
         {/* Green Divider */}
         <div className="w-full h-0.5 bg-green-500 mb-8" />
         {/* Status Row: Shopping Bag | Delivery | Payment */}
-        <div className="flex flex-row items-end justify-between mb-2 gap-4">
+        <div className="flex flex-row items-end justify-between mb-8 gap-1 sm:gap-4">
           {/* Right: Truck Icon + Status */}
-          <div className="flex flex-col items-center justify-end flex-1">
-            <img src="/images/truck_icon.png" alt="Truck Icon" className="w-16 h-16 mb-2" />
-            <div className="text-black text-lg font-bold mt-1">{getOrderStatusText(order.status)}</div>
+          <div className="flex flex-col items-center justify-end flex-1 min-w-[80px]">
+            <img src="/images/truck_icon.png" alt="Truck Icon" className="w-8 sm:w-16 h-8 sm:h-16 mb-1 sm:mb-2" />
+            <div className="text-black text-[10px] sm:text-lg font-bold mt-1 text-center whitespace-nowrap">{getOrderStatusText(order.status)}</div>
           </div>
           {/* Middle: Price Tag Hexagon above Amount */}
-          <div className="flex flex-col items-center justify-end flex-1">
-            <img src="/images/price_tag_hexagon.png" alt="Price Tag Hexagon" className="w-16 h-16 mb-2" />
-            <div className="text-black text-lg font-bold mt-1">{order.totalAmount.toFixed(2)}₪</div>
+          <div className="flex flex-col items-center justify-end flex-1 min-w-[80px]">
+            <img src="/images/price_tag_hexagon.png" alt="Price Tag Hexagon" className="w-8 sm:w-16 h-8 sm:h-16 mb-1 sm:mb-2" />
+            <div className="text-black text-[10px] sm:text-lg font-bold mt-1 text-center whitespace-nowrap">{order.totalAmount.toFixed(2)}₪</div>
           </div>
           {/* Left: Market Icon above Shop Name */}
-          <div className="flex flex-col items-center justify-end flex-1">
-            <img src="/images/market_icon.png" alt="Market Icon" className="w-16 h-16 mb-2" />
-            <div className="text-black text-lg font-bold mt-1">{order.purchaseSite}</div>
+          <div className="flex flex-col items-center justify-end flex-1 min-w-[80px]">
+            <img src="/images/market_icon.png" alt="Market Icon" className="w-8 sm:w-16 h-8 sm:h-16 mb-1 sm:mb-2" />
+            <div className="text-black text-[10px] sm:text-lg font-bold mt-1 text-center whitespace-nowrap">{order.purchaseSite}</div>
           </div>
         </div>
         {/* Pay button row */}

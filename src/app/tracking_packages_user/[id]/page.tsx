@@ -212,8 +212,11 @@ export default function PackageDetailsPage() {
           {/* Left: Info */}
           <div className="flex flex-col items-center sm:items-start justify-center">
             <div className="flex flex-col sm:flex-row items-center text-lg sm:text-xl font-bold mb-1">
-              <span>طرد</span>
-              <span className="mx-2">|</span>
+              <div className="flex flex-col sm:flex-row items-center">
+                <span>طرد</span>
+                <span className="hidden sm:inline mx-2">|</span>
+                <span className="sm:hidden w-full h-[1px] bg-black my-1"></span>
+              </div>
               <span className="font-mono text-sm sm:text-base break-all text-center sm:text-left">{pkg.trackingNumber}</span>
             </div>
             <div className="text-black font-mono text-sm sm:text-base mt-2 flex items-center gap-2">
@@ -225,21 +228,21 @@ export default function PackageDetailsPage() {
         {/* Green Divider */}
         <div className="w-full h-0.5 bg-green-500 mb-8" />
         {/* Status Row: Truck | Receipt | Price Tag (aligned bottoms) */}
-        <div className="flex flex-row items-end justify-between mb-8 gap-2 sm:gap-4">
+        <div className="flex flex-row items-end justify-between mb-8 gap-1 sm:gap-4">
           {/* Right: Truck Icon + Status */}
-          <div className="flex flex-col items-center justify-end flex-1">
-            <img src="/images/truck_icon.png" alt="Truck Icon" className="w-10 sm:w-16 h-10 sm:h-16 mb-2" />
-            <div className="text-black text-xs sm:text-lg font-bold mt-1 text-center whitespace-nowrap">{getStatusText(pkg.status)}</div>
+          <div className="flex flex-col items-center justify-end flex-1 min-w-[80px]">
+            <img src="/images/truck_icon.png" alt="Truck Icon" className="w-8 sm:w-16 h-8 sm:h-16 mb-1 sm:mb-2" />
+            <div className="text-black text-[10px] sm:text-lg font-bold mt-1 text-center whitespace-nowrap">{getStatusText(pkg.status)}</div>
           </div>
           {/* Middle: Receipt Icon + Customs Payment */}
-          <div className="flex flex-col items-center justify-end flex-1">
-            <img src="/images/receipt_icon.png" alt="Receipt Icon" className="w-10 sm:w-16 h-10 sm:h-16 mb-2" />
-            <div className="text-black text-xs sm:text-lg font-bold mt-1 text-center whitespace-nowrap">{(pkg.customs_payment ?? 0).toFixed(2)}₪ جمرك</div>
+          <div className="flex flex-col items-center justify-end flex-1 min-w-[80px]">
+            <img src="/images/receipt_icon.png" alt="Receipt Icon" className="w-8 sm:w-16 h-8 sm:h-16 mb-1 sm:mb-2" />
+            <div className="text-black text-[10px] sm:text-lg font-bold mt-1 text-center whitespace-nowrap">{(pkg.customs_payment ?? 0).toFixed(2)}₪ جمرك</div>
           </div>
           {/* Left: Price Tag Hexagon Icon */}
-          <div className="flex flex-col items-center justify-end flex-1">
-            <img src="/images/price_tag_hexagon.png" alt="Price Tag Hexagon" className="w-10 sm:w-16 h-10 sm:h-16 mb-2" />
-            <div className="text-black text-xs sm:text-lg font-bold mt-1 text-center whitespace-nowrap">{(pkg.customs ?? 0).toFixed(2)}₪</div>
+          <div className="flex flex-col items-center justify-end flex-1 min-w-[80px]">
+            <img src="/images/price_tag_hexagon.png" alt="Price Tag Hexagon" className="w-8 sm:w-16 h-8 sm:h-16 mb-1 sm:mb-2" />
+            <div className="text-black text-[10px] sm:text-lg font-bold mt-1 text-center whitespace-nowrap">{(pkg.customs ?? 0).toFixed(2)}₪</div>
           </div>
         </div>
         {/* Green Divider */}

@@ -15,7 +15,7 @@ export default function Header() {
             <Link className="px-2 py-1 text-lg font-bold" href="/prices">اسعارنا</Link>
             <Link className="px-2 py-1 text-lg font-bold" href="/contact">التواصل</Link>
           </div>
-          <div className="absolute left-[40%] md:left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center">
+          <div className="absolute left-[55%] md:left-1/3 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center">
             <Link className="flex items-center gap-2" href="/">
               <Image 
                 src="/images/smart_package_logo_upper_banner.png"
