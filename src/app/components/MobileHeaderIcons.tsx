@@ -35,11 +35,9 @@ export default function MobileHeaderIcons({ isRegularUser }: MobileHeaderIconsPr
     <div className="flex items-center gap-4">
       {/* Wallet Icon */}
       <Link href="/wallet" className="text-white hover:text-green-500 transition-colors">
-        <Image 
+        <img 
           src="/images/white_wallet_icon_mobile.png"
           alt="Wallet"
-          width={24}
-          height={24}
           className="w-6 h-6"
         />
       </Link>
