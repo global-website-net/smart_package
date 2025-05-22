@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 
@@ -7,57 +9,64 @@ interface MobileHeaderIconsProps {
 
 export default function MobileHeaderIcons({ isRegularUser }: MobileHeaderIconsProps) {
   const { data: session } = useSession()
-  const isLoggedIn = !!session
 
   return (
-    <div className="md:hidden flex items-center gap-4">
-      {/* Wallet - Right */}
-      {isRegularUser && (
-        <Link href="/wallet" className="text-white">
-          <img src="/api/images/white_wallet_icon_mobile.png" alt="Wallet Icon" className="w-6 h-6" style={{display: 'inline-block', verticalAlign: 'middle'}} />
-        </Link>
-      )}
+    <div className="flex items-center gap-4">
+      {/* Wallet Icon */}
+      <Link href="/wallet" className="text-white hover:text-green-500 transition-colors">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+          />
+        </svg>
+      </Link>
 
-      {/* New Order - Middle */}
+      {/* New Order Icon */}
       {isRegularUser && (
-        <Link href="/new-order" className="text-white">
-          <svg 
-            className="w-6 h-6" 
-            viewBox="0 0 24 24" 
+        <Link href="/new-order" className="text-white hover:text-green-500 transition-colors">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
             fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
-            <circle cx="12" cy="12" r="10" stroke="#22c55e" strokeWidth="1.5" fill="black" />
-            <path d="M12 8v8" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round" />
-            <path d="M8 12h8" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+            />
           </svg>
         </Link>
       )}
 
-      {/* User Account or Login Button - Left */}
-      {isLoggedIn ? (
-        <Link 
-          href="/account" 
-          className="text-white"
+      {/* My Account Icon */}
+      <Link href={session ? "/my-account" : "/auth/login"} className="text-white hover:text-green-500 transition-colors">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
         >
-          <svg 
-            className="w-6 h-6" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="1.5"
-          >
-            <circle cx="12" cy="8" r="4" />
-            <path d="M20 21a8 8 0 10-16 0" />
-          </svg>
-        </Link>
-      ) : (
-        <Link 
-          href="/auth/login" 
-          className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600 transition-colors text-sm"
-        >
-          تسجيل الدخول
-        </Link>
-      )}
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+          />
+        </svg>
+      </Link>
     </div>
   )
 } 
