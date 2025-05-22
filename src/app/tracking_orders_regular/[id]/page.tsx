@@ -206,21 +206,21 @@ export default function OrderDetailsPage() {
         {/* Green Divider */}
         <div className="w-full h-0.5 bg-green-500 mb-8" />
         {/* Status Row: Shopping Bag | Delivery | Payment */}
-        <div className="flex flex-row items-end justify-between mb-8 gap-3 sm:gap-4">
+        <div className="flex flex-row w-full items-end justify-between mb-8 gap-4">
           {/* Right: Truck Icon + Status */}
-          <div className="flex flex-col items-center justify-end flex-1 min-w-[105px]">
-            <img src="/images/truck_icon.png" alt="Truck Icon" className="w-14 sm:w-16 h-14 sm:h-16 mb-2.5 sm:mb-2" />
-            <div className="text-black text-[14px] sm:text-lg font-bold mt-1 text-center whitespace-nowrap">{getOrderStatusText(order.status)}</div>
+          <div className="flex flex-col items-center justify-end flex-1 min-w-0">
+            <img src="/images/truck_icon.png" alt="Truck Icon" className="w-16 h-16 mb-3" />
+            <div className="text-black text-[16px] font-bold text-center whitespace-nowrap">{getOrderStatusText(order.status)}</div>
           </div>
           {/* Middle: Price Tag Hexagon above Amount */}
-          <div className="flex flex-col items-center justify-end flex-1 min-w-[105px]">
-            <img src="/images/price_tag_hexagon.png" alt="Price Tag Hexagon" className="w-14 sm:w-16 h-14 sm:h-16 mb-2.5 sm:mb-2" />
-            <div className="text-black text-[14px] sm:text-lg font-bold mt-1 text-center whitespace-nowrap">{order.totalAmount.toFixed(2)}₪</div>
+          <div className="flex flex-col items-center justify-end flex-1 min-w-0">
+            <img src="/images/price_tag_hexagon.png" alt="Price Tag Hexagon" className="w-16 h-16 mb-3" />
+            <div className="text-black text-[16px] font-bold text-center whitespace-nowrap">{order.totalAmount.toFixed(2)}₪</div>
           </div>
           {/* Left: Market Icon above Shop Name */}
-          <div className="flex flex-col items-center justify-end flex-1 min-w-[105px]">
-            <img src="/images/market_icon.png" alt="Market Icon" className="w-14 sm:w-16 h-14 sm:h-16 mb-2.5 sm:mb-2" />
-            <div className="text-black text-[14px] sm:text-lg font-bold mt-1 text-center whitespace-nowrap">{order.purchaseSite}</div>
+          <div className="flex flex-col items-center justify-end flex-1 min-w-0">
+            <img src="/images/market_icon.png" alt="Market Icon" className="w-16 h-16 mb-3" />
+            <div className="text-black text-[16px] font-bold text-center whitespace-nowrap">{order.purchaseSite}</div>
           </div>
         </div>
         {/* Pay button row */}
