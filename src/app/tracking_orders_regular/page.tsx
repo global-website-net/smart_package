@@ -332,6 +332,7 @@ export default function TrackingOrdersRegularPage() {
               </svg>
             </button>
           </div>
+          
           {showDesktopFilters && (
             <div className="flex flex-col md:flex-row gap-4 mt-4 items-center bg-white p-4 rounded-lg shadow border border-gray-200 w-full md:w-auto max-w-xl">
               <input
@@ -354,12 +355,14 @@ export default function TrackingOrdersRegularPage() {
             </div>
           )}
         </div>
+
         {/* No orders found message */}
         {currentOrders.length === 0 && (
           <div className="text-center text-lg text-gray-500 my-8">لا توجد طلبات</div>
         )}
+
         {/* Desktop grid */}
-        <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 justify-items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {currentOrders.map((order) => {
             const isSpecialStatus = getOrderStatusText(order.status) !== 'في انتظار الدفع' && getOrderStatusText(order.status) !== 'في انتظار الموافقة';
             return (
@@ -424,108 +427,7 @@ export default function TrackingOrdersRegularPage() {
             );
           })}
         </div>
-        {/* Mobile/table fallback: keep existing table or list */}
-        {isMobile && (
-          <div className="flex flex-col gap-6">
-            {/* Mobile Filters Icon */}
-            <div className="flex justify-start mb-4">
-              <button
-                className="p-0 bg-transparent border-none shadow-none"
-                style={{ background: 'none', border: 'none', boxShadow: 'none' }}
-                onClick={() => setShowMobileFilters(v => !v)}
-                aria-label="عرض الفلاتر"
-              >
-                <Filter className="w-7 h-7 text-black" fill="black" />
-              </button>
-            </div>
-            {showMobileFilters && (
-              <div className="flex flex-col gap-3 mb-4 p-4 bg-white rounded-lg shadow border border-gray-200">
-                <input
-                  type="text"
-                  placeholder="ابحث برقم الطلب"
-                  className="w-full md:w-64 text-right p-2 border rounded"
-                  value={orderNumberFilter}
-                  onChange={e => setOrderNumberFilter(e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="ابحث بموقع الشراء"
-                  className="w-full md:w-64 text-right p-2 border rounded"
-                  value={purchaseSiteFilter}
-                  onChange={e => setPurchaseSiteFilter(e.target.value)}
-                />
-                <select
-                  className="w-full md:w-48 text-right p-2 border rounded"
-                  value={statusFilter}
-                  onChange={e => setStatusFilter(e.target.value)}
-                >
-                  <option value="ALL">كل الحالات</option>
-                  <option value="PENDING_APPROVAL">في انتظار الموافقة</option>
-                  <option value="AWAITING_PAYMENT">في انتظار الدفع</option>
-                  <option value="ORDERING">قيد الطلب</option>
-                  <option value="ORDER_COMPLETED">تم الطلب</option>
-                  <option value="CANCELLED">ملغي</option>
-                </select>
-              </div>
-            )}
-            {currentOrders.length === 0 ? (
-              <div className="text-center py-8">لا توجد طلبات</div>
-            ) : (
-              currentOrders.map((order, idx) => (
-                <div key={order.id} className="bg-white rounded-xl shadow p-6 flex flex-col items-center border border-gray-200">
-                  {/* Order Card Title */}
-                  <div className="flex items-center justify-center gap-2 text-xl font-bold mb-2">
-                    <span>طلبية</span>
-                    <span className="mx-1">|</span>
-                    <span>O - {order.orderNumber}</span>
-                  </div>
-                  {/* Package Icon SVG (from main page) */}
-                  <div className="my-4 text-5xl text-center">
-                    🛒
-                  </div>
-                  <div className="mb-2 text-xl font-bold text-black">{order.purchaseSite}</div>
-                  {/* Status as pill/badge */}
-                  <div className="flex justify-center my-2">
-                    <span
-                      className={(() => {
-                        switch (order.status) {
-                          case 'ORDER_COMPLETED':
-                            return 'px-4 py-1 rounded-full bg-green-100 text-green-700 text-base font-bold';
-                          case 'AWAITING_PAYMENT':
-                          case 'PENDING_APPROVAL':
-                          case 'ORDERING':
-                            return 'px-4 py-1 rounded-full bg-yellow-100 text-yellow-700 text-base font-bold';
-                          case 'CANCELLED':
-                            return 'px-4 py-1 rounded-full bg-red-100 text-red-700 text-base font-bold';
-                          default:
-                            return 'px-4 py-1 rounded-full bg-gray-200 text-gray-700 text-base font-bold';
-                        }
-                      })()}
-                    >
-                      {getOrderStatusText(order.status)}
-                    </span>
-                  </div>
-                  {/* Creation date - move here under status */}
-                  <div className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString('en-US')}</div>
-                  {/* Pay button for AWAITING_PAYMENT status */}
-                  {order.status === 'AWAITING_PAYMENT' && (
-                    <button
-                      className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md mt-2"
-                      onClick={() => {
-                        setSelectedOrder(order)
-                        setIsPaymentModalOpen(true)
-                      }}
-                    >
-                      دفع
-                    </button>
-                  )}
-                  {/* Optionally show order code or totalAmount if needed */}
-                  {/* <div className="mb-2 text-gray-500 text-sm">{order.orderNumber}</div> */}
-                </div>
-              ))
-            )}
-          </div>
-        )}
+
         <PaymentModal
           isOpen={isPaymentModalOpen}
           onClose={() => setIsPaymentModalOpen(false)}

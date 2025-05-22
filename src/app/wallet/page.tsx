@@ -154,7 +154,13 @@ export default function WalletPage() {
               </div>
               {walletData.transactions.map((transaction) => (
                 <div key={transaction.id} className="flex justify-between items-center border-b pb-4">
-                  <span className="w-1/3 text-center">{new Date(transaction.createdAt).toLocaleDateString('ar-SA')}</span>
+                  <span className="w-1/3 text-center">
+                    {new Date(transaction.createdAt).toLocaleDateString('ar-SA', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit'
+                    })}
+                  </span>
                   <span className="w-1/3 text-center">{transaction.reason}</span>
                   <span className={`w-1/3 text-center ${transaction.type === 'CREDIT' ? 'text-green-600' : 'text-red-600'}`}>
                     {transaction.type === 'CREDIT' ? '+' : '-'}{transaction.amount.toFixed(2)} شيكل

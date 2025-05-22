@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useSession } from 'next-auth/react'
+import { usePathname } from 'next/navigation'
 
 interface MobileHeaderIconsProps {
   isRegularUser: boolean
@@ -10,8 +11,14 @@ interface MobileHeaderIconsProps {
 
 export default function MobileHeaderIcons({ isRegularUser }: MobileHeaderIconsProps) {
   const { data: session } = useSession()
+  const pathname = usePathname()
 
   if (!session) {
+    // Don't show login button on the login page
+    if (pathname === '/auth/login') {
+      return null
+    }
+    
     return (
       <div className="flex items-center">
         <Link 
@@ -58,7 +65,7 @@ export default function MobileHeaderIcons({ isRegularUser }: MobileHeaderIconsPr
       )}
 
       {/* My Account Icon */}
-      <Link href="/my-account" className="text-white hover:text-green-500 transition-colors">
+      <Link href="/account" className="text-white hover:text-green-500 transition-colors">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-6 w-6"
