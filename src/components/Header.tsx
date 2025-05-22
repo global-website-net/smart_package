@@ -51,14 +51,11 @@ export default function Header() {
 
           {/* Logo */}
           <div className="flex items-center justify-center flex-1">
-            <Link href="/" className="focus:outline-none">
-              <Image
+            <Link href="/" className="focus:outline-none absolute left-[40%] md:left-1/2 transform -translate-x-1/2">
+              <img
                 src="/images/smart_package_logo_upper_banner.png"
                 alt="Smart Package Logo"
-                width={90}
-                height={32}
                 className="h-8 w-auto"
-                priority
               />
             </Link>
           </div>
