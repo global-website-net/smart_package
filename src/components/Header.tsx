@@ -16,9 +16,9 @@ export default function Header() {
   return (
     <header className="bg-black text-white shadow-md">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
+        <div className="flex justify-between h-16 items-center relative">
           {/* Mobile menu button */}
-          <div className="md:hidden">
+          <div className="md:hidden flex-1">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="text-white p-2"
@@ -50,7 +50,7 @@ export default function Header() {
           </div>
 
           {/* Logo */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center">
+          <div className="flex-1 flex justify-center">
             <Link href="/" className="flex items-center">
               <Image 
                 src="/images/smart_package_logo_upper_banner.png"
@@ -77,7 +77,7 @@ export default function Header() {
           </div>
 
           {/* Mobile icons */}
-          <div className="md:hidden">
+          <div className="md:hidden flex-1 flex justify-end">
             <MobileHeaderIcons isRegularUser={isRegularUser} />
           </div>
         </div>
